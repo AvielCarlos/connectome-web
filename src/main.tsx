@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './components/Toast'
 import AuthPage from './pages/AuthPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
 import FeedPage from './pages/FeedPage'
 import GoalsPage from './pages/GoalsPage'
 import JournalPage from './pages/JournalPage'
@@ -26,6 +27,8 @@ function App() {
       {isAuthenticated && <SuggestionButton />}
       <Routes>
         <Route path="/" element={isAuthenticated ? <Navigate to="/feed" replace /> : <AuthPage />} />
+        {/* Google OAuth callback — must be accessible without auth */}
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/feed"    element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
         <Route path="/goals"   element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
         <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
