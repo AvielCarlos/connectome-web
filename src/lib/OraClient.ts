@@ -10,6 +10,67 @@ const USER_ID_KEY = 'connectome_user_id';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export interface TierLimits {
+  daily_screens: number;  // -1 = unlimited
+  goals: number;
+  chat_messages_daily: number;
+  journal_entries_monthly: number;
+  drive_docs_indexed: number;
+  event_recommendations_weekly: number;
+  api_calls_monthly?: number;
+  cp_multiplier?: number;
+}
+
+export interface OrasTier {
+  name: string;
+  price_monthly: number;
+  price_yearly: number;
+  description: string;
+  features: string[];
+  limits: TierLimits;
+}
+
+export interface TiersResponse {
+  tiers: Record<string, OrasTier>;
+  stripe_configured: boolean;
+  currency: string;
+  note: string;
+}
+
+export interface SubscriptionStatus {
+  tier: string;
+  tier_name: string;
+  status: string;
+  stripe_subscription_id: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  trial_end: string | null;
+  limits: TierLimits;
+  usage: {
+    daily_screens: number;
+    goals: number;
+  };
+  is_free: boolean;
+  is_paid: boolean;
+}
+
+export interface CheckoutSession {
+  checkout_url: string;
+  session_id: string;
+  tier: string;
+  billing: string;
+}
+
+export interface TierLimitError {
+  error: string;
+  resource: string;
+  current: number;
+  limit: number;
+  tier: string;
+  upgrade_message: string;
+  upgrade_url: string;
+}
+
 export interface ScreenComponent {
   type: string;
   text?: string;
@@ -365,6 +426,61 @@ class OraClientClass {
   async healthCheck() {
     const res = await this.client.get('/health');
     return res.data;
+  }
+
+  // ── Payments & Subscriptions ─────────────────────────────────────────────────────
+
+  /**
+   * Get Ora's current tier definitions (public, no auth needed).
+   */
+  async getTiers(): Promise<TiersResponse> {
+    const res = await this.client.get('/api/payments/tiers');
+    return res.data as TiersResponse;
+  }
+
+  /**
+   * Get the current user's subscription status.
+   */
+  async getSubscription(): Promise<SubscriptionStatus> {
+    const res = await this.client.get('/api/payments/subscription');
+    return res.data as SubscriptionStatus;
+  }
+
+  /**
+   * Create a Stripe Checkout session. Redirect the user to checkout_url.
+   */
+  async createCheckout(
+    tier: 'explorer' | 'sovereign',
+    billing: 'monthly' | 'yearly' = 'monthly',
+    successUrl?: string,
+    cancelUrl?: string,
+  ): Promise<CheckoutSession> {
+    const res = await this.client.post('/api/payments/checkout', {
+      tier,
+      billing,
+      ...(successUrl ? { success_url: successUrl } : {}),
+      ...(cancelUrl ? { cancel_url: cancelUrl } : {}),
+    });
+    return res.data as CheckoutSession;
+  }
+
+  /**
+   * Open Stripe billing portal for subscription management.
+   * Redirects to portal_url returned.
+   */
+  async openBillingPortal(returnUrl?: string): Promise<{ portal_url: string }> {
+    const res = await this.client.post('/api/payments/portal', {
+      return_url: returnUrl || window.location.origin + '/account',
+    });
+    return res.data as { portal_url: string };
+  }
+
+  /**
+   * Check if an Axios error is a tier limit (402) error.
+   */
+  static isTierLimitError(error: unknown): error is AxiosError & { response: { data: TierLimitError } } {
+    if (!axios.isAxiosError(error)) return false;
+    return error.response?.status === 402 && error.response?.data?.error === 'tier_limit_exceeded';
   }
 
   async submitMoodCheck(moodIndex: number) {
