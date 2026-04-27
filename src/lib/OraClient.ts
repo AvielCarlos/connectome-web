@@ -291,7 +291,8 @@ class OraClientClass {
   // ── Suggestions / DAO CP ─────────────────────────────────────────────────
 
   async submitSuggestion(content: string, category: string, context?: string) {
-    const res = await this.client.post('/api/suggestions/', { content, category, context });
+    const title = content.slice(0, 80);
+    const res = await this.client.post('/api/suggestions', { title, body: content, content, category, context });
     return res.data as {
       suggestion: any;
       cp_earned: number;
