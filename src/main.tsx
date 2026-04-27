@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { ToastProvider } from './components/Toast'
 import AuthPage from './pages/AuthPage'
 import FeedPage from './pages/FeedPage'
 import GoalsPage from './pages/GoalsPage'
@@ -25,11 +26,11 @@ function App() {
       {isAuthenticated && <SuggestionButton />}
       <Routes>
         <Route path="/" element={isAuthenticated ? <Navigate to="/feed" replace /> : <AuthPage />} />
-        <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
-        <Route path="/goals" element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
+        <Route path="/feed"    element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
+        <Route path="/goals"   element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
         <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
-        <Route path="/ora" element={<ProtectedRoute><OraPage /></ProtectedRoute>} />
-        <Route path="/dao" element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
+        <Route path="/ora"     element={<ProtectedRoute><OraPage /></ProtectedRoute>} />
+        <Route path="/dao"     element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
       </Routes>
     </div>
   )
@@ -39,8 +40,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter basename="/connectome-web">
       <AuthProvider>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 )
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/connectome-web/sw.js').catch(() => {
+      // SW registration is best-effort
+    })
+  })
+}

@@ -5,6 +5,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { OraClient } from '../lib/OraClient';
+import { useToast } from './Toast';
 
 const CATEGORIES = [
   { id: 'feature', label: '💡 Feature Idea', desc: 'Something new you want' },
@@ -28,6 +29,7 @@ interface SubmissionResult {
 }
 
 export default function SuggestionButton() {
+  const { showCP } = useToast();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState('feature');
   const [content, setContent] = useState('');
@@ -78,6 +80,7 @@ export default function SuggestionButton() {
         cp_earned: res.cp_earned,
         total_dao_cp: res.total_dao_cp,
       });
+      showCP(res.cp_earned, res.total_dao_cp);
     } catch (e: any) {
       setError(e?.response?.data?.detail || 'Failed to submit. Please try again.');
     } finally {

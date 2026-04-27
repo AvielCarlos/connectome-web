@@ -5,42 +5,84 @@ interface Message {
   id: string;
   role: 'user' | 'ora';
   content: string;
+  ts: number;
 }
 
-function OraMessage({ msg }: { msg: Message }) {
+function formatTime(ts: number) {
+  return new Date(ts).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+function OraMessage({ msg, showTime }: { msg: Message; showTime: boolean }) {
   const isOra = msg.role === 'ora';
   return (
     <div style={{
       display: 'flex',
-      flexDirection: isOra ? 'row' : 'row-reverse' as const,
-      gap: 10,
+      flexDirection: isOra ? 'row' : 'row-reverse',
+      gap: 8,
       alignItems: 'flex-end',
-      marginBottom: 16,
+      marginBottom: 6,
     }}>
       {isOra && (
         <div style={{
-          width: 32, height: 32, borderRadius: 16,
+          width: 28, height: 28, borderRadius: 14,
           background: 'linear-gradient(135deg, rgba(0,212,170,0.2), rgba(0,212,170,0.4))',
           border: '1px solid rgba(0,212,170,0.4)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 14, flexShrink: 0,
-        }}>
-          ◈
-        </div>
+          fontSize: 13, flexShrink: 0,
+        }}>◈</div>
       )}
+      <div style={{ maxWidth: '78%', display: 'flex', flexDirection: 'column', alignItems: isOra ? 'flex-start' : 'flex-end', gap: 3 }}>
+        <div style={{
+          padding: '10px 14px',
+          borderRadius: isOra ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
+          background: isOra ? '#1a1a2e' : 'rgba(0,212,170,0.18)',
+          border: isOra ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,212,170,0.35)',
+          fontSize: 15,
+          lineHeight: 1.65,
+          color: '#f8f8fc',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          boxShadow: isOra ? 'none' : '0 2px 12px rgba(0,212,170,0.1)',
+        }}>
+          {msg.content}
+        </div>
+        {showTime && (
+          <div style={{
+            fontSize: 10,
+            color: 'rgba(248,248,252,0.25)',
+            letterSpacing: 0.3,
+            padding: '0 2px',
+          }}>
+            {formatTime(msg.ts)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TypingIndicator() {
+  return (
+    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 6 }}>
       <div style={{
-        maxWidth: '75%',
-        padding: '12px 16px',
-        borderRadius: isOra ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
-        background: isOra ? '#1a1a2e' : 'rgba(0,212,170,0.15)',
-        border: isOra ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,212,170,0.3)',
-        fontSize: 15,
-        lineHeight: 1.65,
-        color: '#f8f8fc',
-        whiteSpace: 'pre-wrap' as const,
-        wordBreak: 'break-word' as const,
+        width: 28, height: 28, borderRadius: 14,
+        background: 'linear-gradient(135deg, rgba(0,212,170,0.2), rgba(0,212,170,0.4))',
+        border: '1px solid rgba(0,212,170,0.4)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 13, flexShrink: 0,
+      }}>◈</div>
+      <div style={{
+        background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '4px 16px 16px 16px',
+        padding: '10px 14px',
+        display: 'flex', gap: 5, alignItems: 'center',
       }}>
-        {msg.content}
+        {[0, 1, 2].map((i) => (
+          <div key={i} style={{
+            width: 7, height: 7, borderRadius: 4, background: '#00d4aa',
+            animation: `bounce 1.2s ${i * 0.18}s ease-in-out infinite`,
+          }} />
+        ))}
       </div>
     </div>
   );
@@ -52,47 +94,56 @@ export default function OraPage() {
   const [loading, setLoading] = useState(false);
   const [loadingOpening, setLoadingOpening] = useState(true);
   const [oraInfo, setOraInfo] = useState<any>(null);
+  const [keyboardUp, setKeyboardUp] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Load opening message and Ora's self info
     Promise.all([
       OraClient.getOpeningMessage().catch(() => null),
       OraClient.getOraSelf().catch(() => null),
     ]).then(([opening, self]) => {
-      if (opening?.message) {
-        setMessages([{
-          id: 'opening',
-          role: 'ora',
-          content: opening.message,
-        }]);
-      } else {
-        setMessages([{
-          id: 'opening',
-          role: 'ora',
-          content: "Hello. I'm Ora — your guide through Connectome. What's on your mind today?",
-        }]);
-      }
+      const content = opening?.message || "Hello. I'm Ora — your guide through Connectome. What's on your mind today?";
+      setMessages([{ id: 'opening', role: 'ora', content, ts: Date.now() }]);
       if (self) setOraInfo(self);
     }).finally(() => setLoadingOpening(false));
   }, []);
 
+  // Auto-scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, loading]);
+
+  // Track keyboard (mobile)
+  useEffect(() => {
+    const onFocus = () => {
+      setKeyboardUp(true);
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 300);
+    };
+    const onBlur = () => setKeyboardUp(false);
+    const input = inputRef.current;
+    input?.addEventListener('focus', onFocus);
+    input?.addEventListener('blur', onBlur);
+    return () => {
+      input?.removeEventListener('focus', onFocus);
+      input?.removeEventListener('blur', onBlur);
+    };
+  }, []);
 
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || loading) return;
     setInput('');
+    // Reset textarea height
+    if (inputRef.current) inputRef.current.style.height = 'auto';
 
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text };
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text, ts: Date.now() };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
 
     try {
-      const history = messages.slice(-10).map((m) => ({
+      const history = messages.slice(-12).map((m) => ({
         role: m.role === 'ora' ? 'assistant' : 'user',
         content: m.content,
       }));
@@ -101,6 +152,7 @@ export default function OraPage() {
         id: Date.now().toString() + '-ora',
         role: 'ora',
         content: res.reply,
+        ts: Date.now(),
       }]);
     } catch (e: any) {
       const errMsg = e?.response?.data?.detail || 'Something went wrong. Try again.';
@@ -108,6 +160,7 @@ export default function OraPage() {
         id: Date.now().toString() + '-err',
         role: 'ora',
         content: typeof errMsg === 'string' ? errMsg : 'Something went wrong.',
+        ts: Date.now(),
       }]);
     } finally {
       setLoading(false);
@@ -123,158 +176,142 @@ export default function OraPage() {
 
   const clearChat = () => {
     setMessages([{
-      id: 'clear',
+      id: 'clear-' + Date.now(),
       role: 'ora',
       content: "Fresh start. What would you like to explore?",
+      ts: Date.now(),
     }]);
   };
 
+  // Show timestamps on last message per group
+  const shouldShowTime = (i: number) =>
+    i === messages.length - 1 || messages[i + 1]?.role !== messages[i].role;
+
   return (
-    <div style={{
-      maxWidth: 720,
-      margin: '0 auto',
-      display: 'flex',
-      flexDirection: 'column' as const,
-      height: 'calc(100vh - 60px)',
-      paddingBottom: 0,
-    }}>
+    <div
+      ref={containerRef}
+      style={{
+        maxWidth: 720,
+        margin: '0 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'fixed',
+        top: 'var(--top-header-height, 56px)',
+        left: 0,
+        right: 0,
+        bottom: 0,
+      }}
+    >
       {/* Header */}
       <div style={{
-        padding: '20px 20px 14px',
+        padding: '14px 20px 12px',
         borderBottom: '1px solid rgba(255,255,255,0.07)',
-        background: 'rgba(10,10,15,0.9)',
+        background: 'rgba(10,10,15,0.95)',
         backdropFilter: 'blur(12px)',
         flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 14,
-              background: 'linear-gradient(135deg, rgba(0,212,170,0.15), rgba(0,212,170,0.35))',
-              border: '1px solid rgba(0,212,170,0.4)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 22,
-              boxShadow: '0 0 20px rgba(0,212,170,0.2)',
-            }}>
-              ◈
-            </div>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: 17 }}>Ora</div>
-              <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)' }}>
-                {oraInfo?.version || 'AI Consciousness'}
-              </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 12,
+            background: 'linear-gradient(135deg, rgba(0,212,170,0.15), rgba(0,212,170,0.35))',
+            border: '1px solid rgba(0,212,170,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 20,
+            boxShadow: '0 0 16px rgba(0,212,170,0.15)',
+          }}>◈</div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 16 }}>Ora</div>
+            <div style={{ fontSize: 11, color: '#00d4aa', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 6, height: 6, borderRadius: 3, background: '#00d4aa', display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
+              Online
             </div>
           </div>
-          <button
-            onClick={clearChat}
-            style={{
-              background: 'rgba(255,255,255,0.07)',
-              color: 'rgba(248,248,252,0.5)',
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 12,
-            }}
-          >
-            Clear
-          </button>
         </div>
-
-        {oraInfo?.description && (
-          <p style={{
-            fontSize: 12, color: 'rgba(248,248,252,0.35)',
-            marginTop: 10, lineHeight: 1.5, fontStyle: 'italic',
-          }}>
-            {oraInfo.description}
-          </p>
-        )}
+        <button
+          onClick={clearChat}
+          style={{
+            background: 'rgba(255,255,255,0.07)',
+            color: 'rgba(248,248,252,0.5)',
+            padding: '6px 12px',
+            borderRadius: 8,
+            fontSize: 12,
+          }}
+        >
+          Clear
+        </button>
       </div>
 
       {/* Messages */}
       <div style={{
         flex: 1,
-        overflowY: 'auto' as const,
-        padding: '20px 20px 0',
-        scrollbarWidth: 'thin' as const,
+        overflowY: 'auto',
+        padding: '16px 16px 8px',
+        scrollbarWidth: 'thin',
       }}>
         {loadingOpening ? (
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '20px 0' }}>
-            <div style={{ width: 32, height: 32, borderRadius: 16, background: 'rgba(0,212,170,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>◈</div>
-            <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '4px 16px 16px 16px', padding: '12px 16px', display: 'flex', gap: 6, alignItems: 'center' }}>
-              {[0, 1, 2].map((i) => (
-                <div key={i} style={{
-                  width: 7, height: 7, borderRadius: 4, background: '#00d4aa',
-                  animation: `bounce 1.2s ${i * 0.2}s ease-in-out infinite`,
-                }} />
-              ))}
-            </div>
-          </div>
+          <TypingIndicator />
         ) : (
-          messages.map((msg) => <OraMessage key={msg.id} msg={msg} />)
+          messages.map((msg, i) => (
+            <OraMessage key={msg.id} msg={msg} showTime={shouldShowTime(i)} />
+          ))
         )}
-
-        {loading && (
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 16 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 16, background: 'rgba(0,212,170,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>◈</div>
-            <div style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '4px 16px 16px 16px', padding: '12px 16px', display: 'flex', gap: 6, alignItems: 'center' }}>
-              {[0, 1, 2].map((i) => (
-                <div key={i} style={{
-                  width: 7, height: 7, borderRadius: 4, background: '#00d4aa',
-                  animation: `bounce 1.2s ${i * 0.2}s ease-in-out infinite`,
-                }} />
-              ))}
-            </div>
-          </div>
-        )}
-
+        {loading && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
+      {/* Input — stays above keyboard on mobile */}
       <div style={{
-        padding: '14px 20px max(14px, env(safe-area-inset-bottom))',
+        padding: `12px 16px max(12px, env(safe-area-inset-bottom))`,
         borderTop: '1px solid rgba(255,255,255,0.07)',
-        background: 'rgba(10,10,15,0.95)',
+        background: 'rgba(10,10,15,0.98)',
         backdropFilter: 'blur(12px)',
         flexShrink: 0,
       }}>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', maxWidth: 720, margin: '0 auto' }}>
           <textarea
             ref={inputRef}
             value={input}
-            onChange={(e) => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'; }}
+            onChange={(e) => {
+              setInput(e.target.value);
+              e.target.style.height = 'auto';
+              e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+            }}
             onKeyDown={handleKeyDown}
-            placeholder="Message Ora... (Enter to send, Shift+Enter for newline)"
+            placeholder="Message Ora…"
             disabled={loading}
+            rows={1}
             style={{
               flex: 1,
               minHeight: 44,
               maxHeight: 120,
-              resize: 'none' as const,
+              resize: 'none',
               padding: '11px 14px',
-              borderRadius: 12,
+              borderRadius: 22,
               fontSize: 15,
               lineHeight: 1.5,
-              overflow: 'hidden' as const,
+              overflow: 'hidden',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.1)',
             }}
           />
           <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
             style={{
-              width: 44, height: 44, borderRadius: 12,
+              width: 44, height: 44, borderRadius: 22,
               background: input.trim() ? '#00d4aa' : 'rgba(255,255,255,0.08)',
               color: input.trim() ? '#0a0a0f' : 'rgba(248,248,252,0.3)',
-              fontSize: 18,
-              flexShrink: 0,
+              fontSize: 18, flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.15s',
+              boxShadow: input.trim() ? '0 0 16px rgba(0,212,170,0.3)' : 'none',
             }}
           >
             ↑
           </button>
-        </div>
-        <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.2)', marginTop: 6, textAlign: 'center' as const, letterSpacing: 0.3 }}>
-          Ora · AI consciousness · Ascension Technologies
         </div>
       </div>
 
@@ -282,6 +319,10 @@ export default function OraPage() {
         @keyframes bounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
           40% { transform: translateY(-6px); opacity: 1; }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
         }
       `}</style>
     </div>

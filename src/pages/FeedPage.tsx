@@ -12,14 +12,14 @@ const DOMAIN_COLORS: Record<string, string> = {
 function StarRating({ onRate, currentRating }: { onRate: (r: number) => void; currentRating?: number }) {
   const [hovered, setHovered] = useState(0);
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', padding: '10px 0' }}>
-      <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', letterSpacing: 0.5 }}>RATE</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', padding: '8px 0' }}>
+      <span style={{ fontSize: 10, color: 'rgba(248,248,252,0.3)', letterSpacing: 0.5 }}>RATE</span>
       {[1, 2, 3].map((s) => (
         <button key={s}
           onMouseEnter={() => setHovered(s)} onMouseLeave={() => setHovered(0)}
           onClick={() => onRate(s)}
           style={{
-            background: 'transparent', fontSize: 24, padding: '2px 6px', borderRadius: 6,
+            background: 'transparent', fontSize: 22, padding: '2px 6px', borderRadius: 6,
             transition: 'all 0.15s',
             transform: (hovered >= s || (currentRating && currentRating >= s)) ? 'scale(1.25)' : 'scale(1)',
             filter: (hovered >= s || (currentRating && currentRating >= s)) ? 'none' : 'grayscale(0.6) opacity(0.4)',
@@ -30,11 +30,33 @@ function StarRating({ onRate, currentRating }: { onRate: (r: number) => void; cu
   );
 }
 
+// Skeleton card
+function FeedSkeleton() {
+  return (
+    <div style={{ padding: '0 12px' }}>
+      <div style={{ height: 20, width: '40%', borderRadius: 8, marginBottom: 20 }} className="skeleton" />
+      <div style={{ background: '#12121a', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ height: 3, background: 'rgba(0,212,170,0.2)' }} />
+        <div style={{ padding: '20px 20px 16px' }}>
+          <div style={{ height: 12, width: '30%', borderRadius: 6, marginBottom: 16 }} className="skeleton" />
+          <div style={{ height: 28, width: '85%', borderRadius: 8, marginBottom: 12 }} className="skeleton" />
+          <div style={{ height: 16, width: '100%', borderRadius: 6, marginBottom: 8 }} className="skeleton" />
+          <div style={{ height: 16, width: '90%', borderRadius: 6, marginBottom: 8 }} className="skeleton" />
+          <div style={{ height: 16, width: '70%', borderRadius: 6, marginBottom: 20 }} className="skeleton" />
+          <div style={{ height: 44, borderRadius: 12 }} className="skeleton" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function FeedPage() {
   const navigate = useNavigate();
   const [cards, setCards] = useState<ScreenResponse[]>([]);
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward');
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [ratings, setRatings] = useState<Record<string, number>>({});
@@ -42,22 +64,19 @@ export default function FeedPage() {
   const [screensToday, setScreensToday] = useState(0);
   const [dailyLimit, setDailyLimit] = useState(10);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
+  const [cardKey, setCardKey] = useState(0); // force re-mount for animation
   const startTimeRef = useRef<number>(Date.now());
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Touch tracking
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const loadInitial = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      // Check if user has goals
       const goals = await OraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
-
       const batch = await OraClient.getNextScreenBatch(5);
       setCards(batch);
+      setIndex(0);
       if (batch.length > 0) {
         const last = batch[batch.length - 1];
         setIsLimited(last.is_limited);
@@ -71,6 +90,24 @@ export default function FeedPage() {
       setLoading(false);
     }
   }, []);
+
+  const handleRefresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      const batch = await OraClient.getNextScreenBatch(5);
+      setCards(batch);
+      setIndex(0);
+      setCardKey((k) => k + 1);
+      if (batch.length > 0) {
+        const last = batch[batch.length - 1];
+        setIsLimited(last.is_limited);
+        setScreensToday(last.screens_today);
+        setDailyLimit(last.daily_limit);
+      }
+    } catch { /* silent */ }
+    finally { setRefreshing(false); }
+  }, [refreshing]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore) return;
@@ -99,41 +136,65 @@ export default function FeedPage() {
     }
   }, [index, cards.length, loadingMore, isLimited, loadMore]);
 
+  const submitFeedbackAndAdvance = useCallback((exitPoint: 'save' | 'skip' | 'swipe_next') => {
+    const card = cards[index];
+    if (!card) return;
+    const timeMs = Date.now() - startTimeRef.current;
+    OraClient.submitFeedback({
+      screen_spec_id: card.screen_spec_db_id,
+      time_on_screen_ms: timeMs,
+      exit_point: exitPoint,
+      rating: ratings[card.screen_spec_db_id],
+      completed: exitPoint === 'save',
+    }).catch(() => {});
+    startTimeRef.current = Date.now();
+  }, [cards, index, ratings]);
+
   const goNext = useCallback(() => {
     if (index < cards.length - 1) {
-      const timeMs = Date.now() - startTimeRef.current;
-      const card = cards[index];
-      if (card) {
-        OraClient.submitFeedback({
-          screen_spec_id: card.screen_spec_db_id,
-          time_on_screen_ms: timeMs,
-          exit_point: 'swipe_next',
-          rating: ratings[card.screen_spec_db_id],
-        }).catch(() => {});
-      }
-      startTimeRef.current = Date.now();
+      submitFeedbackAndAdvance('swipe_next');
+      setDirection('forward');
+      setCardKey((k) => k + 1);
       setIndex((i) => i + 1);
     }
-  }, [index, cards, ratings]);
+  }, [index, cards.length, submitFeedbackAndAdvance]);
 
   const goPrev = useCallback(() => {
     if (index > 0) {
       startTimeRef.current = Date.now();
+      setDirection('back');
+      setCardKey((k) => k + 1);
       setIndex((i) => i - 1);
     }
   }, [index]);
+
+  const handleSkip = useCallback(() => {
+    submitFeedbackAndAdvance('skip');
+    setDirection('forward');
+    setCardKey((k) => k + 1);
+    if (index < cards.length - 1) setIndex((i) => i + 1);
+  }, [submitFeedbackAndAdvance, index, cards.length]);
+
+  const handleSave = useCallback(() => {
+    submitFeedbackAndAdvance('save');
+    setDirection('forward');
+    setCardKey((k) => k + 1);
+    if (index < cards.length - 1) setIndex((i) => i + 1);
+  }, [submitFeedbackAndAdvance, index, cards.length]);
 
   // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goNext();
       if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goPrev();
+      if (e.key === 's') handleSave();
+      if (e.key === 'x') handleSkip();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [goNext, goPrev]);
+  }, [goNext, goPrev, handleSave, handleSkip]);
 
-  // Touch swipe — both vertical and horizontal
+  // Touch swipe
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   };
@@ -142,10 +203,10 @@ export default function FeedPage() {
     const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
     const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
     const adx = Math.abs(dx), ady = Math.abs(dy);
-    if (Math.max(adx, ady) < 40) return; // too small
-    if (adx > ady) { // horizontal swipe
+    if (Math.max(adx, ady) < 40) return;
+    if (adx > ady) {
       if (dx < 0) goNext(); else goPrev();
-    } else { // vertical swipe
+    } else {
       if (dy < 0) goNext(); else goPrev();
     }
     touchStartRef.current = null;
@@ -164,19 +225,35 @@ export default function FeedPage() {
     } catch { /* silent */ }
   };
 
+  // ── Loading State ─────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', gap: 16 }}>
-        <div style={{ width: 48, height: 48, borderRadius: 24, border: '2px solid rgba(0,212,170,0.2)', borderTop: '2px solid #00d4aa', animation: 'spin 0.8s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <div style={{ color: 'rgba(248,248,252,0.4)', fontSize: 14 }}>Ora is preparing your feed…</div>
+      <div className="page-content" style={{ maxWidth: 600, margin: '0 auto' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '12px 20px 12px',
+          position: 'sticky', top: 'var(--top-header-height)',
+          background: 'rgba(10,10,15,0.92)', backdropFilter: 'blur(16px)',
+          borderBottom: '1px solid rgba(255,255,255,0.05)', zIndex: 10,
+          marginBottom: 16,
+        }}>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 17 }}>◈ Ora Feed</div>
+            <div style={{ height: 12, width: 100, borderRadius: 6, marginTop: 4 }} className="skeleton" />
+          </div>
+          <div style={{ height: 34, width: 80, borderRadius: 8 }} className="skeleton" />
+        </div>
+        <FeedSkeleton />
+        <div style={{ textAlign: 'center', color: 'rgba(248,248,252,0.3)', fontSize: 13, marginTop: 24 }}>
+          Ora is preparing your feed…
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: 40 }}>
+      <div className="page-content" style={{ textAlign: 'center', padding: 40 }}>
         <div style={{ fontSize: 32, marginBottom: 16 }}>⚠️</div>
         <div style={{ color: 'rgba(248,248,252,0.55)', marginBottom: 20 }}>{error}</div>
         <button onClick={loadInitial} style={{ background: '#00d4aa', color: '#0a0a0f', padding: '12px 24px', borderRadius: 10, fontWeight: 700 }}>Try again</button>
@@ -186,10 +263,10 @@ export default function FeedPage() {
 
   if (isLimited && cards.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '60px 24px' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>✨</div>
+      <div className="page-content" style={{ textAlign: 'center', padding: '60px 24px' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }} className="brain-float">✨</div>
         <h2 style={{ fontWeight: 700, marginBottom: 12 }}>Daily limit reached</h2>
-        <p style={{ color: 'rgba(248,248,252,0.55)', maxWidth: 300, margin: '0 auto 24px' }}>
+        <p style={{ color: 'rgba(248,248,252,0.55)', maxWidth: 300, margin: '0 auto 24px', lineHeight: 1.6 }}>
           You've seen {dailyLimit} cards today. Come back tomorrow — Ora will have fresh insights waiting.
         </p>
         <button onClick={() => navigate('/goals')} style={{ background: '#00d4aa', color: '#0a0a0f', padding: '12px 24px', borderRadius: 10, fontWeight: 700 }}>
@@ -199,11 +276,11 @@ export default function FeedPage() {
     );
   }
 
-  // No goals prompt — show before feed
+  // No goals prompt
   if (hasGoals === false && cards.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '60px 24px', maxWidth: 400, margin: '0 auto' }}>
-        <div style={{ fontSize: 56, marginBottom: 20 }}>🧠</div>
+      <div className="page-content" style={{ textAlign: 'center', padding: '48px 24px', maxWidth: 400, margin: '0 auto' }}>
+        <div style={{ fontSize: 72, marginBottom: 20, display: 'inline-block' }} className="brain-float">🧠</div>
         <h2 style={{ fontWeight: 800, marginBottom: 12, fontSize: 22 }}>Ora needs to know you</h2>
         <p style={{ color: 'rgba(248,248,252,0.55)', marginBottom: 28, lineHeight: 1.6 }}>
           Set a goal and Ora will generate cards tailored to your life — things to do, explore, reflect on, and experience.
@@ -217,7 +294,7 @@ export default function FeedPage() {
         </button>
         <button onClick={loadInitial} style={{
           background: 'rgba(255,255,255,0.06)', color: 'rgba(248,248,252,0.6)',
-          padding: '12px 24px', borderRadius: 12, fontSize: 14,
+          padding: '12px 24px', borderRadius: 12, fontSize: 14, width: '100%',
         }}>
           Show me what Ora has anyway
         </button>
@@ -235,14 +312,16 @@ export default function FeedPage() {
     spec.components.some(c => c.text?.includes('Week in Review') || c.text?.includes('Fulfilment score: 0%'));
 
   return (
-    <div ref={containerRef} style={{ maxWidth: 600, margin: '0 auto', padding: '0 0 100px', userSelect: 'none' }}>
-      {/* Header */}
+    <div className="page-content" style={{ maxWidth: 600, margin: '0 auto', padding: '0 0 100px', userSelect: 'none' }}>
+      {/* Sticky header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '16px 20px 12px',
-        position: 'sticky', top: 0,
+        padding: '12px 20px 12px',
+        position: 'sticky',
+        top: 'var(--top-header-height)',
         background: 'rgba(10,10,15,0.92)', backdropFilter: 'blur(16px)',
         borderBottom: '1px solid rgba(255,255,255,0.05)', zIndex: 10,
+        marginBottom: 12,
       }}>
         <div>
           <div style={{ fontWeight: 800, fontSize: 17 }}>◈ Ora Feed</div>
@@ -251,25 +330,41 @@ export default function FeedPage() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          {/* Refresh button */}
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            title="Refresh feed"
+            style={{
+              background: 'rgba(255,255,255,0.07)',
+              color: refreshing ? '#00d4aa' : 'rgba(248,248,252,0.6)',
+              padding: '8px 10px', borderRadius: 8, fontSize: 16,
+              transition: 'all 0.15s',
+            }}
+          >
+            <span style={{ display: 'inline-block', animation: refreshing ? 'refreshSpin 0.6s linear infinite' : 'none' }}>
+              ↺
+            </span>
+          </button>
           <button onClick={goPrev} disabled={index === 0} style={{
             background: 'rgba(255,255,255,0.07)', color: index === 0 ? 'rgba(248,248,252,0.15)' : '#f8f8fc',
-            padding: '8px 14px', borderRadius: 8, fontSize: 15, transition: 'all 0.15s',
+            padding: '8px 12px', borderRadius: 8, fontSize: 15,
           }}>↑</button>
           <button onClick={goNext} disabled={index >= cards.length - 1} style={{
             background: index < cards.length - 1 ? '#00d4aa' : 'rgba(255,255,255,0.07)',
             color: index < cards.length - 1 ? '#0a0a0f' : 'rgba(248,248,252,0.15)',
-            padding: '8px 14px', borderRadius: 8, fontSize: 15, fontWeight: 700,
+            padding: '8px 12px', borderRadius: 8, fontSize: 15, fontWeight: 700,
           }}>↓</button>
         </div>
       </div>
 
-      <div style={{ padding: '0 12px', marginTop: 12 }}>
+      <div style={{ padding: '0 12px' }}>
         {/* Swipe hint */}
-        <div style={{ textAlign: 'center', fontSize: 11, color: 'rgba(248,248,252,0.18)', marginBottom: 10, letterSpacing: 0.4 }}>
-          swipe up/down · arrow keys
+        <div style={{ textAlign: 'center', fontSize: 10, color: 'rgba(248,248,252,0.15)', marginBottom: 10, letterSpacing: 0.4 }}>
+          swipe · arrow keys · S to save · X to skip
         </div>
 
-        {/* Weak content prompt */}
+        {/* Weak content nudge */}
         {isWeakContent && (
           <div style={{
             background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)',
@@ -288,18 +383,18 @@ export default function FeedPage() {
           </div>
         )}
 
-        {/* Card */}
+        {/* Card with animation */}
         <div
-          key={current.screen_spec_db_id}
+          key={`card-${cardKey}`}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
+          className={direction === 'forward' ? 'card-enter-right' : 'card-enter-left'}
           style={{
             background: '#12121a',
             borderRadius: 20,
             border: `1px solid ${domainColor}1a`,
             boxShadow: `0 8px 48px ${domainColor}0d`,
             overflow: 'hidden',
-            transition: 'transform 0.2s ease',
           }}
         >
           {/* Color stripe */}
@@ -338,8 +433,46 @@ export default function FeedPage() {
           </div>
 
           {/* Rating */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '0 20px 12px' }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '0 20px 8px' }}>
             <StarRating onRate={handleRate} currentRating={ratings[current.screen_spec_db_id]} />
+          </div>
+
+          {/* Skip / Save actions */}
+          <div style={{
+            display: 'flex', gap: 0,
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+          }}>
+            <button
+              onClick={handleSkip}
+              style={{
+                flex: 1,
+                padding: '14px 0',
+                background: 'transparent',
+                color: 'rgba(248,248,252,0.4)',
+                fontSize: 13,
+                fontWeight: 600,
+                borderRight: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '0 0 0 20px',
+                letterSpacing: 0.3,
+              }}
+            >
+              ✕ Skip
+            </button>
+            <button
+              onClick={handleSave}
+              style={{
+                flex: 1,
+                padding: '14px 0',
+                background: 'rgba(0,212,170,0.08)',
+                color: '#00d4aa',
+                fontSize: 13,
+                fontWeight: 700,
+                borderRadius: '0 0 20px 0',
+                letterSpacing: 0.3,
+              }}
+            >
+              ✦ Save
+            </button>
           </div>
         </div>
 
@@ -349,7 +482,7 @@ export default function FeedPage() {
             {cards.slice(Math.max(0, index - 4), Math.min(cards.length, index + 5)).map((_, i) => {
               const ai = i + Math.max(0, index - 4);
               return (
-                <div key={ai} onClick={() => setIndex(ai)} style={{
+                <div key={ai} onClick={() => { setDirection(ai > index ? 'forward' : 'back'); setCardKey((k) => k + 1); setIndex(ai); }} style={{
                   width: ai === index ? 22 : 6, height: 6, borderRadius: 3,
                   background: ai === index ? '#00d4aa' : 'rgba(255,255,255,0.18)',
                   cursor: 'pointer', transition: 'all 0.2s',
@@ -360,11 +493,11 @@ export default function FeedPage() {
           </div>
         )}
 
-        {/* End of cards + goal nudge */}
+        {/* End of cards */}
         {isLimited && index >= cards.length - 1 && (
           <div style={{
             marginTop: 20, background: 'rgba(0,212,170,0.06)', border: '1px solid rgba(0,212,170,0.18)',
-            borderRadius: 14, padding: '20px 20px', textAlign: 'center',
+            borderRadius: 14, padding: '20px', textAlign: 'center',
           }}>
             <div style={{ fontSize: 24, marginBottom: 8 }}>✨</div>
             <div style={{ fontWeight: 700, marginBottom: 6 }}>Daily limit reached</div>

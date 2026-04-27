@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { OraClient, JournalEntry } from '../lib/OraClient';
+import { useToast } from '../components/Toast';
 
 function EntryCard({ entry }: { entry: JournalEntry }) {
   const [expanded, setExpanded] = useState(false);
@@ -61,6 +62,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
 }
 
 export default function JournalPage() {
+  const { show } = useToast();
   const [prompt, setPrompt] = useState<{ id: string; prompt: string } | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +89,7 @@ export default function JournalPage() {
       const res = await OraClient.submitJournalEntry(prompt.id, text.trim());
       setReflection(res.ora_reflection || '');
       setSubmitted(true);
+      show('Journal entry saved!', 'success');
       // Refresh entries
       const updated = await OraClient.getJournalEntries().catch(() => entries);
       setEntries(updated);
@@ -98,7 +101,7 @@ export default function JournalPage() {
   };
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 16px 80px' }}>
+    <div className="page-content" style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 80px' }}>
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: -0.5 }}>✍ Journal</h1>
         <p style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 4 }}>

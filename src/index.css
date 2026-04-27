@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens (8px grid) ─────────────────────────────────────── */
 :root {
   --bg: #0a0a0f;
   --surface: #12121a;
@@ -10,6 +11,29 @@
   --text-dim: rgba(248, 248, 252, 0.55);
   --border: rgba(255, 255, 255, 0.08);
   --indigo: #6366f1;
+
+  /* spacing */
+  --sp1: 8px;
+  --sp2: 16px;
+  --sp3: 24px;
+  --sp4: 32px;
+  --sp5: 40px;
+
+  /* radius */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+
+  /* nav */
+  --bottom-nav-height: 64px;
+  --top-header-height: 56px;
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────── */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -17,20 +41,21 @@ body {
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
+/* ─── Scrollbar ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
 
-/* Smooth transitions */
+/* ─── Animations ────────────────────────────────────────────────────── */
 .fade-in {
   animation: fadeIn 0.35s ease-in-out;
 }
@@ -39,7 +64,6 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Card slide */
 .slide-in {
   animation: slideIn 0.3s cubic-bezier(.25,.8,.25,1);
 }
@@ -48,55 +72,85 @@ body {
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Glow pulse */
+.slide-up {
+  animation: slideUp 0.4s cubic-bezier(.25,.8,.25,1);
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+
 @keyframes glowPulse {
   0%, 100% { box-shadow: 0 0 12px rgba(0, 212, 170, 0.3); }
   50%       { box-shadow: 0 0 24px rgba(0, 212, 170, 0.6); }
 }
+.glow-accent { animation: glowPulse 2.5s ease-in-out infinite; }
 
-.glow-accent {
-  animation: glowPulse 2.5s ease-in-out infinite;
+/* Brain float animation for empty states */
+@keyframes brainFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%       { transform: translateY(-12px) rotate(2deg); }
 }
+.brain-float { animation: brainFloat 3s ease-in-out infinite; }
+
+/* Refresh spin animation */
+@keyframes refreshSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spinning { animation: refreshSpin 0.6s ease-in-out; }
 
 /* Star rating */
 .star { cursor: pointer; transition: transform 0.1s; }
 .star:hover { transform: scale(1.2); }
 
-/* Input styles */
+/* ─── Inputs ────────────────────────────────────────────────────────── */
 input, textarea {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
-  border-radius: 10px;
+  border-radius: var(--r-md);
   padding: 12px 14px;
   font-size: 15px;
   outline: none;
   width: 100%;
   transition: border-color 0.2s;
+  font-family: inherit;
 }
 input:focus, textarea:focus {
   border-color: var(--accent);
 }
-
 textarea {
   resize: vertical;
   min-height: 100px;
   line-height: 1.6;
 }
 
-/* Button base */
+/* ─── Buttons ───────────────────────────────────────────────────────── */
 button {
   cursor: pointer;
   border: none;
   font-family: inherit;
   font-weight: 600;
   font-size: 15px;
-  transition: opacity 0.15s, transform 0.1s;
+  transition: opacity 0.15s, transform 0.12s cubic-bezier(.25,.8,.25,1), background 0.15s;
 }
-button:active { transform: scale(0.97); }
+button:active {
+  transform: scale(0.94) !important;
+}
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Progress bar */
+/* Haptic-style tap feedback */
+.btn-press:active { transform: scale(0.93) !important; }
+
+/* ─── Progress ──────────────────────────────────────────────────────── */
 .progress-track {
   background: rgba(255,255,255,0.08);
   border-radius: 999px;
@@ -107,10 +161,76 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   height: 100%;
   border-radius: 999px;
   background: var(--accent);
-  transition: width 0.5s ease;
+  transition: width 0.6s cubic-bezier(.25,.8,.25,1);
 }
 
-/* Tooltip */
-.tooltip {
+/* ─── Progress Ring ──────────────────────────────────────────────────── */
+.progress-ring {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* ─── Skeleton screens ──────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -300px 0; }
+  100% { background-position: 300px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ─── Cards ─────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+}
+
+/* ─── Page layout (accounts for nav bars) ───────────────────────────── */
+.page-content {
+  padding-bottom: calc(var(--bottom-nav-height) + 24px);
+  padding-top: calc(var(--top-header-height) + 8px);
+}
+
+/* Desktop: account for sidebar */
+@media (min-width: 768px) {
+  .page-content {
+    padding-top: 24px;
+    margin-left: 220px;
+  }
+}
+
+/* ─── Responsive helpers ────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .hidden-mobile { display: flex !important; }
+  .show-mobile   { display: none  !important; }
+}
+@media (max-width: 767px) {
+  .hidden-mobile { display: none  !important; }
+  .show-mobile   { display: flex  !important; }
+}
+
+/* ─── Swipe card transition ─────────────────────────────────────────── */
+.card-enter-right {
+  animation: cardEnterRight 0.25s cubic-bezier(.25,.8,.25,1);
+}
+@keyframes cardEnterRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.card-enter-left {
+  animation: cardEnterLeft 0.25s cubic-bezier(.25,.8,.25,1);
+}
+@keyframes cardEnterLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ─── Tooltip ───────────────────────────────────────────────────────── */
+.tooltip { position: relative; }
