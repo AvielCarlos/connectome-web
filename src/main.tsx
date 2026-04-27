@@ -9,6 +9,7 @@ import JournalPage from './pages/JournalPage'
 import OraPage from './pages/OraPage'
 import DAOPage from './pages/DAOPage'
 import { NavBar } from './components/NavBar'
+import SuggestionButton from './components/SuggestionButton'
 import './index.css'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ function App() {
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: '#f8f8fc' }}>
       {isAuthenticated && <NavBar />}
+      {isAuthenticated && <SuggestionButton />}
       <Routes>
         <Route path="/" element={isAuthenticated ? <Navigate to="/feed" replace /> : <AuthPage />} />
         <Route path="/feed" element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />

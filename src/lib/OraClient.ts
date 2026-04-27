@@ -288,6 +288,67 @@ class OraClientClass {
     return res.data;
   }
 
+  // ── Suggestions / DAO CP ─────────────────────────────────────────────────
+
+  async submitSuggestion(content: string, category: string, context?: string) {
+    const res = await this.client.post('/api/suggestions/', { content, category, context });
+    return res.data as {
+      suggestion: any;
+      cp_earned: number;
+      total_dao_cp: number;
+      ora_response: string;
+      message: string;
+    };
+  }
+
+  async getMySuggestions() {
+    const res = await this.client.get('/api/suggestions/mine');
+    return res.data as {
+      suggestions: any[];
+      total_suggestions: number;
+      total_cp_earned: number;
+      total_dao_cp: number;
+      tier: string;
+    };
+  }
+
+  async getPublicSuggestions(category?: string, statusFilter?: string) {
+    const params: Record<string, string> = {};
+    if (category) params.category = category;
+    if (statusFilter) params.status_filter = statusFilter;
+    const res = await this.client.get('/api/suggestions/feed', { params });
+    return res.data as { suggestions: any[]; total: number };
+  }
+
+  async quickFeedback(type: 'love' | 'confused' | 'suggest' | 'bug', screen_context?: string, note?: string) {
+    const res = await this.client.post('/api/suggestions/quick', { type, screen_context, note });
+    return res.data as {
+      suggestion: any;
+      cp_earned: number;
+      total_dao_cp: number;
+      ora_response: string;
+    };
+  }
+
+  async getMyDaoStats() {
+    const res = await this.client.get('/api/suggestions/my-dao-stats');
+    return res.data as {
+      user_id: string;
+      total_dao_cp: number;
+      tier: string;
+      tier_label: string;
+      next_tier: string | null;
+      next_tier_cp: number | null;
+      progress_pct: number | null;
+      is_dao_contributor: boolean;
+      suggestion_count: number;
+      accepted_count: number;
+      implemented_count: number;
+      recent_cp_events: any[];
+      badge: string | null;
+    };
+  }
+
   // ── Generic ───────────────────────────────────────────────────────────────
 
   async get<T = any>(path: string): Promise<T> {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { OraClient } from '../lib/OraClient';
+import { authStorage } from '../lib/OraClient';
 
 const TIER_CONFIG: Record<string, { color: string; label: string }> = {
   observer:   { color: '#6b7280', label: 'Observer' },
@@ -126,28 +127,55 @@ function FoundingStewardCard({ item, number }: { item: any; number: number }) {
   );
 }
 
+const STATUS_BADGE_STYLE: Record<string, { bg: string; color: string; label: string }> = {
+  pending:     { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af', label: '🕐 Pending' },
+  accepted:    { bg: 'rgba(16,185,129,0.12)', color: '#10b981', label: '✅ Accepted' },
+  implemented: { bg: 'rgba(99,102,241,0.12)', color: '#818cf8', label: '🚀 Implemented' },
+  rejected:    { bg: 'rgba(239,68,68,0.1)',   color: '#f87171', label: '❌ Closed' },
+};
+
+function SuggestionStatusBadge({ status }: { status: string }) {
+  const s = STATUS_BADGE_STYLE[status] || STATUS_BADGE_STYLE.pending;
+  return (
+    <span style={{
+      background: s.bg, color: s.color,
+      fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6,
+    }}>{s.label}</span>
+  );
+}
+
 export default function DAOPage() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [daoStats, setDaoStats] = useState<any>(null);
   const [foundingStewards, setFoundingStewards] = useState<any>(null);
   const [contributions, setContributions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'leaderboard' | 'contributions'>('leaderboard');
+  const [tab, setTab] = useState<'leaderboard' | 'contributions' | 'my-contributions' | 'suggestions'>('leaderboard');
+  const [myDaoStats, setMyDaoStats] = useState<any>(null);
+  const [mySuggestions, setMySuggestions] = useState<any[]>([]);
+  const [publicSuggestions, setPublicSuggestions] = useState<any[]>([]);
+  const isLoggedIn = authStorage.isAuthenticated();
 
   useEffect(() => {
     Promise.all([
       OraClient.getDAOLeaderboard(20).catch(() => null),
       OraClient.getFoundingStewards().catch(() => null),
       OraClient.getDAOContributions(15).catch(() => null),
-    ]).then(([lb, fs, contribs]) => {
+      isLoggedIn ? OraClient.getMyDaoStats().catch(() => null) : Promise.resolve(null),
+      isLoggedIn ? OraClient.getMySuggestions().catch(() => null) : Promise.resolve(null),
+      OraClient.getPublicSuggestions().catch(() => null),
+    ]).then(([lb, fs, contribs, stats, mine, pub]) => {
       if (lb) {
         setLeaderboard(lb.leaderboard || []);
         setDaoStats({ total_contributors: lb.total_contributors, total_cp_awarded: lb.total_cp_awarded });
       }
       if (fs) setFoundingStewards(fs);
       if (contribs) setContributions(contribs.contributions || []);
+      if (stats) setMyDaoStats(stats);
+      if (mine) setMySuggestions(mine.suggestions || []);
+      if (pub) setPublicSuggestions(pub.suggestions || []);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [isLoggedIn]);
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 16px 80px' }}>
