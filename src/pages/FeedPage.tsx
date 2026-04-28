@@ -14,6 +14,144 @@ function getColor(spec: any) {
   return DOMAIN_COLORS[d] || '#00d4aa';
 }
 
+// ─── Deep-dive detail sheet ─────────────────────────────────────────────────
+function DetailSheet({ card, color, onClose }: { card: any; color: string; onClose: () => void }) {
+  const deepDive = card?.deep_dive || null;
+  const title = card?.title || card?.text || '';
+  const body = card?.body || card?.body_text || '';
+
+  const difficultyColor = (d: string) =>
+    d === 'easy' ? '#10b981' : d === 'medium' ? '#f59e0b' : '#ef4444';
+
+  const typeIcon = (t: string) =>
+    ({ article: '📄', book: '📚', app: '📱', video: '🎬', tool: '🔧' }[t] || '🔗');
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 200,
+        background: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'flex-end',
+        animation: 'fadeIn 0.2s ease-out',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%',
+          maxHeight: '88vh',
+          background: '#12121e',
+          borderRadius: '24px 24px 0 0',
+          border: `1px solid ${color}22`,
+          borderBottom: 'none',
+          overflowY: 'auto',
+          animation: 'slideUpSheet 0.3s cubic-bezier(.25,.8,.25,1)',
+        }}
+      >
+        {/* Handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
+        </div>
+
+        <div style={{ padding: '8px 22px 40px' }}>
+          {/* Title */}
+          <div style={{ fontWeight: 800, fontSize: 20, lineHeight: 1.3, marginBottom: 10, color: '#f8f8fc' }}>{title}</div>
+
+          {/* Body */}
+          {body && <div style={{ fontSize: 15, color: 'rgba(248,248,252,0.65)', lineHeight: 1.7, marginBottom: 20 }}>{body}</div>}
+
+          {deepDive ? (
+            <>
+              {/* Stats row */}
+              <div style={{ display: 'flex', gap: 10, marginBottom: 22, flexWrap: 'wrap' }}>
+                {deepDive.time_to_start && (
+                  <span style={{ background: color + '15', border: `1px solid ${color}33`, color, fontSize: 12, fontWeight: 600, padding: '4px 12px', borderRadius: 20 }}>
+                    ⏱ {deepDive.time_to_start}
+                  </span>
+                )}
+                {deepDive.difficulty && (
+                  <span style={{ background: difficultyColor(deepDive.difficulty) + '15', border: `1px solid ${difficultyColor(deepDive.difficulty)}33`, color: difficultyColor(deepDive.difficulty), fontSize: 12, fontWeight: 600, padding: '4px 12px', borderRadius: 20 }}>
+                    {deepDive.difficulty === 'easy' ? '✓ Easy start' : deepDive.difficulty === 'medium' ? '◎ Medium effort' : '⚡ Challenging'}
+                  </span>
+                )}
+              </div>
+
+              {/* Why it matters */}
+              {deepDive.why_it_matters && (
+                <div style={{ marginBottom: 22 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: color, marginBottom: 8, textTransform: 'uppercase' }}>Why it matters</div>
+                  <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.7)', lineHeight: 1.7 }}>{deepDive.why_it_matters}</div>
+                </div>
+              )}
+
+              {/* Stat highlight */}
+              {deepDive.stat && (
+                <div style={{ background: color + '0e', border: `1px solid ${color}22`, borderRadius: 14, padding: '14px 18px', marginBottom: 22 }}>
+                  <div style={{ fontSize: 13, color: color, fontWeight: 700, lineHeight: 1.5 }}>📊 {deepDive.stat}</div>
+                </div>
+              )}
+
+              {/* Action steps */}
+              {deepDive.steps?.length > 0 && (
+                <div style={{ marginBottom: 22 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: color, marginBottom: 10, textTransform: 'uppercase' }}>How to start</div>
+                  {deepDive.steps.map((step: string, i: number) => (
+                    <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 10 }}>
+                      <div style={{ width: 24, height: 24, borderRadius: 12, background: color + '20', border: `1px solid ${color}44`, color, fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>{i + 1}</div>
+                      <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.75)', lineHeight: 1.55 }}>{step}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Resources */}
+              {deepDive.resources?.length > 0 && (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: color, marginBottom: 10, textTransform: 'uppercase' }}>Explore more</div>
+                  {deepDive.resources.map((r: any, i: number) => (
+                    <a
+                      key={i}
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '12px 14px', marginBottom: 8,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: 12, textDecoration: 'none',
+                        transition: 'background 0.15s',
+                      }}
+                    >
+                      <span style={{ fontSize: 20 }}>{typeIcon(r.type)}</span>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: '#f8f8fc' }}>{r.label}</div>
+                        <div style={{ fontSize: 11, color: color, marginTop: 2 }}>{r.type}</div>
+                      </div>
+                      <div style={{ marginLeft: 'auto', color: 'rgba(248,248,252,0.3)', fontSize: 16 }}>›</div>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.3)', textAlign: 'center', padding: '20px 0' }}>Loading details…</div>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes slideUpSheet {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 // ─── Single full-screen card ──────────────────────────────────────────────────
 function FeedCard({
   item,
@@ -35,6 +173,18 @@ function FeedCard({
   const color = getColor(spec);
   const domain = spec?.metadata?.domain || spec?.domain || '';
   const currentRating = ratings[item.screen_spec_db_id] ?? 0;
+  const [showDetail, setShowDetail] = useState(false);
+
+  // Extract card data — check card_data first, then parse components
+  const specAny = spec as any;
+  const cardData: any = specAny.card_data || {};
+  if (!cardData.title) {
+    for (const c of spec.components || []) {
+      if ((c as any).type === 'headline') cardData.title = (c as any).text;
+      if ((c as any).type === 'body_text' && !cardData.body) cardData.body = (c as any).text;
+    }
+  }
+  if (!cardData.deep_dive) cardData.deep_dive = specAny.deep_dive || null;
 
   return (
     <div style={{
@@ -53,13 +203,21 @@ function FeedCard({
         zIndex: 2,
       }} />
 
-      {/* Scrollable content area */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '28px 20px 12px',
-        scrollbarWidth: 'none',
-      }}>
+      {/* Tap to expand detail sheet */}
+      {showDetail && (
+        <DetailSheet card={cardData} color={color} onClose={() => setShowDetail(false)} />
+      )}
+
+      {/* Scrollable content area — tap to open detail */}
+      <div
+        onClick={() => setShowDetail(true)}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '28px 20px 12px',
+          scrollbarWidth: 'none',
+          cursor: 'pointer',
+        }}>
         {/* Domain badge */}
         {domain && (
           <div style={{ marginBottom: 16 }}>
@@ -162,6 +320,26 @@ function FeedCard({
         background: 'linear-gradient(transparent, rgba(10,10,15,0.95))',
         pointerEvents: 'none', zIndex: 1,
       }} />
+
+      {/* Tap to explore hint */}
+      <div
+        onClick={() => setShowDetail(true)}
+        style={{
+          position: 'absolute', bottom: 18, left: 70, right: 70,
+          textAlign: 'center', zIndex: 5, cursor: 'pointer',
+        }}
+      >
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 5,
+          background: 'rgba(255,255,255,0.07)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          borderRadius: 20, padding: '6px 14px',
+          fontSize: 12, color: 'rgba(248,248,252,0.5)', fontWeight: 600,
+          backdropFilter: 'blur(8px)',
+        }}>
+          <span style={{ fontSize: 14 }}>⤴️</span> Tap to explore
+        </div>
+      </div>
 
       {/* Swipe hint (first card only) */}
       {active && (
