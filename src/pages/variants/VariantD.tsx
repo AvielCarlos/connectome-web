@@ -4,6 +4,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { OraClient, ScreenResponse } from '../../lib/OraClient';
+import { useAuth } from '../../context/AuthContext';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
 const VARIANT = 'D';
@@ -173,6 +174,8 @@ function MiniCard({ screen, onClick }: { screen: ScreenResponse; onClick: () => 
 // ── Main component ────────────────────────────────────────────────────────
 
 export default function VariantD() {
+  const { profile } = useAuth();
+  const topics: string[] = (profile as any)?.twitter_topics || [];
   const [screens, setScreens] = useState<ScreenResponse[]>([]);
   const [selected, setSelected] = useState<ScreenResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -211,8 +214,20 @@ export default function VariantD() {
 
   return (
     <div style={{ padding: '16px 12px 80px', background: '#0a0a0f', minHeight: '100vh' }}>
-      <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.45)', fontWeight: 600, letterSpacing: 0.5, marginBottom: 14, textAlign: 'center' }}>
-        DISCOVER TODAY
+      {/* Personalised header */}
+      <div
+        style={{
+          fontSize: 13,
+          color: topics.length > 0 ? '#00d4aa' : 'rgba(248,248,252,0.45)',
+          fontWeight: 700,
+          letterSpacing: 0.5,
+          marginBottom: 14,
+          textAlign: 'center',
+        }}
+      >
+        {topics.length > 0
+          ? '✦ Curated for you based on your interests'
+          : '✦ Explore new paths'}
       </div>
 
       {/* 2-column grid */}

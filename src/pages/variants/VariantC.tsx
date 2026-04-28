@@ -5,6 +5,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OraClient, Goal } from '../../lib/OraClient';
+import { useAuth } from '../../context/AuthContext';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
 const VARIANT = 'C';
@@ -19,10 +20,21 @@ function getDomainColor(domain?: string) {
   return domain ? DOMAIN_COLORS[domain] || '#00d4aa' : '#00d4aa';
 }
 
+const INTENSITY_COLORS: Record<string, string> = {
+  light: '#3b82f6',
+  medium: '#f59e0b',
+  challenging: '#f97316',
+};
+
 export default function VariantC() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [goal, setGoal] = useState<Goal | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const intensity: string =
+    (profile as any)?.context_hints?.recommended_intensity || 'medium';
+  const intensityColor = INTENSITY_COLORS[intensity] || INTENSITY_COLORS.medium;
 
   useEffect(() => {
     OraClient.listGoals('active')
@@ -146,6 +158,25 @@ export default function VariantC() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Intensity badge */}
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '6px 14px',
+          borderRadius: 20,
+          background: `${intensityColor}18`,
+          border: `1px solid ${intensityColor}44`,
+          fontSize: 12,
+          fontWeight: 700,
+          color: intensityColor,
+          alignSelf: 'center',
+        }}
+      >
+        Today: {intensity} intensity
       </div>
 
       {/* Ora coaching bubble */}

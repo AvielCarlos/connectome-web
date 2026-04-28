@@ -641,7 +641,16 @@ export default function FeedPage() {
       }}>
         <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: 0.3 }}>◈ Ora Feed</div>
         <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)' }}>
-          {index + 1} / {cards.length}{loadingMore ? '…' : ''}
+          {(() => {
+            const remaining = Math.max(0, cards.length - index - 1);
+            const h = new Date().getHours();
+            const timeLabel =
+              h >= 5 && h < 12 ? 'morning'
+              : h >= 12 && h < 17 ? 'afternoon'
+              : h >= 17 && h < 22 ? 'evening'
+              : 'night';
+            return `${remaining} remaining · ${timeLabel} mode${loadingMore ? '…' : ''}`;
+          })()}
         </div>
       </div>
 

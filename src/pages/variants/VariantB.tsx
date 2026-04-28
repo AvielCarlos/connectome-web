@@ -5,6 +5,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OraClient } from '../../lib/OraClient';
+import { useAuth } from '../../context/AuthContext';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
 const VARIANT = 'B';
@@ -20,9 +21,10 @@ const QUOTES = [
 
 function getGreeting(): string {
   const h = new Date().getHours();
-  if (h < 12) return 'Good morning, explorer';
-  if (h < 18) return 'Good afternoon, explorer';
-  return 'Good evening, explorer';
+  if (h >= 5 && h < 12) return 'Good morning';
+  if (h >= 12 && h < 17) return 'Good afternoon';
+  if (h >= 17 && h < 22) return 'Good evening';
+  return 'Good night';
 }
 
 function getQuote(): string {
@@ -32,7 +34,10 @@ function getQuote(): string {
 
 export default function VariantB() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [topGoal, setTopGoal] = useState<string | null>(null);
+
+  const topics: string[] = (profile as any)?.twitter_topics || [];
 
   useEffect(() => {
     OraClient.listGoals('active')
@@ -66,6 +71,22 @@ export default function VariantB() {
       <div style={{ fontSize: 22, fontWeight: 700, color: '#f8f8fc', letterSpacing: '-0.5px' }}>
         {getGreeting()}
       </div>
+
+      {/* Personalised topics line */}
+      {topics.length >= 2 && (
+        <div
+          style={{
+            fontSize: 13,
+            color: 'rgba(248,248,252,0.5)',
+            maxWidth: 320,
+            lineHeight: 1.5,
+          }}
+        >
+          Based on your interest in{' '}
+          <span style={{ color: '#00d4aa' }}>{topics[0]}</span> and{' '}
+          <span style={{ color: '#00d4aa' }}>{topics[1]}</span>
+        </div>
+      )}
 
       {/* Ora glyph with glow */}
       <div
