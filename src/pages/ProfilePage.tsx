@@ -23,6 +23,8 @@ export default function ProfilePage() {
   const [currentVariant, setCurrentVariant] = useState<string>('A');
   const [autonomyStatus, setAutonomyStatus] = useState<any>(null);
   const [runningAutonomy, setRunningAutonomy] = useState(false);
+  const [proposals, setProposals] = useState<any[]>([]);
+  const [proposalsLoading, setProposalsLoading] = useState(false);
   const [section, setSection] = useState<'profile' | 'ab' | 'system' | 'google'>('profile');
 
   const load = useCallback(async () => {
@@ -56,6 +58,24 @@ export default function ProfilePage() {
     localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
     setCurrentVariant(v);
     navigate('/feed');
+  };
+
+  const loadProposals = async () => {
+    setProposalsLoading(true);
+    try {
+      const res = await OraClient['client'].get('/api/ora/autonomy/proposals');
+      setProposals(res.data?.proposals || []);
+    } catch {}
+    setProposalsLoading(false);
+  };
+
+  const handleProposal = async (id: string, action: 'approve' | 'reject') => {
+    try {
+      await OraClient['client'].post(`/api/ora/autonomy/proposals/${id}/${action}`);
+      await loadProposals();
+    } catch (e: any) {
+      alert(`Failed to ${action}: ${e?.response?.data?.detail || 'Unknown error'}`);
+    }
   };
 
   const runAutonomy = async () => {
@@ -311,6 +331,56 @@ export default function ProfilePage() {
             >
               View Health Dashboard
             </button>
+          </Card>
+
+          <Card title="Ora's Self-Improvement Proposals">
+            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 12 }}>
+              High-risk improvements Ora wants to make — review and approve or reject.
+            </div>
+            <button
+              onClick={loadProposals}
+              disabled={proposalsLoading}
+              style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(248,248,252,0.6)', fontWeight: 600, fontSize: 12, marginBottom: 12 }}
+            >
+              {proposalsLoading ? '⟳ Loading…' : '↺ Refresh Proposals'}
+            </button>
+            {proposals.length === 0 && !proposalsLoading && (
+              <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.3)', textAlign: 'center', padding: '12px 0' }}>
+                No pending proposals
+              </div>
+            )}
+            {proposals.map((p: any) => (
+              <div key={p.id} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px', marginBottom: 8, border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(248,248,252,0.85)', flex: 1 }}>{p.title}</div>
+                  <div style={{ fontSize: 10, padding: '2px 7px', borderRadius: 6, background:
+                    p.status === 'applied' ? 'rgba(0,212,130,0.15)' :
+                    p.status === 'rejected' ? 'rgba(255,80,80,0.15)' :
+                    'rgba(255,200,80,0.15)',
+                    color:
+                    p.status === 'applied' ? '#00d482' :
+                    p.status === 'rejected' ? '#ff5050' :
+                    '#ffc850',
+                    fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}
+                  >{p.status || 'pending'}</div>
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.45)', marginBottom: 4 }}>{p.rationale}</div>
+                {p.target_file && <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', marginBottom: 8, fontFamily: 'monospace' }}>📄 {p.target_file}</div>}
+                <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.25)', marginBottom: 8 }}>Risk: {p.risk} • Impact: {p.estimated_impact}</div>
+                {p.status === 'pending' && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={() => handleProposal(p.id, 'approve')}
+                      style={{ flex: 1, padding: '7px', borderRadius: 8, background: 'rgba(0,212,130,0.12)', border: '1px solid rgba(0,212,130,0.3)', color: '#00d482', fontWeight: 700, fontSize: 12 }}
+                    >✓ Approve</button>
+                    <button
+                      onClick={() => handleProposal(p.id, 'reject')}
+                      style={{ flex: 1, padding: '7px', borderRadius: 8, background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.2)', color: '#ff6060', fontWeight: 700, fontSize: 12 }}
+                    >✕ Reject</button>
+                  </div>
+                )}
+              </div>
+            ))}
           </Card>
 
           <Card title="Variant Modulation">
