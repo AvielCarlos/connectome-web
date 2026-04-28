@@ -135,6 +135,15 @@ export default function LandingRouter() {
     );
   }
 
+  // Auto-detect admin from profile (is_admin in profile JSON)
+  useEffect(() => {
+    OraClient.getProfile().then((p: any) => {
+      if (p?.profile?.is_admin) {
+        localStorage.setItem('ab_admin', 'true');
+      }
+    }).catch(() => {});
+  }, []);
+
   const isAdmin = localStorage.getItem('ab_admin') === 'true';
 
   return (
