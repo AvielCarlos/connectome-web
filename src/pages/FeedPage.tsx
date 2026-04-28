@@ -326,7 +326,7 @@ export default function FeedPage() {
         <div>
           <div style={{ fontWeight: 800, fontSize: 17 }}>◈ Ora Feed</div>
           <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', marginTop: 1 }}>
-            {screensToday}/{dailyLimit} today · {index + 1} of {cards.length}
+            {index + 1} of {cards.length} · {dailyLimit - screensToday > 0 ? `${dailyLimit - screensToday} remaining` : 'limit reached'}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
