@@ -348,6 +348,38 @@ class OraClientClass {
     return res.data;
   }
 
+  async getDAOTasks(): Promise<any> {
+    const res = await this.client.get('/api/dao/tasks');
+    return res.data;
+  }
+
+  async claimDAOTask(taskId: string): Promise<any> {
+    const res = await this.client.post(`/api/dao/claim/${taskId}`);
+    return res.data;
+  }
+
+  async submitDAOTask(taskId: string, prUrl: string, notes?: string): Promise<any> {
+    const res = await this.client.post(`/api/dao/submit/${taskId}`, { pr_url: prUrl, notes });
+    return res.data;
+  }
+
+  // ── Services (Nea-as-Agent-for-Hire) ─────────────────────────────────────
+
+  async getServicesCatalog(): Promise<any> {
+    const res = await this.client.get('/api/services/catalog');
+    return res.data;
+  }
+
+  async createServiceOrder(serviceId: string, description: string, email?: string): Promise<any> {
+    const res = await this.client.post('/api/services/order', { service_id: serviceId, description, email });
+    return res.data;
+  }
+
+  async getMyServiceOrders(): Promise<any> {
+    const res = await this.client.get('/api/services/my-orders');
+    return res.data;
+  }
+
   async getDAOContributions(limit = 30): Promise<any> {
     const res = await this.client.get(`/api/dao/contributions?status_filter=accepted&limit=${limit}`);
     return res.data;

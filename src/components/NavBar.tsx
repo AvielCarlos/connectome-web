@@ -8,8 +8,9 @@ const NAV_ITEMS: Array<{ path: string; label: string; icon: string | null; emoji
   { path: '/ora',     label: 'Ora',     icon: '◈',  special: true },
   { path: '/goals',   label: 'Goals',   icon: '◎',  emoji: false },
   { path: '/journal', label: 'Journal', icon: '✍',  emoji: false },
-  { path: '/dao',     label: 'DAO',     icon: '🏛', emoji: true  },
-  { path: '/profile', label: 'Me',      icon: null,  isProfile: true },
+  { path: '/dao',      label: 'DAO',      icon: '🏛', emoji: true  },
+  { path: '/services', label: 'Services', icon: '⚡',  emoji: true  },
+  { path: '/profile',  label: 'Me',       icon: null,  isProfile: true },
 ];
 
 const TIER_COLORS: Record<string, string> = {

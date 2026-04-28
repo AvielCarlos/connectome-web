@@ -11,6 +11,7 @@ import GoalsPage from './pages/GoalsPage'
 import JournalPage from './pages/JournalPage'
 import OraPage from './pages/OraPage'
 import DAOPage from './pages/DAOPage'
+import ServicesPage from './pages/ServicesPage'
 import ProfilePage from './pages/ProfilePage'
 import SurfacePage from './pages/SurfacePage'
 import HomePage from './pages/HomePage'
@@ -38,8 +39,9 @@ function App() {
         <Route path="/goals"   element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
         <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
         <Route path="/ora"     element={<ProtectedRoute><OraPage /></ProtectedRoute>} />
-        <Route path="/dao"     element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/dao"      element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
+        <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
+        <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         {/* WebSpawn surfaces — auth-gated but accessible via direct link */}
         <Route path="/surfaces/:surfaceId" element={<SurfacePage />} />
       </Routes>
