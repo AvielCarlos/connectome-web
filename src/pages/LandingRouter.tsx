@@ -101,16 +101,38 @@ export default function LandingRouter() {
       }
     }
 
-    // 4. API assignment
-    OraClient.assignAbVariant(EXPERIMENT_ID)
-      .then((v) => {
-        const safeV = (VALID_VARIANTS as readonly string[]).includes(v) ? (v as Variant) : 'A';
-        localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, safeV);
-        localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
-        setVariant(safeV);
-        OraClient.trackAbEvent(EXPERIMENT_ID, safeV, 'session_start', 1).catch(() => {});
+    // 4. Check server-side winner first, then fall back to API assignment
+    OraClient.getAbWinner(EXPERIMENT_ID)
+      .then((winner) => {
+        if (winner && (VALID_VARIANTS as readonly string[]).includes(winner)) {
+          // Server has promoted a winner — use it unconditionally
+          const winnerV = winner as Variant;
+          localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, winnerV);
+          localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
+          setVariant(winnerV);
+          OraClient.trackAbEvent(EXPERIMENT_ID, winnerV, 'session_start', 1).catch(() => {});
+          return;
+        }
+        // No server winner — fall back to random API assignment
+        return OraClient.assignAbVariant(EXPERIMENT_ID).then((v) => {
+          const safeV = (VALID_VARIANTS as readonly string[]).includes(v) ? (v as Variant) : 'A';
+          localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, safeV);
+          localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
+          setVariant(safeV);
+          OraClient.trackAbEvent(EXPERIMENT_ID, safeV, 'session_start', 1).catch(() => {});
+        });
       })
-      .catch(() => setVariant('A'));
+      .catch(() =>
+        OraClient.assignAbVariant(EXPERIMENT_ID)
+          .then((v) => {
+            const safeV = (VALID_VARIANTS as readonly string[]).includes(v) ? (v as Variant) : 'A';
+            localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, safeV);
+            localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
+            setVariant(safeV);
+            OraClient.trackAbEvent(EXPERIMENT_ID, safeV, 'session_start', 1).catch(() => {});
+          })
+          .catch(() => setVariant('A'))
+      );
   }, []);
 
   // Track session duration on unmount

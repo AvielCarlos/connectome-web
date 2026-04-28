@@ -502,6 +502,15 @@ class OraClientClass {
     return res.data.variant;
   }
 
+  async getAbWinner(experimentId: string): Promise<string | null> {
+    try {
+      const res = await this.client.get(`/api/ab/winner/${experimentId}`);
+      return res.data.winner ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   async trackAbEvent(
     experimentId: string,
     variant: string,
