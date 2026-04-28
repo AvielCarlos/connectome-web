@@ -6,6 +6,7 @@ import { ToastProvider } from './components/Toast'
 import AuthPage from './pages/AuthPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
 import FeedPage from './pages/FeedPage'
+import LandingRouter from './pages/LandingRouter'
 import GoalsPage from './pages/GoalsPage'
 import JournalPage from './pages/JournalPage'
 import OraPage from './pages/OraPage'
@@ -29,7 +30,7 @@ function App() {
         <Route path="/" element={isAuthenticated ? <Navigate to="/feed" replace /> : <AuthPage />} />
         {/* Google OAuth callback — must be accessible without auth */}
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route path="/feed"    element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
+        <Route path="/feed"    element={<ProtectedRoute><LandingRouter /></ProtectedRoute>} />
         <Route path="/goals"   element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
         <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
         <Route path="/ora"     element={<ProtectedRoute><OraPage /></ProtectedRoute>} />

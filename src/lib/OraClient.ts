@@ -487,6 +487,24 @@ class OraClientClass {
     const res = await this.client.post('/api/mood/check', { mood_index: moodIndex });
     return res.data;
   }
+
+  // ── A/B Testing ────────────────────────────────────────────────────────────────────────────────
+
+  async assignAbVariant(experimentId: string): Promise<string> {
+    const res = await this.client.post('/api/ab/assign', { experiment_id: experimentId });
+    return res.data.variant;
+  }
+
+  async trackAbEvent(
+    experimentId: string,
+    variant: string,
+    eventType: string,
+    value: number = 1,
+  ): Promise<void> {
+    await this.client
+      .post('/api/ab/event', { experiment_id: experimentId, variant, event_type: eventType, value })
+      .catch(() => {});
+  }
 }
 
 export const OraClient = new OraClientClass();
