@@ -194,7 +194,7 @@ export default function FeedPage() {
     return () => window.removeEventListener('keydown', handler);
   }, [goNext, goPrev, handleSave, handleSkip]);
 
-  // Touch swipe
+  // Touch swipe — vertical only (swipe up = next, swipe down = previous)
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   };
@@ -203,12 +203,9 @@ export default function FeedPage() {
     const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
     const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
     const adx = Math.abs(dx), ady = Math.abs(dy);
-    if (Math.max(adx, ady) < 40) return;
-    if (adx > ady) {
-      if (dx < 0) goNext(); else goPrev();
-    } else {
-      if (dy < 0) goNext(); else goPrev();
-    }
+    // Only respond to vertical swipes; ignore horizontal
+    if (ady < 40 || adx > ady * 0.8) { touchStartRef.current = null; return; }
+    if (dy < 0) goNext(); else goPrev();
     touchStartRef.current = null;
   };
 
@@ -361,7 +358,7 @@ export default function FeedPage() {
       <div style={{ padding: '0 12px' }}>
         {/* Swipe hint */}
         <div style={{ textAlign: 'center', fontSize: 10, color: 'rgba(248,248,252,0.15)', marginBottom: 10, letterSpacing: 0.4 }}>
-          swipe · arrow keys · S to save · X to skip
+          swipe up/down · arrow keys · S to save · X to skip
         </div>
 
         {/* Weak content nudge */}
