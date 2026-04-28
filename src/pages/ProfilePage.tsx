@@ -283,6 +283,31 @@ export default function ProfilePage() {
             </div>
           )}
 
+          {/* ── Get the App ── */}
+          <div style={{
+            background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)',
+            borderRadius: 14, padding: '16px 18px',
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', marginBottom: 10 }}>Get the App</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <span style={{ fontSize: 24 }}>📱</span>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>iDo Android App</div>
+                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.5)', marginTop: 2 }}>Download the native app for the best experience</div>
+              </div>
+            </div>
+            <a
+              href="https://github.com/AvielCarlos/connectome-backend/releases/download/v0.1.0-alpha/iDo-debug.apk"
+              style={{
+                display: 'inline-block', background: '#16a34a', color: '#fff',
+                padding: '9px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
+                textDecoration: 'none',
+              }}
+            >
+              Download APK ↓
+            </a>
+          </div>
+
           <button onClick={handleLogout} style={{
             width: '100%', padding: '13px', borderRadius: 12,
             background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
