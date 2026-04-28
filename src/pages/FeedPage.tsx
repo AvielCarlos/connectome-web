@@ -539,7 +539,7 @@ export default function FeedPage() {
         <div style={{ fontSize: 40 }}>◈</div>
         <div style={{ fontWeight: 700, fontSize: 18 }}>Nothing yet</div>
         <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', textAlign: 'center' }}>
-          {hasGoals === false ? "Set a goal and Ora will curate your feed." : "Ora's preparing your first cards…"}
+          {hasGoals === false ? "Tell Ora what you want — she'll build your path." : "Ora's preparing your first cards…"}
         </div>
         {hasGoals === false && (
           <button onClick={() => navigate('/goals')} style={{ background: '#00d4aa', color: '#0a0a0f', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>
