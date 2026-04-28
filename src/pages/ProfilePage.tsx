@@ -25,7 +25,18 @@ export default function ProfilePage() {
   const [runningAutonomy, setRunningAutonomy] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsLoading, setProposalsLoading] = useState(false);
-  const [section, setSection] = useState<'profile' | 'ab' | 'system' | 'google'>('profile');
+  const [section, setSection] = useState<'profile' | 'ab' | 'system' | 'google' | 'surfaces'>('profile');
+  const [surfaces, setSurfaces] = useState<any[]>([]);
+  const [surfacesLoading, setSurfacesLoading] = useState(false);
+  const [spawnRequest, setSpawnRequest] = useState('');
+  const [spawning, setSpawning] = useState(false);
+  const [spawnResult, setSpawnResult] = useState<any>(null);
+  const [spawnError, setSpawnError] = useState<string | null>(null);
+  const [showSpawnModal, setShowSpawnModal] = useState(false);
+  const [agentPopulation, setAgentPopulation] = useState<any[]>([]);
+  const [agentPopulationLoading, setAgentPopulationLoading] = useState(false);
+  const [evolutionProposals, setEvolutionProposals] = useState<any[]>([]);
+  const [evolutionProposalsLoading, setEvolutionProposalsLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -60,6 +71,44 @@ export default function ProfilePage() {
     navigate('/feed');
   };
 
+  const loadSurfaces = async () => {
+    setSurfacesLoading(true);
+    try {
+      const res = await OraClient['client'].get('/api/surfaces/my');
+      setSurfaces(res.data?.surfaces || []);
+    } catch {}
+    setSurfacesLoading(false);
+  };
+
+  const handleSpawn = async () => {
+    if (!spawnRequest.trim()) return;
+    setSpawning(true);
+    setSpawnResult(null);
+    setSpawnError(null);
+    try {
+      const res = await OraClient['client'].post('/api/surfaces/spawn', { request: spawnRequest });
+      setSpawnResult(res.data);
+      setSpawnRequest('');
+      await loadSurfaces();
+    } catch (e: any) {
+      const detail = e?.response?.data?.detail;
+      if (typeof detail === 'object' && detail?.message) {
+        setSpawnError(detail.message);
+      } else {
+        setSpawnError(typeof detail === 'string' ? detail : 'Something went wrong. Try again.');
+      }
+    }
+    setSpawning(false);
+  };
+
+  const handleRetireSurface = async (id: string) => {
+    if (!window.confirm('Remove this surface? This cannot be undone.')) return;
+    try {
+      await OraClient['client'].delete(`/api/surfaces/${id}`);
+      setSurfaces((prev) => prev.filter((s) => s.id !== id));
+    } catch {}
+  };
+
   const loadProposals = async () => {
     setProposalsLoading(true);
     try {
@@ -67,6 +116,33 @@ export default function ProfilePage() {
       setProposals(res.data?.proposals || []);
     } catch {}
     setProposalsLoading(false);
+  };
+
+  const loadAgentPopulation = async () => {
+    setAgentPopulationLoading(true);
+    try {
+      const res = await OraClient['client'].get('/api/ora/autonomy/evolution/population');
+      setAgentPopulation(res.data?.population || []);
+    } catch {}
+    setAgentPopulationLoading(false);
+  };
+
+  const loadEvolutionProposals = async () => {
+    setEvolutionProposalsLoading(true);
+    try {
+      const res = await OraClient['client'].get('/api/ora/autonomy/evolution/proposals');
+      setEvolutionProposals(res.data?.proposals || []);
+    } catch {}
+    setEvolutionProposalsLoading(false);
+  };
+
+  const handleEvolutionProposal = async (id: string, action: 'approve' | 'reject') => {
+    try {
+      await OraClient['client'].post(`/api/ora/autonomy/evolution/proposals/${id}/${action}`);
+      await loadEvolutionProposals();
+    } catch (e: any) {
+      alert(`Failed to ${action}: ${e?.response?.data?.detail || 'Unknown error'}`);
+    }
   };
 
   const handleProposal = async (id: string, action: 'approve' | 'reject') => {
@@ -139,10 +215,15 @@ export default function ProfilePage() {
 
       {/* Tab bar */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto', paddingBottom: 4 }}>
-        {(['profile', 'google', ...(isAdmin ? ['ab', 'system'] : [])] as string[]).map((s) => (
+        {(['profile', 'google', 'surfaces', ...(isAdmin ? ['ab', 'system'] : [])] as string[]).map((s) => (
           <button
             key={s}
-            onClick={() => { setSection(s as any); if (s === 'ab') loadAbResults(); }}
+            onClick={() => {
+              setSection(s as any);
+              if (s === 'ab') loadAbResults();
+              if (s === 'system') { loadAgentPopulation(); loadEvolutionProposals(); }
+              if (s === 'surfaces') loadSurfaces();
+            }}
             style={{
               padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
               background: section === s ? '#00d4aa' : 'rgba(255,255,255,0.06)',
@@ -151,7 +232,11 @@ export default function ProfilePage() {
               whiteSpace: 'nowrap',
             }}
           >
-            {s === 'profile' ? '👤 Profile' : s === 'ab' ? '🧪 A/B Tests' : s === 'system' ? '⚡ System' : '🔗 Google'}
+            {s === 'profile' ? '👤 Profile'
+              : s === 'ab' ? '🧪 A/B Tests'
+              : s === 'system' ? '⚡ System'
+              : s === 'surfaces' ? '🌐 My Surfaces'
+              : '🔗 Google'}
           </button>
         ))}
       </div>
@@ -205,6 +290,233 @@ export default function ProfilePage() {
           }}>
             Sign out
           </button>
+        </div>
+      )}
+
+      {/* ── Surfaces section ── */}
+      {section === 'surfaces' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Spawn modal */}
+          {showSpawnModal && (
+            <div style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+              zIndex: 1000, padding: '0 0 32px',
+            }}>
+              <div style={{
+                background: '#13131a',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 20,
+                padding: 24,
+                width: '100%',
+                maxWidth: 440,
+              }}>
+                <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 6, color: '#f8f8fc' }}>
+                  What should Ora build for you?
+                </div>
+                <p style={{ fontSize: 13, color: 'rgba(248,248,252,0.45)', marginBottom: 16 }}>
+                  Describe your goal or need in plain language. Ora will design the perfect page for you — no templates.
+                </p>
+                <textarea
+                  rows={4}
+                  placeholder='e.g. &quot;I want to quit smoking&quot;, &quot;Prep me for my YC interview&quot;, &quot;Help me learn Mandarin in 3 months&quot;…'
+                  value={spawnRequest}
+                  onChange={(e) => setSpawnRequest(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(255,255,255,0.06)',
+                    color: '#f8f8fc',
+                    fontSize: 13,
+                    resize: 'none',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                {spawnError && (
+                  <div style={{ fontSize: 12, color: '#ef4444', marginTop: 8 }}>{spawnError}</div>
+                )}
+                {spawnResult && (
+                  <div style={{
+                    marginTop: 12,
+                    padding: '12px 14px',
+                    background: 'rgba(0,212,170,0.08)',
+                    border: '1px solid rgba(0,212,170,0.25)',
+                    borderRadius: 10,
+                  }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: '#00d4aa', marginBottom: 4 }}>
+                      ✨ {spawnResult.title}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.5)', marginBottom: 8 }}>
+                      {spawnResult.description}
+                    </div>
+                    <a
+                      href={spawnResult.url.replace('https://avielcarlos.github.io/connectome-web', '/connectome-web')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: 12, color: '#8b5cf6', fontWeight: 700,
+                        textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4,
+                      }}
+                    >
+                      Open surface →
+                    </a>
+                    <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', marginTop: 6 }}>
+                      Backend deploys in ~{spawnResult.estimated_ready_in}
+                    </div>
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+                  <button
+                    onClick={() => { setShowSpawnModal(false); setSpawnResult(null); setSpawnError(null); }}
+                    style={{
+                      flex: 1, padding: '10px 0', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                      background: 'rgba(255,255,255,0.07)', color: 'rgba(248,248,252,0.6)',
+                      border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer',
+                    }}
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={handleSpawn}
+                    disabled={spawning || !spawnRequest.trim()}
+                    style={{
+                      flex: 2, padding: '10px 0', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                      background: spawning ? 'rgba(139,92,246,0.4)' : '#8b5cf6',
+                      color: '#fff', border: 'none', cursor: spawning ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {spawning ? 'Ora is designing…' : 'Build my surface'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 17, color: '#f8f8fc' }}>🌐 My Surfaces</div>
+              <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)', marginTop: 2 }}>
+                Personalized pages Ora built for you
+              </div>
+            </div>
+            <button
+              onClick={() => { setShowSpawnModal(true); setSpawnResult(null); setSpawnError(null); }}
+              style={{
+                padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                color: '#fff', border: 'none', cursor: 'pointer',
+              }}
+            >
+              + Create New
+            </button>
+          </div>
+
+          {/* Tier note for free users */}
+          {tier === 'free' && (
+            <div style={{
+              padding: '14px 16px',
+              background: 'rgba(139,92,246,0.08)',
+              border: '1px solid rgba(139,92,246,0.2)',
+              borderRadius: 12,
+              fontSize: 13,
+              color: 'rgba(248,248,252,0.7)',
+            }}>
+              ✨ WebSpawn is an Explorer &amp; Sovereign feature. Ora builds personalized pages for any goal — a dashboard, a plan, a tracker, whatever fits. <a href="/connectome-web/#upgrade" style={{ color: '#8b5cf6', fontWeight: 700 }}>Upgrade to unlock it.</a>
+            </div>
+          )}
+
+          {/* Surface list */}
+          {surfacesLoading ? (
+            <div style={{ textAlign: 'center', padding: 32, color: 'rgba(248,248,252,0.3)' }}>Loading…</div>
+          ) : surfaces.length === 0 ? (
+            <div style={{
+              textAlign: 'center', padding: '32px 20px',
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 14,
+            }}>
+              <div style={{ fontSize: 32, marginBottom: 10 }}>✦</div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: '#f8f8fc', marginBottom: 6 }}>
+                No surfaces yet
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', lineHeight: 1.5 }}>
+                Tell Ora what you want to track, build, or plan.<br />
+                She’ll design a page just for you.
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {surfaces.map((s) => (
+                <div key={s.id} style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 14,
+                  padding: '14px 16px',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#f8f8fc', marginBottom: 2 }}>
+                        {s.title}
+                      </div>
+                      {s.description && (
+                        <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.45)', marginBottom: 8, lineHeight: 1.4 }}>
+                          {s.description}
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const, alignItems: 'center' }}>
+                        <span style={{
+                          fontSize: 10, color: 'rgba(248,248,252,0.35)',
+                          background: 'rgba(139,92,246,0.12)',
+                          border: '1px solid rgba(139,92,246,0.2)',
+                          padding: '2px 7px', borderRadius: 6,
+                        }}>
+                          {s.inferred_type?.replace(/_/g, ' ')}
+                        </span>
+                        <span style={{ fontSize: 10, color: 'rgba(248,248,252,0.3)' }}>
+                          {s.view_count} view{s.view_count !== 1 ? 's' : ''}
+                        </span>
+                        <span style={{ fontSize: 10, color: 'rgba(248,248,252,0.3)' }}>
+                          {new Date(s.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRetireSurface(s.id)}
+                      title="Retire surface"
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        color: 'rgba(248,248,252,0.25)', fontSize: 16, padding: '0 0 0 10px',
+                        flexShrink: 0,
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                    <a
+                      href={s.url.replace('https://avielcarlos.github.io/connectome-web', '/connectome-web')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        flex: 1, display: 'block', textAlign: 'center',
+                        padding: '8px 0', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                        background: 'rgba(139,92,246,0.15)',
+                        border: '1px solid rgba(139,92,246,0.3)',
+                        color: '#8b5cf6', textDecoration: 'none',
+                      }}
+                    >
+                      Open →
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -375,6 +687,92 @@ export default function ProfilePage() {
                     >✓ Approve</button>
                     <button
                       onClick={() => handleProposal(p.id, 'reject')}
+                      style={{ flex: 1, padding: '7px', borderRadius: 8, background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.2)', color: '#ff6060', fontWeight: 700, fontSize: 12 }}
+                    >✕ Reject</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </Card>
+
+          <Card title="Agent Population">
+            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.55)', lineHeight: 1.6, marginBottom: 12 }}>
+              Ora's living agent roster — builtin, spawned, partitioned, and merged agents.
+            </div>
+            <button
+              onClick={loadAgentPopulation}
+              disabled={agentPopulationLoading}
+              style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(248,248,252,0.6)', fontWeight: 600, fontSize: 12, marginBottom: 12 }}
+            >
+              {agentPopulationLoading ? '⟳ Loading…' : '↺ Refresh Population'}
+            </button>
+            {agentPopulation.length === 0 && !agentPopulationLoading && (
+              <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.3)', textAlign: 'center', padding: '12px 0' }}>No agents loaded</div>
+            )}
+            {agentPopulation.map((agent: any) => {
+              const fs = agent.fitness?.fitness_score;
+              const health = agent.health || 'unknown';
+              const healthColor = health === 'thriving' ? '#00d482' : health === 'struggling' ? '#ff6060' : health === 'average' ? '#ffc850' : '#888';
+              const healthEmoji = health === 'thriving' ? '🟢' : health === 'struggling' ? '🔴' : health === 'average' ? '🟡' : '⚪';
+              const statusColor = agent.status === 'active' ? '#00d4aa' : agent.status === 'retired' ? '#888' : '#a855f7';
+              const typeBadge = agent.type === 'builtin' ? null : agent.type === 'spawned' ? '✨ spawned' : agent.type === 'partitioned' ? `✂️ from ${(agent.lineage||[]).join(',')}` : agent.type === 'merged' ? `🔀 from ${(agent.lineage||[]).join('+')}` : agent.type;
+              return (
+                <div key={agent.name} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '10px 12px', marginBottom: 8, border: `1px solid ${agent.status === 'active' ? 'rgba(0,212,170,0.12)' : 'rgba(255,255,255,0.06)'}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: agent.status === 'active' ? 'rgba(248,248,252,0.9)' : 'rgba(248,248,252,0.4)' }}>{healthEmoji} {agent.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                      {typeBadge && (
+                        <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 5, background: 'rgba(168,85,247,0.15)', color: '#a855f7', fontWeight: 700, whiteSpace: 'nowrap' }}>{typeBadge}</span>
+                      )}
+                      <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 5, background: statusColor + '15', color: statusColor, fontWeight: 700, textTransform: 'uppercase' }}>{agent.status}</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12, marginTop: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)' }}>gen {agent.generation ?? 0}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)' }}>w={((agent.weight || 0) * 100).toFixed(1)}%</span>
+                    {fs != null && <span style={{ fontSize: 11, color: healthColor, fontWeight: 700 }}>fitness {fs.toFixed(2)}</span>}
+                    {agent.fitness?.avg_rating && <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)' }}>★{agent.fitness.avg_rating.toFixed(1)}</span>}
+                    {agent.fitness?.interaction_count && <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)' }}>{agent.fitness.interaction_count}x</span>}
+                  </div>
+                  {agent.retire_reason && (
+                    <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.25)', marginTop: 4 }}>{agent.retire_reason}</div>
+                  )}
+                </div>
+              );
+            })}
+          </Card>
+
+          <Card title="Evolution Proposals">
+            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 12 }}>
+              Risky evolutions Ora wants to run — review and approve or reject.
+            </div>
+            <button
+              onClick={loadEvolutionProposals}
+              disabled={evolutionProposalsLoading}
+              style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(248,248,252,0.6)', fontWeight: 600, fontSize: 12, marginBottom: 12 }}
+            >
+              {evolutionProposalsLoading ? '⟳ Loading…' : '↺ Refresh Proposals'}
+            </button>
+            {evolutionProposals.length === 0 && !evolutionProposalsLoading && (
+              <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.3)', textAlign: 'center', padding: '12px 0' }}>No pending evolution proposals</div>
+            )}
+            {evolutionProposals.map((p: any) => (
+              <div key={p.id} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px', marginBottom: 8, border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(248,248,252,0.85)', flex: 1 }}>{p.title}</div>
+                  <div style={{ fontSize: 10, padding: '2px 7px', borderRadius: 6, background: 'rgba(168,85,247,0.15)', color: '#a855f7', fontWeight: 700, whiteSpace: 'nowrap' }}>{p.type}</div>
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.45)', marginBottom: 8 }}>{p.rationale}</div>
+                {p.status === 'pending' && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={() => handleEvolutionProposal(p.id, 'approve')}
+                      style={{ flex: 1, padding: '7px', borderRadius: 8, background: 'rgba(0,212,130,0.12)', border: '1px solid rgba(0,212,130,0.3)', color: '#00d482', fontWeight: 700, fontSize: 12 }}
+                    >✓ Approve &amp; Execute</button>
+                    <button
+                      onClick={() => handleEvolutionProposal(p.id, 'reject')}
                       style={{ flex: 1, padding: '7px', borderRadius: 8, background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.2)', color: '#ff6060', fontWeight: 700, fontSize: 12 }}
                     >✕ Reject</button>
                   </div>

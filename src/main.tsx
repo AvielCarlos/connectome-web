@@ -12,6 +12,7 @@ import JournalPage from './pages/JournalPage'
 import OraPage from './pages/OraPage'
 import DAOPage from './pages/DAOPage'
 import ProfilePage from './pages/ProfilePage'
+import SurfacePage from './pages/SurfacePage'
 import { NavBar } from './components/NavBar'
 import SuggestionButton from './components/SuggestionButton'
 import './index.css'
@@ -37,6 +38,8 @@ function App() {
         <Route path="/ora"     element={<ProtectedRoute><OraPage /></ProtectedRoute>} />
         <Route path="/dao"     element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        {/* WebSpawn surfaces — auth-gated but accessible via direct link */}
+        <Route path="/surfaces/:surfaceId" element={<SurfacePage />} />
       </Routes>
     </div>
   )
