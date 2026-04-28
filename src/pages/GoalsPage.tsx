@@ -116,7 +116,7 @@ function GoalCard({
       const updated = await OraClient.breakdownGoal(goal.id);
       onUpdate(updated);
       setExpanded(true);
-      show('Goal broken down into steps!', 'success');
+      show('✦ Ora mapped your path!', 'success');
     } catch (e) {
       console.error('Breakdown failed:', e);
     } finally {
@@ -129,7 +129,7 @@ function GoalCard({
     try {
       await OraClient.completeGoal(goal.id);
       onDelete(goal.id);
-      show('🎉 Goal completed!', 'success');
+      show('🎉 Done!', 'success');
     } catch (e) {
       console.error('Complete goal failed:', e);
     } finally {
@@ -138,7 +138,7 @@ function GoalCard({
   };
 
   const handleDelete = async () => {
-    if (!confirm('Delete this goal?')) return;
+    if (!confirm('Remove this?')) return;
     try {
       await OraClient.deleteGoal(goal.id);
       onDelete(goal.id);
@@ -400,7 +400,7 @@ function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
       setTitle('');
       setDomain('');
       setFocused(false);
-      show('Goal created!', 'success');
+      show('✦ Goal set!', 'success');
     } catch (e) {
       console.error('Create goal failed:', e);
     } finally {
@@ -431,7 +431,7 @@ function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
           onChange={(e) => setTitle(e.target.value)}
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Add a new goal…"
+          placeholder="I want to…"
           style={{
             flex: 1,
             background: 'transparent',
@@ -455,7 +455,7 @@ function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
               flexShrink: 0,
             }}
           >
-            {creating ? '…' : 'Add →'}
+            {creating ? '…' : '→'}
           </button>
         )}
       </div>
@@ -517,7 +517,7 @@ export default function GoalsPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingTop: 8 }}>
         <div>
-          <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: -0.5 }}>◎ Goals</h1>
+          <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: -0.5 }}>◎ What do you want?</h1>
           <p style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 4 }}>
             {goals.length} active goal{goals.length !== 1 ? 's' : ''}
           </p>
