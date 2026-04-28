@@ -344,9 +344,12 @@ export default function ProfilePage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Card title="Account">
             <Row label="Email" value={profile?.email} />
-            <Row label="Member since" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '—'} />
+            <Row label="Member since" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '\u2014'} />
             <Row label="Fulfilment score" value={`${((profile?.fulfilment_score || 0) * 100).toFixed(0)}%`} />
             <Row label="Tier" value={tier} valueColor={tierColor} />
+            <Row label="CP Balance" value={(profile?.cp_balance ?? 0).toLocaleString()} valueColor="#8b5cf6" />
+            <Row label="Total CP Earned" value={(profile?.total_dao_cp ?? 0).toLocaleString()} />
+            {profile?.is_founding_steward && <Row label="Status" value="\u25c8 Founding Steward" valueColor="#f59e0b" />}
           </Card>
 
           <Card title="Current A/B Variant">
