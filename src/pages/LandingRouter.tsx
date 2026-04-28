@@ -74,7 +74,18 @@ function renderVariant(v: Variant): React.ReactElement {
 
 export default function LandingRouter() {
   const [variant, setVariant] = useState<Variant | null>(null);
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem('ab_admin') === 'true');
   const sessionStart = useRef(Date.now());
+
+  // Detect admin from profile — must be at top level (no conditional hooks)
+  useEffect(() => {
+    OraClient.getProfile().then((p: any) => {
+      if (p?.profile?.is_admin) {
+        localStorage.setItem('ab_admin', 'true');
+        setIsAdmin(true);
+      }
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     // 1. Skip flag (set by variants B/C CTA buttons)
@@ -105,7 +116,6 @@ export default function LandingRouter() {
     OraClient.getAbWinner(EXPERIMENT_ID)
       .then((winner) => {
         if (winner && (VALID_VARIANTS as readonly string[]).includes(winner)) {
-          // Server has promoted a winner — use it unconditionally
           const winnerV = winner as Variant;
           localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, winnerV);
           localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
@@ -113,7 +123,6 @@ export default function LandingRouter() {
           OraClient.trackAbEvent(EXPERIMENT_ID, winnerV, 'session_start', 1).catch(() => {});
           return;
         }
-        // No server winner — fall back to random API assignment
         return OraClient.assignAbVariant(EXPERIMENT_ID).then((v) => {
           const safeV = (VALID_VARIANTS as readonly string[]).includes(v) ? (v as Variant) : 'A';
           localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, safeV);
@@ -156,17 +165,6 @@ export default function LandingRouter() {
       </div>
     );
   }
-
-  // Auto-detect admin from profile (is_admin in profile JSON)
-  useEffect(() => {
-    OraClient.getProfile().then((p: any) => {
-      if (p?.profile?.is_admin) {
-        localStorage.setItem('ab_admin', 'true');
-      }
-    }).catch(() => {});
-  }, []);
-
-  const isAdmin = localStorage.getItem('ab_admin') === 'true';
 
   return (
     <>
