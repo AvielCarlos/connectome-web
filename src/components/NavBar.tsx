@@ -71,7 +71,7 @@ export function NavBar() {
             fontSize: 19, boxShadow: '0 0 20px rgba(0,212,170,0.12)',
           }}>◈</div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: -0.5 }}>Connectome</div>
+            <div style={{ fontWeight: 800, fontSize: 16, letterSpacing: -0.5 }}>iDo</div>
             <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.3)', letterSpacing: 1.5, textTransform: 'uppercase' }}>by Ora</div>
           </div>
         </div>
@@ -152,7 +152,7 @@ export function NavBar() {
             border: '1px solid rgba(0,212,170,0.35)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
           }}>◈</div>
-          <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: -0.3 }}>Connectome</span>
+          <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: -0.3 }}>iDo</span>
         </div>
         {/* Avatar — navigates to profile */}
         <button onClick={() => navigate('/profile')} style={{
