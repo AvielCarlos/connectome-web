@@ -3,7 +3,7 @@
  * Cache-first for shell assets, network-first for API with offline fallback
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const SHELL_CACHE = `connectome-shell-${CACHE_VERSION}`;
 const API_CACHE = `connectome-api-${CACHE_VERSION}`;
 
@@ -59,17 +59,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell → cache-first
+  // App shell → network-first so updates are picked up immediately
   if (url.origin === self.location.origin) {
-    event.respondWith(cacheFirstWithNetwork(request, SHELL_CACHE));
+    event.respondWith(networkFirstWithShellFallback(request, SHELL_CACHE));
   }
 });
 
 // ─── Strategies ───────────────────────────────────────────────────────────────
 
-async function cacheFirstWithNetwork(request, cacheName) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
+async function networkFirstWithShellFallback(request, cacheName) {
   try {
     const response = await fetch(request);
     if (response.ok) {
@@ -78,7 +76,9 @@ async function cacheFirstWithNetwork(request, cacheName) {
     }
     return response;
   } catch {
-    // Offline — return cached index for navigation
+    // Offline — return cached version
+    const cached = await caches.match(request);
+    if (cached) return cached;
     const fallback = await caches.match('/connectome-web/');
     return fallback || new Response('Offline', { status: 503 });
   }
