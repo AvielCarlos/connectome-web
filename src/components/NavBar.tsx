@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { path: '/journal', label: 'Journal', icon: '✍' },
   { path: '/ora',     label: 'Ora',     icon: '◈' },
   { path: '/dao',     label: 'DAO',     icon: '🏛' },
+  { path: '/profile', label: 'Profile', icon: '◉' },
 ];
 
 export function NavBar() {
