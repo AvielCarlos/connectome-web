@@ -199,7 +199,7 @@ export default function OraPage() {
         top: 'var(--top-header-height, 56px)',
         left: 0,
         right: 0,
-        bottom: 0,
+        bottom: 'var(--bottom-nav-height, 64px)',
       }}
     >
       {/* Header */}
@@ -264,7 +264,7 @@ export default function OraPage() {
 
       {/* Input — stays above keyboard on mobile */}
       <div style={{
-        padding: `12px 16px max(12px, env(safe-area-inset-bottom))`,
+        padding: '12px 16px 16px',
         borderTop: '1px solid rgba(255,255,255,0.07)',
         background: 'rgba(10,10,15,0.98)',
         backdropFilter: 'blur(12px)',
