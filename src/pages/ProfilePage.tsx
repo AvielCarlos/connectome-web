@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OraClient } from '../lib/OraClient';
 import { useAuth } from '../context/AuthContext';
+import { useExperiment } from '../lib/useExperiment';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
 const VARIANTS = ['A', 'B', 'C', 'D'] as const;
@@ -25,7 +26,15 @@ export default function ProfilePage() {
   const [runningAutonomy, setRunningAutonomy] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsLoading, setProposalsLoading] = useState(false);
-  const [section, setSection] = useState<'profile' | 'ab' | 'system' | 'google' | 'surfaces'>('profile');
+  const [section, setSection] = useState<'profile' | 'ab' | 'experiments' | 'system' | 'google' | 'surfaces' | 'council'>('profile');
+  const [allExperiments, setAllExperiments] = useState<any>(null);
+  const [allExperimentsLoading, setAllExperimentsLoading] = useState(false);
+  const [applyingWinner, setApplyingWinner] = useState<string | null>(null);
+  const [councilBrief, setCouncilBrief] = useState<any>(null);
+  const [councilAgents, setCouncilAgents] = useState<any[]>([]);
+  const [councilMetrics, setCouncilMetrics] = useState<any>(null);
+  const [councilLoading, setCouncilLoading] = useState(false);
+  const [runningAgent, setRunningAgent] = useState<string | null>(null);
   const [surfaces, setSurfaces] = useState<any[]>([]);
   const [surfacesLoading, setSurfacesLoading] = useState(false);
   const [spawnRequest, setSpawnRequest] = useState('');
@@ -55,6 +64,42 @@ export default function ProfilePage() {
 
   useEffect(() => { load(); }, [load]);
 
+  const loadCouncilData = async () => {
+    if (!isAdmin) return;
+    setCouncilLoading(true);
+    try {
+      const adminToken = localStorage.getItem('admin_token') || 'connectome-admin-secret';
+      const headers = { 'X-Admin-Token': adminToken };
+      const [briefRes, agentsRes, metricsRes] = await Promise.allSettled([
+        OraClient['client'].get('/api/executive/brief', { headers }),
+        OraClient['client'].get('/api/executive/agents', { headers }),
+        OraClient['client'].get('/api/executive/metrics', { headers }),
+      ]);
+      if (briefRes.status === 'fulfilled') setCouncilBrief(briefRes.value.data);
+      if (agentsRes.status === 'fulfilled') setCouncilAgents(agentsRes.value.data?.agents || []);
+      if (metricsRes.status === 'fulfilled') setCouncilMetrics(metricsRes.value.data);
+    } catch {}
+    setCouncilLoading(false);
+  };
+
+  const runAgent = async (agentName: string) => {
+    if (!isAdmin) return;
+    setRunningAgent(agentName);
+    try {
+      const adminToken = localStorage.getItem('admin_token') || 'connectome-admin-secret';
+      await OraClient['client'].post(`/api/executive/run/${agentName}`, {}, {
+        headers: { 'X-Admin-Token': adminToken },
+      });
+      // Refresh after a short delay
+      setTimeout(() => {
+        loadCouncilData();
+        setRunningAgent(null);
+      }, 3000);
+    } catch {
+      setRunningAgent(null);
+    }
+  };
+
   const loadAbResults = async () => {
     try {
       const res = await OraClient['client'].get(`/api/ab/results/${EXPERIMENT_ID}`);
@@ -62,6 +107,26 @@ export default function ProfilePage() {
       const winnerRes = await OraClient['client'].get(`/api/ab/winner/${EXPERIMENT_ID}`).catch(() => ({ data: { winner: null } }));
       setAbWinner(winnerRes.data.winner);
     } catch {}
+  };
+
+  const loadAllExperiments = async () => {
+    setAllExperimentsLoading(true);
+    try {
+      const res = await OraClient['client'].get('/api/ab/results');
+      setAllExperiments(res.data);
+    } catch {}
+    setAllExperimentsLoading(false);
+  };
+
+  const applyExperimentWinner = async (experiment: string, winner: string) => {
+    setApplyingWinner(experiment);
+    try {
+      await OraClient['client'].post('/api/ab/winner', { experiment, winner });
+      await loadAllExperiments();
+    } catch (e: any) {
+      alert(`Failed to apply winner: ${e?.response?.data?.detail || 'Unknown error'}`);
+    }
+    setApplyingWinner(null);
   };
 
   const setVariant = (v: string) => {
@@ -185,6 +250,35 @@ export default function ProfilePage() {
   const tier = profile?.subscription_tier || 'free';
   const tierColor = tier === 'sovereign' ? '#a855f7' : tier === 'explorer' ? '#3b82f6' : '#6b7280';
 
+  // ─── A/B experiments (upgrade paywall) ───────────────────────────────────
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { variant: upgradeHeadlineVariant, trackEvent: trackUpgradeHeadline } = useExperiment('upgrade_headline');
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { variant: priceDisplayVariant } = useExperiment('upgrade_price_display');
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { variant: ctaButtonVariant, trackEvent: trackUpgradeCTA } = useExperiment('upgrade_cta_button');
+
+  const UPGRADE_HEADLINES: Record<string, string> = {
+    A: 'Unlock the full Ora',
+    B: 'Go deeper with Explorer',
+    C: "You're using iDo like a power user",
+    D: 'Explorer — built for people serious about their goals',
+  };
+  const UPGRADE_PRICES: Record<string, string> = {
+    A: '$12.99/month',
+    B: '$0.43/day',
+    C: 'Less than a coffee/month',
+  };
+  const UPGRADE_CTAS: Record<string, string> = {
+    A: 'Upgrade to Explorer',
+    B: 'Unlock Explorer — $12.99/mo',
+    C: 'Try Explorer Free for 7 Days',
+    D: 'Get Explorer',
+  };
+  const upgradeHeadlineText = UPGRADE_HEADLINES[upgradeHeadlineVariant] || UPGRADE_HEADLINES['A'];
+  const upgradePriceText = UPGRADE_PRICES[priceDisplayVariant] || UPGRADE_PRICES['A'];
+  const upgradeCTAText = UPGRADE_CTAS[ctaButtonVariant] || UPGRADE_CTAS['A'];
+
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '16px 16px 100px', overflowY: 'auto', height: '100%' }}>
 
@@ -215,14 +309,16 @@ export default function ProfilePage() {
 
       {/* Tab bar */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto', paddingBottom: 4 }}>
-        {(['profile', 'google', 'surfaces', ...(isAdmin ? ['ab', 'system'] : [])] as string[]).map((s) => (
+        {(['profile', 'google', 'surfaces', ...(isAdmin ? ['ab', 'experiments', 'system', 'council'] : [])] as string[]).map((s) => (
           <button
             key={s}
             onClick={() => {
               setSection(s as any);
               if (s === 'ab') loadAbResults();
+              if (s === 'experiments') loadAllExperiments();
               if (s === 'system') { loadAgentPopulation(); loadEvolutionProposals(); }
               if (s === 'surfaces') loadSurfaces();
+              if (s === 'council') loadCouncilData();
             }}
             style={{
               padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
@@ -234,8 +330,10 @@ export default function ProfilePage() {
           >
             {s === 'profile' ? '👤 Profile'
               : s === 'ab' ? '🧪 A/B Tests'
+              : s === 'experiments' ? '⚗️ Experiments'
               : s === 'system' ? '⚡ System'
               : s === 'surfaces' ? '🌐 My Surfaces'
+              : s === 'council' ? '◈ Council'
               : '🔗 Google'}
           </button>
         ))}
@@ -275,11 +373,12 @@ export default function ProfilePage() {
               background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
               borderRadius: 14, padding: '16px 18px',
             }}>
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>Upgrade to Explorer</div>
-              <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 12 }}>Unlimited cards, Drive sync, local events</div>
-              <button onClick={() => navigate('/dao')} style={{
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>{upgradeHeadlineText}</div>
+              <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 4 }}>Unlimited cards, Drive sync, local events</div>
+              <div style={{ fontSize: 13, color: 'rgba(99,102,241,0.8)', fontWeight: 600, marginBottom: 12 }}>{upgradePriceText}</div>
+              <button onClick={() => { trackUpgradeCTA('click'); navigate('/dao'); }} style={{
                 background: '#6366f1', color: '#fff', padding: '9px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
-              }}>View plans →</button>
+              }}>{upgradeCTAText}</button>
             </div>
           )}
 
@@ -625,6 +724,257 @@ export default function ProfilePage() {
             ))
           ) : (
             <div style={{ textAlign: 'center', color: 'rgba(248,248,252,0.3)', fontSize: 13, padding: 20 }}>Loading results…</div>
+          )}
+        </div>
+      )}
+
+      {/* ── ⚗️ Experiments section (admin only) ── */}
+      {section === 'experiments' && isAdmin && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', marginBottom: 4 }}>
+            ⚗️ All A/B Experiments
+          </div>
+          {allExperimentsLoading ? (
+            <div style={{ textAlign: 'center', padding: 40, color: 'rgba(248,248,252,0.3)' }}>Loading…</div>
+          ) : allExperiments?.results ? (
+            allExperiments.results.map((exp: any) => {
+              const hasWinner = exp.declared_winner || exp.auto_winner;
+              const statusColor = exp.best_confidence >= 0.95 ? '#10b981'
+                : exp.best_confidence >= 0.7 ? '#f59e0b'
+                : 'rgba(248,248,252,0.2)';
+              return (
+                <div key={exp.experiment} style={{
+                  background: '#12121a',
+                  border: `1px solid ${statusColor}44`,
+                  borderRadius: 14, padding: '14px 16px',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{exp.experiment}</div>
+                      <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)', marginTop: 2 }}>{exp.page} — metric: {exp.metric}</div>
+                    </div>
+                    {hasWinner && (
+                      <span style={{ fontSize: 10, background: '#10b981' + '22', color: '#10b981', border: '1px solid #10b98144', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>
+                        🏆 {exp.declared_winner || exp.auto_winner}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 12, color: statusColor, marginBottom: 10 }}>{exp.recommendation}</div>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                    {Object.entries(exp.variants || {}).map(([vKey, vStats]: [string, any]) => (
+                      <div key={vKey} style={{
+                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                        borderRadius: 8, padding: '6px 10px', fontSize: 11,
+                      }}>
+                        <div style={{ fontWeight: 700, color: '#f8f8fc' }}>{vKey}</div>
+                        <div style={{ color: 'rgba(248,248,252,0.4)' }}>{vStats.exposures ?? 0} views</div>
+                        <div style={{ color: 'rgba(248,248,252,0.4)' }}>{((vStats.conversion_rate ?? 0) * 100).toFixed(1)}% conv</div>
+                        {vStats.confidence_vs_control != null && (
+                          <div style={{ color: statusColor }}>{(vStats.confidence_vs_control * 100).toFixed(0)}% conf</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {exp.auto_winner && !exp.declared_winner && (
+                    <button
+                      onClick={() => applyExperimentWinner(exp.experiment, exp.auto_winner)}
+                      disabled={applyingWinner === exp.experiment}
+                      style={{
+                        background: '#10b981', color: '#0a0a0f',
+                        padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                        border: 'none', cursor: 'pointer', opacity: applyingWinner === exp.experiment ? 0.6 : 1,
+                      }}
+                    >
+                      {applyingWinner === exp.experiment ? 'Applying…' : `✓ Apply Winner: ${exp.auto_winner}`}
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div style={{ textAlign: 'center', color: 'rgba(248,248,252,0.3)', fontSize: 13, padding: 20 }}>
+              No data yet. Run the app to collect experiment data.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Executive Council section (admin only) ── */}
+      {section === 'council' && isAdmin && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {councilLoading ? (
+            <div style={{ textAlign: 'center', color: 'rgba(248,248,252,0.3)', padding: 40 }}>Loading council data…</div>
+          ) : (
+            <>
+              {/* Financial Snapshot */}
+              {councilMetrics && (
+                <Card title="💰 Financial Snapshot">
+                  <Row label="MRR" value={`$${(councilMetrics.financial?.mrr_usd || 0).toFixed(2)}`} valueColor="#00d4aa" />
+                  <Row label="ARR" value={`$${(councilMetrics.financial?.arr_usd || 0).toFixed(2)}`} />
+                  <Row label="Active Subscriptions" value={String(councilMetrics.financial?.active_subscriptions || 0)} />
+                  <Row label="Revenue (30d)" value={`$${(councilMetrics.financial?.revenue_last_30d_usd || 0).toFixed(2)}`} />
+                  <Row label="Churn" value={`${councilMetrics.financial?.churn_rate_pct || 0}%`} valueColor={councilMetrics.financial?.churn_rate_pct > 20 ? '#ff6060' : undefined} />
+                  <Row label="Gross Margin" value={`${councilMetrics.financial?.gross_margin_pct || 0}%`} />
+                  {/* Growth */}
+                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <Row label="Total Users" value={String(councilMetrics.growth?.total_users || 0)} />
+                    <Row label="New Users (7d)" value={`+${councilMetrics.growth?.new_users_7d || 0}`} valueColor="#00d4aa" />
+                    <Row label="Weekly Growth" value={`${councilMetrics.growth?.weekly_growth_rate_pct || 0}%`} />
+                    <Row label="Growth Trend" value={councilMetrics.growth?.growth_trend || '—'} />
+                  </div>
+                  {/* Infrastructure */}
+                  {councilMetrics.infrastructure && (
+                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <Row
+                        label="API Health"
+                        value={councilMetrics.infrastructure.api_healthy ? '✅ Healthy' : '❌ Down'}
+                        valueColor={councilMetrics.infrastructure.api_healthy ? '#00d4aa' : '#ff6060'}
+                      />
+                      <Row label="API Response" value={`${councilMetrics.infrastructure.api_response_time_s || '?'}s`} />
+                      <Row label="Health Score" value={`${councilMetrics.infrastructure.health_score || 0}/100`} />
+                      <Row label="CI Status" value={councilMetrics.infrastructure.ci_status || '—'} />
+                    </div>
+                  )}
+                </Card>
+              )}
+
+              {/* Agent Status Grid */}
+              {councilAgents.length > 0 && (
+                <Card title="🤖 Executive Agent Status">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {councilAgents.map((agent: any) => (
+                      <div key={agent.name} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '8px 10px', borderRadius: 8,
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{
+                            width: 8, height: 8, borderRadius: '50%',
+                            background: agent.health === 'green' ? '#00d4aa' : agent.health === 'yellow' ? '#ffd700' : '#ff6060',
+                          }} />
+                          <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(248,248,252,0.8)' }}>
+                            {agent.name}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)' }}>
+                            {agent.age_hours != null ? `${agent.age_hours}h ago` : 'never run'}
+                          </span>
+                          <button
+                            onClick={() => runAgent(agent.name)}
+                            disabled={runningAgent === agent.name}
+                            style={{
+                              padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700,
+                              background: runningAgent === agent.name ? 'rgba(255,255,255,0.05)' : 'rgba(0,212,170,0.1)',
+                              border: '1px solid rgba(0,212,170,0.2)', color: '#00d4aa',
+                            }}
+                          >
+                            {runningAgent === agent.name ? '…' : '▶ Run'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {/* Latest Council Brief */}
+              {councilBrief && councilBrief.brief && (
+                <Card title="🏛️ Latest Executive Brief">
+                  <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)', marginBottom: 10 }}>
+                    Convened: {councilBrief.brief.convened_at?.slice(0, 10) || '—'} |
+                    {` ${councilBrief.brief.agents_reporting || 0}/${7} agents reporting`}
+                  </div>
+                  {councilBrief.brief.top_priorities?.length > 0 && (
+                    <div style={{ marginBottom: 10 }}>
+                      <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', fontWeight: 700, marginBottom: 6 }}>🎯 PRIORITIES</div>
+                      {councilBrief.brief.top_priorities.map((p: string, i: number) => (
+                        <div key={i} style={{ fontSize: 12, color: 'rgba(248,248,252,0.65)', padding: '3px 0' }}>{p}</div>
+                      ))}
+                    </div>
+                  )}
+                  {councilBrief.brief.key_opportunities?.length > 0 && (
+                    <div style={{ marginBottom: 10 }}>
+                      <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', fontWeight: 700, marginBottom: 6 }}>✨ OPPORTUNITIES</div>
+                      {councilBrief.brief.key_opportunities.map((o: string, i: number) => (
+                        <div key={i} style={{ fontSize: 12, color: 'rgba(248,248,252,0.65)', padding: '3px 0' }}>{o}</div>
+                      ))}
+                    </div>
+                  )}
+                  {councilBrief.brief.key_risks?.length > 0 && (
+                    <div style={{ marginBottom: 10 }}>
+                      <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', fontWeight: 700, marginBottom: 6 }}>⚠️ RISKS</div>
+                      {councilBrief.brief.key_risks.map((r: string, i: number) => (
+                        <div key={i} style={{ fontSize: 12, color: '#ffd700', padding: '3px 0' }}>{r}</div>
+                      ))}
+                    </div>
+                  )}
+                  {councilBrief.brief.recommended_actions?.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', fontWeight: 700, marginBottom: 6 }}>→ ACTIONS</div>
+                      {councilBrief.brief.recommended_actions.map((a: string, i: number) => (
+                        <div key={i} style={{ fontSize: 12, color: '#00d4aa', padding: '3px 0' }}>{a}</div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              )}
+
+              {/* Quick Actions */}
+              <Card title="⚡ Quick Actions">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <button
+                    onClick={() => runAgent('executive_council')}
+                    disabled={runningAgent === 'executive_council'}
+                    style={{
+                      padding: '10px', borderRadius: 10,
+                      background: 'rgba(0,212,170,0.1)',
+                      border: '1px solid rgba(0,212,170,0.3)',
+                      color: '#00d4aa', fontWeight: 700, fontSize: 13,
+                    }}
+                  >
+                    {runningAgent === 'executive_council' ? '⟳ Convening…' : '🏛️ Convene Council Now'}
+                  </button>
+                  <button
+                    onClick={() => runAgent('cto')}
+                    disabled={runningAgent === 'cto'}
+                    style={{
+                      padding: '10px', borderRadius: 10,
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: 'rgba(248,248,252,0.7)', fontWeight: 600, fontSize: 13,
+                    }}
+                  >
+                    {runningAgent === 'cto' ? '⟳ Checking…' : '⚙️ Check System Health'}
+                  </button>
+                  <button
+                    onClick={() => runAgent('cfo')}
+                    disabled={runningAgent === 'cfo'}
+                    style={{
+                      padding: '10px', borderRadius: 10,
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: 'rgba(248,248,252,0.7)', fontWeight: 600, fontSize: 13,
+                    }}
+                  >
+                    {runningAgent === 'cfo' ? '⟳ Analyzing…' : '💰 Run CFO Analysis'}
+                  </button>
+                </div>
+              </Card>
+
+              {/* Refresh button */}
+              <button
+                onClick={loadCouncilData}
+                style={{
+                  padding: '10px', borderRadius: 10,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: 'rgba(248,248,252,0.4)', fontSize: 12,
+                }}
+              >↺ Refresh Council Data</button>
+            </>
           )}
         </div>
       )}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { OraClient, Goal } from '../lib/OraClient';
 import { useToast } from '../components/Toast';
+import { useExperiment } from '../lib/useExperiment';
 
 const DOMAIN_CONFIG: Record<string, { emoji: string; color: string }> = {
   iVive:  { emoji: '🌱', color: '#10b981' },
@@ -393,6 +394,16 @@ function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
   const { show } = useToast();
   const [searchParams] = useSearchParams();
 
+  // A/B: goals_input_placeholder
+  const { variant: placeholderVariant, trackEvent: trackGoalEvent } = useExperiment('goals_input_placeholder');
+  const GOAL_PLACEHOLDERS: Record<string, string> = {
+    A: 'I want to…',
+    B: 'What do you want?',
+    C: 'My goal is to…',
+    D: 'Tell Ora what you want',
+  };
+  const goalPlaceholder = GOAL_PLACEHOLDERS[placeholderVariant] || GOAL_PLACEHOLDERS['A'];
+
   // Auto-focus when navigated here from HomePage with ?focus=true
   useEffect(() => {
     if (searchParams.get('focus') === 'true') {
@@ -408,6 +419,7 @@ function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
     setCreating(true);
     try {
       const goal = await OraClient.createGoal(title.trim(), undefined, domain || undefined);
+      trackGoalEvent('goal_created', 1);
       onCreate(goal);
       setTitle('');
       setDomain('');
@@ -443,7 +455,7 @@ function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
           onChange={(e) => setTitle(e.target.value)}
           onFocus={() => setFocused(true)}
           onKeyDown={handleKeyDown}
-          placeholder="I want to…"
+          placeholder={goalPlaceholder}
           style={{
             flex: 1,
             background: 'transparent',

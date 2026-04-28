@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useExperiment } from '../lib/useExperiment';
 
 const NAV_ITEMS: Array<{ path: string; label: string; icon: string | null; emoji?: boolean; special?: boolean; isProfile?: boolean; isAdmin?: boolean }> = [
   { path: '/home',    label: 'Home',    icon: '◉',  emoji: false },
@@ -19,11 +20,22 @@ const TIER_COLORS: Record<string, string> = {
   free:      '#6b7280',
 };
 
+// Navbar label sets by variant
+const NAVBAR_LABEL_SETS: Record<string, Record<string, string>> = {
+  A: { '/feed': 'Feed', '/ora': 'Ora ◈', '/goals': 'Goals', '/dao': 'DAO', '/profile': 'Profile' },
+  B: { '/feed': 'Discover', '/ora': 'Chat', '/goals': 'Goals', '/dao': 'Earn', '/profile': 'Me' },
+  C: { '/feed': 'Home', '/ora': 'Ora', '/goals': 'Goals', '/dao': 'DAO', '/profile': 'You' },
+};
+
 export function NavBar() {
   const { logout, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [navVisible, setNavVisible] = useState(true);
+
+  // A/B: navbar_labels
+  const { variant: navLabelsVariant, trackEvent: trackNavEvent } = useExperiment('navbar_labels');
+  const navLabels = NAVBAR_LABEL_SETS[navLabelsVariant] || NAVBAR_LABEL_SETS['A'];
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
@@ -100,7 +112,7 @@ export function NavBar() {
               ) : (
                 <span style={{ fontSize: 17, width: 22, textAlign: 'center', lineHeight: 1 }}>{item.icon}</span>
               )}
-              <span>{item.label}</span>
+              <span>{navLabels[item.path] || item.label}</span>
               {item.isAdmin && isAdmin && (
                 <span style={{ marginLeft: 'auto', fontSize: 9, color: '#00d4aa', background: 'rgba(0,212,170,0.1)', padding: '1px 6px', borderRadius: 8 }}>ADMIN</span>
               )}
@@ -260,7 +272,7 @@ export function NavBar() {
                   fontSize: 9, fontWeight: isActive ? 700 : 500, letterSpacing: 0.3,
                   color: isActive ? '#00d4aa' : 'rgba(248,248,252,0.3)',
                   transition: 'color 0.18s',
-                }}>{item.label}</span>
+                }}>{navLabels[item.path] || item.label}</span>
               </NavLink>
             );
           })}

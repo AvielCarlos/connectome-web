@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { OraClient } from '../lib/OraClient';
+import { useExperiment } from '../lib/useExperiment';
 
 interface Message {
   id: string;
@@ -89,6 +90,18 @@ function TypingIndicator() {
 }
 
 export default function OraPage() {
+  // ─── A/B experiments ────────────────────────────────────────────────────
+  const { variant: greetingVariant } = useExperiment('ora_greeting');
+  const { variant: responseLengthVariant } = useExperiment('ora_response_length');
+  const { variant: proactiveSuggestionsVariant, trackEvent: trackOraEvent } = useExperiment('ora_proactive_suggestions');
+
+  const ORA_GREETINGS: Record<string, string> = {
+    A: "Hey! I'm Ora. What do you want to work toward?",
+    B: '◈ What\'s on your mind?',
+    C: 'Hey. What are we working on today?',
+    D: "I've been thinking about your goals. Want to pick up where we left off?",
+  };
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -104,7 +117,9 @@ export default function OraPage() {
       OraClient.getOpeningMessage().catch(() => null),
       OraClient.getOraSelf().catch(() => null),
     ]).then(([opening, self]) => {
-      const content = opening?.message || "Hello. I'm Ora — your guide through Connectome. What's on your mind today?";
+      // Use A/B greeting variant if no server-provided message
+      const defaultGreeting = ORA_GREETINGS[greetingVariant] || ORA_GREETINGS['A'];
+      const content = opening?.message || defaultGreeting;
       setMessages([{ id: 'opening', role: 'ora', content, ts: Date.now() }]);
       if (self) setOraInfo(self);
     }).finally(() => setLoadingOpening(false));
@@ -141,6 +156,8 @@ export default function OraPage() {
     const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text, ts: Date.now() };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
+    // Track message sent event
+    trackOraEvent('message_sent', 1);
 
     try {
       const history = messages.slice(-12).map((m) => ({

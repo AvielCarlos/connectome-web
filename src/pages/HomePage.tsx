@@ -14,6 +14,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OraClient } from '../lib/OraClient';
 import { useAuth } from '../context/AuthContext';
+import { useExperiment } from '../lib/useExperiment';
 
 // ─── A/B variant helpers (client-side, deterministic per user) ────────────────
 
@@ -80,6 +81,11 @@ const SHARED_STYLES = {
 export default function HomePage() {
   const navigate = useNavigate();
   const { userId } = useAuth();
+
+  // ─── A/B experiments ────────────────────────────────────────────────────
+  const { variant: homeEntryVariant } = useExperiment('home_entry_state');
+  const { variant: homeIntakeVariant } = useExperiment('home_intake_depth');
+  // Note: knowVariant / exploreVariant still use local hash helpers below for backwards compat
 
   const [view, setView] = useState<HomeView>('choice');
   const [knowVariant, setKnowVariant] = useState<'immediate' | 'clarifying'>('immediate');

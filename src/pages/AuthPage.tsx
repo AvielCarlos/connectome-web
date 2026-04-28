@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useExperiment } from '../lib/useExperiment';
 
 const API_URL = 'https://connectome-api-production.up.railway.app';
 
 export default function AuthPage() {
+  // A/B experiments
+  const { variant: registerHeadlineVariant } = useExperiment('register_headline');
+  const { variant: postRegisterDestVariant } = useExperiment('login_after_register_destination');
+
+  const REGISTER_HEADLINES: Record<string, string> = {
+    A: 'Create your account',
+    B: 'Meet Ora',
+    C: 'Start your journey',
+    D: 'Join iDo',
+  };
+  const registerHeadlineText = REGISTER_HEADLINES[registerHeadlineVariant] || REGISTER_HEADLINES['A'];
+
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,10 +34,15 @@ export default function AuthPage() {
     try {
       if (mode === 'login') {
         await login(email, password);
+        navigate('/feed');
       } else {
         await register(email, password, displayName || undefined);
+        // A/B: login_after_register_destination
+        const dest = postRegisterDestVariant === 'B' ? '/onboarding'
+          : postRegisterDestVariant === 'C' ? '/feed'
+          : '/home';
+        navigate(dest);
       }
-      navigate('/feed');
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || 'Something went wrong';
       setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
@@ -174,7 +192,7 @@ export default function AuthPage() {
                   transition: 'all 0.2s',
                 }}
               >
-                {m === 'login' ? 'Sign In' : 'Create Account'}
+                {m === 'login' ? 'Sign In' : registerHeadlineText}
               </button>
             ))}
           </div>

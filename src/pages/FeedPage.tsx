@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OraClient, ScreenResponse } from '../lib/OraClient';
 import { OraCard } from '../components/OraCard';
+import { useExperiment } from '../lib/useExperiment';
 
 const DOMAIN_COLORS: Record<string, string> = {
   iVive: '#10b981',
@@ -361,6 +362,12 @@ export default function FeedPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  // ─── A/B experiments ────────────────────────────────────────────────────
+  const { variant: layoutVariant } = useExperiment('feed_card_layout');
+  const { variant: ratingUI } = useExperiment('feed_rating_ui');
+  const { variant: emptyStateVariant, trackEvent: trackEmptyState } = useExperiment('feed_empty_state');
+  const { variant: goalBannerVariant } = useExperiment('feed_goal_banner');
+
   // Goal-directed mode: ?goal=<id> means the feed is curated for a specific goal
   const goalId = searchParams.get('goal') || undefined;
   const [goalTitle, setGoalTitle] = useState<string | null>(null);
@@ -550,17 +557,31 @@ export default function FeedPage() {
     );
   }
 
+  // Empty state messages from A/B experiment
+  const EMPTY_STATE_MESSAGES: Record<string, string> = {
+    A: 'Talk to Ora to get more cards',
+    B: "You've seen everything for now — come back tomorrow",
+    C: 'Add a goal to get personalized cards',
+  };
+
   if (!cards.length) {
+    const emptyMsg = EMPTY_STATE_MESSAGES[emptyStateVariant] || EMPTY_STATE_MESSAGES['A'];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 16, padding: 24 }}>
         <div style={{ fontSize: 40 }}>◈</div>
         <div style={{ fontWeight: 700, fontSize: 18 }}>Nothing yet</div>
         <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', textAlign: 'center' }}>
-          {hasGoals === false ? "Tell Ora what you want — she'll build your path." : "Ora's preparing your first cards…"}
+          {hasGoals === false ? emptyMsg : "Ora's preparing your first cards…"}
         </div>
         {hasGoals === false && (
-          <button onClick={() => navigate('/goals')} style={{ background: '#00d4aa', color: '#0a0a0f', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>
-            Add a goal
+          <button
+            onClick={() => {
+              trackEmptyState('click');
+              navigate(emptyStateVariant === 'A' ? '/ora' : '/goals');
+            }}
+            style={{ background: '#00d4aa', color: '#0a0a0f', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}
+          >
+            {emptyStateVariant === 'A' ? 'Talk to Ora →' : 'Add a goal →'}
           </button>
         )}
       </div>
@@ -656,7 +677,7 @@ export default function FeedPage() {
         background: 'linear-gradient(rgba(10,10,15,0.8), transparent)',
         pointerEvents: 'none', zIndex: 20,
       }}>
-        {goalId && goalTitle ? (
+        {goalId && goalTitle && goalBannerVariant !== 'B' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
             <span style={{ color: '#8b5cf6', fontSize: 14 }}>◈</span>
             <span style={{ fontWeight: 700, fontSize: 13, color: 'rgba(248,248,252,0.85)', letterSpacing: 0.2 }}>

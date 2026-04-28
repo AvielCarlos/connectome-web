@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { OraClient } from '../lib/OraClient';
 import { authStorage } from '../lib/OraClient';
+import { useExperiment } from '../lib/useExperiment';
 
 const TIER_CONFIG: Record<string, { color: string; label: string }> = {
   observer:    { color: '#6b7280', label: 'Observer' },
@@ -304,6 +305,16 @@ function ClaimModal({
 
 // ─── Main DAO Page ─────────────────────────────────────────────────────────
 export default function DAOPage() {
+  // ─── A/B experiments ────────────────────────────────────────────────────
+  const { variant: taskDisplayVariant } = useExperiment('dao_task_display');
+  const { variant: firstCTAVariant, trackEvent: trackDAOEvent } = useExperiment('dao_first_cta');
+
+  const DAO_FIRST_CTA: Record<string, string> = {
+    A: 'Claim a Task →',
+    B: 'Earn your first CP →',
+    C: 'Start Contributing →',
+  };
+
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [daoStats, setDaoStats] = useState<any>(null);
   const [foundingStewards, setFoundingStewards] = useState<any>(null);
@@ -453,7 +464,7 @@ export default function DAOPage() {
               }}>
                 <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>💡 How to Earn CP</div>
                 {[
-                  { icon: '1️⃣', text: 'Claim a task below' },
+                  { icon: '1️⃣', text: DAO_FIRST_CTA[firstCTAVariant] || 'Claim a task below' },
                   { icon: '2️⃣', text: 'Complete it → open a PR' },
                   { icon: '3️⃣', text: 'Submit your PR here → earn 50 CP instantly' },
                   { icon: '4️⃣', text: 'Full CP awarded on merge. LTV model: keep earning monthly.' },
@@ -471,13 +482,19 @@ export default function DAOPage() {
                 </div>
               </div>
 
-              {/* Task grid */}
+              {/* Task grid — layout driven by dao_task_display A/B variant */}
               {tasks.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: 40, color: 'rgba(248,248,252,0.35)' }}>No open tasks right now.</div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
+                <div style={{
+                  display: taskDisplayVariant === 'A' ? 'grid' : 'flex',
+                  flexDirection: taskDisplayVariant === 'B' ? 'column' : undefined,
+                  flexWrap: taskDisplayVariant === 'C' ? 'wrap' : undefined,
+                  gridTemplateColumns: taskDisplayVariant === 'A' ? 'repeat(auto-fill, minmax(280px, 1fr))' : undefined,
+                  gap: 12,
+                }}>
                   {tasks.map((task: any) => (
-                    <TaskCard key={task.id} task={task} onClaim={handleClaim} />
+                    <TaskCard key={task.id} task={task} onClaim={(t) => { trackDAOEvent('task_claim', 1); handleClaim(t); }} />
                   ))}
                 </div>
               )}
