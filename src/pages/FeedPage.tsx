@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OraClient, ScreenResponse } from '../lib/OraClient';
 import { OraCard } from '../components/OraCard';
 
@@ -359,6 +359,12 @@ function FeedCard({
 // ─── Main feed ────────────────────────────────────────────────────────────────
 export default function FeedPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Goal-directed mode: ?goal=<id> means the feed is curated for a specific goal
+  const goalId = searchParams.get('goal') || undefined;
+  const [goalTitle, setGoalTitle] = useState<string | null>(null);
+
   const [cards, setCards] = useState<ScreenResponse[]>([]);
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -381,13 +387,24 @@ export default function FeedPage() {
     setTimeout(() => setToastMsg(''), 2200);
   };
 
+  // Fetch goal title when in goal-directed mode
+  useEffect(() => {
+    if (!goalId) return;
+    OraClient.listGoals()
+      .then((goals) => {
+        const found = goals.find((g) => g.id === goalId);
+        if (found) setGoalTitle(found.title);
+      })
+      .catch(() => {});
+  }, [goalId]);
+
   const loadInitial = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       const goals = await OraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
-      const batch = await OraClient.getNextScreenBatch(5);
+      const batch = await OraClient.getNextScreenBatch(5, goalId);
       setCards(batch);
       setIndex(0);
       if (batch.length > 0) {
@@ -401,7 +418,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [goalId]);
 
   useEffect(() => { loadInitial(); }, [loadInitial]);
 
@@ -409,7 +426,7 @@ export default function FeedPage() {
     if (loadingMore || isLimited) return;
     setLoadingMore(true);
     try {
-      const batch = await OraClient.getNextScreenBatch(3);
+      const batch = await OraClient.getNextScreenBatch(3, goalId);
       setCards((prev) => [...prev, ...batch]);
       if (batch.length > 0) {
         const last = batch[batch.length - 1];
@@ -639,7 +656,23 @@ export default function FeedPage() {
         background: 'linear-gradient(rgba(10,10,15,0.8), transparent)',
         pointerEvents: 'none', zIndex: 20,
       }}>
-        <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: 0.3 }}>◈ Ora Feed</div>
+        {goalId && goalTitle ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <span style={{ color: '#8b5cf6', fontSize: 14 }}>◈</span>
+            <span style={{ fontWeight: 700, fontSize: 13, color: 'rgba(248,248,252,0.85)', letterSpacing: 0.2 }}>
+              Working toward:
+            </span>
+            <span style={{
+              fontWeight: 600, fontSize: 13,
+              color: '#8b5cf6',
+              maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {goalTitle}
+            </span>
+          </div>
+        ) : (
+          <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: 0.3 }}>◈ Ora Feed</div>
+        )}
         <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)' }}>
           {(() => {
             const remaining = Math.max(0, cards.length - index - 1);

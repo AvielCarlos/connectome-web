@@ -236,16 +236,18 @@ class OraClientClass {
     return res.data as ScreenResponse;
   }
 
-  async getNextScreenBatch(count: number): Promise<ScreenResponse[]> {
+  async getNextScreenBatch(count: number, goalId?: string): Promise<ScreenResponse[]> {
     try {
-      const res = await this.client.post('/api/screens/batch', { count: Math.min(count, 5) });
+      const body: Record<string, any> = { count: Math.min(count, 5) };
+      if (goalId) body.goal_id = goalId;
+      const res = await this.client.post('/api/screens/batch', body);
       return res.data as ScreenResponse[];
     } catch (e: any) {
       if (e?.response?.status === 404) {
         const results: ScreenResponse[] = [];
         for (let i = 0; i < count; i++) {
           try {
-            results.push(await this.getNextScreen());
+            results.push(await this.getNextScreen(undefined, goalId));
           } catch { break; }
         }
         return results;

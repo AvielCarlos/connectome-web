@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { OraClient, Goal } from '../lib/OraClient';
 import { useToast } from '../components/Toast';
 
@@ -390,6 +391,17 @@ function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
   const [creating, setCreating] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { show } = useToast();
+  const [searchParams] = useSearchParams();
+
+  // Auto-focus when navigated here from HomePage with ?focus=true
+  useEffect(() => {
+    if (searchParams.get('focus') === 'true') {
+      setTimeout(() => {
+        inputRef.current?.focus();
+        setFocused(true);
+      }, 150);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async () => {
     if (!title.trim() || creating) return;

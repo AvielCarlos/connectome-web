@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const NAV_ITEMS: Array<{ path: string; label: string; icon: string | null; emoji?: boolean; special?: boolean; isProfile?: boolean; isAdmin?: boolean }> = [
+  { path: '/home',    label: 'Home',    icon: '◉',  emoji: false },
   { path: '/feed',    label: 'Feed',    icon: '✦',  emoji: true  },
   { path: '/ora',     label: 'Ora',     icon: '◈',  special: true },
   { path: '/goals',   label: 'Goals',   icon: '◎',  emoji: false },

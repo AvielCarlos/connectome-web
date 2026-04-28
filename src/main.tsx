@@ -13,6 +13,7 @@ import OraPage from './pages/OraPage'
 import DAOPage from './pages/DAOPage'
 import ProfilePage from './pages/ProfilePage'
 import SurfacePage from './pages/SurfacePage'
+import HomePage from './pages/HomePage'
 import { NavBar } from './components/NavBar'
 import SuggestionButton from './components/SuggestionButton'
 import './index.css'
@@ -29,7 +30,8 @@ function App() {
       {isAuthenticated && <NavBar />}
       {isAuthenticated && <SuggestionButton />}
       <Routes>
-        <Route path="/" element={isAuthenticated ? <Navigate to="/feed" replace /> : <AuthPage />} />
+        <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />} />
+        <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
         {/* Google OAuth callback — must be accessible without auth */}
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/feed"    element={<ProtectedRoute><LandingRouter /></ProtectedRoute>} />
