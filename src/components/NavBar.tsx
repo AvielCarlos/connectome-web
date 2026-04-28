@@ -158,7 +158,7 @@ export function NavBar() {
         <button onClick={() => navigate('/profile')} style={{
           width: 34, height: 34, borderRadius: 17, border: 'none', cursor: 'pointer',
           background: `linear-gradient(135deg, ${tierColor}44, ${tierColor}88)`,
-          border: `1.5px solid ${tierColor}66`,
+          outline: `1.5px solid ${tierColor}66`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 14, fontWeight: 800, color: tierColor, position: 'relative',
         }}>
