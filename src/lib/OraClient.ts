@@ -515,5 +515,3 @@ class OraClientClass {
 }
 
 export const OraClient = new OraClientClass();
-export type { OraClientClass };
-export { OraClientClass };
