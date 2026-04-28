@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OraClient, ScreenResponse } from '../lib/OraClient';
-import OraCard from '../components/OraCard';
+import { OraCard } from '../components/OraCard';
 
 const DOMAIN_COLORS: Record<string, string> = {
   iVive: '#10b981',

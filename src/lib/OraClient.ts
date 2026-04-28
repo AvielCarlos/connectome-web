@@ -105,6 +105,9 @@ export interface ScreenSpec {
   type: string;
   layout: string;
   layout_style?: string;
+  domain?: string;
+  deep_dive?: any;
+  card_data?: any;
   components: ScreenComponent[];
   feedback_overlay: {
     type: string;
@@ -252,6 +255,10 @@ class OraClientClass {
   }
 
   // ── Feedback ─────────────────────────────────────────────────────────────
+
+  async saveScreen(screenSpecDbId: string): Promise<void> {
+    await this.client.post('/api/screens/save', { screen_spec_db_id: screenSpecDbId }).catch(() => {});
+  }
 
   async submitFeedback(payload: FeedbackPayload) {
     const res = await this.client.post('/api/feedback/', {
@@ -508,3 +515,5 @@ class OraClientClass {
 }
 
 export const OraClient = new OraClientClass();
+export type { OraClientClass };
+export { OraClientClass };

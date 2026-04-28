@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { OraClient, OrasTier, TiersResponse } from '../lib/OraClient';
 
-const ora = new OraClient();
+const ora = OraClient;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
