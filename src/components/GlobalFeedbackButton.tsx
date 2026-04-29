@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import { OraClient, GlobalFeedbackPayload } from '../lib/OraClient';
+import CPExplainerModal from './CPExplainerModal';
 import { useToast } from './Toast';
 
 const CATEGORIES: GlobalFeedbackPayload['category'][] = ['Bug', 'Confusing', 'Idea', 'Design', 'Praise', 'Other'];
@@ -8,6 +9,7 @@ const CATEGORIES: GlobalFeedbackPayload['category'][] = ['Bug', 'Confusing', 'Id
 export default function GlobalFeedbackButton() {
   const { show } = useToast();
   const [open, setOpen] = useState(false);
+  const [cpExplainerOpen, setCpExplainerOpen] = useState(false);
   const [category, setCategory] = useState<GlobalFeedbackPayload['category']>('Idea');
   const [message, setMessage] = useState('');
   const [includeScreenshot, setIncludeScreenshot] = useState(true);
@@ -106,7 +108,11 @@ export default function GlobalFeedbackButton() {
             <div className="global-feedback-modal__header">
               <div>
                 <h2 id="global-feedback-title">Help improve Ora</h2>
-                <p>Send what you notice here and earn contribution points.</p>
+                <p className="global-feedback-reward">
+                  <span>Earn +10 CP</span>
+                  <span aria-hidden="true">·</span>
+                  <button type="button" onClick={() => setCpExplainerOpen(true)}>What is CP?</button>
+                </p>
               </div>
               <button type="button" aria-label="Close feedback" onClick={resetAndClose} disabled={submitting}>×</button>
             </div>
@@ -148,11 +154,13 @@ export default function GlobalFeedbackButton() {
             {error && <div className="global-feedback-error" role="alert">{error}</div>}
 
             <button type="button" className="global-feedback-submit" onClick={handleSubmit} disabled={submitting}>
-              {submitting ? 'Sending…' : 'Send feedback + earn CP'}
+              {submitting ? 'Sending…' : 'Send feedback + earn 10 CP'}
             </button>
           </section>
         </div>
       )}
+
+      <CPExplainerModal open={cpExplainerOpen} onClose={() => setCpExplainerOpen(false)} />
     </>
   );
 }

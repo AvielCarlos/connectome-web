@@ -1085,7 +1085,14 @@ body {
 .global-feedback-modal__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
 .global-feedback-modal__header h2 { margin: 0; font-size: 22px; letter-spacing: -0.02em; }
 .global-feedback-modal__header p { margin: 5px 0 0; color: rgba(248,248,252,0.58); font-size: 13px; }
-.global-feedback-modal__header button {
+.global-feedback-reward { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.global-feedback-reward span:first-child { color: #f4c26b; font-weight: 900; }
+.global-feedback-reward button {
+  min-height: 0; padding: 0; border: none; background: transparent; color: #7dd3fc;
+  font-size: 13px; font-weight: 900; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+.global-feedback-reward button:hover { color: #bae6fd; }
+.global-feedback-modal__header > button {
   width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.1);
   background: rgba(255,255,255,0.06); color: rgba(248,248,252,0.82); font-size: 22px; cursor: pointer;
 }
@@ -1110,6 +1117,31 @@ body {
   box-shadow: 0 14px 34px rgba(37,99,235,0.26);
 }
 .global-feedback-submit:disabled { opacity: 0.62; cursor: wait; }
+
+.cp-explainer-backdrop {
+  position: fixed; inset: 0; z-index: 2300; background: rgba(3, 6, 20, 0.78);
+  backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; padding: 18px;
+}
+.cp-explainer-modal {
+  position: relative; width: min(500px, 100%); border-radius: 24px; border: 1px solid rgba(255,255,255,0.14);
+  background: linear-gradient(180deg, rgba(24,27,48,0.98), rgba(8,10,20,0.99));
+  box-shadow: 0 24px 90px rgba(0,0,0,0.58); padding: 26px; color: #f8f8fc;
+}
+.cp-explainer-close {
+  position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; min-height: 34px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.06); color: rgba(248,248,252,0.82);
+  font-size: 22px; cursor: pointer;
+}
+.cp-explainer-kicker { color: #f4c26b; font-size: 12px; font-weight: 950; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.cp-explainer-modal h2 { margin: 0 42px 10px 0; font-size: 28px; letter-spacing: -0.04em; }
+.cp-explainer-modal p { margin: 0; color: rgba(248,248,252,0.68); line-height: 1.6; }
+.cp-explainer-modal ul { margin: 18px 0 0; padding-left: 20px; color: rgba(248,248,252,0.74); line-height: 1.65; }
+.cp-explainer-modal li + li { margin-top: 10px; }
+.cp-explainer-modal strong { color: #f8f8fc; }
+.cp-explainer-note {
+  margin-top: 18px; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(244,194,107,0.22);
+  background: rgba(244,194,107,0.08); color: rgba(248,248,252,0.78); font-size: 13px; font-weight: 800;
+}
 
 @media (min-width: 768px) {
   .global-feedback-fab { bottom: 28px; right: 28px; }
