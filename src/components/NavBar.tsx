@@ -23,7 +23,7 @@ const MOBILE_TABS = [
   { path: '/feed',    icon: '◉',  label: 'Discover' },
   { path: '/goals',   icon: '◎',  label: 'Goals'    },
   { path: '/ora',     icon: null, label: 'Ora',  isOra: true },
-  { path: '/ioo',     icon: '🗺', label: 'Map'      },
+  { path: '/dao',     icon: '🏛', label: 'DAO'      },
   { path: '/profile', icon: null, label: 'Me',   isProfile: true },
 ] as const;
 
