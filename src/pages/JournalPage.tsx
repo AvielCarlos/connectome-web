@@ -101,7 +101,7 @@ export default function JournalPage() {
   };
 
   return (
-    <div className="page-content" style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 80px' }}>
+    <div className="page-content" style={{ maxWidth: 640, margin: '0 auto' }}>
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: -0.5 }}>✍ Journal</h1>
         <p style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 4 }}>

@@ -31,7 +31,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function App() {
   const { isAuthenticated } = useAuth()
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: '#f8f8fc' }}>
+    <div className={isAuthenticated ? 'app-authenticated' : undefined} style={{ minHeight: '100vh', background: '#0a0a0f', color: '#f8f8fc' }}>
       {isAuthenticated && <NavBar />}
       <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', color: '#888' }}>Loading…</div>}>
         <Routes>

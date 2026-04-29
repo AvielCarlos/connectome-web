@@ -309,12 +309,11 @@ export default function IOOPage() {
   const containerStyle: React.CSSProperties = {
     maxWidth: 720,
     margin: '0 auto',
-    padding: '80px 20px 120px',
   }
 
   if (loading) {
     return (
-      <div style={containerStyle}>
+      <div className="page-content" style={containerStyle}>
         <div style={{ color: 'rgba(248,248,252,0.4)', fontSize: 14, textAlign: 'center', marginTop: 60 }}>
           Loading your map…
         </div>
@@ -324,7 +323,7 @@ export default function IOOPage() {
 
   if (error) {
     return (
-      <div style={containerStyle}>
+      <div className="page-content" style={containerStyle}>
         <div style={{ color: '#f87171', fontSize: 14, textAlign: 'center', marginTop: 60 }}>
           {error}
           <br />
@@ -339,7 +338,7 @@ export default function IOOPage() {
   const noNodes = globalNodes.length === 0 && Object.values(nodesByGoal).every(n => n.length === 0)
 
   return (
-    <div style={containerStyle}>
+    <div className="page-content" style={containerStyle}>
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>

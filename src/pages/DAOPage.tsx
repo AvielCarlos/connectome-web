@@ -372,7 +372,7 @@ export default function DAOPage() {
   };
 
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 16px 80px' }}>
+    <div className="page-content" style={{ maxWidth: 640, margin: '0 auto' }}>
       {/* Toast */}
       {toast && (
         <div style={{

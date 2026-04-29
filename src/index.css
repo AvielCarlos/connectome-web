@@ -40,6 +40,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  font-size: clamp(14px, 2.5vw, 16px);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -118,7 +119,7 @@ input, textarea {
   color: var(--text);
   border-radius: var(--r-md);
   padding: 12px 14px;
-  font-size: 15px;
+  font-size: 16px; /* ≥16px prevents iOS auto-zoom */
   outline: none;
   width: 100%;
   transition: border-color 0.2s;
@@ -140,6 +141,7 @@ button {
   font-family: inherit;
   font-weight: 600;
   font-size: 15px;
+  min-height: 44px; /* touch target */
   transition: opacity 0.15s, transform 0.12s cubic-bezier(.25,.8,.25,1), background 0.15s;
 }
 button:active {
@@ -194,26 +196,72 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ─── Page layout (accounts for nav bars) ───────────────────────────── */
 .page-content {
-  padding-bottom: calc(var(--bottom-nav-height) + 24px);
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
   padding-top: 8px;
+  padding-left: var(--sp2);
+  padding-right: var(--sp2);
 }
 
-/* Desktop: account for sidebar */
-@media (min-width: 768px) {
+/* Desktop: account for sidebar + no bottom nav */
+@media (min-width: 1024px) {
   .page-content {
     padding-top: 24px;
-    margin-left: 220px;
+    padding-left: var(--sp3);
+    padding-right: var(--sp3);
+    padding-bottom: 24px;
+  }
+}
+
+/* ─── Authenticated app shell (offset for sidebar on desktop) ────────── */
+.app-authenticated {
+  min-height: 100vh;
+}
+@media (min-width: 1024px) {
+  .app-authenticated {
+    padding-left: 240px;
+  }
+}
+
+/* ─── OraPage fixed chat shell ────────────────────────────────── */
+.ora-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px)) !important;
+}
+@media (min-width: 1024px) {
+  .ora-container {
+    left: 240px !important;
+    bottom: 0 !important;
+  }
+}
+
+/* ─── FeedPage full-screen shell ──────────────────────────────── */
+.feed-container {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+}
+@media (min-width: 1024px) {
+  .feed-container {
+    height: 100vh;
   }
 }
 
 /* ─── Responsive helpers ────────────────────────────────────────────── */
-@media (min-width: 768px) {
-  .hidden-mobile { display: flex !important; }
-  .show-mobile   { display: none  !important; }
+@media (min-width: 1024px) {
+  .hidden-mobile  { display: flex !important; }
+  .show-mobile    { display: none !important; }
+  .show-desktop   { display: flex !important; }
+  .hidden-desktop { display: none !important; }
 }
-@media (max-width: 767px) {
-  .hidden-mobile { display: none  !important; }
-  .show-mobile   { display: flex  !important; }
+@media (max-width: 1023px) {
+  .hidden-mobile  { display: none !important; }
+  .show-mobile    { display: flex !important; }
+  .show-desktop   { display: none !important; }
+  .hidden-desktop { display: flex !important; }
 }
 
 /* ─── Swipe card transition (vertical) ─────────────────────────────── */

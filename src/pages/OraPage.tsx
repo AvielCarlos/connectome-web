@@ -207,16 +207,12 @@ export default function OraPage() {
   return (
     <div
       ref={containerRef}
+      className="ora-container"
       style={{
         maxWidth: 720,
         margin: '0 auto',
         display: 'flex',
         flexDirection: 'column',
-        position: 'fixed',
-        top: 'var(--top-header-height, 56px)',
-        left: 0,
-        right: 0,
-        bottom: 'var(--bottom-nav-height, 64px)',
       }}
     >
       {/* Header */}

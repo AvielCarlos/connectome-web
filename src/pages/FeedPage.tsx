@@ -694,7 +694,7 @@ export default function FeedPage() {
   }
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', background: '#0a0a0f', overflow: 'hidden' }}>
+    <div className="feed-container" style={{ background: '#0a0a0f' }}>
 
       {/* Collection picker */}
       {collectionPickerCard && (

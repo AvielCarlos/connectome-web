@@ -219,7 +219,7 @@ export default function HomePage() {
           maxWidth: 560,
           margin: '0 auto',
           width: '100%',
-          paddingBottom: 48,
+          paddingBottom: 'calc(var(--bottom-nav-height, 80px) + 24px)',
         }}>
           {/* Ora mark */}
           <div style={{ fontSize: 26, color: '#8b5cf6', marginBottom: 18, animation: 'oraFade 3s ease-in-out infinite' }}>✦</div>
@@ -371,7 +371,7 @@ export default function HomePage() {
 
         <div style={{
           flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
-          maxWidth: 480, margin: '0 auto', width: '100%', paddingBottom: 48,
+          maxWidth: 480, margin: '0 auto', width: '100%', paddingBottom: 'calc(var(--bottom-nav-height, 80px) + 24px)',
         }}>
           <div style={{ fontSize: 26, color: '#00d4aa', marginBottom: 18, animation: 'oraFade 3s ease-in-out infinite' }}>◈</div>
           <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.4, marginBottom: 4 }}>

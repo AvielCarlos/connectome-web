@@ -537,7 +537,7 @@ export default function GoalsPage() {
   };
 
   return (
-    <div className="page-content" style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 80px' }}>
+    <div className="page-content" style={{ maxWidth: 640, margin: '0 auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingTop: 8 }}>
         <div>
