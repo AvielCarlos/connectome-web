@@ -10,9 +10,9 @@ const highlights = [
 ];
 
 const recent = [
-  'Ora mapped a fresh goal thread from your last session.',
-  'DAO contribution queue refreshed with new CP opportunities.',
-  'Your discovery feed has 4 new adventures tuned to your current path.',
+  'Ora mapped a fresh goal thread through the Connectome OS.',
+  'Ascension DAO contribution queue refreshed with new CP opportunities.',
+  'Aventi has 4 new experiences tuned to your current path.',
 ];
 
 function greetingName(profile: any) {
@@ -37,8 +37,9 @@ export default function ConnectomeHome() {
         <div className="connectome-home__signal">
           <span className="ora-orb" /> Ora is online
         </div>
-        <h1>Good {dayPart()}, {greetingName(profile)}.</h1>
-        <p>Here's what's calling for your attention today.</p>
+        <h1>The AI OS for Human Flourishing</h1>
+        <p>The nervous system of the internet — powered by Ascension Technologies.</p>
+        <p>Good {dayPart()}, {greetingName(profile)}. Ora is orienting the OS around what matters next.</p>
       </section>
 
       <section className="connectome-home__highlights" aria-label="Ora highlights">
@@ -51,7 +52,8 @@ export default function ConnectomeHome() {
         ))}
       </section>
 
-      <section className="connectome-home__apps" aria-label="Apps">
+      <section className="connectome-home__apps" aria-label="Apps Running on Connectome">
+        <h2>Apps Running on Connectome</h2>
         {CONNECTOME_APPS.filter((app) => !app.soon && !app.external).slice(0, 5).map((app) => (
           <button key={app.name} type="button" onClick={() => navigate(app.path)}>
             <span>{app.icon}</span>

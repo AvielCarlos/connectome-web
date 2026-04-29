@@ -189,9 +189,9 @@ export default function OraOnboarding() {
               boxShadow: '0 0 34px rgba(0,212,170,0.35)',
             }}>◈</div>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 900 }}>Getting to know you</div>
+              <div style={{ fontSize: 20, fontWeight: 900 }}>Ora — brain of Connectome</div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.56)', marginTop: 3 }}>
-                Step {progressStep} of {totalQuestions} — so Ora can build your path.
+                Step {progressStep} of {totalQuestions} — mapping your iVive, Eviva, and Aventi domains on the AI OS built by Ascension Technologies DAO.
               </div>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function OraOnboarding() {
               animation: 'oraOnboardingPop 420ms ease-out',
             }}>
               <div style={{ fontSize: 30, marginBottom: 8 }}>✦</div>
-              <div style={{ fontWeight: 900 }}>Your Connectome is awake.</div>
+              <div style={{ fontWeight: 900 }}>Your Connectome AI OS is awake.</div>
             </div>
           )}
           <div ref={bottomRef} />
@@ -222,9 +222,9 @@ export default function OraOnboarding() {
             {showDomainCards && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 12 }}>
                 {[
-                  ['🌱', 'iVive', 'Vitality, health, mind, inner world'],
-                  ['🌊', 'Eviva', 'Work, contribution, social life, love'],
-                  ['🚀', 'Aventi', 'Adventures, fun, travel, experiences'],
+                  ['🌱', 'iVive', 'Vitality, health, mind, inner world — your life-force domain'],
+                  ['🌊', 'Eviva', 'Work, contribution, service, civilization — your impact domain'],
+                  ['🚀', 'Aventi', 'Adventures, fun, travel, experiences — your aliveness domain'],
                 ].map(([icon, title, desc]) => (
                   <button
                     key={title}
