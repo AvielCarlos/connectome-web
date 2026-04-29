@@ -143,13 +143,13 @@ function DAOStatusCard({ cp, tier, rank }: { cp: number; tier: string; rank: num
 function WeeklyLeaderboard({ items }: { items: any[] }) {
   return (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 10 }}>This Week's Builders 🔥</div>
+      <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 10 }}>Top CP Contributors 🔥</div>
       <div style={{ background: '#12121a', border: '1px solid rgba(0,212,170,0.14)', borderRadius: 14, overflow: 'hidden' }}>
         {items.length === 0 ? (
-          <div style={{ padding: 18, textAlign: 'center' as const, color: 'rgba(248,248,252,0.35)', fontSize: 13 }}>No weekly XP yet. Open a PR and light it up.</div>
+          <div style={{ padding: 18, textAlign: 'center' as const, color: 'rgba(248,248,252,0.35)', fontSize: 13 }}>No CP yet. Submit a contribution and light it up.</div>
         ) : items.slice(0, 10).map((item, i) => {
           const rank = item.rank || i + 1;
-          const xp = item.weekly_xp ?? item.xp_this_week ?? item.total_xp ?? item.xp ?? 0;
+          const cp = item.total_cp ?? item.cp_balance ?? item.weekly_cp ?? 0;
           const name = item.display_name || item.name || item.github_username || item.username || 'Builder';
           return (
             <div key={item.id || item.user_id || item.github_username || i} style={{
@@ -158,7 +158,7 @@ function WeeklyLeaderboard({ items }: { items: any[] }) {
             }}>
               <div style={{ width: 30, color: rank <= 3 ? '#fbbf24' : 'rgba(248,248,252,0.35)', fontWeight: 800 }}>#{rank}</div>
               <div style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 650, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{name}</div>
-              <div style={{ color: '#00d4aa', fontWeight: 800 }}>{Number(xp || 0).toLocaleString()} XP</div>
+              <div style={{ color: '#f4c26b', fontWeight: 800 }}>{Number(cp || 0).toLocaleString()} CP</div>
             </div>
           );
         })}
@@ -455,7 +455,7 @@ export default function DAOPage() {
       if (fs) setFoundingStewards(fs);
       if (contribs) setContributions(contribs.contributions || []);
       if (t) setTasks(t.tasks || []);
-      if (weekly) setWeeklyLeaderboard(weekly.leaderboard || weekly.builders || weekly.results || (Array.isArray(weekly) ? weekly : []));
+      setWeeklyLeaderboard((lb?.leaderboard || []).slice(0, 10));
       if (proposalRes) setProposals(proposalRes.proposals || proposalRes.items || (Array.isArray(proposalRes) ? proposalRes : []));
     }).finally(() => setLoading(false));
   }, []);

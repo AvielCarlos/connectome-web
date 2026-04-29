@@ -428,6 +428,7 @@ class OraClientClass {
     github_pr_url?: string;
     external_link?: string;
     evidence_text?: string;
+    attachment_urls?: string[];
   }): Promise<any> {
     const res = await this.client.post('/api/dao/contribute', data);
     return res.data;
@@ -436,6 +437,21 @@ class OraClientClass {
   async getMyContributions(): Promise<any[]> {
     const res = await this.client.get('/api/dao/my-contributions');
     return res.data.contributions;
+  }
+
+  async syncGitHubContributions(): Promise<any> {
+    const res = await this.client.post('/api/dao/sync-github');
+    return res.data;
+  }
+
+  async getContributionStats(): Promise<any> {
+    const res = await this.client.get('/api/users/me/contribution-stats');
+    return res.data;
+  }
+
+  getGitHubConnectUrl(): string {
+    const token = authStorage.getToken();
+    return `${API_URL}/api/auth/github/login?token=${encodeURIComponent(token || '')}`;
   }
 
   // ── Services (Nea-as-Agent-for-Hire) ─────────────────────────────────────
