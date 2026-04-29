@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { OraClient } from '../lib/OraClient';
 import { useAuth } from '../context/AuthContext';
 import { useExperiment } from '../lib/useExperiment';
+import { StreakBadge } from '../components/StreakBadge';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
 const VARIANTS = ['A', 'B', 'C', 'D'] as const;
@@ -339,6 +340,9 @@ export default function ProfilePage() {
       {/* ── Profile section ── */}
       {section === 'profile' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* ── Streak + XP + Badges ── */}
+          <StreakBadge />
+
           <Card title="Account">
             <Row label="Email" value={profile?.email} />
             <Row label="Member since" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '\u2014'} />

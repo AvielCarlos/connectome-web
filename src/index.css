@@ -234,3 +234,67 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ─── Tooltip ───────────────────────────────────────────────────────── */
 .tooltip { position: relative; }
+
+/* ─── Gamification / Celebration ───────────────────────────────────── */
+@keyframes streakFlame {
+  0%   { transform: scale(1) rotate(-4deg); }
+  25%  { transform: scale(1.15) rotate(3deg); }
+  50%  { transform: scale(1.08) rotate(-2deg); }
+  75%  { transform: scale(1.18) rotate(4deg); }
+  100% { transform: scale(1) rotate(-4deg); }
+}
+.streak-flame { animation: streakFlame 0.9s ease-in-out infinite; }
+
+@keyframes xpPop {
+  0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+  40%  { opacity: 1; transform: translateY(-20px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-48px) scale(0.9); }
+}
+.xp-pop { animation: xpPop 1.2s ease-out forwards; }
+
+@keyframes badgeEarn {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(5deg);  opacity: 1; }
+  80%  { transform: scale(0.95) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.badge-earn { animation: badgeEarn 0.55s cubic-bezier(.25,.8,.25,1) forwards; }
+
+@keyframes confettiFall {
+  0%   { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Streak-at-risk pulse */
+@keyframes atRiskPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+.at-risk-pulse { animation: atRiskPulse 1.5s ease-in-out infinite; }
+
+/* Collection save flash */
+@keyframes saveFlash {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.35); }
+  60%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.save-flash { animation: saveFlash 0.4s cubic-bezier(.25,.8,.25,1); }
+
+/* Card entrance from bottom (feed) */
+@keyframes cardRise {
+  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.card-rise { animation: cardRise 0.35s cubic-bezier(.25,.8,.25,1); }
+
+/* Full-bleed card gradient shimmer */
+@keyframes gradShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.grad-shimmer {
+  background-size: 200% 200%;
+  animation: gradShimmer 5s ease infinite;
+}
