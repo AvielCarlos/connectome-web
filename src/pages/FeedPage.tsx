@@ -17,6 +17,7 @@ const DOMAIN_CONFIG: Record<string, { color: string; gradient: string; emoji: st
   iVive:   { color: '#10b981', gradient: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #0a0a0f 100%)', emoji: '🌱' },
   Eviva:   { color: '#3b82f6', gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #0a0a0f 100%)', emoji: '🌊' },
   Aventi:  { color: '#f59e0b', gradient: 'linear-gradient(135deg, #451a03 0%, #92400e 50%, #0a0a0f 100%)', emoji: '🚀' },
+  Rest:    { color: '#8b5cf6', gradient: 'linear-gradient(135deg, #2e1065 0%, #5b21b6 50%, #0a0a0f 100%)', emoji: '🌙' },
 };
 const DEFAULT_DOMAIN = { color: '#00d4aa', gradient: 'linear-gradient(135deg, #042f2e 0%, #0f766e 50%, #0a0a0f 100%)', emoji: '◈' };
 
@@ -215,7 +216,7 @@ function FeedCard({
   if (!cardData.title) {
     for (const c of spec.components || []) {
       if ((c as any).type === 'headline') cardData.title = (c as any).text;
-      if ((c as any).type === 'body_text' && !cardData.body) cardData.body = (c as any).text;
+      if (['body', 'body_text'].includes((c as any).type) && !cardData.body) cardData.body = (c as any).text;
     }
   }
   if (!cardData.deep_dive) cardData.deep_dive = specAny.deep_dive || null;
@@ -350,7 +351,12 @@ function FeedCard({
       }}>
         {/* Rating stars — simplified to heart+fire for visual clarity */}
         <button
-          onClick={() => onRate(item.screen_spec_db_id, currentRating === 5 ? 1 : 5)}
+          onClick={() => {
+            // TODO(IOO): "Do now" should start the IOO Execution Protocol for
+            // this node/action, then write the completion/result back as graph
+            // refinement. Rating=5 is the temporary MVP signal.
+            onRate(item.screen_spec_db_id, currentRating === 5 ? 1 : 5);
+          }}
           style={{
             width: 48, height: 48, borderRadius: 24,
             background: currentRating >= 4
@@ -368,7 +374,7 @@ function FeedCard({
           {currentRating >= 4 ? '♥' : '♡'}
         </button>
         <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.3)', fontWeight: 600 }}>
-          {currentRating >= 4 ? 'Loved' : 'Like'}
+          {currentRating >= 4 ? 'Doing' : 'Do now'}
         </div>
 
         {/* Quick star rating */}
@@ -392,7 +398,11 @@ function FeedCard({
 
         {/* Save to collection */}
         <button
-          onClick={handleSave}
+          onClick={() => {
+            // TODO(IOO): treat "Do later" as an explicit resurface/scheduling
+            // signal, not only a collection save.
+            handleSave();
+          }}
           className={isSaved ? 'save-flash' : ''}
           style={{
             width: 48, height: 48, borderRadius: 24,
@@ -407,12 +417,16 @@ function FeedCard({
           {isSaved ? '✦' : '✧'}
         </button>
         <div style={{ fontSize: 10, color: isSaved ? color : 'rgba(248,248,252,0.3)', fontWeight: 600 }}>
-          {isSaved ? 'Saved' : 'Save'}
+          {isSaved ? 'Later' : 'Do later'}
         </div>
 
         {/* Skip */}
         <button
-          onClick={onSkip}
+          onClick={() => {
+            // TODO(IOO): "not interested" should down-rank/refine similar IOO
+            // graph nodes rather than simply advancing the feed.
+            onSkip();
+          }}
           style={{
             width: 44, height: 44, borderRadius: 22,
             background: 'rgba(0,0,0,0.4)',
@@ -422,6 +436,9 @@ function FeedCard({
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >✕</button>
+        <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.3)', fontWeight: 600 }}>
+          Not interested
+        </div>
       </div>
 
       {/* Bottom left: card info */}
@@ -528,17 +545,26 @@ export default function FeedPage() {
       const goals = await OraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
       const batch = await OraClient.getNextScreenBatch(5, goalId);
-      setCards(batch);
+      let nextCards = batch;
+      if (!nextCards.length) {
+        const single = await OraClient.getNextScreen(undefined, goalId).catch(() => null);
+        nextCards = single ? [single] : [];
+      }
+      setCards(nextCards);
       setIndex(0);
-      if (batch.length > 0) {
-        setIsLimited(batch[batch.length - 1].is_limited);
-        setDailyLimit(batch[batch.length - 1].daily_limit);
+      if (nextCards.length > 0) {
+        setIsLimited(nextCards[nextCards.length - 1].is_limited);
+        setDailyLimit(nextCards[nextCards.length - 1].daily_limit);
+      } else {
+        setError('Ora could not prepare cards yet. Try again in a moment.');
       }
       // Send backend progress signal.
       OraClient['client'].post('/api/gamification/checkin', { reason: 'card_view' }).catch(() => {});
     } catch (e: any) {
-      if (e?.response?.status === 402) setIsLimited(true);
-      else setError(e?.response?.data?.detail || 'Failed to load feed');
+      if (e?.response?.status === 402) {
+        setIsLimited(true);
+        setError('You have explored today’s cards. We are opening the feed again now — tap retry.');
+      } else setError(e?.response?.data?.detail || 'Failed to load feed');
     } finally {
       setLoading(false);
     }
@@ -551,11 +577,18 @@ export default function FeedPage() {
     setLoadingMore(true);
     try {
       const batch = await OraClient.getNextScreenBatch(3, goalId);
-      setCards((prev) => [...prev, ...batch]);
-      if (batch.length > 0) {
-        setIsLimited(batch[batch.length - 1].is_limited);
-        setDailyLimit(batch[batch.length - 1].daily_limit);
+      let nextCards = batch;
+      if (!nextCards.length) {
+        const single = await OraClient.getNextScreen(undefined, goalId).catch(() => null);
+        nextCards = single ? [single] : [];
       }
+      if (nextCards.length > 0) {
+        setCards((prev) => [...prev, ...nextCards]);
+        setIsLimited(nextCards[nextCards.length - 1].is_limited);
+        setDailyLimit(nextCards[nextCards.length - 1].daily_limit);
+      }
+    } catch (e: any) {
+      if (e?.response?.status === 402) setIsLimited(true);
     } finally {
       setLoadingMore(false);
     }
@@ -689,20 +722,36 @@ export default function FeedPage() {
     );
   }
 
-  // If user has no goals and feed is empty, prompt to set a goal
-  if (!cards.length && hasGoals === false) {
-    navigate('/goals');
-    return null;
-  }
-
   if (!cards.length) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 16, padding: 24 }}>
-        <div style={{ fontSize: 40 }}>◈</div>
-        <div style={{ fontWeight: 700, fontSize: 18 }}>Nothing yet</div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 16, padding: 24, textAlign: 'center' }}>
+        <div style={{ fontSize: 40 }}>{isLimited ? '✨' : '◈'}</div>
+        <div style={{ fontWeight: 700, fontSize: 18 }}>{isLimited ? 'Cards are refreshing' : 'Preparing your first card'}</div>
         <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', textAlign: 'center' }}>
-          Ora's preparing your first cards…
+          {isLimited
+            ? 'Ora hit a temporary feed limit. Retry now — the feed should reopen.'
+            : hasGoals === false
+              ? 'You can set a goal, or retry and Ora will suggest a discovery card.'
+              : 'Ora returned an empty batch. Retry will request a single fallback card.'}
         </div>
+        {hasGoals === false && (
+          <button
+            onClick={() => navigate('/goals')}
+            style={{
+              marginTop: 12,
+              background: 'linear-gradient(135deg, #00d4aa, #00b896)',
+              border: 'none',
+              color: '#0a0a0f',
+              padding: '10px 24px',
+              borderRadius: 24,
+              fontSize: 14,
+              fontWeight: 800,
+              cursor: 'pointer',
+            }}
+          >
+            Set a goal →
+          </button>
+        )}
         <button
           onClick={() => loadInitial()}
           style={{
