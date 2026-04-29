@@ -402,19 +402,9 @@ export default function ProfilePage() {
               <span style={{ fontSize: 24 }}>📱</span>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>iDo Android App</div>
-                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.5)', marginTop: 2 }}>Download the native app for the best experience</div>
+                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.5)', marginTop: 2 }}>Add to your home screen for the best experience</div>
               </div>
             </div>
-            <a
-              href="https://github.com/AvielCarlos/connectome-backend/releases/download/v0.1.0-alpha/iDo-debug.apk"
-              style={{
-                display: 'inline-block', background: '#16a34a', color: '#fff',
-                padding: '9px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
-                textDecoration: 'none',
-              }}
-            >
-              Download APK ↓
-            </a>
           </div>
 
           <button onClick={handleLogout} style={{
