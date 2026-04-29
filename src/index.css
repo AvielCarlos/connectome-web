@@ -263,9 +263,9 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 @media (max-width: 1023px) {
   .hidden-mobile  { display: none !important; }
-  .show-mobile    { display: flex !important; }
+  .show-mobile    { display: block !important; }
   .show-desktop   { display: none !important; }
-  .hidden-desktop { display: flex !important; }
+  .hidden-desktop { display: block !important; }
 }
 
 /* ─── Swipe card transition (vertical) ─────────────────────────────── */

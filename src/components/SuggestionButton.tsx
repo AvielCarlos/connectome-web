@@ -96,8 +96,8 @@ export default function SuggestionButton() {
         title="Share a suggestion with Ora (+5 CP)"
         style={{
           position: 'fixed',
-          bottom: 88,
-          right: 20,
+          top: 12,
+          right: 16,
           width: 52,
           height: 52,
           borderRadius: 26,
