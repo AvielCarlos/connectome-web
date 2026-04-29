@@ -238,8 +238,9 @@ export function NavBar() {
           <div style={{
             display: 'flex',
             alignItems: 'flex-end',
-            paddingLeft: 4,
-            paddingRight: 4,
+            width: '100%',
+            paddingLeft: 0,
+            paddingRight: 0,
           }}>
             {MOBILE_TABS.map((tab) => {
               const isActive = location.pathname === tab.path ||
