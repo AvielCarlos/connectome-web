@@ -39,7 +39,8 @@ function App() {
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           {/* Google OAuth callback — must be accessible without auth */}
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
-          <Route path="/feed"    element={<ProtectedRoute><LandingRouter /></ProtectedRoute>} />
+          <Route path="/feed"    element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
+          <Route path="/discover" element={<ProtectedRoute><LandingRouter /></ProtectedRoute>} />
           <Route path="/goals"   element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
           <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
           <Route path="/ora"     element={<ProtectedRoute><OraPage /></ProtectedRoute>} />

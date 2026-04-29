@@ -51,6 +51,20 @@ export function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [navVisible, setNavVisible] = useState(true);
+  const [moreMenu, setMoreMenu] = useState<'me' | 'map' | null>(null);
+
+  // More menu items for Me tab
+  const ME_MORE = [
+    { path: '/dao',      icon: '🏛', label: 'DAO & Contributions' },
+    { path: '/services', icon: '⚡', label: 'Services' },
+    { path: '/journal',  icon: '✍', label: 'Journal' },
+    { path: '/home',     icon: '◉', label: 'Home' },
+  ];
+
+  const MAP_MORE = [
+    { path: '/ioo',      icon: '🗺', label: 'IOO Map' },
+    { path: '/goals',    icon: '◎', label: 'Goals' },
+  ];
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
@@ -175,6 +189,34 @@ export function NavBar() {
         </div>
       </nav>
 
+      {/* More menu popover */}
+      {moreMenu && (
+        <div className="show-mobile" onClick={() => setMoreMenu(null)} style={{
+          position: 'fixed', inset: 0, zIndex: 150,
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+        }}>
+          <div onClick={(e: React.MouseEvent) => e.stopPropagation()} style={{
+            position: 'absolute', bottom: 80, right: 16,
+            background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 16, overflow: 'hidden', minWidth: 220,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          }}>
+            {(moreMenu === 'me' ? ME_MORE : MAP_MORE).map((item, i, arr) => (
+              <button key={item.path} onClick={() => { navigate(item.path); setMoreMenu(null); }} style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                padding: '14px 18px', background: 'none', border: 'none',
+                borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                color: '#f8f8fc', fontSize: 15, fontWeight: 500, cursor: 'pointer',
+                textAlign: 'left' as const,
+              }}>
+                <span style={{ fontSize: 20 }}>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Mobile Bottom Nav — WeChat 5-tab pattern ─────────────────────── */}
       <div className="show-mobile" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
@@ -236,10 +278,13 @@ export function NavBar() {
 
               if ((tab as any).isProfile) {
                 return (
-                  <NavLink key={tab.path} to={tab.path} style={{
-                    flex: 1,
+                  <button key={tab.path} onClick={() => {
+                    if (isActive) { setMoreMenu(moreMenu === 'me' ? null : 'me'); }
+                    else { navigate(tab.path); setMoreMenu(null); }
+                  }} style={{
+                    flex: 1, background: 'none', border: 'none', cursor: 'pointer',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    gap: 4, textDecoration: 'none', padding: '10px 4px 10px',
+                    gap: 4, padding: '10px 4px 10px',
                     position: 'relative',
                   }}>
                     {/* Active indicator dot */}
@@ -264,8 +309,8 @@ export function NavBar() {
                     <span style={{
                       fontSize: 10, fontWeight: isActive ? 700 : 500, letterSpacing: 0.3,
                       color: isActive ? '#f8f8fc' : 'rgba(248,248,252,0.35)',
-                    }}>{tab.label}</span>
-                  </NavLink>
+                    }}>{tab.label}{moreMenu === 'me' ? ' ▲' : isActive ? ' ⋯' : ''}</span>
+                  </button>
                 );
               }
 
