@@ -2,8 +2,8 @@
  * HomePage — iDo's philosophical entry point.
  *
  * Two paths, every session:
- *   "I know what I want" → full goal creation + breakdown + directed feed
- *   "Show me what to do" → exploratory feed (A/B intake depth: deep / instant / one_q)
+ *   "I know what I want to do" → Ora goal creation/clarification + directed feed
+ *   "I don't know what I want to do" → randomized/recommended IOO feed discovery
  *
  * "I know" path also A/B tested:
  *   Variant A (immediate): straight to input
@@ -90,6 +90,7 @@ export default function HomePage() {
   const [view, setView] = useState<HomeView>('choice');
   const [knowVariant, setKnowVariant] = useState<'immediate' | 'clarifying'>('immediate');
   const [exploreVariant, setExploreVariant] = useState<'deep' | 'instant' | 'one_q'>('instant');
+  const [selectedChoice, setSelectedChoice] = useState<'know' | 'explore' | null>(null);
 
   // Goal input state
   const [goalInput, setGoalInput] = useState('');
@@ -130,19 +131,25 @@ export default function HomePage() {
 
   const handleKnow = () => {
     OraClient.trackAbEvent('home_session_v1', 'know', 'home_choice').catch(() => {});
-    setView('goal-input');
+    setSelectedChoice('know');
+    // TODO(IOO): persist this low-friction selection into the user preference
+    // vector/profile. Avoid typed questionnaires; learn from taps/swipes over time.
+    setTimeout(() => setView('goal-input'), 180);
   };
 
   const handleExplore = () => {
     OraClient.trackAbEvent('home_session_v1', 'explore', 'home_choice').catch(() => {});
+    setSelectedChoice('explore');
+    // TODO(IOO): seed randomized/recommended discovery using the user's current
+    // IOO vector, then refine it from not interested / do later / do now taps.
 
     if (exploreVariant === 'instant') {
       OraClient.trackAbEvent('home_intake_v1', 'instant', 'intake_depth').catch(() => {});
-      navigate('/feed');
+      setTimeout(() => navigate('/feed'), 180);
       return;
     }
 
-    setView(exploreVariant === 'deep' ? 'intake-deep' : 'intake-one-q');
+    setTimeout(() => setView(exploreVariant === 'deep' ? 'intake-deep' : 'intake-one-q'), 180);
   };
 
   const handleGoalSubmit = async () => {
@@ -548,12 +555,13 @@ export default function HomePage() {
           iconBorder="rgba(139,92,246,0.3)"
           accentColor="rgba(139,92,246,0.5)"
           hoverBorder="rgba(139,92,246,0.4)"
-          title="I know what I want"
+          title="I know what I want to do"
           subtitle="Tell Ora your goal. She builds your path and gets you moving."
           onClick={handleKnow}
+          selected={selectedChoice === 'know'}
         />
 
-        {/* ── "Show me what to do" card ── */}
+        {/* ── "I don't know what I want to do" card ── */}
         <ChoiceCard
           icon="◈"
           iconColor="#00d4aa"
@@ -561,9 +569,10 @@ export default function HomePage() {
           iconBorder="rgba(0,212,170,0.25)"
           accentColor="rgba(0,212,170,0.4)"
           hoverBorder="rgba(0,212,170,0.4)"
-          title="Show me what to do"
+          title="I don't know what I want to do"
           subtitle="Ora reads the moment and picks what's right for you, right now."
           onClick={handleExplore}
+          selected={selectedChoice === 'explore'}
         />
       </div>
 
@@ -595,11 +604,12 @@ interface ChoiceCardProps {
   title: string;
   subtitle: string;
   onClick: () => void;
+  selected?: boolean;
 }
 
 function ChoiceCard({
   icon, iconColor, iconBg, iconBorder, accentColor, hoverBorder,
-  title, subtitle, onClick,
+  title, subtitle, onClick, selected = false,
 }: ChoiceCardProps) {
   const [hovered, setHovered] = useState(false);
 
@@ -609,8 +619,8 @@ function ChoiceCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.04)',
-        border: `1px solid ${hovered ? hoverBorder : 'rgba(255,255,255,0.1)'}`,
+        background: selected ? `${iconColor}14` : hovered ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${selected ? iconColor : hovered ? hoverBorder : 'rgba(255,255,255,0.1)'}`,
         borderRadius: 16,
         padding: '24px 20px',
         textAlign: 'left',
@@ -619,9 +629,15 @@ function ChoiceCard({
         position: 'relative',
         overflow: 'hidden',
         transform: hovered ? 'translateY(-1px)' : 'none',
-        boxShadow: hovered ? `0 8px 32px rgba(0,0,0,0.3)` : 'none',
+        boxShadow: selected ? `0 0 32px ${iconColor}33` : hovered ? `0 8px 32px rgba(0,0,0,0.3)` : 'none',
       }}
     >
+      {selected && (
+        <div style={{
+          position: 'absolute', right: 14, top: 14,
+          color: iconColor, fontSize: 18, fontWeight: 900,
+        }}>✓</div>
+      )}
       {/* Left accent line */}
       <div style={{
         position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
