@@ -17,10 +17,10 @@ type AiosState = {
 };
 
 export const CONNECTOME_APPS: ConnectomeApp[] = [
-  { path: '/app/ido', icon: '🚀', name: 'iDo', description: 'Adventure, discovery, and what to do next.' },
-  { path: 'https://aventi.app', icon: '🎉', name: 'Aventi', description: 'Events & Adventures', external: true },
-  { path: '/app/ivive', icon: '🌱', name: 'iVive', description: 'Vitality & Wellbeing' },
-  { path: '/app/eviva', icon: '🌊', name: 'Eviva', description: 'Best of the World' },
+  { path: '/app/ido', icon: '🚀', name: 'iDo', description: 'Daily life surface for what to do next on Connectome.' },
+  { path: 'https://aventi.app', icon: '🎉', name: 'Aventi', description: 'Experience-discovery domain running on Connectome.', external: true },
+  { path: '/app/ivive', icon: '🌱', name: 'iVive', description: 'Vitality domain running on Connectome.' },
+  { path: '/app/eviva', icon: '🌊', name: 'Eviva', description: 'Civilization-serving domain running on Connectome.' },
   { path: '/app/goals', icon: '🎯', name: 'Goals', description: 'Your IOO path, broken into living quests.' },
   { path: '/app/dao', icon: '🏛️', name: 'DAO', description: 'Contribute, coordinate, and earn CP.' },
   { path: '/app/journal', icon: '📓', name: 'Journal', description: 'Reflection, memory, and pattern discovery.' },
@@ -75,8 +75,8 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
   return (
     <section className="app-launcher" aria-label="Connectome app launcher">
       <div className="app-launcher__intro">
-        <span>Applications</span>
-        <h2>Choose where Connectome should focus.</h2>
+        <span>Running on Connectome AIOS</span>
+        <h2>Choose which domain of human activity Connectome should focus.</h2>
         {aiosState.ora_mission_statement && (
           <p className="app-launcher__mission">{aiosState.ora_mission_statement}</p>
         )}

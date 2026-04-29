@@ -8,14 +8,14 @@ interface OraOverlayProps {
   onClose: () => void;
 }
 
-const quickActions = ['Show my path', 'What should I do today?', 'How am I doing?'];
+const quickActions = ['Navigate my path', "What's my IOO next step?", 'Show my life map'];
 
 export default function OraOverlay({ open, onClose }: OraOverlayProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'opening',
       role: 'ora',
-      content: "I'm here. Ask me anything, or choose a signal below and I'll orient the whole OS around it.",
+      content: "I'm Ora — the brain of Connectome. Ask me anything, or choose a signal below and I'll orient the AI OS around it.",
     },
   ]);
   const [input, setInput] = useState('');
@@ -81,8 +81,8 @@ export default function OraOverlay({ open, onClose }: OraOverlayProps) {
           <div className="ora-overlay__identity">
             <span className="ora-orb ora-orb--large" />
             <div>
-              <div className="ora-overlay__eyebrow">OS-level intelligence</div>
-              <h2>Ora</h2>
+              <div className="ora-overlay__eyebrow">Ora · Connectome AI OS</div>
+              <h2>Ora — Brain of Connectome</h2>
             </div>
           </div>
           <button className="ora-overlay__close" type="button" onClick={onClose} aria-label="Close Ora">×</button>
