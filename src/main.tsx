@@ -1,24 +1,28 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './components/Toast'
-import AuthPage from './pages/AuthPage'
-import AuthCallbackPage from './pages/AuthCallbackPage'
-import FeedPage from './pages/FeedPage'
-import LandingRouter from './pages/LandingRouter'
-import GoalsPage from './pages/GoalsPage'
-import JournalPage from './pages/JournalPage'
-import OraPage from './pages/OraPage'
-import DAOPage from './pages/DAOPage'
-import ServicesPage from './pages/ServicesPage'
-import ProfilePage from './pages/ProfilePage'
-import SurfacePage from './pages/SurfacePage'
-import HomePage from './pages/HomePage'
-import IOOPage from './pages/IOOPage'
 import { NavBar } from './components/NavBar'
 import SuggestionButton from './components/SuggestionButton'
 import './index.css'
+
+// Eagerly load auth pages (small, needed immediately)
+import AuthPage from './pages/AuthPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
+
+// Lazy-load all app pages for route-level code splitting
+const FeedPage = lazy(() => import('./pages/FeedPage'))
+const LandingRouter = lazy(() => import('./pages/LandingRouter'))
+const GoalsPage = lazy(() => import('./pages/GoalsPage'))
+const JournalPage = lazy(() => import('./pages/JournalPage'))
+const OraPage = lazy(() => import('./pages/OraPage'))
+const DAOPage = lazy(() => import('./pages/DAOPage'))
+const ServicesPage = lazy(() => import('./pages/ServicesPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const SurfacePage = lazy(() => import('./pages/SurfacePage'))
+const HomePage = lazy(() => import('./pages/HomePage'))
+const IOOPage = lazy(() => import('./pages/IOOPage'))
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
@@ -31,22 +35,24 @@ function App() {
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: '#f8f8fc' }}>
       {isAuthenticated && <NavBar />}
       {isAuthenticated && <SuggestionButton />}
-      <Routes>
-        <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />} />
-        <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-        {/* Google OAuth callback — must be accessible without auth */}
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route path="/feed"    element={<ProtectedRoute><LandingRouter /></ProtectedRoute>} />
-        <Route path="/goals"   element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
-        <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
-        <Route path="/ora"     element={<ProtectedRoute><OraPage /></ProtectedRoute>} />
-        <Route path="/dao"      element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
-        <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
-        <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/ioo"      element={<ProtectedRoute><IOOPage /></ProtectedRoute>} />
-        {/* WebSpawn surfaces — auth-gated but accessible via direct link */}
-        <Route path="/surfaces/:surfaceId" element={<SurfacePage />} />
-      </Routes>
+      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', color: '#888' }}>Loading…</div>}>
+        <Routes>
+          <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />} />
+          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          {/* Google OAuth callback — must be accessible without auth */}
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/feed"    element={<ProtectedRoute><LandingRouter /></ProtectedRoute>} />
+          <Route path="/goals"   element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
+          <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
+          <Route path="/ora"     element={<ProtectedRoute><OraPage /></ProtectedRoute>} />
+          <Route path="/dao"      element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
+          <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
+          <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/ioo"      element={<ProtectedRoute><IOOPage /></ProtectedRoute>} />
+          {/* WebSpawn surfaces — auth-gated but accessible via direct link */}
+          <Route path="/surfaces/:surfaceId" element={<SurfacePage />} />
+        </Routes>
+      </Suspense>
     </div>
   )
 }
