@@ -47,6 +47,11 @@ export default function ProfilePage() {
   const [evolutionProposals, setEvolutionProposals] = useState<any[]>([]);
   const [evolutionProposalsLoading, setEvolutionProposalsLoading] = useState(false);
 
+  // ── A/B hooks must be BEFORE any conditional returns (Rules of Hooks) ──
+  const { variant: upgradeHeadlineVariant, trackEvent: trackUpgradeHeadline } = useExperiment('upgrade_headline');
+  const { variant: priceDisplayVariant } = useExperiment('upgrade_price_display');
+  const { variant: ctaButtonVariant, trackEvent: trackUpgradeCTA } = useExperiment('upgrade_cta_button');
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -249,14 +254,6 @@ export default function ProfilePage() {
 
   const tier = profile?.subscription_tier || 'free';
   const tierColor = tier === 'sovereign' ? '#a855f7' : tier === 'explorer' ? '#3b82f6' : '#6b7280';
-
-  // ─── A/B experiments (upgrade paywall) ───────────────────────────────────
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { variant: upgradeHeadlineVariant, trackEvent: trackUpgradeHeadline } = useExperiment('upgrade_headline');
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { variant: priceDisplayVariant } = useExperiment('upgrade_price_display');
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { variant: ctaButtonVariant, trackEvent: trackUpgradeCTA } = useExperiment('upgrade_cta_button');
 
   const UPGRADE_HEADLINES: Record<string, string> = {
     A: 'Unlock the full Ora',
