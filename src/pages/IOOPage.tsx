@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import MiniAppSurface, { SurfaceSpec } from '../components/MiniAppSurface'
 
 const API = 'https://connectome-api-production.up.railway.app'
 
@@ -181,6 +182,8 @@ export default function IOOPage() {
   const [seedDone, setSeedDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [startedNode, setStartedNode] = useState<string | null>(null)
+  const [activeSurface, setActiveSurface] = useState<(SurfaceSpec & { id: string }) | null>(null)
+  const [surfaceLoading, setSurfaceLoading] = useState(false)
 
   const authHeaders = { Authorization: `Bearer ${token}` }
 
@@ -232,8 +235,10 @@ export default function IOOPage() {
   }
 
   async function handleStart(node: IOONode, goalId: string) {
+    setSurfaceLoading(true)
     setStartedNode(node.id)
     try {
+      // Record progress start
       await fetch(`${API}/api/ioo/progress`, {
         method: 'POST',
         headers: { ...authHeaders, 'Content-Type': 'application/json' },
@@ -241,17 +246,37 @@ export default function IOOPage() {
           node_id: node.id,
           goal_id: goalId || undefined,
           status: 'started',
-          surface_type: 'feed_card',
+          surface_type: 'mini_app',
         }),
       })
-      // Check if there's a surface for this node
+
+      // Check for existing active surface
       const surfRes = await fetch(`${API}/api/ioo/surfaces/${node.id}`, { headers: authHeaders })
       const surfData = await surfRes.json()
-      const surface = (surfData.surfaces || [])[0]
+      let surface = (surfData.surfaces || [])[0]
+
+      if (!surface) {
+        // Spawn a new surface
+        const spawnRes = await fetch(`${API}/api/ioo/surfaces/${node.id}`, {
+          method: 'POST',
+          headers: { ...authHeaders, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ surface_type: 'info_card' }),
+        })
+        if (spawnRes.ok) {
+          surface = await spawnRes.json()
+        }
+      }
+
       if (surface) {
-        navigate(`/surfaces/${surface.id}`)
+        // Merge spec fields with surface-level fields
+        const spec = surface.spec || surface
+        setActiveSurface({
+          ...spec,
+          id: surface.id || spec.id,
+          title: surface.title || spec.title || node.title,
+        })
       } else {
-        // Briefly show started state then reload
+        // No surface available — briefly show started then reload
         setTimeout(() => {
           setStartedNode(null)
           loadData()
@@ -259,7 +284,21 @@ export default function IOOPage() {
       }
     } catch {
       setStartedNode(null)
+    } finally {
+      setSurfaceLoading(false)
+      if (!activeSurface) setStartedNode(null)
     }
+  }
+
+  function handleSurfaceClose() {
+    setActiveSurface(null)
+    setStartedNode(null)
+  }
+
+  function handleSurfaceComplete() {
+    setActiveSurface(null)
+    setStartedNode(null)
+    loadData()
   }
 
   useEffect(() => {
@@ -431,21 +470,28 @@ export default function IOOPage() {
         </div>
       )}
 
-      {/* Started overlay */}
-      {startedNode && (
+      {/* Loading overlay while spawning surface */}
+      {surfaceLoading && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 200,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(10,10,15,0.85)',
+          background: 'rgba(10,10,15,0.75)',
         }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>🚀</div>
-            <div style={{ fontWeight: 800, fontSize: 20, color: '#00d4aa' }}>Started!</div>
-            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginTop: 8 }}>
-              Ora is tracking your progress.
-            </div>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>⚙️</div>
+            <div style={{ fontWeight: 700, fontSize: 16, color: '#00d4aa' }}>Preparing your surface…</div>
           </div>
         </div>
+      )}
+
+      {/* MiniApp surface bottom sheet */}
+      {activeSurface && (
+        <MiniAppSurface
+          surface={activeSurface}
+          token={token as string}
+          onClose={handleSurfaceClose}
+          onComplete={handleSurfaceComplete}
+        />
       )}
     </div>
   )
