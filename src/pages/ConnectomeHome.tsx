@@ -52,7 +52,7 @@ export default function ConnectomeHome() {
       </section>
 
       <section className="connectome-home__apps" aria-label="Apps">
-        {CONNECTOME_APPS.filter((app) => !app.soon).slice(0, 5).map((app) => (
+        {CONNECTOME_APPS.filter((app) => !app.soon && !app.external).slice(0, 5).map((app) => (
           <button key={app.name} type="button" onClick={() => navigate(app.path)}>
             <span>{app.icon}</span>
             <strong>{app.name}</strong>

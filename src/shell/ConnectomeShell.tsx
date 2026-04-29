@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AppLauncher from './AppLauncher';
@@ -6,7 +6,7 @@ import OraOverlay from './OraOverlay';
 
 interface ConnectomeShellProps {
   children: React.ReactNode;
-  activeApp?: 'home' | 'ido' | 'goals' | 'dao' | 'contribute' | 'journal' | 'profile' | 'services' | 'ioo';
+  activeApp?: 'home' | 'ido' | 'goals' | 'dao' | 'contribute' | 'journal' | 'profile' | 'services' | 'ioo' | 'ivive' | 'eviva';
 }
 
 const appLabels: Record<string, string> = {
@@ -18,6 +18,8 @@ const appLabels: Record<string, string> = {
   profile: 'Profile',
   services: 'Services',
   ioo: 'IOO Map',
+  ivive: 'iVive',
+  eviva: 'Eviva',
 };
 
 const dockItems = [
@@ -41,6 +43,12 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
 
   const closeApps = () => setLauncherOpen(false);
   const toggleApps = () => setLauncherOpen((open) => !open);
+
+  useEffect(() => {
+    const openOra = () => setOraOpen(true);
+    window.addEventListener('connectome:open-ora', openOra);
+    return () => window.removeEventListener('connectome:open-ora', openOra);
+  }, []);
 
   const handleDock = (item: typeof dockItems[number]) => {
     if (item.id === 'ora') {

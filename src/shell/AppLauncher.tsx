@@ -1,25 +1,74 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { OraClient } from '../lib/OraClient';
 
-export const CONNECTOME_APPS = [
+type ConnectomeApp = {
+  path: string;
+  icon: string;
+  name: string;
+  description: string;
+  soon?: boolean;
+  external?: boolean;
+};
+
+type AiosState = {
+  featured_apps?: string[];
+  ora_mission_statement?: string;
+};
+
+export const CONNECTOME_APPS: ConnectomeApp[] = [
   { path: '/app/ido', icon: '🚀', name: 'iDo', description: 'Adventure, discovery, and what to do next.' },
+  { path: 'https://aventi.app', icon: '🎉', name: 'Aventi', description: 'Events & Adventures', external: true },
+  { path: '/app/ivive', icon: '🌱', name: 'iVive', description: 'Vitality & Wellbeing' },
+  { path: '/app/eviva', icon: '🌊', name: 'Eviva', description: 'Best of the World' },
   { path: '/app/goals', icon: '🎯', name: 'Goals', description: 'Your IOO path, broken into living quests.' },
   { path: '/app/dao', icon: '🏛️', name: 'DAO', description: 'Contribute, coordinate, and earn CP.' },
   { path: '/app/journal', icon: '📓', name: 'Journal', description: 'Reflection, memory, and pattern discovery.' },
   { path: '/app/profile', icon: '👤', name: 'Profile', description: 'Identity, stats, streaks, and sovereignty.' },
-  { path: '/app/ivive', icon: '🌱', name: 'iVive', description: 'Biometrics and vitality signals. Coming soon.', soon: true },
 ];
 
 interface AppLauncherProps {
   onLaunch?: () => void;
 }
 
+const DEFAULT_FEATURED_APPS = ['iDo', 'Aventi', 'iVive', 'Eviva'];
+
 export default function AppLauncher({ onLaunch }: AppLauncherProps) {
   const navigate = useNavigate();
+  const [aiosState, setAiosState] = useState<AiosState>({ featured_apps: DEFAULT_FEATURED_APPS });
 
-  const launch = (path: string, soon?: boolean) => {
-    if (soon) return;
-    navigate(path);
+  useEffect(() => {
+    let cancelled = false;
+    OraClient.get<AiosState>('/api/system/aios-state')
+      .then((state) => {
+        if (!cancelled) setAiosState(state);
+      })
+      .catch(() => {
+        if (!cancelled) setAiosState({ featured_apps: DEFAULT_FEATURED_APPS });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const featuredApps = aiosState.featured_apps?.length ? aiosState.featured_apps : DEFAULT_FEATURED_APPS;
+  const orderedApps = useMemo(() => {
+    const rank = new Map(featuredApps.map((name, index) => [name.toLowerCase(), index]));
+    return [...CONNECTOME_APPS].sort((a, b) => {
+      const aRank = rank.get(a.name.toLowerCase()) ?? 999;
+      const bRank = rank.get(b.name.toLowerCase()) ?? 999;
+      if (aRank !== bRank) return aRank - bRank;
+      return CONNECTOME_APPS.indexOf(a) - CONNECTOME_APPS.indexOf(b);
+    });
+  }, [featuredApps]);
+
+  const launch = (app: ConnectomeApp) => {
+    if (app.external) {
+      window.open(app.path, '_blank', 'noopener,noreferrer');
+      onLaunch?.();
+      return;
+    }
+    navigate(app.path);
     onLaunch?.();
   };
 
@@ -28,22 +77,29 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
       <div className="app-launcher__intro">
         <span>Applications</span>
         <h2>Choose where Connectome should focus.</h2>
+        {aiosState.ora_mission_statement && (
+          <p className="app-launcher__mission">{aiosState.ora_mission_statement}</p>
+        )}
       </div>
       <div className="app-launcher__grid">
-        {CONNECTOME_APPS.map((app) => (
-          <button
-            key={app.name}
-            type="button"
-            className="app-launcher__card"
-            onClick={() => launch(app.path, app.soon)}
-            aria-disabled={app.soon}
-          >
-            <span className="app-launcher__icon">{app.icon}</span>
-            <span className="app-launcher__name">{app.name}</span>
-            <span className="app-launcher__description">{app.description}</span>
-            {app.soon && <span className="app-launcher__soon">More coming</span>}
-          </button>
-        ))}
+        {orderedApps.map((app) => {
+          const featuredIndex = featuredApps.findIndex((name) => name.toLowerCase() === app.name.toLowerCase());
+          const isFeatured = featuredIndex >= 0 && featuredIndex <= 1;
+          return (
+            <button
+              key={app.name}
+              type="button"
+              className={`app-launcher__card ${isFeatured ? 'app-launcher__card--featured' : ''}`}
+              onClick={() => launch(app)}
+            >
+              {isFeatured && <span className="app-launcher__featured-badge">Featured</span>}
+              <span className="app-launcher__icon">{app.icon}</span>
+              <span className="app-launcher__name">{app.name}</span>
+              <span className="app-launcher__description">{app.description}</span>
+              {app.external && <span className="app-launcher__soon">Opens externally</span>}
+            </button>
+          );
+        })}
       </div>
     </section>
   );
