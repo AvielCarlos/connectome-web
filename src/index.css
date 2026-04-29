@@ -350,3 +350,482 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   background-size: 200% 200%;
   animation: gradShimmer 5s ease infinite;
 }
+
+/* ─── Connectome AIOS shell ───────────────────────────────────────── */
+:root {
+  --bg: #060610;
+  --surface: rgba(16, 17, 31, 0.78);
+  --surface2: rgba(27, 29, 50, 0.76);
+  --border: rgba(255, 255, 255, 0.1);
+  --bottom-nav-height: 92px;
+  --top-header-height: 72px;
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% -15%, rgba(0, 212, 170, 0.18), transparent 34rem),
+    radial-gradient(circle at 12% 20%, rgba(99, 102, 241, 0.14), transparent 28rem),
+    #060610;
+  font-size: clamp(15px, 2.2vw, 17px);
+}
+
+.connectome-shell {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+  overflow-x: hidden;
+  color: #f8f8fc;
+  background:
+    linear-gradient(180deg, rgba(6, 6, 16, 0.58), #060610 48%),
+    radial-gradient(circle at 82% 18%, rgba(0, 212, 170, 0.12), transparent 24rem);
+}
+
+.connectome-stars {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.42;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.42) 1px, transparent 1px),
+    radial-gradient(circle, rgba(0,212,170,0.28) 1px, transparent 1px);
+  background-size: 68px 68px, 113px 113px;
+  background-position: 0 0, 24px 36px;
+}
+
+.connectome-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  height: var(--top-header-height);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: max(10px, env(safe-area-inset-top)) 18px 10px;
+  background: linear-gradient(180deg, rgba(6, 6, 16, 0.92), rgba(6, 6, 16, 0.58));
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.connectome-brand,
+.connectome-ora-indicator,
+.connectome-status button,
+.connectome-dock__item {
+  background: transparent;
+  color: inherit;
+}
+
+.connectome-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  min-height: 44px;
+  text-align: left;
+}
+
+.connectome-brand__glyph {
+  width: 38px;
+  height: 38px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(0,212,170,0.34);
+  background: rgba(0,212,170,0.08);
+  box-shadow: 0 0 26px rgba(0,212,170,0.14);
+  color: #00d4aa;
+  font-size: 22px;
+}
+
+.connectome-brand strong { display: block; font-size: 16px; letter-spacing: -0.04em; }
+.connectome-brand small { display: block; margin-top: 1px; color: rgba(248,248,252,0.42); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
+
+.connectome-ora-indicator {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.035);
+  color: rgba(248,248,252,0.72);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.ora-orb {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  display: inline-block;
+  background: radial-gradient(circle at 35% 30%, #eafffb, #00d4aa 38%, #0d7768 74%);
+  box-shadow: 0 0 18px rgba(0,212,170,0.9), 0 0 44px rgba(0,212,170,0.35);
+  animation: oraPulse 2.8s ease-in-out infinite;
+}
+
+.ora-orb--large { width: 34px; height: 34px; }
+.ora-orb--small { width: 22px; height: 22px; }
+
+@keyframes oraPulse {
+  0%, 100% { transform: scale(1); filter: saturate(1); opacity: 0.82; }
+  50% { transform: scale(1.18); filter: saturate(1.4); opacity: 1; }
+}
+
+.connectome-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.connectome-xp,
+.connectome-bell,
+.connectome-avatar {
+  min-height: 38px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.04) !important;
+}
+
+.connectome-xp {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  color: #00d4aa;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.connectome-bell { width: 38px; }
+.connectome-avatar { width: 38px; color: #f8f8fc; font-weight: 900; }
+
+.connectome-main {
+  position: relative;
+  min-height: 100vh;
+  padding: calc(var(--top-header-height) + 18px) clamp(16px, 4vw, 44px) calc(var(--bottom-nav-height) + 28px);
+}
+
+.connectome-main--ido {
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+}
+
+.connectome-app-titlebar {
+  position: fixed;
+  top: calc(var(--top-header-height) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 35;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(8, 9, 20, 0.72);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.28);
+}
+
+.connectome-app-titlebar span { font-weight: 900; letter-spacing: -0.02em; }
+.connectome-app-titlebar small { color: rgba(248,248,252,0.48); font-size: 12px; white-space: nowrap; }
+
+.connectome-dock {
+  position: fixed;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 95;
+  transform: translateX(-50%);
+  width: min(520px, calc(100vw - 24px));
+  height: 72px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 8px;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(10, 11, 24, 0.74);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: 0 18px 70px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.connectome-dock__item {
+  min-height: 54px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: rgba(248,248,252,0.5);
+}
+
+.connectome-dock__item span { font-size: 21px; line-height: 1; }
+.connectome-dock__item small { font-size: 10px; font-weight: 700; letter-spacing: 0.02em; }
+
+.connectome-dock__item--active,
+.connectome-dock__item:hover {
+  color: #f8f8fc;
+  background: rgba(0,212,170,0.1);
+  box-shadow: 0 0 28px rgba(0,212,170,0.18), inset 0 0 0 1px rgba(0,212,170,0.18);
+}
+
+.connectome-dock__item--ora span {
+  color: #00d4aa;
+  text-shadow: 0 0 18px rgba(0,212,170,0.8);
+}
+
+.connectome-signout {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 20;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(248,248,252,0.24);
+  font-size: 11px;
+}
+
+.connectome-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: rgba(248,248,252,0.54);
+  background: #060610;
+}
+
+.connectome-home {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 24px;
+}
+
+.connectome-home__hero {
+  min-height: 34vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(26px, 6vw, 64px);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 36px;
+  background:
+    radial-gradient(circle at 75% 25%, rgba(0,212,170,0.22), transparent 20rem),
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
+  box-shadow: 0 24px 90px rgba(0,0,0,0.28);
+}
+
+.connectome-home__signal,
+.connectome-home__highlight span,
+.connectome-home__activity span,
+.app-launcher__intro span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #00d4aa;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.connectome-home h1 {
+  margin-top: 18px;
+  max-width: 780px;
+  font-size: clamp(38px, 8vw, 82px);
+  line-height: 0.94;
+  letter-spacing: -0.08em;
+}
+
+.connectome-home__hero p {
+  margin-top: 18px;
+  color: rgba(248,248,252,0.62);
+  font-size: clamp(18px, 3vw, 24px);
+}
+
+.connectome-home__highlights {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.connectome-home__highlight,
+.connectome-home__activity,
+.app-launcher__card {
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.028));
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+}
+
+.connectome-home__highlight { padding: 22px; }
+.connectome-home__highlight h3 { margin-top: 14px; font-size: 20px; line-height: 1.18; letter-spacing: -0.04em; }
+.connectome-home__highlight p { margin-top: 10px; color: rgba(248,248,252,0.46); font-size: 14px; }
+
+.connectome-home__apps {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.connectome-home__apps button {
+  min-width: 136px;
+  min-height: 104px;
+  padding: 16px;
+  border-radius: 26px;
+  background: rgba(255,255,255,0.055);
+  color: #f8f8fc;
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.connectome-home__apps span { font-size: 28px; }
+.connectome-home__apps strong { font-size: 15px; }
+
+.connectome-home__activity { padding: 26px; }
+.connectome-home__activity h2 { margin: 8px 0 18px; letter-spacing: -0.04em; }
+.connectome-home__activity p { padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.06); color: rgba(248,248,252,0.65); }
+
+.connectome-launcher-sheet,
+.ora-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+}
+
+.connectome-launcher-sheet {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0,0,0,0.52);
+  backdrop-filter: blur(12px);
+}
+
+.connectome-launcher-sheet__panel {
+  position: relative;
+  width: min(880px, 100%);
+  max-height: min(82vh, 760px);
+  overflow: auto;
+  border-radius: 34px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(9, 10, 22, 0.92);
+  box-shadow: 0 24px 90px rgba(0,0,0,0.58);
+}
+
+.connectome-launcher-sheet__close,
+.ora-overlay__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: #f8f8fc;
+  font-size: 24px;
+}
+
+.app-launcher { padding: clamp(24px, 5vw, 42px); }
+.app-launcher__intro h2 { margin-top: 8px; font-size: clamp(28px, 5vw, 46px); line-height: 1; letter-spacing: -0.07em; }
+.app-launcher__grid { margin-top: 26px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.app-launcher__card { min-height: 188px; padding: 22px; text-align: left; color: #f8f8fc; display: flex; flex-direction: column; align-items: flex-start; }
+.app-launcher__card:hover { transform: translateY(-3px); border-color: rgba(0,212,170,0.28); }
+.app-launcher__icon { font-size: 34px; }
+.app-launcher__name { margin-top: 18px; font-size: 21px; font-weight: 900; letter-spacing: -0.04em; }
+.app-launcher__description { margin-top: 8px; color: rgba(248,248,252,0.55); font-size: 14px; line-height: 1.45; }
+.app-launcher__soon { margin-top: auto; color: #00d4aa; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.ora-overlay { display: grid; place-items: center; padding: 18px; }
+.ora-overlay__scrim { position: absolute; inset: 0; background: rgba(2,3,10,0.58); backdrop-filter: blur(16px); }
+.ora-overlay__panel {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 100%);
+  height: min(820px, calc(100vh - 36px));
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 36px;
+  background: linear-gradient(145deg, rgba(14,16,32,0.86), rgba(6,7,18,0.78));
+  backdrop-filter: blur(34px);
+  box-shadow: 0 32px 120px rgba(0,0,0,0.68), inset 0 1px 0 rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.ora-overlay__header { position: relative; padding: 18px 22px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.ora-overlay__handle { width: 44px; height: 4px; margin: 0 auto 14px; border-radius: 999px; background: rgba(255,255,255,0.24); }
+.ora-overlay__identity { display: flex; align-items: center; gap: 14px; }
+.ora-overlay__eyebrow { color: rgba(248,248,252,0.42); font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800; }
+.ora-overlay__identity h2 { margin: 2px 0 0; font-size: 30px; letter-spacing: -0.06em; }
+.ora-overlay__messages { flex: 1; overflow: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.ora-overlay__message { display: flex; align-items: flex-end; gap: 10px; }
+.ora-overlay__message > div { max-width: min(72%, 520px); padding: 13px 16px; border-radius: 20px; line-height: 1.55; font-size: 15px; }
+.ora-overlay__message--ora > div { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.08); border-bottom-left-radius: 6px; }
+.ora-overlay__message--user { justify-content: flex-end; }
+.ora-overlay__message--user > div { background: rgba(0,212,170,0.16); border: 1px solid rgba(0,212,170,0.28); border-bottom-right-radius: 6px; }
+.ora-overlay__typing { display: flex; gap: 5px; }
+.ora-overlay__typing span { width: 7px; height: 7px; border-radius: 999px; background: #00d4aa; animation: bounce 1.2s ease-in-out infinite; }
+.ora-overlay__typing span:nth-child(2) { animation-delay: 0.15s; }
+.ora-overlay__typing span:nth-child(3) { animation-delay: 0.3s; }
+.ora-overlay__quick-actions { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 14px; }
+.ora-overlay__quick-actions button { flex: 0 0 auto; min-height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.07); color: rgba(248,248,252,0.78); border: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+.ora-overlay__composer { display: flex; gap: 10px; padding: 16px 20px max(18px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,0.08); }
+.ora-overlay__composer input { border-radius: 999px; background: rgba(255,255,255,0.07); }
+.ora-overlay__composer button { min-width: 82px; border-radius: 999px; background: #00d4aa; color: #04110f; }
+
+/* Reframe legacy full-screen pages inside the AIOS chrome. */
+.feed-container {
+  top: var(--top-header-height) !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: var(--bottom-nav-height) !important;
+}
+.ora-container {
+  top: var(--top-header-height) !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: var(--bottom-nav-height) !important;
+}
+
+@media (min-width: 1024px) {
+  .app-authenticated { padding-left: 0; }
+  .feed-container,
+  .ora-container { left: 0 !important; bottom: var(--bottom-nav-height) !important; }
+}
+
+@media (max-width: 760px) {
+  .connectome-topbar { grid-template-columns: auto 1fr auto; padding-left: 12px; padding-right: 12px; }
+  .connectome-brand small,
+  .connectome-ora-indicator span:last-child,
+  .connectome-xp,
+  .connectome-app-titlebar small,
+  .connectome-signout { display: none; }
+  .connectome-brand strong { font-size: 14px; }
+  .connectome-main { padding-left: 14px; padding-right: 14px; }
+  .connectome-home__hero { min-height: 30vh; border-radius: 28px; }
+  .connectome-home__highlights,
+  .app-launcher__grid { grid-template-columns: 1fr; }
+  .connectome-home h1 { font-size: clamp(36px, 14vw, 62px); }
+  .ora-overlay { padding: 0; align-items: stretch; }
+  .ora-overlay__panel { width: 100%; height: 100%; border-radius: 0; border-left: none; border-right: none; }
+  .ora-overlay__message > div { max-width: 82%; }
+}
