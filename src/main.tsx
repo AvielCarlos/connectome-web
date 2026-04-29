@@ -3,61 +3,78 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './components/Toast'
-import { NavBar } from './components/NavBar'
-import SuggestionButton from './components/SuggestionButton'
-import OraOnboarding from './components/OraOnboarding'
+import ConnectomeShell from './shell/ConnectomeShell'
 import './index.css'
 
 // Eagerly load auth pages (small, needed immediately)
 import AuthPage from './pages/AuthPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
 import GitHubCallbackPage from './pages/GitHubCallbackPage'
+import ConnectomeHome from './pages/ConnectomeHome'
 
 // Lazy-load all app pages for route-level code splitting
 const FeedPage = lazy(() => import('./pages/FeedPage'))
-const LandingRouter = lazy(() => import('./pages/LandingRouter'))
 const GoalsPage = lazy(() => import('./pages/GoalsPage'))
 const JournalPage = lazy(() => import('./pages/JournalPage'))
-const OraPage = lazy(() => import('./pages/OraPage'))
 const DAOPage = lazy(() => import('./pages/DAOPage'))
 const ContributePage = lazy(() => import('./pages/ContributePage'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SurfacePage = lazy(() => import('./pages/SurfacePage'))
-const HomePage = lazy(() => import('./pages/HomePage'))
 const IOOPage = lazy(() => import('./pages/IOOPage'))
+
+type ShellApp = React.ComponentProps<typeof ConnectomeShell>['activeApp']
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth()
   return isAuthenticated ? <>{children}</> : <Navigate to="/" replace />
 }
 
+function ShellRoute({ activeApp, children }: { activeApp: ShellApp; children: React.ReactNode }) {
+  return (
+    <ProtectedRoute>
+      <ConnectomeShell activeApp={activeApp}>{children}</ConnectomeShell>
+    </ProtectedRoute>
+  )
+}
+
 function App() {
   const { isAuthenticated } = useAuth()
   return (
-    <div className={isAuthenticated ? 'app-authenticated' : undefined} style={{ minHeight: '100vh', background: '#0a0a0f', color: '#f8f8fc' }}>
-      {isAuthenticated && <NavBar />}
-      {isAuthenticated && <SuggestionButton />}
-      {isAuthenticated && <OraOnboarding />}
-      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', color: '#888' }}>Loading…</div>}>
+    <div style={{ minHeight: '100vh', background: '#060610', color: '#f8f8fc' }}>
+      <Suspense fallback={<div className="connectome-loading">Loading…</div>}>
         <Routes>
-          <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />} />
-          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/" element={isAuthenticated ? <ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute> : <AuthPage />} />
           {/* Google OAuth callback — must be accessible without auth */}
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/auth/github-callback" element={<GitHubCallbackPage />} />
-          <Route path="/feed"    element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
-          <Route path="/discover" element={<ProtectedRoute><LandingRouter /></ProtectedRoute>} />
-          <Route path="/goals"   element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
-          <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
-          <Route path="/ora"     element={<ProtectedRoute><OraPage /></ProtectedRoute>} />
-          <Route path="/dao"      element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
-          <Route path="/contribute" element={<ProtectedRoute><ContributePage /></ProtectedRoute>} />
-          <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
-          <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="/ioo"      element={<ProtectedRoute><IOOPage /></ProtectedRoute>} />
+
+          {/* Connectome AIOS app routes */}
+          <Route path="/app/ido" element={<ShellRoute activeApp="ido"><FeedPage /></ShellRoute>} />
+          <Route path="/app/goals" element={<ShellRoute activeApp="goals"><GoalsPage /></ShellRoute>} />
+          <Route path="/app/dao" element={<ShellRoute activeApp="dao"><DAOPage /></ShellRoute>} />
+          <Route path="/app/contribute" element={<ShellRoute activeApp="contribute"><ContributePage /></ShellRoute>} />
+          <Route path="/app/profile" element={<ShellRoute activeApp="profile"><ProfilePage /></ShellRoute>} />
+          <Route path="/app/journal" element={<ShellRoute activeApp="journal"><JournalPage /></ShellRoute>} />
+          <Route path="/app/services" element={<ShellRoute activeApp="services"><ServicesPage /></ShellRoute>} />
+          <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
+          <Route path="/app/ivive" element={<ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute>} />
+
+          {/* Backward-compatible redirects */}
+          <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route path="/feed" element={<Navigate to="/app/ido" replace />} />
+          <Route path="/discover" element={<Navigate to="/app/ido" replace />} />
+          <Route path="/goals" element={<Navigate to="/app/goals" replace />} />
+          <Route path="/journal" element={<Navigate to="/app/journal" replace />} />
+          <Route path="/ora" element={<Navigate to="/" replace />} />
+          <Route path="/dao" element={<Navigate to="/app/dao" replace />} />
+          <Route path="/contribute" element={<Navigate to="/app/contribute" replace />} />
+          <Route path="/services" element={<Navigate to="/app/services" replace />} />
+          <Route path="/profile" element={<Navigate to="/app/profile" replace />} />
+          <Route path="/ioo" element={<Navigate to="/app/ioo" replace />} />
+
           {/* WebSpawn surfaces — auth-gated but accessible via direct link */}
-          <Route path="/surfaces/:surfaceId" element={<SurfacePage />} />
+          <Route path="/surfaces/:surfaceId" element={<ShellRoute activeApp="services"><SurfacePage /></ShellRoute>} />
         </Routes>
       </Suspense>
     </div>
