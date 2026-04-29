@@ -342,7 +342,7 @@ export function NavBar() {
           .show-mobile   { display: none !important; }
         }
         @media (max-width: 1023px) {
-          .show-mobile   { display: flex  !important; }
+          .show-mobile   { display: block !important; }
         }
         @keyframes fadeIn {
           from { opacity: 0; }
