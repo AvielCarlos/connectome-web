@@ -195,7 +195,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 /* ─── Page layout (accounts for nav bars) ───────────────────────────── */
 .page-content {
   padding-bottom: calc(var(--bottom-nav-height) + 24px);
-  padding-top: calc(var(--top-header-height) + 8px);
+  padding-top: 8px;
 }
 
 /* Desktop: account for sidebar */

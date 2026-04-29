@@ -149,44 +149,6 @@ export function NavBar() {
         </div>
       </nav>
 
-      {/* ── Mobile Top Bar ───────────────────────────────────────────────── */}
-      <header className="show-mobile" style={{
-        position: 'fixed', top: 0, left: 0, right: 0,
-        height: 'var(--top-header-height)',
-        background: 'rgba(10,10,15,0.95)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        zIndex: 99,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 18px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: 8,
-            background: 'linear-gradient(135deg, rgba(0,212,170,0.2), rgba(0,212,170,0.4))',
-            border: '1px solid rgba(0,212,170,0.35)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
-          }}>◈</div>
-          <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: -0.3 }}>iDo</span>
-        </div>
-        {/* Avatar — navigates to profile */}
-        <button onClick={() => navigate('/profile')} style={{
-          width: 34, height: 34, borderRadius: 17, border: 'none', cursor: 'pointer',
-          background: `linear-gradient(135deg, ${tierColor}44, ${tierColor}88)`,
-          outline: `1.5px solid ${tierColor}66`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 14, fontWeight: 800, color: tierColor, position: 'relative',
-        }}>
-          {initials}
-          {isAdmin && (
-            <span style={{
-              position: 'absolute', top: -3, right: -3,
-              width: 10, height: 10, borderRadius: 5,
-              background: '#00d4aa', border: '1.5px solid #0a0a0f',
-            }} />
-          )}
-        </button>
-      </header>
 
       {/* ── Mobile Bottom Nav — floating pill ───────────────────────────── */}
       <div className="show-mobile" style={{
