@@ -189,9 +189,9 @@ export default function OraOnboarding() {
               boxShadow: '0 0 34px rgba(0,212,170,0.35)',
             }}>◈</div>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 900 }}>Ora — brain of Connectome</div>
+              <div style={{ fontSize: 20, fontWeight: 900 }}>Ora — your AI guide</div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.56)', marginTop: 3 }}>
-                Step {progressStep} of {totalQuestions} — mapping your iVive, Eviva, and Aventi domains on the AI OS built by Ascension Technologies DAO.
+                Step {progressStep} of {totalQuestions} — mapping your iVive, Eviva, Aventi, and iDo domains with Ascension Technologies DAO.
               </div>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function OraOnboarding() {
               animation: 'oraOnboardingPop 420ms ease-out',
             }}>
               <div style={{ fontSize: 30, marginBottom: 8 }}>✦</div>
-              <div style={{ fontWeight: 900 }}>Your Connectome AI OS is awake.</div>
+              <div style={{ fontWeight: 900 }}>Your AI OS is awake.</div>
             </div>
           )}
           <div ref={bottomRef} />

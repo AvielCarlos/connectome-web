@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './components/Toast'
 import ConnectomeShell from './shell/ConnectomeShell'
+import OraOnboarding from './components/OraOnboarding'
 import './index.css'
 
 // Eagerly load auth pages (small, needed immediately)
@@ -15,6 +16,7 @@ import ConnectomeHome from './pages/ConnectomeHome'
 // Lazy-load all app pages for route-level code splitting
 const FeedPage = lazy(() => import('./pages/FeedPage'))
 const GoalsPage = lazy(() => import('./pages/GoalsPage'))
+const RoutinesPage = lazy(() => import('./pages/RoutinesPage'))
 const JournalPage = lazy(() => import('./pages/JournalPage'))
 const DAOPage = lazy(() => import('./pages/DAOPage'))
 const ContributePage = lazy(() => import('./pages/ContributePage'))
@@ -51,9 +53,10 @@ function App() {
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/auth/github-callback" element={<GitHubCallbackPage />} />
 
-          {/* Connectome AIOS app routes */}
+          {/* AIOS app routes */}
           <Route path="/app/ido" element={<ShellRoute activeApp="ido"><FeedPage /></ShellRoute>} />
           <Route path="/app/goals" element={<ShellRoute activeApp="goals"><GoalsPage /></ShellRoute>} />
+          <Route path="/app/routines" element={<ShellRoute activeApp="routines"><RoutinesPage /></ShellRoute>} />
           <Route path="/app/dao" element={<ShellRoute activeApp="dao"><DAOPage /></ShellRoute>} />
           <Route path="/app/contribute" element={<ShellRoute activeApp="contribute"><ContributePage /></ShellRoute>} />
           <Route path="/app/profile" element={<ShellRoute activeApp="profile"><ProfilePage /></ShellRoute>} />
@@ -62,12 +65,14 @@ function App() {
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
           <Route path="/app/ivive" element={<ShellRoute activeApp="ivive"><IVivePage /></ShellRoute>} />
           <Route path="/app/eviva" element={<ShellRoute activeApp="eviva"><EvivaPage /></ShellRoute>} />
+          <Route path="/onboarding" element={<ShellRoute activeApp="home"><OraOnboarding /></ShellRoute>} />
 
           {/* Backward-compatible redirects */}
           <Route path="/home" element={<Navigate to="/" replace />} />
           <Route path="/feed" element={<Navigate to="/app/ido" replace />} />
           <Route path="/discover" element={<Navigate to="/app/ido" replace />} />
           <Route path="/goals" element={<Navigate to="/app/goals" replace />} />
+          <Route path="/routines" element={<Navigate to="/app/routines" replace />} />
           <Route path="/journal" element={<Navigate to="/app/journal" replace />} />
           <Route path="/ora" element={<Navigate to="/" replace />} />
           <Route path="/dao" element={<Navigate to="/app/dao" replace />} />

@@ -15,7 +15,7 @@ export default function OraOverlay({ open, onClose }: OraOverlayProps) {
     {
       id: 'opening',
       role: 'ora',
-      content: "I'm Ora — the brain of Connectome. Ask me anything, or choose a signal below and I'll orient the AI OS around it.",
+      content: "I'm Ora — your AI OS for human flourishing. Ask me anything, or choose a signal below and I'll orient the day around it.",
     },
   ]);
   const [input, setInput] = useState('');
@@ -81,8 +81,8 @@ export default function OraOverlay({ open, onClose }: OraOverlayProps) {
           <div className="ora-overlay__identity">
             <span className="ora-orb ora-orb--large" />
             <div>
-              <div className="ora-overlay__eyebrow">Ora · Connectome AI OS</div>
-              <h2>Ora — Brain of Connectome</h2>
+              <div className="ora-overlay__eyebrow">Ora · AIOS</div>
+              <h2>Ora — your guide</h2>
             </div>
           </div>
           <button className="ora-overlay__close" type="button" onClick={onClose} aria-label="Close Ora">×</button>

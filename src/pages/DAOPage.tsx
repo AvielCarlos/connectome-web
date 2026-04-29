@@ -610,7 +610,7 @@ export default function DAOPage() {
               }}>
                 <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Don't code? You can still earn CP:</div>
                 <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)', marginBottom: 14 }}>
-                  Every action helps grow Connectome. Every action earns CP.
+                  Every action helps grow the mission. Every action earns CP.
                 </div>
                 {[
                   {
@@ -623,7 +623,7 @@ export default function DAOPage() {
                     icon: '🐦',
                     label: 'Share on Twitter',
                     sub: 'Spread the word',
-                    href: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Just discovered Connectome by @OraAI — an AI OS for personal growth. Check it out! https://avielcarlos.github.io/connectome-web/')}`,
+                    href: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Just discovered iDo by @OraAI — a daily AI life app for personal growth. Check it out! https://avielcarlos.github.io/connectome-web/')}`,
                   },
                   {
                     icon: '🔗',

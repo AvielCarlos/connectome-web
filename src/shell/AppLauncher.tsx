@@ -17,10 +17,10 @@ type AiosState = {
 };
 
 export const CONNECTOME_APPS: ConnectomeApp[] = [
-  { path: '/app/ido', icon: '🚀', name: 'iDo', description: 'Daily life surface for what to do next on Connectome.' },
-  { path: 'https://aventi.app', icon: '🎉', name: 'Aventi', description: 'Experience-discovery domain running on Connectome.', external: true },
-  { path: '/app/ivive', icon: '🌱', name: 'iVive', description: 'Vitality domain running on Connectome.' },
-  { path: '/app/eviva', icon: '🌊', name: 'Eviva', description: 'Civilization-serving domain running on Connectome.' },
+  { path: '/app/ido', icon: '🚀', name: 'iDo', description: 'Daily feed, goals, social signal, journal, and routines.' },
+  { path: 'https://aventi.app', icon: '🎉', name: 'Aventi', description: 'Experience discovery for adventures, events, and IRL momentum.', external: true },
+  { path: '/app/ivive', icon: '🌱', name: 'iVive', description: 'Vitality, health, biometrics, and wellness guidance.' },
+  { path: '/app/eviva', icon: '🌊', name: 'Eviva', description: 'Meaningful missions, services, products, and civilization work.' },
   { path: '/app/goals', icon: '🎯', name: 'Goals', description: 'Your IOO path, broken into living quests.' },
   { path: '/app/dao', icon: '🏛️', name: 'DAO', description: 'Contribute, coordinate, and earn CP.' },
   { path: '/app/journal', icon: '📓', name: 'Journal', description: 'Reflection, memory, and pattern discovery.' },
@@ -73,10 +73,10 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
   };
 
   return (
-    <section className="app-launcher" aria-label="Connectome app launcher">
+    <section className="app-launcher" aria-label="AIOS app launcher">
       <div className="app-launcher__intro">
-        <span>Running on Connectome AIOS</span>
-        <h2>Choose which domain of human activity Connectome should focus.</h2>
+        <span>Ora AIOS</span>
+        <h2>Choose the life domain Ora should focus.</h2>
         {aiosState.ora_mission_statement && (
           <p className="app-launcher__mission">{aiosState.ora_mission_statement}</p>
         )}

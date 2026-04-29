@@ -101,10 +101,10 @@ export default function AuthPage() {
             ◈
           </div>
           <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: -0.5, marginBottom: 8 }}>
-            Connectome
+            iDo
           </h1>
           <p style={{ color: 'rgba(248,248,252,0.45)', fontSize: 15 }}>
-            Ora's intelligence, in your browser
+            Your daily AI life app, guided by Ora
           </p>
         </div>
 

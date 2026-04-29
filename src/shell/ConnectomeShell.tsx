@@ -6,12 +6,14 @@ import OraOverlay from './OraOverlay';
 
 interface ConnectomeShellProps {
   children: React.ReactNode;
-  activeApp?: 'home' | 'ido' | 'goals' | 'dao' | 'contribute' | 'journal' | 'profile' | 'services' | 'ioo' | 'ivive' | 'eviva';
+  activeApp?: 'home' | 'ido' | 'goals' | 'routines' | 'dao' | 'contribute' | 'journal' | 'profile' | 'services' | 'ioo' | 'ivive' | 'eviva';
 }
 
 const appLabels: Record<string, string> = {
+  home: 'Ora',
   ido: 'iDo',
   goals: 'Goals',
+  routines: 'Routines',
   dao: 'DAO',
   contribute: 'Contribute',
   journal: 'Journal',
@@ -22,16 +24,109 @@ const appLabels: Record<string, string> = {
   eviva: 'Eviva',
 };
 
-const dockItems = [
-  { id: 'ora', label: 'Ora', icon: '◈' },
-  { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
-  { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
-  { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-];
+type DockItem = {
+  id: string;
+  label: string;
+  icon: string;
+  path?: string;
+  action?: 'ora' | 'launcher';
+};
+
+const dockMenus: Record<string, DockItem[]> = {
+  home: [
+    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'ivive', label: 'iVive', icon: '🌱', path: '/app/ivive' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'eviva', label: 'Eviva', icon: '🌊', path: '/app/eviva' },
+    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
+  ],
+  ido: [
+    { id: 'feed', label: 'Feed', icon: '✦', path: '/app/ido' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+  ],
+  goals: [
+    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+    { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
+  ],
+  journal: [
+    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
+  ],
+  routines: [
+    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+    { id: 'feed', label: 'Feed', icon: '✦', path: '/app/ido' },
+  ],
+  ivive: [
+    { id: 'vitality', label: 'Vitality', icon: '🌱', path: '/app/ivive' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+    { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
+  ],
+  eviva: [
+    { id: 'missions', label: 'Missions', icon: '🌊', path: '/app/eviva' },
+    { id: 'services', label: 'Services', icon: '🛠️', path: '/app/services' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
+    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
+  ],
+  dao: [
+    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
+    { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
+    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+  ],
+  contribute: [
+    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
+    { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
+    { id: 'eviva', label: 'Missions', icon: '🌊', path: '/app/eviva' },
+  ],
+  services: [
+    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'eviva', label: 'Eviva', icon: '🌊', path: '/app/eviva' },
+    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
+  ],
+  ioo: [
+    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
+    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+  ],
+  profile: [
+    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
+    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
+  ],
+};
 
 function xpLevel(profile: any) {
   const xp = Number(profile?.xp ?? profile?.profile?.xp ?? 420);
   return Math.max(1, Math.floor(xp / 250) + 1);
+}
+
+function initials(profile: any) {
+  const raw = profile?.display_name || profile?.name || profile?.email || 'Avi';
+  return String(raw).trim().slice(0, 1).toUpperCase();
 }
 
 export default function ConnectomeShell({ children, activeApp = 'home' }: ConnectomeShellProps) {
@@ -50,9 +145,15 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
     return () => window.removeEventListener('connectome:open-ora', openOra);
   }, []);
 
-  const handleDock = (item: typeof dockItems[number]) => {
-    if (item.id === 'ora') {
+  const dockItems = dockMenus[activeApp] || dockMenus.home;
+
+  const handleDock = (item: DockItem) => {
+    if (item.action === 'ora') {
       setOraOpen(true);
+      return;
+    }
+    if (item.action === 'launcher') {
+      setLauncherOpen(true);
       return;
     }
     if (item.path) navigate(item.path);
@@ -61,7 +162,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   return (
     <div className="connectome-shell">
       <div className="connectome-stars" aria-hidden="true" />
-      <header className={`connectome-topbar ${launcherOpen ? 'connectome-topbar--launcher-open' : ''}`}>
+      <header className={`connectome-ambient-chrome ${launcherOpen ? 'connectome-topbar--launcher-open' : ''}`}>
         <button
           className={`connectome-launcher-toggle ${launcherOpen ? 'connectome-launcher-toggle--open' : ''}`}
           type="button"
@@ -75,38 +176,29 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
           <span className="connectome-launcher-toggle__line" />
         </button>
 
-        <button className="connectome-brand" type="button" onClick={() => navigate('/')} aria-label="Connectome home">
-          <span className="connectome-brand__glyph">◌</span>
-          <span>
-            <strong>Connectome</strong>
-            <small>AI OS</small>
-          </span>
-        </button>
+        <span className="connectome-context-label connectome-context-label--ambient" aria-live="polite">{appLabels[activeApp] || 'Ora'}</span>
 
         <div className="connectome-status">
           <span className="connectome-xp">LVL {xpLevel(profile)}</span>
           <button type="button" className="connectome-bell" aria-label="Notifications">🔔</button>
+          <button type="button" className="connectome-avatar" onClick={() => navigate('/app/profile')} aria-label="Open profile">
+            {initials(profile)}
+          </button>
         </div>
       </header>
 
       <main className={`connectome-main connectome-main--${activeApp}`}>
-        {activeApp !== 'home' && appLabels[activeApp] && (
-          <div className="connectome-app-titlebar">
-            <span>{appLabels[activeApp]}</span>
-            <small>{activeApp === 'ido' ? 'Adventure & discovery inside Connectome' : 'Running inside Connectome'}</small>
-          </div>
-        )}
         {children}
       </main>
 
-      <nav className="connectome-dock" aria-label="Connectome dock">
+      <nav className={`connectome-dock connectome-dock--${dockItems.length}`} aria-label={`${appLabels[activeApp] || 'Ora'} navigation`}>
         {dockItems.map((item) => {
-          const active = item.id === activeApp || (item.path && location.pathname === item.path);
+          const active = item.id === activeApp || (item.path && location.pathname === item.path) || (activeApp === 'ido' && item.id === 'feed');
           return (
             <button
               key={item.id}
               type="button"
-              className={`connectome-dock__item ${active ? 'connectome-dock__item--active' : ''} ${item.id === 'ora' ? 'connectome-dock__item--ora' : ''}`}
+              className={`connectome-dock__item ${active ? 'connectome-dock__item--active' : ''} ${item.action === 'ora' ? 'connectome-dock__item--ora' : ''}`}
               onClick={() => handleDock(item)}
               aria-label={item.label}
             >

@@ -265,7 +265,7 @@ export default function SuggestionButton() {
                   value={content}
                   onChange={e => { setContent(e.target.value); setError(null); }}
                   placeholder={
-                    category === 'feature' ? "What would make Connectome more valuable for you?"
+                    category === 'feature' ? "What would make Ora more valuable for you?"
                     : category === 'bug' ? "Describe what happened and what you expected..."
                     : category === 'ux' ? "What felt confusing or could feel better?"
                     : category === 'content' ? "What topics or content would you love to see?"
