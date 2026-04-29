@@ -362,6 +362,13 @@ export default function FeedPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  // Auth guard — redirect to login if not authenticated
+  React.useEffect(() => {
+    if (!OraClient.isAuthenticated()) {
+      navigate('/auth?redirect=/feed', { replace: true });
+    }
+  }, [navigate]);
+
   // ─── A/B experiments ────────────────────────────────────────────────────
   const { variant: layoutVariant } = useExperiment('feed_card_layout');
   const { variant: ratingUI } = useExperiment('feed_rating_ui');
@@ -549,10 +556,16 @@ export default function FeedPage() {
   }
 
   if (error) {
+    const isAuthError = error.includes('401') || error.toLowerCase().includes('unauthorized') || error.toLowerCase().includes('not authenticated');
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, padding: 24 }}>
-        <div style={{ fontSize: 13, color: '#ef4444' }}>{error}</div>
-        <button onClick={loadInitial} style={{ background: '#00d4aa', color: '#0a0a0f', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>Retry</button>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 16, padding: 24, textAlign: 'center' }}>
+        <div style={{ fontSize: 32 }}>{isAuthError ? '🔑' : '⚠️'}</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: '#f8f8fc' }}>{isAuthError ? 'Sign in to view your feed' : 'Could not load feed'}</div>
+        <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.45)' }}>{isAuthError ? 'Your session may have expired.' : error}</div>
+        {isAuthError
+          ? <button onClick={() => navigate('/auth?redirect=/feed')} style={{ background: '#6366f1', color: '#fff', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>Sign In</button>
+          : <button onClick={loadInitial} style={{ background: '#00d4aa', color: '#0a0a0f', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>Retry</button>
+        }
       </div>
     );
   }
