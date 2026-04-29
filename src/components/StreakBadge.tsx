@@ -3,9 +3,9 @@
  *
  * Shows current streak with animated flame.
  * Pulses red when "at risk" (user hasn't checked in today).
- * Triggers XP pop animation on milestone streaks.
+ * Keeps progress signals soft and non-score-like.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { OraClient } from '../lib/OraClient';
 
 interface StreakData {
@@ -24,22 +24,13 @@ interface StreakData {
   collections_count: number;
 }
 
-interface XpPop {
-  id: number;
-  amount: number;
-  x: number;
-  y: number;
-}
-
 export function StreakBadge({ compact = false }: { compact?: boolean }) {
   const [data, setData] = useState<StreakData | null>(null);
-  const [xpPops, setXpPops] = useState<XpPop[]>([]);
   const [newBadge, setNewBadge] = useState<{ emoji: string; name: string } | null>(null);
-  const xpPopId = useRef(0);
 
   useEffect(() => {
     fetchStatus();
-    // Checkin on mount (awards daily login XP if first session today)
+    // Check in on mount for backend progress/personalization signals.
     doCheckin();
   }, []);
 
@@ -56,10 +47,6 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
     try {
       const result = await OraClient.post<any>('/api/gamification/checkin', { reason: 'daily_login' });
 
-      if (result.xp_awarded > 0) {
-        triggerXpPop(result.xp_awarded);
-      }
-
       if (result.new_badges?.length > 0) {
         setNewBadge(result.new_badges[0]);
         setTimeout(() => setNewBadge(null), 3500);
@@ -70,16 +57,6 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
     } catch {
       // Non-critical
     }
-  };
-
-  const triggerXpPop = (amount: number) => {
-    const id = ++xpPopId.current;
-    const x = 50 + Math.random() * 20 - 10;
-    const y = 50;
-    setXpPops((prev) => [...prev, { id, amount, x, y }]);
-    setTimeout(() => {
-      setXpPops((prev) => prev.filter((p) => p.id !== id));
-    }, 1300);
   };
 
   if (!data) return null;
@@ -113,26 +90,6 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
         </span>
         <span>{streak.current}</span>
 
-        {/* XP pops */}
-        {xpPops.map((pop) => (
-          <div
-            key={pop.id}
-            className="xp-pop"
-            style={{
-              position: 'absolute',
-              top: -10,
-              left: `${pop.x}%`,
-              transform: 'translateX(-50%)',
-              fontSize: 11,
-              fontWeight: 800,
-              color: '#00d4aa',
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            +{pop.amount} XP
-          </div>
-        ))}
       </div>
     );
   }
@@ -197,19 +154,14 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
             </div>
           </div>
 
-          {/* XP pill */}
-          <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#00d4aa' }}>{xp.total.toLocaleString()}</div>
-            <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)', fontWeight: 600 }}>XP total</div>
-          </div>
         </div>
 
-        {/* XP progress bar */}
+        {/* Soft milestone progress */}
         {xp.next_milestone && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(248,248,252,0.3)', marginBottom: 6, fontWeight: 600 }}>
-              <span>{xp.total} XP</span>
-              <span>Next: {xp.next_milestone} XP</span>
+              <span>Milestone progress</span>
+              <span>{Math.round(progressPct)}%</span>
             </div>
             <div className="progress-track">
               <div
@@ -250,27 +202,6 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
         )}
       </div>
 
-      {/* XP pops */}
-      {xpPops.map((pop) => (
-        <div
-          key={pop.id}
-          className="xp-pop"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: `${pop.x}%`,
-            transform: 'translateX(-50%)',
-            fontSize: 14,
-            fontWeight: 800,
-            color: '#00d4aa',
-            pointerEvents: 'none',
-            whiteSpace: 'nowrap',
-            zIndex: 100,
-          }}
-        >
-          +{pop.amount} XP
-        </div>
-      ))}
     </div>
   );
 }

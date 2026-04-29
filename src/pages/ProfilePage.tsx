@@ -338,7 +338,7 @@ export default function ProfilePage() {
       {/* ── Profile section ── */}
       {section === 'profile' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* ── Streak + XP + Badges ── */}
+          {/* ── Streak + Milestones + Badges ── */}
           <StreakBadge />
 
           {/* ── Account Info ── */}

@@ -984,11 +984,11 @@ function SkillTree({ spec, onAction }: { spec: SurfaceSpec; onAction: (a: string
   const cfg = spec.config || {}
   type NodeStatus = 'locked' | 'in_progress' | 'unlocked'
   const defaultNodes: Array<{ id: string; label: string; status: NodeStatus; xp?: number }> = [
-    { id: '1', label: 'Foundations', status: 'unlocked', xp: 100 },
-    { id: '2', label: 'Core Skills', status: 'unlocked', xp: 150 },
-    { id: '3', label: 'Intermediate', status: 'in_progress', xp: 200 },
-    { id: '4', label: 'Advanced', status: 'locked', xp: 250 },
-    { id: '5', label: 'Mastery', status: 'locked', xp: 500 },
+    { id: '1', label: 'Foundations', status: 'unlocked' },
+    { id: '2', label: 'Core Skills', status: 'unlocked' },
+    { id: '3', label: 'Intermediate', status: 'in_progress' },
+    { id: '4', label: 'Advanced', status: 'locked' },
+    { id: '5', label: 'Mastery', status: 'locked' },
   ]
   const nodes: Array<{ id: string; label: string; status: NodeStatus; xp?: number }> = cfg.nodes || defaultNodes
 
@@ -1014,9 +1014,6 @@ function SkillTree({ spec, onAction }: { spec: SurfaceSpec; onAction: (a: string
               <div style={{ fontSize: 18, width: 24, textAlign: 'center', flexShrink: 0 }}>{st.icon}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: st.textColor }}>{node.label}</div>
-                {node.xp != null && (
-                  <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', marginTop: 2 }}>{node.xp} XP</div>
-                )}
               </div>
               {i < nodes.length - 1 && node.status === 'unlocked' && (
                 <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.2)' }}>▼</div>
@@ -1228,7 +1225,6 @@ function Comparison({ spec, onAction }: { spec: SurfaceSpec; onAction: (a: strin
 function Celebration({ spec, onAction }: { spec: SurfaceSpec; onAction: (a: string) => void }) {
   const cfg = spec.config || {}
   const achievement: string = cfg.achievement || spec.title
-  const xp: number = cfg.xp_earned ?? cfg.xp ?? 0
   const emoji: string = cfg.emoji || '🏆'
   const [shared, setShared] = useState(false)
   const confettiColors = ['#00d4aa', '#a855f7', '#f59e0b', '#f43f5e', '#3b82f6']
@@ -1253,15 +1249,6 @@ function Celebration({ spec, onAction }: { spec: SurfaceSpec; onAction: (a: stri
           ))}
         </div>
         <div style={{ fontSize: 22, fontWeight: 800, color: '#f8f8fc', marginBottom: 8 }}>{achievement}</div>
-        {xp > 0 && (
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'rgba(0,212,170,0.12)', border: '1px solid rgba(0,212,170,0.3)',
-            borderRadius: 20, padding: '6px 16px', fontSize: 14, fontWeight: 700, color: '#00d4aa',
-          }}>
-            ⚡ +{xp} XP earned
-          </div>
-        )}
         {cfg.message && (
           <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', lineHeight: 1.6, marginTop: 14, padding: '0 8px' }}>
             {cfg.message}
@@ -1272,7 +1259,7 @@ function Celebration({ spec, onAction }: { spec: SurfaceSpec; onAction: (a: stri
         style={s.primaryBtn(shared ? '#10b981' : '#00d4aa')}
         onClick={() => {
           setShared(true)
-          if (navigator.share) navigator.share({ title: achievement, text: `I just earned: ${achievement}${xp ? ` (+${xp} XP!)` : ''}` })
+          if (navigator.share) navigator.share({ title: achievement, text: `I just completed: ${achievement}` })
           onAction('complete')
         }}
       >

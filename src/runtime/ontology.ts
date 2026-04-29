@@ -445,7 +445,7 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'governance',
     visibleToUser: true,
     permissions: ['dao', 'social', 'notifications'],
-    description: 'Governance, ownership, CP/XP, proposals, voting, and contributor identity.',
+    description: 'Governance, ownership, CP, proposals, voting, and contributor identity.',
     purpose: 'Governs the ecosystem and rewards contribution without becoming the workbench itself.',
   },
   {

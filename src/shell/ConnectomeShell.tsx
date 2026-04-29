@@ -112,11 +112,6 @@ const dockMenus: Record<string, DockItem[]> = {
   ],
 };
 
-function xpLevel(profile: any) {
-  const xp = Number(profile?.xp ?? profile?.profile?.xp ?? 420);
-  return Math.max(1, Math.floor(xp / 250) + 1);
-}
-
 function initials(profile: any) {
   const raw = profile?.display_name || profile?.name || profile?.email || 'Avi';
   return String(raw).trim().slice(0, 1).toUpperCase();
@@ -172,7 +167,6 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
         <span className="connectome-context-label connectome-context-label--ambient" aria-live="polite">{appLabels[activeApp] || 'Ora'}</span>
 
         <div className="connectome-status">
-          <span className="connectome-xp">LVL {xpLevel(profile)}</span>
           <button type="button" className="connectome-bell" aria-label="Notifications">🔔</button>
           <button type="button" className="connectome-avatar" onClick={() => navigate('/app/profile')} aria-label="Open profile">
             {initials(profile)}
