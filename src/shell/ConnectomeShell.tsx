@@ -25,12 +25,7 @@ const dockItems = [
   { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
   { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
   { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-  { id: 'apps', label: 'Apps', icon: '+' },
 ];
-
-function initials(profile: any) {
-  return String(profile?.display_name || profile?.email || 'U')[0].toUpperCase();
-}
 
 function xpLevel(profile: any) {
   const xp = Number(profile?.xp ?? profile?.profile?.xp ?? 420);
@@ -44,16 +39,12 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   const [oraOpen, setOraOpen] = useState(false);
   const [launcherOpen, setLauncherOpen] = useState(false);
 
-  const openApps = () => setLauncherOpen(true);
   const closeApps = () => setLauncherOpen(false);
+  const toggleApps = () => setLauncherOpen((open) => !open);
 
   const handleDock = (item: typeof dockItems[number]) => {
     if (item.id === 'ora') {
       setOraOpen(true);
-      return;
-    }
-    if (item.id === 'apps') {
-      openApps();
       return;
     }
     if (item.path) navigate(item.path);
@@ -62,7 +53,20 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   return (
     <div className="connectome-shell">
       <div className="connectome-stars" aria-hidden="true" />
-      <header className="connectome-topbar">
+      <header className={`connectome-topbar ${launcherOpen ? 'connectome-topbar--launcher-open' : ''}`}>
+        <button
+          className={`connectome-launcher-toggle ${launcherOpen ? 'connectome-launcher-toggle--open' : ''}`}
+          type="button"
+          onClick={toggleApps}
+          aria-label={launcherOpen ? 'Close app launcher' : 'Open app launcher'}
+          aria-expanded={launcherOpen}
+          aria-controls="connectome-app-launcher"
+        >
+          <span className="connectome-launcher-toggle__line" />
+          <span className="connectome-launcher-toggle__line" />
+          <span className="connectome-launcher-toggle__line" />
+        </button>
+
         <button className="connectome-brand" type="button" onClick={() => navigate('/')} aria-label="Connectome home">
           <span className="connectome-brand__glyph">◌</span>
           <span>
@@ -71,17 +75,9 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
           </span>
         </button>
 
-        <button className="connectome-ora-indicator" type="button" onClick={() => setOraOpen(true)}>
-          <span className="ora-orb" />
-          <span>Ora ambient</span>
-        </button>
-
         <div className="connectome-status">
           <span className="connectome-xp">LVL {xpLevel(profile)}</span>
           <button type="button" className="connectome-bell" aria-label="Notifications">🔔</button>
-          <button type="button" className="connectome-avatar" onClick={() => navigate('/app/profile')} title="Profile">
-            {initials(profile)}
-          </button>
         </div>
       </header>
 
@@ -115,8 +111,11 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
 
       {launcherOpen && (
         <div className="connectome-launcher-sheet" onClick={closeApps}>
-          <div className="connectome-launcher-sheet__panel" onClick={(event) => event.stopPropagation()}>
-            <button type="button" className="connectome-launcher-sheet__close" onClick={closeApps}>×</button>
+          <div
+            id="connectome-app-launcher"
+            className="connectome-launcher-sheet__panel"
+            onClick={(event) => event.stopPropagation()}
+          >
             <AppLauncher onLaunch={closeApps} />
           </div>
         </div>
