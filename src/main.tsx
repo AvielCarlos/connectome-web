@@ -18,6 +18,7 @@ const GoalsPage = lazy(() => import('./pages/GoalsPage'))
 const JournalPage = lazy(() => import('./pages/JournalPage'))
 const OraPage = lazy(() => import('./pages/OraPage'))
 const DAOPage = lazy(() => import('./pages/DAOPage'))
+const ContributePage = lazy(() => import('./pages/ContributePage'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SurfacePage = lazy(() => import('./pages/SurfacePage'))
@@ -47,6 +48,7 @@ function App() {
           <Route path="/journal" element={<ProtectedRoute><JournalPage /></ProtectedRoute>} />
           <Route path="/ora"     element={<ProtectedRoute><OraPage /></ProtectedRoute>} />
           <Route path="/dao"      element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
+          <Route path="/contribute" element={<ProtectedRoute><ContributePage /></ProtectedRoute>} />
           <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
           <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/ioo"      element={<ProtectedRoute><IOOPage /></ProtectedRoute>} />

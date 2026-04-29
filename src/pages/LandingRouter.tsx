@@ -112,10 +112,17 @@ export default function LandingRouter() {
       }
     }
 
-    // 4. Check server-side winner first, then fall back to API assignment
+    // 4. Check server-side winner first, then fall back to API assignment.
+    // Railway can cold-start slowly; render Variant A after 3s while the
+    // backend resolves in the background and updates the variant if needed.
+    const fallbackTimer = setTimeout(() => {
+      setVariant((v) => v ?? 'A');
+    }, 3000);
+
     OraClient.getAbWinner(EXPERIMENT_ID)
       .then((winner) => {
         if (winner && (VALID_VARIANTS as readonly string[]).includes(winner)) {
+          clearTimeout(fallbackTimer);
           const winnerV = winner as Variant;
           localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, winnerV);
           localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
@@ -124,6 +131,7 @@ export default function LandingRouter() {
           return;
         }
         return OraClient.assignAbVariant(EXPERIMENT_ID).then((v) => {
+          clearTimeout(fallbackTimer);
           const safeV = (VALID_VARIANTS as readonly string[]).includes(v) ? (v as Variant) : 'A';
           localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, safeV);
           localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
@@ -134,14 +142,20 @@ export default function LandingRouter() {
       .catch(() =>
         OraClient.assignAbVariant(EXPERIMENT_ID)
           .then((v) => {
+            clearTimeout(fallbackTimer);
             const safeV = (VALID_VARIANTS as readonly string[]).includes(v) ? (v as Variant) : 'A';
             localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, safeV);
             localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
             setVariant(safeV);
             OraClient.trackAbEvent(EXPERIMENT_ID, safeV, 'session_start', 1).catch(() => {});
           })
-          .catch(() => setVariant('A'))
+          .catch(() => {
+            clearTimeout(fallbackTimer);
+            setVariant('A');
+          })
       );
+
+    return () => clearTimeout(fallbackTimer);
   }, []);
 
   // Track session duration on unmount

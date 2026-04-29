@@ -35,9 +35,10 @@ const SIDEBAR_ITEMS = [
   { path: '/goals',    icon: '◎',  label: 'Goals'    },
   { path: '/ioo',      icon: '🗺', label: 'Map'      },
   { path: '/journal',  icon: '✍',  label: 'Journal'  },
-  { path: '/services', icon: '⚡', label: 'Services' },
-  { path: '/dao',      icon: '🏛', label: 'DAO'      },
-  { path: '/profile',  icon: null, label: 'Me',      isProfile: true },
+  { path: '/services',   icon: '⚡', label: 'Services'   },
+  { path: '/dao',        icon: '🏛', label: 'DAO'        },
+  { path: '/contribute', icon: '✚',  label: 'Contribute' },
+  { path: '/profile',    icon: null, label: 'Me',        isProfile: true },
 ] as const;
 
 const TIER_COLORS: Record<string, string> = {
@@ -55,8 +56,9 @@ export function NavBar() {
 
   // More menu items for Me tab
   const ME_MORE = [
-    { path: '/dao',      icon: '🏛', label: 'DAO & Contributions' },
-    { path: '/services', icon: '⚡', label: 'Services' },
+    { path: '/dao',        icon: '🏛', label: 'DAO & Contributions' },
+    { path: '/contribute', icon: '✚', label: 'Contribute' },
+    { path: '/services',   icon: '⚡', label: 'Services' },
     { path: '/journal',  icon: '✍', label: 'Journal' },
     { path: '/home',     icon: '◉', label: 'Home' },
   ];
