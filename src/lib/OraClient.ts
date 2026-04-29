@@ -438,6 +438,24 @@ class OraClientClass {
     return res.data.contributions;
   }
 
+  async getGitHubStatus(): Promise<{ connected: boolean; github_username: string | null; github_avatar_url: string | null }> {
+    try {
+      const res = await this.client.get('/api/users/me/contribution-stats');
+      return {
+        connected: res.data.github_connected || false,
+        github_username: res.data.github_username || null,
+        github_avatar_url: res.data.github_avatar_url || null,
+      };
+    } catch {
+      return { connected: false, github_username: null, github_avatar_url: null };
+    }
+  }
+
+  getGitHubLoginUrl(): string {
+    const token = localStorage.getItem('connectome_token') || '';
+    return `https://connectome-api-production.up.railway.app/api/auth/github/login?token=${encodeURIComponent(token)}`;
+  }
+
   // ── Services (Nea-as-Agent-for-Hire) ─────────────────────────────────────
 
   async getServicesCatalog(): Promise<any> {

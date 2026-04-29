@@ -11,6 +11,12 @@ type Contribution = {
   cp_awarded?: number;
 };
 
+type GitHubStatus = {
+  connected: boolean;
+  github_username: string | null;
+  github_avatar_url: string | null;
+};
+
 const contributionTypes = [
   { value: 'code', label: 'Code', icon: '💻' },
   { value: 'design', label: 'Design', icon: '🎨' },
@@ -45,6 +51,7 @@ export default function ContributePage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [githubStatus, setGithubStatus] = useState<GitHubStatus>({ connected: false, github_username: null, github_avatar_url: null });
 
   const isAuthed = useMemo(() => authStorage.isAuthenticated(), []);
 
@@ -63,6 +70,7 @@ export default function ContributePage() {
 
   useEffect(() => {
     loadMine();
+    OraClient.getGitHubStatus().then(setGithubStatus);
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -72,6 +80,11 @@ export default function ContributePage() {
 
     if (!title.trim() || !description.trim()) {
       setError('Title and description are required.');
+      return;
+    }
+
+    if (type === 'code' && !githubStatus.connected) {
+      setError('Connect GitHub before submitting code contributions.');
       return;
     }
 
@@ -142,15 +155,40 @@ export default function ContributePage() {
 
         <section style={{ ...card, padding: 24, marginBottom: 22 }}>
           <div style={{ marginBottom: 18 }}><div style={{ color: ACCENT, fontSize: 12, fontWeight: 900, letterSpacing: 1.1, textTransform: 'uppercase' }}>Submit a Contribution</div><h2 style={{ margin: '5px 0 0', fontSize: 30, letterSpacing: -0.8 }}>Tell reviewers what you built or moved forward.</h2></div>
+          {githubStatus.connected && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 20, padding: '4px 12px', marginBottom: 16 }}>
+              {githubStatus.github_avatar_url && <img src={githubStatus.github_avatar_url} style={{ width: 20, height: 20, borderRadius: 10 }} />}
+              <span style={{ fontSize: 13, color: '#34d399', fontWeight: 600 }}>@{githubStatus.github_username}</span>
+              <span style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)' }}>GitHub connected</span>
+            </div>
+          )}
           <form onSubmit={submit} style={{ display: 'grid', gap: 16 }}>
             <div><label>Contribution type</label><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>{contributionTypes.map((item) => { const active = type === item.value; return <button key={item.value} type="button" onClick={() => setType(item.value)} style={{ border: active ? '1px solid rgba(0,212,170,0.72)' : '1px solid rgba(255,255,255,0.1)', background: active ? 'rgba(0,212,170,0.14)' : 'rgba(255,255,255,0.04)', color: active ? ACCENT : '#f8f8fc', borderRadius: 999, padding: '10px 13px', fontWeight: 850, cursor: 'pointer' }}>{item.icon} {item.label}</button>; })}</div></div>
+            {type === 'code' && !githubStatus.connected && (
+              <div style={{ background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.3)', borderRadius: 16, padding: '20px 24px', marginBottom: 20 }}>
+                <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>Connect GitHub first</div>
+                <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.6)', marginBottom: 16 }}>
+                  For code contributions, we verify your GitHub account to automatically track your merged PRs and award CP accurately.
+                </div>
+                <a href={OraClient.getGitHubLoginUrl()} style={{ display: 'inline-block', background: '#24292e', color: '#fff', padding: '10px 20px', borderRadius: 24, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
+                  Connect GitHub →
+                </a>
+              </div>
+            )}
             <div><label htmlFor="contribution-title">Title</label><input id="contribution-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Short, clear name for your contribution" /></div>
             <div><label htmlFor="contribution-description">Description *</label><textarea id="contribution-description" value={description} onChange={(e) => setDescription(e.target.value)} rows={6} required placeholder="What did you do? Be specific — reviewers need to understand your contribution." /></div>
             <div><label htmlFor="contribution-link">Link (optional)</label><input id="contribution-link" value={link} onChange={(e) => setLink(e.target.value)} placeholder="GitHub PR, Figma link, Google Doc, YouTube, etc." /></div>
             <div><label htmlFor="contribution-evidence">Evidence / context (optional)</label><textarea id="contribution-evidence" value={evidence} onChange={(e) => setEvidence(e.target.value)} rows={4} placeholder="Any additional context, screenshots description, or proof of work." /></div>
+            {!githubStatus.connected && type !== 'code' && (
+              <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 8, textAlign: 'center' }}>
+                <a href={OraClient.getGitHubLoginUrl()} style={{ color: '#00d4aa', textDecoration: 'none' }}>
+                  Connect GitHub
+                </a>{' '}to link your profile and get more accurate CP attribution.
+              </div>
+            )}
             {message && <div style={{ color: '#6ff0ad', background: 'rgba(80,220,150,0.1)', border: '1px solid rgba(80,220,150,0.25)', borderRadius: 14, padding: 12 }}>{message}</div>}
             {error && <div style={{ color: '#ff8d8d', background: 'rgba(255,102,102,0.1)', border: '1px solid rgba(255,102,102,0.25)', borderRadius: 14, padding: 12 }}>{error}</div>}
-            <button type="submit" disabled={submitting || !isAuthed} style={{ justifySelf: 'start', minWidth: 210, padding: '14px 18px', borderRadius: 14, border: 'none', background: isAuthed ? `linear-gradient(135deg, ${ACCENT}, #00b896)` : 'rgba(255,255,255,0.12)', color: isAuthed ? '#06100e' : 'rgba(248,248,252,0.55)', fontWeight: 950, cursor: isAuthed ? 'pointer' : 'not-allowed', boxShadow: isAuthed ? '0 12px 34px rgba(0,212,170,0.20)' : 'none' }}>{submitting ? 'Submitting…' : isAuthed ? 'Submit Contribution' : 'Sign in to submit'}</button>
+            <button type="submit" disabled={submitting || !isAuthed || (type === 'code' && !githubStatus.connected)} style={{ justifySelf: 'start', minWidth: 210, padding: '14px 18px', borderRadius: 14, border: 'none', background: isAuthed && !(type === 'code' && !githubStatus.connected) ? `linear-gradient(135deg, ${ACCENT}, #00b896)` : 'rgba(255,255,255,0.12)', color: isAuthed && !(type === 'code' && !githubStatus.connected) ? '#06100e' : 'rgba(248,248,252,0.55)', fontWeight: 950, cursor: isAuthed && !(type === 'code' && !githubStatus.connected) ? 'pointer' : 'not-allowed', boxShadow: isAuthed && !(type === 'code' && !githubStatus.connected) ? '0 12px 34px rgba(0,212,170,0.20)' : 'none' }}>{submitting ? 'Submitting…' : isAuthed ? 'Submit Contribution' : 'Sign in to submit'}</button>
           </form>
         </section>
 
