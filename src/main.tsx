@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './components/Toast'
 import { NavBar } from './components/NavBar'
 import SuggestionButton from './components/SuggestionButton'
+import OraOnboarding from './components/OraOnboarding'
 import './index.css'
 
 // Eagerly load auth pages (small, needed immediately)
@@ -36,6 +37,7 @@ function App() {
     <div className={isAuthenticated ? 'app-authenticated' : undefined} style={{ minHeight: '100vh', background: '#0a0a0f', color: '#f8f8fc' }}>
       {isAuthenticated && <NavBar />}
       {isAuthenticated && <SuggestionButton />}
+      {isAuthenticated && <OraOnboarding />}
       <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', color: '#888' }}>Loading…</div>}>
         <Routes>
           <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />} />
