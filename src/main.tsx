@@ -11,6 +11,7 @@ import './index.css'
 // Eagerly load auth pages (small, needed immediately)
 import AuthPage from './pages/AuthPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
+import GitHubCallbackPage from './pages/GitHubCallbackPage'
 
 // Lazy-load all app pages for route-level code splitting
 const FeedPage = lazy(() => import('./pages/FeedPage'))
@@ -44,6 +45,7 @@ function App() {
           <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           {/* Google OAuth callback — must be accessible without auth */}
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/auth/github-callback" element={<GitHubCallbackPage />} />
           <Route path="/feed"    element={<ProtectedRoute><FeedPage /></ProtectedRoute>} />
           <Route path="/discover" element={<ProtectedRoute><LandingRouter /></ProtectedRoute>} />
           <Route path="/goals"   element={<ProtectedRoute><GoalsPage /></ProtectedRoute>} />
