@@ -73,22 +73,7 @@ export function NavBar() {
   const initials = ((profile as any)?.display_name || (profile as any)?.email || 'U')[0].toUpperCase();
   const isAdmin = (profile as any)?.is_admin || (profile as any)?.profile?.is_admin;
 
-  // Hide nav on scroll down, show on scroll up
-  useEffect(() => {
-    const onScroll = () => {
-      if (ticking.current) return;
-      ticking.current = true;
-      requestAnimationFrame(() => {
-        const current = window.scrollY;
-        if (current > lastScrollY.current + 12 && current > 80) setNavVisible(false);
-        else if (current < lastScrollY.current - 6) setNavVisible(true);
-        lastScrollY.current = current;
-        ticking.current = false;
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  // Nav always visible — no hide on scroll
 
   // Show nav on route change
   useEffect(() => {
@@ -221,9 +206,8 @@ export function NavBar() {
       <div className="show-mobile" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         zIndex: 100,
-        transform: navVisible ? 'translateY(0)' : 'translateY(110%)',
-        transition: 'transform 0.3s cubic-bezier(.25,.8,.25,1)',
-        pointerEvents: navVisible ? 'auto' : 'none',
+        transform: 'translateY(0)',
+        pointerEvents: 'auto',
       }}>
         {/* Frosted glass background */}
         <div style={{
@@ -353,11 +337,11 @@ export function NavBar() {
 
       <style>{`
         .hidden-mobile { display: none !important; }
-        @media (min-width: 768px) {
+        @media (min-width: 1024px) {
           .hidden-mobile { display: flex !important; }
           .show-mobile   { display: none !important; }
         }
-        @media (max-width: 767px) {
+        @media (max-width: 1023px) {
           .show-mobile   { display: flex  !important; }
         }
         @keyframes fadeIn {
