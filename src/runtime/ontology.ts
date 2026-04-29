@@ -49,6 +49,7 @@ export type AppId =
   | 'profile';
 
 export type AppCategory = 'daily' | 'domain' | 'system' | 'governance';
+export type FeedOwner = 'ido_meta_feed' | 'ivive_domain_feed' | 'eviva_domain_feed' | 'aventi_domain_feed' | 'dao_signal_feed';
 
 export interface AppManifestEntry {
   id: AppId;
@@ -152,6 +153,15 @@ export interface Opportunity {
   servesNeeds: string[]; // Need.id[]
   fitScore?: number; // 0–1
   source?: 'ido_feed' | 'domain_feed' | 'aventi' | 'eviva' | 'ivive' | 'dao' | 'ora' | 'partner';
+}
+
+export interface FeedSurface {
+  id: string;
+  owner: FeedOwner;
+  visibleInApp: AppId;
+  rankingStrategy: 'what_should_i_do_next' | 'domain_readiness' | 'mission_fit' | 'experience_fit' | 'governance_signal';
+  blendsOwners?: FeedOwner[];
+  itemKinds: Array<'Opportunity' | 'Event' | 'Mission' | 'Routine' | 'Service' | 'DaoTask'>;
 }
 
 export interface Event {
@@ -307,7 +317,9 @@ export type RelationshipKind =
   | 'unlocks_readiness_for'
   | 'governs'
   | 'hosts'
-  | 'recommends';
+  | 'recommends'
+  | 'renders'
+  | 'blends';
 
 export interface OntologyRelationship {
   kind: RelationshipKind;
@@ -334,6 +346,23 @@ export const ONTOLOGY_RELATIONSHIPS: OntologyRelationship[] = [
   { kind: 'governs', fromKind: 'Dao', toKind: 'Connectome', description: 'The DAO governs Connectome.' },
   { kind: 'hosts', fromKind: 'Connectome', toKind: 'App', description: 'Connectome hosts apps.' },
   { kind: 'recommends', fromKind: 'Ora', toKind: 'Entity', description: 'Ora recommends entities to a person.' },
+  { kind: 'renders', fromKind: 'FeedSurface', toKind: 'Entity', description: 'A feed renders opportunities, events, missions, routines, services, and DAO signals.' },
+  { kind: 'blends', fromKind: 'iDoFeed', toKind: 'DomainFeed', description: 'iDo blends domain feeds into the daily what-should-I-do-next meta-feed.' },
+];
+
+export const FEED_SURFACES: FeedSurface[] = [
+  {
+    id: 'ido-meta-feed',
+    owner: 'ido_meta_feed',
+    visibleInApp: 'ido',
+    rankingStrategy: 'what_should_i_do_next',
+    blendsOwners: ['ivive_domain_feed', 'eviva_domain_feed', 'aventi_domain_feed', 'dao_signal_feed'],
+    itemKinds: ['Opportunity', 'Event', 'Mission', 'Routine', 'Service', 'DaoTask'],
+  },
+  { id: 'ivive-feed', owner: 'ivive_domain_feed', visibleInApp: 'ivive', rankingStrategy: 'domain_readiness', itemKinds: ['Routine', 'Opportunity'] },
+  { id: 'eviva-feed', owner: 'eviva_domain_feed', visibleInApp: 'eviva', rankingStrategy: 'mission_fit', itemKinds: ['Mission', 'Service', 'Opportunity'] },
+  { id: 'aventi-feed', owner: 'aventi_domain_feed', visibleInApp: 'aventi', rankingStrategy: 'experience_fit', itemKinds: ['Event', 'Opportunity'] },
+  { id: 'dao-signal-feed', owner: 'dao_signal_feed', visibleInApp: 'dao', rankingStrategy: 'governance_signal', itemKinds: ['DaoTask', 'Mission'] },
 ];
 
 // ─── App manifest (visible/invisible boundaries) ──────────────────────────────
@@ -371,7 +400,7 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     visibleToUser: true,
     permissions: ['memory', 'dao', 'notifications'],
     description: 'Civilization-serving: missions, services, products, civic life.',
-    purpose: 'Connects people to meaningful work, missions, products, and services.',
+    purpose: 'Connects people to world-facing meaningful work, missions, products, and services beyond the internal DAO.',
   },
   {
     id: 'aventi',
@@ -416,8 +445,8 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'governance',
     visibleToUser: true,
     permissions: ['dao', 'social', 'notifications'],
-    description: 'Governance, contribution, CP/XP economics.',
-    purpose: 'Coordinates ownership, contribution, and community decisions.',
+    description: 'Governance, ownership, CP/XP, proposals, voting, and contributor identity.',
+    purpose: 'Governs the ecosystem and rewards contribution without becoming the workbench itself.',
   },
   {
     id: 'contribute',
@@ -427,8 +456,8 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'governance',
     visibleToUser: true,
     permissions: ['dao', 'files', 'notifications'],
-    description: 'Build, improve, review, earn CP.',
-    purpose: 'Routes useful work to people who can do it.',
+    description: 'Internal ecosystem workbench: build, improve, review, earn CP.',
+    purpose: 'Routes concrete ecosystem tasks to people who can do them; DAO governs and rewards the work.',
   },
   {
     id: 'services',
