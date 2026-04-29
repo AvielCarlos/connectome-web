@@ -3,12 +3,20 @@ import { useSearchParams } from 'react-router-dom';
 import { OraClient, Goal } from '../lib/OraClient';
 import { useToast } from '../components/Toast';
 import { useExperiment } from '../lib/useExperiment';
+import GoalClarifyModal from '../components/GoalClarifyModal';
 
 const DOMAIN_CONFIG: Record<string, { emoji: string; color: string }> = {
   iVive:  { emoji: '🌱', color: '#10b981' },
   Eviva:  { emoji: '🌊', color: '#6366f1' },
   Aventi: { emoji: '✨', color: '#f59e0b' },
 };
+
+const GOAL_STARTERS = [
+  { title: 'Get fit', domain: 'iVive', emoji: '🌱' },
+  { title: 'Feel calmer', domain: 'Eviva', emoji: '🌊' },
+  { title: 'Build a new habit', domain: 'iVive', emoji: '◎' },
+  { title: 'Explore more of life', domain: 'Aventi', emoji: '✨' },
+];
 
 function DomainBadge({ domain }: { domain?: string }) {
   if (!domain) return null;
@@ -385,7 +393,7 @@ function GoalCard({
 }
 
 // Quick inline goal creation bar
-function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
+function QuickAddGoal({ onClarify }: { onClarify: (title: string) => void }) {
   const [focused, setFocused] = useState(false);
   const [title, setTitle] = useState('');
   const [domain, setDomain] = useState('');
@@ -418,15 +426,14 @@ function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
     if (!title.trim() || creating) return;
     setCreating(true);
     try {
-      const goal = await OraClient.createGoal(title.trim(), undefined, domain || undefined);
-      trackGoalEvent('goal_created', 1);
-      onCreate(goal);
+      trackGoalEvent('goal_clarification_started', 1);
+      onClarify(title.trim());
       setTitle('');
       setDomain('');
       setFocused(false);
-      show('✦ Goal set!', 'success');
     } catch (e) {
-      console.error('Create goal failed:', e);
+      console.error('Start clarification failed:', e);
+      show('Could not start Ora right now.', 'error');
     } finally {
       setCreating(false);
     }
@@ -519,14 +526,12 @@ function QuickAddGoal({ onCreate }: { onCreate: (goal: Goal) => void }) {
 export default function GoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clarifyingGoal, setClarifyingGoal] = useState<string | null>(null);
+  const { show } = useToast();
 
   useEffect(() => {
     OraClient.listGoals().then(setGoals).catch(console.error).finally(() => setLoading(false));
   }, []);
-
-  const handleCreate = (goal: Goal) => {
-    setGoals((prev) => [goal, ...prev]);
-  };
 
   const handleUpdate = (updated: Goal) => {
     setGoals((prev) => prev.map((g) => g.id === updated.id ? updated : g));
@@ -534,6 +539,36 @@ export default function GoalsPage() {
 
   const handleDelete = (id: string) => {
     setGoals((prev) => prev.filter((g) => g.id !== id));
+  };
+
+  const handleClarifiedGoal = async (structuredGoal: any, iooPath: any[]) => {
+    const title = structuredGoal?.title || clarifyingGoal || 'New goal';
+    const descriptionParts = [
+      structuredGoal?.why ? `Why: ${structuredGoal.why}` : null,
+      structuredGoal?.specifics ? `Specifics: ${structuredGoal.specifics}` : null,
+      structuredGoal?.timeline ? `Timeline: ${structuredGoal.timeline}` : null,
+      structuredGoal?.constraints ? `Constraints: ${structuredGoal.constraints}` : null,
+    ].filter(Boolean);
+
+    const steps = iooPath.slice(0, 5).map((node, i) => ({
+      id: node.id || `${Date.now()}-${i}`,
+      text: node.title || `Step ${i + 1}`,
+      detail: node.description,
+      resources: [],
+      completed: false,
+      order: i,
+      ora_note: node.domain ? `IOO path • ${node.domain}` : undefined,
+    }));
+
+    const goal = await OraClient.createGoal(
+      title,
+      descriptionParts.join('\n') || undefined,
+      undefined,
+      steps.length ? steps : undefined,
+    );
+    setGoals((prev) => [goal, ...prev]);
+    setClarifyingGoal(null);
+    show('✦ Goal created!', 'success');
   };
 
   return (
@@ -555,7 +590,27 @@ export default function GoalsPage() {
       </div>
 
       {/* Quick add */}
-      <QuickAddGoal onCreate={handleCreate} />
+      <QuickAddGoal onClarify={setClarifyingGoal} />
+
+      {/* Goal starter cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
+        {GOAL_STARTERS.map((starter) => (
+          <button
+            key={starter.title}
+            onClick={() => setClarifyingGoal(starter.title)}
+            style={{
+              textAlign: 'left', padding: 14, borderRadius: 14,
+              background: 'rgba(255,255,255,0.035)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#f8f8fc',
+            }}
+          >
+            <div style={{ fontSize: 20, marginBottom: 8 }}>{starter.emoji}</div>
+            <div style={{ fontSize: 13, fontWeight: 750 }}>{starter.title}</div>
+            <div style={{ fontSize: 11, color: DOMAIN_CONFIG[starter.domain].color, marginTop: 4 }}>{starter.domain}</div>
+          </button>
+        ))}
+      </div>
 
       {/* Goals list */}
       {loading ? (
@@ -569,7 +624,7 @@ export default function GoalsPage() {
           <div style={{ fontSize: 56, marginBottom: 16, display: 'inline-block' }} className="brain-float">◎</div>
           <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 18 }}>No goals yet</div>
           <div style={{ color: 'rgba(248,248,252,0.4)', maxWidth: 260, margin: '0 auto', lineHeight: 1.6 }}>
-            Tap the field above to add your first goal. Ora will break it into steps.
+            Tap a starter or type your own goal. Ora will clarify it before building your path.
           </div>
         </div>
       ) : (
@@ -578,6 +633,14 @@ export default function GoalsPage() {
             <GoalCard key={goal.id} goal={goal} onUpdate={handleUpdate} onDelete={handleDelete} />
           ))}
         </div>
+      )}
+
+      {clarifyingGoal && (
+        <GoalClarifyModal
+          goalTitle={clarifyingGoal}
+          onClose={() => setClarifyingGoal(null)}
+          onComplete={handleClarifiedGoal}
+        />
       )}
     </div>
   );
