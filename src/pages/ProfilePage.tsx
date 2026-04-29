@@ -49,6 +49,7 @@ export default function ProfilePage() {
   const [agentPopulationLoading, setAgentPopulationLoading] = useState(false);
   const [evolutionProposals, setEvolutionProposals] = useState<any[]>([]);
   const [evolutionProposalsLoading, setEvolutionProposalsLoading] = useState(false);
+  const [contributionStats, setContributionStats] = useState<any>(null);
 
   // ── A/B hooks must be BEFORE any conditional returns (Rules of Hooks) ──
   const { variant: upgradeHeadlineVariant, trackEvent: trackUpgradeHeadline } = useExperiment('upgrade_headline');
@@ -60,6 +61,7 @@ export default function ProfilePage() {
     try {
       const p = await OraClient.getProfile();
       setProfile(p);
+      OraClient.getContributionStats().then(setContributionStats).catch(() => {});
       const adminFlag = p?.profile?.is_admin || localStorage.getItem('ab_admin') === 'true';
       setIsAdmin(adminFlag);
       if (adminFlag) localStorage.setItem('ab_admin', 'true');
@@ -345,6 +347,33 @@ export default function ProfilePage() {
             <Row label="Member since" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '\u2014'} />
             <Row label="Fulfilment score" value={`${((profile?.fulfilment_score || 0) * 100).toFixed(0)}%`} />
             <Row label="Tier" value={tier} valueColor={tierColor} />
+          </Card>
+
+          <Card title="Contributions">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 12 }}>
+              <StatBox label="Total CP" value={(contributionStats?.total_cp || profile?.profile?.total_dao_cp || 0).toLocaleString()} color="#f4c26b" />
+              <StatBox label="Approved" value={contributionStats?.contributions_approved || 0} color="#34d399" />
+              <StatBox label="Rank" value={contributionStats?.weekly_xp_rank ? `#${contributionStats.weekly_xp_rank}` : '—'} color="#00d4aa" />
+            </div>
+            <Row label="Contributor tier" value={contributionStats?.tier || 'observer'} valueColor="#00d4aa" />
+            <Row
+              label="GitHub"
+              value={contributionStats?.github_connected ? `✓ @${contributionStats.github_username}` : 'Not connected'}
+              valueColor={contributionStats?.github_connected ? '#34d399' : 'rgba(248,248,252,0.45)'}
+            />
+            {contributionStats?.recent_contributions?.length > 0 && (
+              <div style={{ marginTop: 12, borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 10 }}>
+                {contributionStats.recent_contributions.slice(0, 3).map((c: any) => (
+                  <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 12, marginBottom: 8 }}>
+                    <span style={{ color: 'rgba(248,248,252,0.72)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</span>
+                    <span style={{ color: c.status === 'approved' || c.status === 'accepted' ? '#34d399' : '#f4c26b', fontWeight: 700 }}>{c.status}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!contributionStats?.github_connected && (
+              <button onClick={() => { window.location.href = OraClient.getGitHubLoginUrl(); }} style={{ marginTop: 12, background: '#00d4aa', color: '#07110f', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 800 }}>Connect GitHub</button>
+            )}
           </Card>
 
           {/* ── Upgrade prompt for free users ── */}
@@ -1231,6 +1260,15 @@ export default function ProfilePage() {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+function StatBox({ label, value, color }: { label: string; value: React.ReactNode; color: string }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 10 }}>
+      <div style={{ color, fontWeight: 900, fontSize: 18 }}>{value}</div>
+      <div style={{ color: 'rgba(248,248,252,0.42)', fontSize: 10, marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.6 }}>{label}</div>
+    </div>
+  );
+}
+
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ background: '#12121e', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '16px 18px' }}>

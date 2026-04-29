@@ -48,7 +48,9 @@ export default function ContributePage() {
   const [description, setDescription] = useState('');
   const [link, setLink] = useState('');
   const [evidence, setEvidence] = useState('');
+  const [attachmentUrls, setAttachmentUrls] = useState(['', '', '']);
   const [submitting, setSubmitting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [githubStatus, setGithubStatus] = useState<GitHubStatus>({ connected: false, github_username: null, github_avatar_url: null });
@@ -72,6 +74,22 @@ export default function ContributePage() {
     loadMine();
     OraClient.getGitHubStatus().then(setGithubStatus);
   }, []);
+
+  const syncGitHub = async () => {
+    setMessage(null);
+    setError(null);
+    setSyncing(true);
+    try {
+      const res = await OraClient.syncGitHubContributions();
+      const count = Number(res?.synced || 0);
+      setMessage(count > 0 ? `Synced ${count} merged PR${count === 1 ? '' : 's'} from GitHub.` : 'No new merged PRs found on GitHub.');
+      await loadMine();
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || 'Could not sync GitHub contributions.');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,12 +116,14 @@ export default function ContributePage() {
         github_pr_url: type === 'code' && trimmedLink ? trimmedLink : undefined,
         external_link: type !== 'code' && trimmedLink ? trimmedLink : undefined,
         evidence_text: evidence.trim() || undefined,
+        attachment_urls: attachmentUrls.map((url) => url.trim()).filter(Boolean),
       });
       setMessage('Contribution submitted! Ora will review within 24h.');
       setTitle('');
       setDescription('');
       setLink('');
       setEvidence('');
+      setAttachmentUrls(['', '', '']);
       await loadMine();
     } catch (err: any) {
       const detail = err?.response?.data?.detail;
@@ -133,7 +153,7 @@ export default function ContributePage() {
         <section style={{ ...card, padding: 22, marginBottom: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
             <div><div style={{ color: ACCENT, fontSize: 12, fontWeight: 900, letterSpacing: 1.1, textTransform: 'uppercase' }}>My Contributions</div><h2 style={{ margin: '5px 0 0', fontSize: 26, letterSpacing: -0.6 }}>Your submitted work</h2></div>
-            {loadingMine && <span style={{ color: 'rgba(248,248,252,0.52)' }}>Loading…</span>}
+            {githubStatus.connected ? <button type="button" onClick={syncGitHub} disabled={syncing} style={{ border: 'none', background: syncing ? 'rgba(255,255,255,0.12)' : `linear-gradient(135deg, ${ACCENT}, #00b896)`, color: syncing ? 'rgba(248,248,252,0.55)' : '#06100e', borderRadius: 12, padding: '10px 13px', fontWeight: 900, cursor: syncing ? 'not-allowed' : 'pointer' }}>{syncing ? 'Syncing…' : 'Sync GitHub PRs'}</button> : loadingMine && <span style={{ color: 'rgba(248,248,252,0.52)' }}>Loading…</span>}
           </div>
 
           {!isAuthed ? <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)' }}>Sign in to submit contributions and track CP awards.</p> : contributions.length === 0 ? <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)' }}>No submissions yet. Your next contribution can start below.</p> : (
@@ -179,6 +199,7 @@ export default function ContributePage() {
             <div><label htmlFor="contribution-description">Description *</label><textarea id="contribution-description" value={description} onChange={(e) => setDescription(e.target.value)} rows={6} required placeholder="What did you do? Be specific — reviewers need to understand your contribution." /></div>
             <div><label htmlFor="contribution-link">Link (optional)</label><input id="contribution-link" value={link} onChange={(e) => setLink(e.target.value)} placeholder="GitHub PR, Figma link, Google Doc, YouTube, etc." /></div>
             <div><label htmlFor="contribution-evidence">Evidence / context (optional)</label><textarea id="contribution-evidence" value={evidence} onChange={(e) => setEvidence(e.target.value)} rows={4} placeholder="Any additional context, screenshots description, or proof of work." /></div>
+            <div><label>Attachment URLs (optional)</label><div style={{ display: 'grid', gap: 10 }}>{attachmentUrls.map((url, i) => <input key={i} value={url} onChange={(e) => { const next = [...attachmentUrls]; next[i] = e.target.value; setAttachmentUrls(next); }} placeholder={`Screenshot, Drive, Figma, Loom, or proof URL ${i + 1}`} />)}</div></div>
             {!githubStatus.connected && type !== 'code' && (
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 8, textAlign: 'center' }}>
                 <a href={OraClient.getGitHubLoginUrl()} style={{ color: '#00d4aa', textDecoration: 'none' }}>
