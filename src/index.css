@@ -411,19 +411,62 @@ body {
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
+.connectome-topbar--launcher-open {
+  z-index: 220;
+}
+
 .connectome-brand,
 .connectome-ora-indicator,
+.connectome-launcher-toggle,
 .connectome-status button,
 .connectome-dock__item {
   background: transparent;
   color: inherit;
 }
 
+.connectome-launcher-toggle {
+  position: relative;
+  justify-self: start;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #fff;
+}
+
+.connectome-launcher-toggle__line {
+  width: 20px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform-origin: center;
+  transition: transform 200ms ease, opacity 160ms ease, width 200ms ease;
+}
+
+.connectome-launcher-toggle--open .connectome-launcher-toggle__line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.connectome-launcher-toggle--open .connectome-launcher-toggle__line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0.35);
+}
+
+.connectome-launcher-toggle--open .connectome-launcher-toggle__line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
 .connectome-brand {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  justify-self: start;
+  justify-self: center;
   min-height: 44px;
   text-align: left;
 }
@@ -546,10 +589,10 @@ body {
   bottom: max(14px, env(safe-area-inset-bottom));
   z-index: 95;
   transform: translateX(-50%);
-  width: min(520px, calc(100vw - 24px));
+  width: min(430px, calc(100vw - 24px));
   height: 72px;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   padding: 8px;
   border-radius: 28px;
@@ -712,22 +755,34 @@ body {
 
 .connectome-launcher-sheet {
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 16px;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: calc(var(--top-header-height) + 12px) 16px 16px;
   background: rgba(0,0,0,0.52);
   backdrop-filter: blur(12px);
+  animation: connectomeLauncherFade 200ms ease both;
 }
 
 .connectome-launcher-sheet__panel {
   position: relative;
-  width: min(880px, 100%);
-  max-height: min(82vh, 760px);
+  width: min(440px, calc(100vw - 32px));
+  max-height: 100%;
   overflow: auto;
   border-radius: 34px;
   border: 1px solid rgba(255,255,255,0.12);
   background: rgba(9, 10, 22, 0.92);
   box-shadow: 0 24px 90px rgba(0,0,0,0.58);
+  animation: connectomeLauncherSlideIn 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes connectomeLauncherFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes connectomeLauncherSlideIn {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .connectome-launcher-sheet__close,
@@ -749,6 +804,7 @@ body {
 .app-launcher__intro h2 { margin-top: 8px; font-size: clamp(28px, 5vw, 46px); line-height: 1; letter-spacing: -0.07em; }
 .app-launcher__mission { margin-top: 12px; max-width: 720px; color: rgba(248,248,252,0.58); font-size: 14px; line-height: 1.55; }
 .app-launcher__grid { margin-top: 26px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.connectome-launcher-sheet__panel .app-launcher__grid { grid-template-columns: 1fr; }
 .app-launcher__card { position: relative; min-height: 188px; padding: 22px; text-align: left; color: #f8f8fc; display: flex; flex-direction: column; align-items: flex-start; overflow: hidden; }
 .app-launcher__card--featured { border-color: rgba(0,212,170,0.42); box-shadow: 0 22px 78px rgba(0,212,170,0.16), inset 0 1px 0 rgba(255,255,255,0.08); }
 .app-launcher__card--featured::before { content: ''; position: absolute; inset: -30% -10% auto auto; width: 150px; height: 150px; border-radius: 999px; background: rgba(0,212,170,0.18); filter: blur(22px); }
