@@ -325,7 +325,7 @@ function FeedCard({
         {/* Card content */}
         {spec.components.map((comp: any, i: number) => (
           <OraCard key={i} component={comp} index={i} onAction={(action: any) => {
-            if (action.type === 'navigate' && action.url === '/goals') navigate('/goals');
+            if (action.type === 'navigate' && action.url === '/app/goals') navigate('/app/goals');
           }} />
         ))}
 
@@ -858,7 +858,7 @@ export default function FeedPage() {
             <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.4)', maxWidth: 280, lineHeight: 1.7 }}>
               {dailyLimit} cards/day keeps insights sharp. Ora will have fresh ones ready tomorrow.
             </div>
-            <button onClick={() => navigate('/goals')} style={{
+            <button onClick={() => navigate('/app/goals')} style={{
               background: 'linear-gradient(135deg, #00d4aa, #00b896)',
               color: '#0a0a0f', padding: '14px 32px', borderRadius: 14,
               fontWeight: 800, fontSize: 16, marginTop: 8,
@@ -909,7 +909,7 @@ export default function FeedPage() {
         {streak && (
           <div
             style={{ pointerEvents: 'auto' }}
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/app/profile')}
           >
             <StreakBadge compact />
           </div>

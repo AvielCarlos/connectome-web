@@ -1,0 +1,146 @@
+# Connectome / iDo UX Flow
+
+## Product hierarchy
+
+- **Ascension** = the DAO and mission ecosystem. It explains why the work matters, hosts contribution culture, and points people toward governance/community.
+- **Connectome** = the AIOS. It connects the user's life context, apps, DAO identity, and semantic graph into one operating system.
+- **Ora** = the brain/interface. Ora clarifies intent, answers questions, routes users, and sits contextually in the shell.
+- **iDo** = the daily app. It gives the user one useful next action when they do not know what to do.
+
+Public site (`web/atdao`) is the Ascension/DAO front door. GitHub Pages `connectome-web` remains the app surface until the domain strategy changes.
+
+## Current audit summary
+
+### Confusing/broken patterns found
+
+- Auth success and several internal links still used legacy routes (`/feed`, `/home`, `/dao`, `/contribute`) even though the app IA now lives under `/app/*`.
+- `/app` had no canonical route; only `/` authenticated rendered the orientation screen.
+- New users could finish onboarding on `/onboarding` and be left on an empty shell because the onboarding overlay hid itself without navigating onward.
+- Home showed app names and ambient signals, but not the two real first choices: “I know what I want” vs “I need a suggestion.”
+- The launcher used internal product labels first, which made it feel like architecture rather than user outcomes.
+- CP was explained from feedback, but contribution screens did not surface the same explanation clearly.
+- Profile/admin/system surfaces are mixed; they should remain reachable but not become a default path for ordinary users.
+
+## Primary user journeys
+
+### 1. First-time visitor → sign up → onboarding → home/feed
+
+1. Public entry explains Ascension/Connectome/iDo at a high level.
+2. User opens app and sees auth page: “iDo — your daily AI life app, guided by Ora.”
+3. Registration goes to `/onboarding` when the onboarding experiment asks for it; otherwise it lands at `/app`.
+4. Onboarding collects orientation signals.
+5. Completion lands at `/app`.
+6. `/app` asks the only important first question:
+   - “I know what I want to do” → `/app/goals?clarify=1`
+   - “I don’t know what I want to do” → `/app/ido`
+
+### 2. Returning user → home → choose goal/discovery → feed/action
+
+1. Login, OAuth callback, `/`, and `/app` land on the Connectome home/orientation screen.
+2. If the user has intent, Goals opens focused and invites them to clarify with Ora.
+3. If the user lacks intent, iDo opens the one-action feed.
+4. Feed cards support save/rate/skip/detail and route goal-building to `/app/goals`.
+
+### 3. User wants feedback → CP explainer → feedback submit
+
+1. Global `?` feedback FAB is available in the shell.
+2. Feedback modal answers “what do I send?” and “why would I do this?”
+3. “What is CP?” opens the CP explainer.
+4. Submit sends route, optional screenshot, category, and text; reward feedback is shown in toast.
+
+### 4. User wants to contribute → DAO/contribute/GitHub
+
+1. `/app/dao` explains DAO, CP, governance, proposals, leaderboard, and contribution status.
+2. Primary CTA opens `/app/contribute`.
+3. `/app/contribute` explains what contribution evidence is needed and links the CP explainer.
+4. Code contributions require GitHub connection; GitHub callback returns to `/app/contribute?github=connected`.
+
+### 5. User wants to understand CP/DAO/Ascension/Connectome/Ora/iDo
+
+1. Public site = Ascension/DAO mission.
+2. App home = short product hierarchy in the first screen.
+3. DAO page = governance and contribution economy.
+4. CP explainer = reward/reputation mechanism.
+5. Ora overlay = contextual guide, not primary navigation.
+
+## Route map
+
+### Auth and callbacks
+
+- `/` — unauthenticated auth page; authenticated Connectome/iDo home.
+- `/auth/callback` — Google OAuth callback; stores auth and redirects to `/app`.
+- `/auth/github-callback` — GitHub connection callback; redirects to `/app/contribute?github=connected`.
+- `/onboarding` — authenticated Ora onboarding; completion redirects to `/app`.
+
+### Authenticated app
+
+- `/app` — Home/orientation screen.
+- `/app/ido` — one-action feed/discovery.
+- `/app/goals` — goals and Ora clarification.
+- `/app/routines` — routines and habits.
+- `/app/dao` — DAO, CP, proposals, governance, contribution overview.
+- `/app/contribute` — submit contributions and sync GitHub.
+- `/app/profile` — personal profile, settings, admin/system tools when available.
+- `/app/services` — Ora-powered tools and generated surfaces.
+- `/app/ioo` — IOO semantic graph/map.
+- `/app/ivive` — vitality domain.
+- `/app/eviva` — mission/service domain.
+- `/surfaces/:surfaceId` — auth-gated generated surface.
+
+### Backward-compatible redirects
+
+- `/home` → `/app`
+- `/feed`, `/discover`, `/journal` → `/app/ido`
+- `/goals` → `/app/goals`
+- `/routines` → `/app/routines`
+- `/dao` → `/app/dao`
+- `/contribute` → `/app/contribute`
+- `/services` → `/app/services`
+- `/profile` → `/app/profile`
+- `/ora` → `/app`
+
+## Screen purposes, first 5 seconds, CTAs
+
+| Screen | Purpose | Must answer in 5 seconds | Primary CTA | Secondary CTA |
+|---|---|---|---|---|
+| Auth | Sign in/up to iDo/Ora | “This is my daily AI life app.” | Continue with Google / Sign in | Register |
+| `/app` Home | Orient the user and route intent | “Choose goal clarification or discovery.” | Clarify with Ora | Open iDo feed |
+| `/app/ido` | Present one next action | “Here is something I can do now.” | Act/save/rate card | Skip / make it a goal |
+| `/app/goals` | Convert intent into structured path | “Tell Ora what you want.” | Start clarification | Pick a starter |
+| `/app/dao` | Explain contribution economy/governance | “This is how the ecosystem is governed and rewarded.” | Open Contribute | Browse issues/proposals |
+| `/app/contribute` | Submit evidence of work | “Submit concrete work and earn CP.” | Submit contribution | Connect GitHub / What is CP? |
+| `/app/profile` | Identity, settings, system/admin | “This is my account and controls.” | Manage profile/settings | Open admin/system sections |
+| `/app/services` | Tools and surfaces | “Use or generate Ora-powered tools.” | Open tool/surface | Ask Ora |
+| `/app/ioo` | Semantic map | “This is Ora’s life graph.” | Explore map | Return to goals/iDo |
+| `/app/ivive` | Vitality domain | “Improve energy/body/mind.” | Start vitality action | Ask Ora |
+| `/app/eviva` | Mission/service domain | “Find meaningful contribution.” | Explore missions/services | Contribute |
+
+## Navigation rules
+
+- **Home is the orientation hub**: `/` when authenticated and `/app` both render it.
+- **Dock is local navigation**: show the 4–5 most relevant neighbouring actions for the current app. Keep Ora centered/contextual where possible.
+- **Launcher is global navigation**: hamburger opens all major surfaces using user-outcome labels, not internal architecture labels.
+- **Ora overlay is contextual assistance**: use for questions, clarification, and routing help; do not make it the only way to move between screens.
+- **Profile is identity/settings**: admin/dev/system tools may live there for now but should not be primary user navigation.
+- **Legacy routes redirect** rather than render duplicate screens.
+
+## Error, empty, and loading states
+
+- **Auth**: show backend error; return to auth page after callback failure.
+- **Onboarding**: if already complete, redirect to `/app`; if API fails, avoid trapping user in a blank shell.
+- **Home**: static orientation should render without API dependency.
+- **Feed**: loading should communicate that Ora is preparing actions; empty should offer goals and feedback.
+- **Goals**: skeleton while loading; empty state invites starter or typed goal; failed Ora clarification should show toast.
+- **DAO**: empty leaderboard/proposals explain what to do next, not just “none.”
+- **Contribute**: unauthenticated submit disabled with sign-in copy; code contribution requires GitHub; success/error messages stay inline.
+- **Feedback**: screenshot capture is optional; failed submit shows retryable error.
+
+## First-pass implementation made with this spec
+
+- Added canonical `/app` route.
+- Auth login, OAuth callback, and onboarding completion now land on `/app`.
+- GitHub callback now returns to `/app/contribute`.
+- Cleaned app-internal legacy navigation links to `/app/*`.
+- Reworked Home into the two-choice orientation screen.
+- Changed launcher copy to user outcomes.
+- Added CP explainer access from Contribute.

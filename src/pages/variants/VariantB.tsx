@@ -50,7 +50,7 @@ export default function VariantB() {
   const handleCTA = () => {
     OraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, 'cta_tapped', 1).catch(() => {});
     sessionStorage.setItem('ab_skip', '1');
-    navigate('/feed');
+    navigate('/app/ido');
   };
 
   return (

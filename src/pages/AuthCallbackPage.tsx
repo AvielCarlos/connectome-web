@@ -4,7 +4,7 @@
  * Google → Railway backend → redirects to:
  *   https://avielcarlos.github.io/connectome-web/auth/callback?token=<jwt>
  *
- * This page reads the token from the URL, stores it, and redirects to /feed.
+ * This page reads the token from the URL, stores it, and redirects to the app home.
  * If there's an error param instead, it shows an error and redirects to login.
  */
 import { useEffect, useState } from 'react';
@@ -41,8 +41,8 @@ export default function AuthCallbackPage() {
       if (!userId) throw new Error('No user ID in token');
 
       authStorage.setAuth(token, userId);
-      // Small delay to let state settle, then redirect to feed
-      setTimeout(() => navigate('/feed', { replace: true }), 100);
+      // Small delay to let state settle, then redirect to the orientation home
+      setTimeout(() => navigate('/app', { replace: true }), 100);
     } catch (e: any) {
       setError(`Token error: ${e.message}`);
       setTimeout(() => navigate('/', { replace: true }), 3000);

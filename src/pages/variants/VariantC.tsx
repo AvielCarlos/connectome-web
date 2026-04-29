@@ -47,7 +47,7 @@ export default function VariantC() {
 
   const trackAndNavigate = (eventType: string, path: string) => {
     OraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, eventType, 1).catch(() => {});
-    if (path === '/feed') sessionStorage.setItem('ab_skip', '1');
+    if (path === '/app/ido') sessionStorage.setItem('ab_skip', '1');
     navigate(path);
   };
 
@@ -83,7 +83,7 @@ export default function VariantC() {
           Set your first goal and let Ora help you achieve it step by step.
         </div>
         <button
-          onClick={() => trackAndNavigate('set_first_goal', '/goals')}
+          onClick={() => trackAndNavigate('set_first_goal', '/app/goals')}
           style={{
             padding: '14px 36px',
             fontSize: 16,
@@ -203,19 +203,19 @@ export default function VariantC() {
       {/* Quick action buttons */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 380 }}>
         <button
-          onClick={() => trackAndNavigate('goal_engaged', '/goals')}
+          onClick={() => trackAndNavigate('goal_engaged', '/app/goals')}
           style={btnStyle(color)}
         >
           📊 Log progress
         </button>
         <button
-          onClick={() => trackAndNavigate('goal_engaged', '/ora')}
+          onClick={() => trackAndNavigate('goal_engaged', '/app')}
           style={btnStyle('#a855f7')}
         >
           💬 Ask Ora
         </button>
         <button
-          onClick={() => trackAndNavigate('feed_opened', '/feed')}
+          onClick={() => trackAndNavigate('feed_opened', '/app/ido')}
           style={{ ...btnStyle('rgba(255,255,255,0.12)'), color: 'rgba(248,248,252,0.7)' }}
         >
           📰 See Feed

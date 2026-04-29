@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { OraClient, OnboardingMessage } from '../lib/OraClient';
 
 interface ChatMessage extends OnboardingMessage {
@@ -59,6 +60,7 @@ export default function OraOnboarding() {
   const [renderHint, setRenderHint] = useState<string | null>(null);
   const [energyScores, setEnergyScores] = useState({ iVive: 5, Eviva: 5, Aventi: 5 });
   const [checked, setChecked] = useState(false);
+  const navigate = useNavigate();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -67,6 +69,7 @@ export default function OraOnboarding() {
     const boot = async () => {
       if (localStorage.getItem(ONBOARDING_CACHE_KEY) === 'true') {
         setChecked(true);
+        navigate('/app', { replace: true });
         return;
       }
       try {
@@ -75,6 +78,7 @@ export default function OraOnboarding() {
         if (status.completed) {
           localStorage.setItem(ONBOARDING_CACHE_KEY, 'true');
           setChecked(true);
+          navigate('/app', { replace: true });
           return;
         }
         setVisible(true);
@@ -100,7 +104,7 @@ export default function OraOnboarding() {
     };
     boot();
     return () => { cancelled = true; };
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -126,7 +130,7 @@ export default function OraOnboarding() {
       if (res.is_complete) {
         setComplete(true);
         localStorage.setItem(ONBOARDING_CACHE_KEY, 'true');
-        window.setTimeout(() => setVisible(false), 1500);
+        window.setTimeout(() => navigate('/app', { replace: true }), 1500);
       }
     } catch (e) {
       console.error('Onboarding send failed:', e);

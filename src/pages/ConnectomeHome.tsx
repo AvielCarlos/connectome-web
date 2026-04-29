@@ -1,18 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { CONNECTOME_APPS } from '../shell/AppLauncher';
 
-const highlights = [
-  { label: 'Next IOO node', title: 'Clarify your next 24-hour move', meta: 'Ready when you are' },
-  { label: 'Pending challenge', title: 'Aventi discovery streak is waiting', meta: '12 minutes to start' },
-  { label: 'Signal from the network', title: '2 friends logged new intentions', meta: 'Reflect or join' },
-];
-
-const recent = [
-  'Ora mapped a fresh goal thread through the AIOS.',
-  'Ascension DAO contribution queue refreshed with new CP opportunities.',
-  'Aventi has 4 new experiences tuned to your current path.',
+const nextSignals = [
+  { label: 'Guided path', title: 'Turn a desire into a concrete next step', path: '/app/goals' },
+  { label: 'Discovery feed', title: 'Browse one doable action at a time', path: '/app/ido' },
+  { label: 'Community', title: 'Contribute to the ecosystem and earn CP', path: '/app/dao' },
 ];
 
 function greetingName(profile: any) {
@@ -27,47 +20,78 @@ function dayPart() {
   return 'evening';
 }
 
+const panel: React.CSSProperties = {
+  background: 'linear-gradient(180deg, rgba(18,18,26,0.94), rgba(12,12,18,0.94))',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: 24,
+  boxShadow: '0 20px 70px rgba(0,0,0,0.24)',
+};
+
 export default function ConnectomeHome() {
   const { profile } = useAuth();
   const navigate = useNavigate();
 
   return (
-    <div className="connectome-home">
-      <section className="connectome-home__hero">
+    <div className="connectome-home" style={{ maxWidth: 1040, margin: '0 auto', padding: '78px 18px 120px' }}>
+      <section className="connectome-home__hero" style={{ textAlign: 'center', marginBottom: 26 }}>
         <div className="connectome-home__signal">
           <span className="ora-orb" /> Ora is online
         </div>
         <h1>Your AI OS for Human Flourishing</h1>
-        <p>Daily guidance, vitality, experiences, missions, and community — orchestrated by Ora.</p>
-        <p>Good {dayPart()}, {greetingName(profile)}. Ora is orienting the OS around what matters next.</p>
+        <p style={{ maxWidth: 720, margin: '0 auto 10px' }}>
+          Good {dayPart()}, {greetingName(profile)}. This is the Connectome home base: choose whether you already know your aim, or want iDo to surface a next action.
+        </p>
       </section>
 
-      <section className="connectome-home__highlights" aria-label="Ora highlights">
-        {highlights.map((item) => (
-          <article key={item.label} className="connectome-home__highlight">
+      <section aria-label="Choose your next mode" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <button
+          type="button"
+          onClick={() => navigate('/app/goals?clarify=1')}
+          style={{ ...panel, padding: 24, color: '#f8f8fc', textAlign: 'left', cursor: 'pointer' }}
+        >
+          <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>I know what I want to do</div>
+          <h2 style={{ margin: '0 0 10px', fontSize: 28, letterSpacing: -0.7 }}>Clarify it with Ora</h2>
+          <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)', lineHeight: 1.6 }}>Turn a goal, feeling, or problem into a concrete path with steps, constraints, and support.</p>
+          <div style={{ marginTop: 18, color: '#00d4aa', fontWeight: 900 }}>Start with a goal →</div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/app/ido')}
+          style={{ ...panel, padding: 24, color: '#f8f8fc', textAlign: 'left', cursor: 'pointer' }}
+        >
+          <div style={{ color: '#f4c26b', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>I don’t know what I want to do</div>
+          <h2 style={{ margin: '0 0 10px', fontSize: 28, letterSpacing: -0.7 }}>Let iDo suggest one action</h2>
+          <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)', lineHeight: 1.6 }}>Open the discovery feed and choose, save, skip, or act on one useful possibility at a time.</p>
+          <div style={{ marginTop: 18, color: '#f4c26b', fontWeight: 900 }}>Open iDo feed →</div>
+        </button>
+      </section>
+
+      <section aria-label="What this is" style={{ ...panel, padding: 22, marginBottom: 24 }}>
+        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>How the pieces fit</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 12 }}>
+          {[
+            ['Ascension', 'The DAO and mission ecosystem.'],
+            ['Connectome', 'The AIOS that connects your life context.'],
+            ['Ora', 'The brain and interface that helps you decide.'],
+            ['iDo', 'The daily app for one next action.'],
+          ].map(([name, copy]) => (
+            <div key={name} style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 15 }}>
+              <strong>{name}</strong>
+              <p style={{ margin: '6px 0 0', color: 'rgba(248,248,252,0.58)', fontSize: 13, lineHeight: 1.5 }}>{copy}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="connectome-home__highlights" aria-label="Next places">
+        {nextSignals.map((item) => (
+          <button key={item.label} className="connectome-home__highlight" type="button" onClick={() => navigate(item.path)} style={{ textAlign: 'left', cursor: 'pointer' }}>
             <span>{item.label}</span>
             <h3>{item.title}</h3>
-            <p>{item.meta}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="connectome-home__apps" aria-label="Ora apps">
-        <h2>Ora apps</h2>
-        {CONNECTOME_APPS.filter((app) => !app.soon && !app.external).slice(0, 5).map((app) => (
-          <button key={app.name} type="button" onClick={() => navigate(app.path)}>
-            <span>{app.icon}</span>
-            <strong>{app.name}</strong>
+            <p>Open →</p>
           </button>
         ))}
-      </section>
-
-      <section className="connectome-home__activity">
-        <div>
-          <span>Recent activity</span>
-          <h2>Light signals from the OS</h2>
-        </div>
-        {recent.map((entry) => <p key={entry}>{entry}</p>)}
       </section>
     </div>
   );

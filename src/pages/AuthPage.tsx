@@ -34,14 +34,13 @@ export default function AuthPage() {
     try {
       if (mode === 'login') {
         await login(email, password);
-        navigate('/feed');
+        navigate('/app', { replace: true });
       } else {
         await register(email, password, displayName || undefined);
         // A/B: login_after_register_destination
         const dest = postRegisterDestVariant === 'B' ? '/onboarding'
-          : postRegisterDestVariant === 'C' ? '/feed'
-          : '/home';
-        navigate(dest);
+          : '/app';
+        navigate(dest, { replace: true });
       }
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || 'Something went wrong';

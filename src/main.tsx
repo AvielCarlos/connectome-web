@@ -53,6 +53,7 @@ function App() {
           <Route path="/auth/github-callback" element={<GitHubCallbackPage />} />
 
           {/* AIOS app routes */}
+          <Route path="/app" element={<ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute>} />
           <Route path="/app/ido" element={<ShellRoute activeApp="ido"><FeedPage /></ShellRoute>} />
           <Route path="/app/goals" element={<ShellRoute activeApp="goals"><GoalsPage /></ShellRoute>} />
           <Route path="/app/routines" element={<ShellRoute activeApp="routines"><RoutinesPage /></ShellRoute>} />
@@ -67,13 +68,13 @@ function App() {
           <Route path="/onboarding" element={<ShellRoute activeApp="home"><OraOnboarding /></ShellRoute>} />
 
           {/* Backward-compatible redirects */}
-          <Route path="/home" element={<Navigate to="/" replace />} />
+          <Route path="/home" element={<Navigate to="/app" replace />} />
           <Route path="/feed" element={<Navigate to="/app/ido" replace />} />
           <Route path="/discover" element={<Navigate to="/app/ido" replace />} />
           <Route path="/goals" element={<Navigate to="/app/goals" replace />} />
           <Route path="/routines" element={<Navigate to="/app/routines" replace />} />
           <Route path="/journal" element={<Navigate to="/app/ido" replace />} />
-          <Route path="/ora" element={<Navigate to="/" replace />} />
+          <Route path="/ora" element={<Navigate to="/app" replace />} />
           <Route path="/dao" element={<Navigate to="/app/dao" replace />} />
           <Route path="/contribute" element={<Navigate to="/app/contribute" replace />} />
           <Route path="/services" element={<Navigate to="/app/services" replace />} />

@@ -18,6 +18,20 @@ interface AppLauncherProps {
 
 const DEFAULT_FEATURED_APPS = ['iDo', 'Aventi', 'iVive', 'Eviva'];
 
+const OUTCOME_LABELS: Partial<Record<ConnectomeApp['id'], { title: string; description: string; badge?: string }>> = {
+  ido: { title: 'Find one thing to do now', description: 'A simple action feed when you want momentum but not more planning.', badge: 'Daily' },
+  goals: { title: 'Clarify a goal with Ora', description: 'Turn an intention into steps, constraints, and a path you can act on.', badge: 'Plan' },
+  routines: { title: 'Build a repeatable rhythm', description: 'Make the helpful action automatic with small routines.', badge: 'Habits' },
+  ivive: { title: 'Improve vitality', description: 'Care for energy, health, recovery, and inner stability.', badge: 'Vitality' },
+  eviva: { title: 'Serve a meaningful mission', description: 'Find contribution, work, services, and world-facing opportunities.', badge: 'Mission' },
+  aventi: { title: 'Discover life experiences', description: 'Open adventures, events, friends, dating, and spontaneity.', badge: 'External' },
+  dao: { title: 'Understand the DAO', description: 'See governance, CP, proposals, and the contribution economy.', badge: 'DAO' },
+  contribute: { title: 'Submit work and earn CP', description: 'Share code, design, research, ideas, or feedback for review.', badge: 'Build' },
+  services: { title: 'Use Ora-powered tools', description: 'Open integrations and generated surfaces around your current path.', badge: 'Tools' },
+  ioo: { title: 'View the life map', description: 'Explore the graph Ora uses to reason about what matters next.', badge: 'Map' },
+  profile: { title: 'Manage identity and settings', description: 'Control profile, accounts, permissions, experiments, and system tools.', badge: 'You' },
+};
+
 export default function AppLauncher({ onLaunch }: AppLauncherProps) {
   const navigate = useNavigate();
   const [aiosState, setAiosState] = useState<AiosState>({ featured_apps: DEFAULT_FEATURED_APPS });
@@ -60,8 +74,8 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
   return (
     <section className="app-launcher" aria-label="App launcher">
       <div className="app-launcher__intro">
-        <span>Ora</span>
-        <h2>Choose where Ora should focus.</h2>
+        <span>Connectome</span>
+        <h2>What are you trying to do?</h2>
         {aiosState.ora_mission_statement && (
           <p className="app-launcher__mission">{aiosState.ora_mission_statement}</p>
         )}
@@ -77,10 +91,10 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
               className={`app-launcher__card ${isFeatured ? 'app-launcher__card--featured' : ''}`}
               onClick={() => launch(app)}
             >
-              {isFeatured && <span className="app-launcher__featured-badge">Featured</span>}
+              {isFeatured && <span className="app-launcher__featured-badge">{OUTCOME_LABELS[app.id]?.badge || 'Featured'}</span>}
               <span className="app-launcher__icon">{app.icon}</span>
-              <span className="app-launcher__name">{app.name}</span>
-              <span className="app-launcher__description">{app.description}</span>
+              <span className="app-launcher__name">{OUTCOME_LABELS[app.id]?.title || app.name}</span>
+              <span className="app-launcher__description">{OUTCOME_LABELS[app.id]?.description || app.description}</span>
               {app.external && <span className="app-launcher__soon">Opens externally</span>}
             </button>
           );

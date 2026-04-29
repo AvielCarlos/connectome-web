@@ -1,4 +1,4 @@
-// Handles /auth/github-callback — shows "GitHub connected!" then redirects to /contribute
+// Handles /auth/github-callback — shows "GitHub connected!" then redirects to /app/contribute
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,7 +10,7 @@ export default function GitHubCallbackPage() {
     const connected = params.get('connected');
     void connected;
     // Slight delay, then go to contribute page
-    setTimeout(() => navigate('/contribute?github=connected'), 1500);
+    setTimeout(() => navigate('/app/contribute?github=connected'), 1500);
   }, [navigate]);
 
   return (
