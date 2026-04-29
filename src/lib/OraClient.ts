@@ -431,6 +431,7 @@ class OraClientClass {
     github_pr_url?: string;
     external_link?: string;
     evidence_text?: string;
+    attachment_urls?: string[];
   }): Promise<any> {
     const res = await this.client.post('/api/dao/contribute', data);
     return res.data;
@@ -452,6 +453,16 @@ class OraClientClass {
     } catch {
       return { connected: false, github_username: null, github_avatar_url: null };
     }
+  }
+
+  async getContributionStats(): Promise<any> {
+    const res = await this.client.get('/api/users/me/contribution-stats');
+    return res.data;
+  }
+
+  async syncGitHubContributions(): Promise<any> {
+    const res = await this.client.post('/api/dao/sync-github');
+    return res.data;
   }
 
   getGitHubLoginUrl(): string {
