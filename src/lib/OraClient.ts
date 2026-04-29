@@ -151,6 +151,18 @@ export interface GoalStep {
   ora_note?: string;
 }
 
+export interface GoalClarifyMessage {
+  role: 'user' | 'ora';
+  content: string;
+}
+
+export interface GoalClarifyResponse {
+  message: string;
+  is_complete: boolean;
+  structured_goal: Record<string, any>;
+  suggested_ioo_path: any[];
+}
+
 export interface FeedbackPayload {
   screen_spec_id: string;
   rating?: number;
@@ -280,9 +292,18 @@ class OraClientClass {
     return res.data as Goal[];
   }
 
-  async createGoal(title: string, description?: string, domain?: string): Promise<Goal> {
-    const res = await this.client.post('/api/goals/', { title, description, domain });
+  async createGoal(title: string, description?: string, domain?: string, steps?: GoalStep[]): Promise<Goal> {
+    const res = await this.client.post('/api/goals/', { title, description, domain, steps });
     return res.data as Goal;
+  }
+
+  async clarifyGoal(goalTitle: string, conversation: GoalClarifyMessage[], userProfile: Record<string, any> = {}): Promise<GoalClarifyResponse> {
+    const res = await this.client.post('/api/goals/clarify', {
+      goal_title: goalTitle,
+      conversation,
+      user_profile: userProfile,
+    });
+    return res.data as GoalClarifyResponse;
   }
 
   async breakdownGoal(goalId: string): Promise<Goal> {
