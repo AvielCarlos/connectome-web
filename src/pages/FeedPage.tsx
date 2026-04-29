@@ -364,7 +364,7 @@ export default function FeedPage() {
 
   // Auth guard — redirect to login if not authenticated
   React.useEffect(() => {
-    if (!OraClient.isAuthenticated()) {
+    if (!localStorage.getItem('connectome_token')) {
       navigate('/auth?redirect=/feed', { replace: true });
     }
   }, [navigate]);
@@ -564,7 +564,7 @@ export default function FeedPage() {
         <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.45)' }}>{isAuthError ? 'Your session may have expired.' : error}</div>
         {isAuthError
           ? <button onClick={() => navigate('/auth?redirect=/feed')} style={{ background: '#6366f1', color: '#fff', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>Sign In</button>
-          : <button onClick={loadInitial} style={{ background: '#00d4aa', color: '#0a0a0f', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>Retry</button>
+          : <button onClick={() => loadInitial()} style={{ background: '#00d4aa', color: '#0a0a0f', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>Retry</button>
         }
       </div>
     );
