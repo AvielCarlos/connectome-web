@@ -670,9 +670,30 @@ export default function FeedPage() {
         <div style={{ fontSize: 32 }}>⚠️</div>
         <div style={{ fontSize: 15, fontWeight: 700 }}>Could not load feed</div>
         <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.45)' }}>{error}</div>
-        <button onClick={loadInitial} style={{ background: '#00d4aa', color: '#0a0a0f', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>Retry</button>
+        <button
+          onClick={() => loadInitial()}
+          style={{
+            marginTop: 16,
+            background: 'rgba(0,212,170,0.15)',
+            border: '1px solid rgba(0,212,170,0.4)',
+            color: '#00d4aa',
+            padding: '10px 24px',
+            borderRadius: 24,
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          Try again →
+        </button>
       </div>
     );
+  }
+
+  // If user has no goals and feed is empty, prompt to set a goal
+  if (!cards.length && hasGoals === false) {
+    navigate('/goals');
+    return null;
   }
 
   if (!cards.length) {
@@ -681,14 +702,24 @@ export default function FeedPage() {
         <div style={{ fontSize: 40 }}>◈</div>
         <div style={{ fontWeight: 700, fontSize: 18 }}>Nothing yet</div>
         <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', textAlign: 'center' }}>
-          {hasGoals === false ? 'Add a goal to get personalized cards' : "Ora's preparing your first cards…"}
+          Ora's preparing your first cards…
         </div>
-        {hasGoals === false && (
-          <button onClick={() => { trackEmptyState('click'); navigate('/goals'); }}
-            style={{ background: '#00d4aa', color: '#0a0a0f', padding: '10px 22px', borderRadius: 10, fontWeight: 700 }}>
-            Add a goal →
-          </button>
-        )}
+        <button
+          onClick={() => loadInitial()}
+          style={{
+            marginTop: 12,
+            background: 'rgba(0,212,170,0.15)',
+            border: '1px solid rgba(0,212,170,0.4)',
+            color: '#00d4aa',
+            padding: '10px 24px',
+            borderRadius: 24,
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          Refresh →
+        </button>
       </div>
     );
   }

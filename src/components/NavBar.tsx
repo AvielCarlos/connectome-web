@@ -23,22 +23,19 @@ const MOBILE_TABS = [
   { path: '/feed',    icon: '◉',  label: 'Discover' },
   { path: '/goals',   icon: '◎',  label: 'Goals'    },
   { path: '/ora',     icon: null, label: 'Ora',  isOra: true },
-  { path: '/dao',     icon: '🏛', label: 'DAO'      },
+  { path: '/ioo',     icon: '🗺', label: 'Map'      },
   { path: '/profile', icon: null, label: 'Me',   isProfile: true },
 ] as const;
 
 // ─── Desktop sidebar config ───────────────────────────────────────────────────
 const SIDEBAR_ITEMS = [
-  { path: '/home',     icon: '◉',  label: 'Home'     },
-  { path: '/feed',     icon: '✦',  label: 'Discover' },
-  { path: '/ora',      icon: '◈',  label: 'Ora',     special: true },
-  { path: '/goals',    icon: '◎',  label: 'Goals'    },
-  { path: '/ioo',      icon: '🗺', label: 'Map'      },
-  { path: '/journal',  icon: '✍',  label: 'Journal'  },
-  { path: '/services',   icon: '⚡', label: 'Services'   },
-  { path: '/dao',        icon: '🏛', label: 'DAO'        },
+  { path: '/home',       icon: '◉',  label: 'Home'       },
+  { path: '/feed',       icon: '✦',  label: 'Discover'   },
+  { path: '/ora',        icon: '◈',  label: 'Ora',        special: true },
+  { path: '/goals',      icon: '◎',  label: 'Goals'      },
+  { path: '/ioo',        icon: '🗺', label: 'Map'        },
   { path: '/contribute', icon: '✚',  label: 'Contribute' },
-  { path: '/profile',    icon: null, label: 'Me',        isProfile: true },
+  { path: '/profile',    icon: null, label: 'Me',         isProfile: true },
 ] as const;
 
 const TIER_COLORS: Record<string, string> = {
@@ -56,11 +53,8 @@ export function NavBar() {
 
   // More menu items for Me tab
   const ME_MORE = [
-    { path: '/dao',        icon: '🏛', label: 'DAO & Contributions' },
-    { path: '/contribute', icon: '✚', label: 'Contribute' },
-    { path: '/services',   icon: '⚡', label: 'Services' },
-    { path: '/journal',  icon: '✍', label: 'Journal' },
-    { path: '/home',     icon: '◉', label: 'Home' },
+    { path: '/contribute', icon: '✚', label: 'Contribute & Earn' },
+    { path: '/home',       icon: '◉', label: 'Home' },
   ];
 
   const MAP_MORE = [
