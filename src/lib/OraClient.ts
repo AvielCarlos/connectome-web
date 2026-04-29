@@ -421,6 +421,23 @@ class OraClientClass {
     return res.data;
   }
 
+  async submitContribution(data: {
+    contribution_type: string;
+    title: string;
+    description: string;
+    github_pr_url?: string;
+    external_link?: string;
+    evidence_text?: string;
+  }): Promise<any> {
+    const res = await this.client.post('/api/dao/contribute', data);
+    return res.data;
+  }
+
+  async getMyContributions(): Promise<any[]> {
+    const res = await this.client.get('/api/dao/my-contributions');
+    return res.data.contributions;
+  }
+
   // ── Services (Nea-as-Agent-for-Hire) ─────────────────────────────────────
 
   async getServicesCatalog(): Promise<any> {
