@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { OraClient, authStorage } from '../lib/OraClient';
+import CPExplainerModal from '../components/CPExplainerModal';
 
 const ACCENT = '#00d4aa';
 
@@ -54,6 +55,7 @@ export default function ContributePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [githubStatus, setGithubStatus] = useState<GitHubStatus>({ connected: false, github_username: null, github_avatar_url: null });
+  const [cpExplainerOpen, setCpExplainerOpen] = useState(false);
 
   const isAuthed = useMemo(() => authStorage.isAuthenticated(), []);
 
@@ -148,6 +150,7 @@ export default function ContributePage() {
           <div style={{ display: 'inline-flex', border: '1px solid rgba(0,212,170,0.28)', background: 'rgba(0,212,170,0.08)', color: ACCENT, borderRadius: 999, padding: '7px 12px', fontSize: 12, fontWeight: 900, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 16 }}>Internal ecosystem workbench</div>
           <h1 style={{ fontSize: 'clamp(36px, 7vw, 70px)', lineHeight: 0.98, letterSpacing: -2.2, margin: '0 0 16px', fontWeight: 950 }}>Submit work. Earn CP. Move the ecosystem forward.</h1>
           <p style={{ margin: '0 auto', maxWidth: 690, color: 'rgba(248,248,252,0.62)', fontSize: 17, lineHeight: 1.65 }}>Contribute is the workbench: concrete tasks, evidence, review, and delivery. DAO governs and rewards the work; Eviva handles world-facing missions and opportunities.</p>
+          <button type="button" onClick={() => setCpExplainerOpen(true)} style={{ marginTop: 14, color: ACCENT, fontWeight: 900, textDecoration: 'none' }}>What is CP?</button>
         </section>
 
         <section style={{ ...card, padding: 22, marginBottom: 22 }}>
@@ -218,6 +221,7 @@ export default function ContributePage() {
           <ul style={{ margin: '16px 0 0', paddingLeft: 20, color: 'rgba(248,248,252,0.66)', lineHeight: 1.75 }}><li>Quality over quantity.</li><li>Must be implemented or documented evidence of real work.</li><li>Ora reviews every submission within 24h.</li><li>CP awarded based on impact and complexity.</li></ul>
         </details>
       </div>
+      <CPExplainerModal open={cpExplainerOpen} onClose={() => setCpExplainerOpen(false)} />
     </main>
   );
 }

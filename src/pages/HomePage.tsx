@@ -145,7 +145,7 @@ export default function HomePage() {
 
     if (exploreVariant === 'instant') {
       OraClient.trackAbEvent('home_intake_v1', 'instant', 'intake_depth').catch(() => {});
-      setTimeout(() => navigate('/feed'), 180);
+      setTimeout(() => navigate('/app/ido'), 180);
       return;
     }
 
@@ -185,7 +185,7 @@ export default function HomePage() {
   const handleIntakeSubmit = () => {
     const variant = exploreVariant === 'deep' ? 'deep' : 'one_q';
     OraClient.trackAbEvent('home_intake_v1', variant, 'intake_depth').catch(() => {});
-    navigate('/feed');
+    navigate('/app/ido');
   };
 
   // ── View: creating ─────────────────────────────────────────────────────────

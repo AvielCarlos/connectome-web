@@ -20,22 +20,22 @@ import { useAuth } from '../context/AuthContext';
 
 // ─── Mobile 5-tab config (WeChat pattern) ────────────────────────────────────
 const MOBILE_TABS = [
-  { path: '/feed',    icon: '◉',  label: 'Discover' },
-  { path: '/goals',   icon: '◎',  label: 'Goals'    },
-  { path: '/ora',     icon: null, label: 'Ora',  isOra: true },
-  { path: '/dao',     icon: '🏛', label: 'DAO'      },
-  { path: '/profile', icon: null, label: 'Me',   isProfile: true },
+  { path: '/app/ido',    icon: '◉',  label: 'Discover' },
+  { path: '/app/goals',   icon: '◎',  label: 'Goals'    },
+  { path: '/app',     icon: null, label: 'Ora',  isOra: true },
+  { path: '/app/dao',     icon: '🏛', label: 'DAO'      },
+  { path: '/app/profile', icon: null, label: 'Me',   isProfile: true },
 ] as const;
 
 // ─── Desktop sidebar config ───────────────────────────────────────────────────
 const SIDEBAR_ITEMS = [
-  { path: '/home',       icon: '◉',  label: 'Home'       },
-  { path: '/feed',       icon: '✦',  label: 'Discover'   },
-  { path: '/ora',        icon: '◈',  label: 'Ora',        special: true },
-  { path: '/goals',      icon: '◎',  label: 'Goals'      },
-  { path: '/dao',        icon: '🏛', label: 'DAO'        },
-  { path: '/contribute', icon: '✚',  label: 'Contribute' },
-  { path: '/profile',    icon: null, label: 'Me',         isProfile: true },
+  { path: '/app',       icon: '◉',  label: 'Home'       },
+  { path: '/app/ido',       icon: '✦',  label: 'Discover'   },
+  { path: '/app',        icon: '◈',  label: 'Ora',        special: true },
+  { path: '/app/goals',      icon: '◎',  label: 'Goals'      },
+  { path: '/app/dao',        icon: '🏛', label: 'DAO'        },
+  { path: '/app/contribute', icon: '✚',  label: 'Contribute' },
+  { path: '/app/profile',    icon: null, label: 'Me',         isProfile: true },
 ] as const;
 
 const TIER_COLORS: Record<string, string> = {
@@ -53,14 +53,14 @@ export function NavBar() {
 
   // More menu items for Me tab
   const ME_MORE = [
-    { path: '/dao',        icon: '🏛', label: 'DAO & Contributions' },
-    { path: '/contribute', icon: '✚', label: 'Contribute & Earn' },
-    { path: '/home',       icon: '◉', label: 'Home' },
+    { path: '/app/dao',        icon: '🏛', label: 'DAO & Contributions' },
+    { path: '/app/contribute', icon: '✚', label: 'Contribute & Earn' },
+    { path: '/app',       icon: '◉', label: 'Home' },
   ];
 
   const MAP_MORE = [
     { path: '/ioo',      icon: '🗺', label: 'IOO Map' },
-    { path: '/goals',    icon: '◎', label: 'Goals' },
+    { path: '/app/goals',    icon: '◎', label: 'Goals' },
   ];
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
@@ -225,7 +225,7 @@ export function NavBar() {
           }}>
             {MOBILE_TABS.map((tab) => {
               const isActive = location.pathname === tab.path ||
-                (tab.path === '/feed' && location.pathname === '/');
+                (tab.path === '/app/ido' && location.pathname === '/');
 
               if ((tab as any).isOra) {
                 // ─── Center Ora button — elevated like WeChat "+" ──────────

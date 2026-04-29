@@ -143,7 +143,7 @@ export default function ProfilePage() {
     localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, v);
     localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
     setCurrentVariant(v);
-    navigate('/feed');
+    navigate('/app/ido');
   };
 
   const loadSurfaces = async () => {
@@ -385,7 +385,7 @@ export default function ProfilePage() {
               <div style={{ fontWeight: 700, marginBottom: 6 }}>{upgradeHeadlineText}</div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 4 }}>Unlimited cards, Drive sync, local events</div>
               <div style={{ fontSize: 13, color: 'rgba(99,102,241,0.8)', fontWeight: 600, marginBottom: 12 }}>{upgradePriceText}</div>
-              <button onClick={() => { trackUpgradeCTA('click'); navigate('/dao'); }} style={{
+              <button onClick={() => { trackUpgradeCTA('click'); navigate('/app/dao'); }} style={{
                 background: '#6366f1', color: '#fff', padding: '9px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
               }}>{upgradeCTAText}</button>
             </div>
@@ -394,9 +394,9 @@ export default function ProfilePage() {
           {/* ── Secondary Navigation — iOS Settings style ── */}
           <div style={{ background: '#12121e', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>Community</div>
-            <MenuRow icon="🏛" label="DAO & Contributions" sublabel="Earn CP, vote on proposals" onClick={() => navigate('/dao')} />
-            <MenuRow icon="✍" label="Journal" sublabel="Your personal log" onClick={() => navigate('/journal')} />
-            <MenuRow icon="⚡" label="Services" sublabel="Ora-powered tools" onClick={() => navigate('/services')} last />
+            <MenuRow icon="🏛" label="DAO & Contributions" sublabel="Earn CP, vote on proposals" onClick={() => navigate('/app/dao')} />
+            <MenuRow icon="✍" label="Journal" sublabel="Your personal log" onClick={() => navigate('/app/ido')} />
+            <MenuRow icon="⚡" label="Services" sublabel="Ora-powered tools" onClick={() => navigate('/app/services')} last />
           </div>
 
           <div style={{ background: '#12121e', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>

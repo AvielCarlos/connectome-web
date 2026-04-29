@@ -412,9 +412,9 @@ function QuickAddGoal({ onClarify }: { onClarify: (title: string) => void }) {
   };
   const goalPlaceholder = GOAL_PLACEHOLDERS[placeholderVariant] || GOAL_PLACEHOLDERS['A'];
 
-  // Auto-focus when navigated here from HomePage with ?focus=true
+  // Auto-focus when navigated here from Home with ?focus=true or ?clarify=1
   useEffect(() => {
-    if (searchParams.get('focus') === 'true') {
+    if (searchParams.get('focus') === 'true' || searchParams.get('clarify') === '1') {
       setTimeout(() => {
         inputRef.current?.focus();
         setFocused(true);
