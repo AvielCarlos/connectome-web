@@ -39,7 +39,6 @@ export type AppId =
   | 'ido'
   | 'goals'
   | 'routines'
-  | 'journal'
   | 'ivive'
   | 'eviva'
   | 'aventi'
@@ -73,6 +72,14 @@ export interface Person {
   privacyTier: PrivacyTier;
   permissions: PermissionGrant[];
   domainsActive: LifeDomain[];
+  linkedPeople?: LinkedPerson[]; // future: partners, family, friends, LinkedIn/Facebook/WA graph
+}
+
+export interface LinkedPerson {
+  id: string;
+  source: 'manual' | 'contacts' | 'whatsapp' | 'linkedin' | 'facebook';
+  relationship?: 'partner' | 'family' | 'friend' | 'colleague' | 'connection';
+  inviteStatus?: 'not_invited' | 'invited' | 'accepted';
 }
 
 export type ConstraintKind = 'energy' | 'money' | 'time' | 'location' | 'skill' | 'courage';
@@ -86,6 +93,8 @@ export interface Constraint {
 
 export type NeedKind =
   | 'vitality'
+  | 'rest'
+  | 'recovery'
   | 'meaning'
   | 'belonging'
   | 'mastery'
@@ -124,6 +133,15 @@ export interface Routine {
   permissions: PermissionDomain[];
 }
 
+export interface ActionDecision {
+  id: string;
+  targetEntity: { kind: string; id: string };
+  decision: 'delegate' | 'plan' | 'ditch';
+  delegatedTo?: 'ora' | 'agent' | 'person';
+  planId?: string;
+  reason?: string;
+}
+
 export interface Opportunity {
   id: string;
   title: string;
@@ -133,7 +151,7 @@ export interface Opportunity {
   cost?: { amount: number; currency: string };
   servesNeeds: string[]; // Need.id[]
   fitScore?: number; // 0–1
-  source?: 'feed' | 'aventi' | 'eviva' | 'ivive' | 'dao' | 'ora' | 'partner';
+  source?: 'ido_feed' | 'domain_feed' | 'aventi' | 'eviva' | 'ivive' | 'dao' | 'ora' | 'partner';
 }
 
 export interface Event {
@@ -187,7 +205,7 @@ export interface DaoTask {
 export interface HealthSignal {
   id: string;
   source: 'manual' | 'wearable' | 'inferred' | 'ora';
-  kind: 'energy' | 'sleep' | 'mood' | 'recovery' | 'focus' | 'biomarker';
+  kind: 'energy' | 'sleep' | 'mood' | 'recovery' | 'focus' | 'rest' | 'pomodoro' | 'biomarker';
   value: number;
   unit?: string;
   recordedAt: string;
@@ -195,11 +213,13 @@ export interface HealthSignal {
 }
 
 export type MemoryKind = 'fact' | 'preference' | 'story' | 'lesson' | 'commitment';
+export type MemoryFraming = 'ora_remembers' | 'profile_memory';
 
 export interface MemoryRecord {
   id: string;
   kind: MemoryKind;
   text: string;
+  framing?: MemoryFraming; // A/B: 'Ora remembers...' vs profile/OS memory framing
   salience: number;
   privacyTier: PrivacyTier;
   recordedAt: string;
@@ -217,6 +237,9 @@ export interface AgentDescriptor {
 }
 
 export type FeedbackKind =
+  | 'delegate'
+  | 'plan'
+  | 'ditch'
   | 'view'
   | 'save'
   | 'skip'
@@ -323,8 +346,8 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'daily',
     visibleToUser: true,
     permissions: ['memory', 'notifications', 'social', 'calendar', 'location'],
-    description: 'Daily life surface: feed, goals, journal, routines, social signal.',
-    purpose: 'Renders the next best life action in a swipeable, doable daily form.',
+    description: 'Daily life surface: feed, goals, routines, social signal, and delegate/plan/ditch decisions.',
+    purpose: 'Renders the next best life action in a swipeable, doable daily form; helps the user delegate it, plan it, or ditch it.',
   },
   {
     id: 'ivive',
@@ -335,8 +358,8 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     domain: 'iVive',
     visibleToUser: true,
     permissions: ['health', 'memory', 'notifications'],
-    description: 'Vitality OS: body, mind, soul, creativity, finances, habits.',
-    purpose: 'Maintains and grows the human substrate.',
+    description: 'Vitality OS: body, mind, soul, creativity, finances, habits, sleep, rest, and recovery.',
+    purpose: 'Maintains and grows the human substrate, including recovery/readiness tools like sleep optimization and Pomodoro-style rest loops.',
   },
   {
     id: 'eviva',
@@ -361,7 +384,7 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     external: true,
     permissions: ['location', 'social', 'calendar'],
     description: 'Adventures, events, dating, friendships, spontaneity.',
-    purpose: 'Surfaces what makes life feel alive and converts intent into experience.',
+    purpose: 'External domain app for what makes life feel alive; eventually merges into the AIOS while sharing identity/IOO data over time.',
   },
   {
     id: 'goals',
@@ -371,8 +394,8 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'daily',
     visibleToUser: true,
     permissions: ['memory', 'notifications'],
-    description: 'Living quests across all three domains.',
-    purpose: 'Turns desires into structured goals with constraints, paths, and routines.',
+    description: 'Primarily iDo feature: living quests across all three domains, also producing shared datapoints for other apps.',
+    purpose: 'Turns desires into structured goals with constraints, paths, and routines for the delegate/plan/ditch loop.',
   },
   {
     id: 'routines',
@@ -382,19 +405,8 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'daily',
     visibleToUser: true,
     permissions: ['memory', 'calendar', 'health', 'notifications'],
-    description: 'Goal-achievement subroutines.',
-    purpose: 'Makes becoming automatic by running small, repeatable loops.',
-  },
-  {
-    id: 'journal',
-    name: 'Journal',
-    icon: '📓',
-    path: '/app/journal',
-    category: 'daily',
-    visibleToUser: true,
-    permissions: ['memory'],
-    description: 'Reflection, memory, and pattern discovery.',
-    purpose: 'Captures lived experience and turns reflection into self-knowledge.',
+    description: 'Primarily iDo feature: goal-achievement subroutines that other apps can read as shared datapoints.',
+    purpose: 'Makes becoming automatic by running small, repeatable loops across domains.',
   },
   {
     id: 'dao',
@@ -448,7 +460,7 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'system',
     visibleToUser: true,
     permissions: ['memory', 'notifications'],
-    description: 'Identity, permissions, sovereignty, stats.',
+    description: 'Single top-right identity, permissions, sovereignty, stats, and connected accounts surface.',
     purpose: 'Gives the user control over who Ora thinks they are and what the OS may access.',
   },
 ];

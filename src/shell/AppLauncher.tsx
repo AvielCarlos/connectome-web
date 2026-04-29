@@ -17,13 +17,12 @@ type AiosState = {
 };
 
 export const CONNECTOME_APPS: ConnectomeApp[] = [
-  { path: '/app/ido', icon: '🚀', name: 'iDo', description: 'Daily feed, goals, social signal, journal, and routines.' },
+  { path: '/app/ido', icon: '🚀', name: 'iDo', description: 'Daily feed, goals, routines, and delegate / plan / ditch decisions.' },
   { path: 'https://aventi.app', icon: '🎉', name: 'Aventi', description: 'Experience discovery for adventures, events, and IRL momentum.', external: true },
   { path: '/app/ivive', icon: '🌱', name: 'iVive', description: 'Vitality, health, biometrics, and wellness guidance.' },
   { path: '/app/eviva', icon: '🌊', name: 'Eviva', description: 'Meaningful missions, services, products, and civilization work.' },
   { path: '/app/goals', icon: '🎯', name: 'Goals', description: 'Your IOO path, broken into living quests.' },
   { path: '/app/dao', icon: '🏛️', name: 'DAO', description: 'Contribute, coordinate, and earn CP.' },
-  { path: '/app/journal', icon: '📓', name: 'Journal', description: 'Reflection, memory, and pattern discovery.' },
   { path: '/app/profile', icon: '👤', name: 'Profile', description: 'Identity, stats, streaks, and sovereignty.' },
 ];
 

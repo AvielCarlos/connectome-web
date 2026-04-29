@@ -7,7 +7,7 @@ import GlobalFeedbackButton from '../components/GlobalFeedbackButton';
 
 interface ConnectomeShellProps {
   children: React.ReactNode;
-  activeApp?: 'home' | 'ido' | 'goals' | 'routines' | 'dao' | 'contribute' | 'journal' | 'profile' | 'services' | 'ioo' | 'ivive' | 'eviva';
+  activeApp?: 'home' | 'ido' | 'goals' | 'routines' | 'dao' | 'contribute' | 'profile' | 'services' | 'ioo' | 'ivive' | 'eviva';
 }
 
 const appLabels: Record<string, string> = {
@@ -17,7 +17,6 @@ const appLabels: Record<string, string> = {
   routines: 'Routines',
   dao: 'DAO',
   contribute: 'Contribute',
-  journal: 'Journal',
   profile: 'Profile',
   services: 'Services',
   ioo: 'IOO Map',
@@ -43,37 +42,30 @@ const dockMenus: Record<string, DockItem[]> = {
   ],
   ido: [
     { id: 'feed', label: 'Feed', icon: '✦', path: '/app/ido' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'ora' },
+    { id: 'plan', label: 'Plan', icon: '🎯', path: '/app/goals' },
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
-    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
-    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'ditch', label: 'Ditch', icon: '🗑️', path: '/app/routines' },
   ],
   goals: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
-    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'ora' },
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
-    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
     { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
-  ],
-  journal: [
-    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
-    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
-    { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
   ],
   routines: [
     { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'ora' },
+    { id: 'plan', label: 'Plan', icon: '🎯', path: '/app/goals' },
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
-    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
     { id: 'feed', label: 'Feed', icon: '✦', path: '/app/ido' },
   ],
   ivive: [
     { id: 'vitality', label: 'Vitality', icon: '🌱', path: '/app/ivive' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'rest', label: 'Rest', icon: '🌙', path: '/app/ivive' },
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
-    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
   ],
   eviva: [
@@ -88,7 +80,7 @@ const dockMenus: Record<string, DockItem[]> = {
     { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
     { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
-    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+    { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
   ],
   contribute: [
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
@@ -109,7 +101,7 @@ const dockMenus: Record<string, DockItem[]> = {
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
     { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
-    { id: 'journal', label: 'Journal', icon: '📓', path: '/app/journal' },
+    { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
   ],
   profile: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },

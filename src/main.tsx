@@ -17,7 +17,6 @@ import ConnectomeHome from './pages/ConnectomeHome'
 const FeedPage = lazy(() => import('./pages/FeedPage'))
 const GoalsPage = lazy(() => import('./pages/GoalsPage'))
 const RoutinesPage = lazy(() => import('./pages/RoutinesPage'))
-const JournalPage = lazy(() => import('./pages/JournalPage'))
 const DAOPage = lazy(() => import('./pages/DAOPage'))
 const ContributePage = lazy(() => import('./pages/ContributePage'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
@@ -60,7 +59,7 @@ function App() {
           <Route path="/app/dao" element={<ShellRoute activeApp="dao"><DAOPage /></ShellRoute>} />
           <Route path="/app/contribute" element={<ShellRoute activeApp="contribute"><ContributePage /></ShellRoute>} />
           <Route path="/app/profile" element={<ShellRoute activeApp="profile"><ProfilePage /></ShellRoute>} />
-          <Route path="/app/journal" element={<ShellRoute activeApp="journal"><JournalPage /></ShellRoute>} />
+          <Route path="/app/journal" element={<Navigate to="/app/ido" replace />} />
           <Route path="/app/services" element={<ShellRoute activeApp="services"><ServicesPage /></ShellRoute>} />
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
           <Route path="/app/ivive" element={<ShellRoute activeApp="ivive"><IVivePage /></ShellRoute>} />
@@ -73,7 +72,7 @@ function App() {
           <Route path="/discover" element={<Navigate to="/app/ido" replace />} />
           <Route path="/goals" element={<Navigate to="/app/goals" replace />} />
           <Route path="/routines" element={<Navigate to="/app/routines" replace />} />
-          <Route path="/journal" element={<Navigate to="/app/journal" replace />} />
+          <Route path="/journal" element={<Navigate to="/app/ido" replace />} />
           <Route path="/ora" element={<Navigate to="/" replace />} />
           <Route path="/dao" element={<Navigate to="/app/dao" replace />} />
           <Route path="/contribute" element={<Navigate to="/app/contribute" replace />} />
