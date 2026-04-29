@@ -22,6 +22,8 @@ const ServicesPage = lazy(() => import('./pages/ServicesPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SurfacePage = lazy(() => import('./pages/SurfacePage'))
 const IOOPage = lazy(() => import('./pages/IOOPage'))
+const IVivePage = lazy(() => import('./pages/iVivePage'))
+const EvivaPage = lazy(() => import('./pages/EvivaPage'))
 
 type ShellApp = React.ComponentProps<typeof ConnectomeShell>['activeApp']
 
@@ -58,7 +60,8 @@ function App() {
           <Route path="/app/journal" element={<ShellRoute activeApp="journal"><JournalPage /></ShellRoute>} />
           <Route path="/app/services" element={<ShellRoute activeApp="services"><ServicesPage /></ShellRoute>} />
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
-          <Route path="/app/ivive" element={<ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute>} />
+          <Route path="/app/ivive" element={<ShellRoute activeApp="ivive"><IVivePage /></ShellRoute>} />
+          <Route path="/app/eviva" element={<ShellRoute activeApp="eviva"><EvivaPage /></ShellRoute>} />
 
           {/* Backward-compatible redirects */}
           <Route path="/home" element={<Navigate to="/" replace />} />
