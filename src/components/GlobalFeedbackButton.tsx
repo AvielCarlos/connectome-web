@@ -6,7 +6,7 @@ import { useToast } from './Toast';
 const CATEGORIES: GlobalFeedbackPayload['category'][] = ['Bug', 'Confusing', 'Idea', 'Design', 'Praise', 'Other'];
 
 export default function GlobalFeedbackButton() {
-  const { show, showCP } = useToast();
+  const { show } = useToast();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<GlobalFeedbackPayload['category']>('Idea');
   const [message, setMessage] = useState('');
@@ -71,8 +71,8 @@ export default function GlobalFeedbackButton() {
         },
       });
 
-      if (res.cp_earned) showCP(res.cp_earned, res.total_dao_cp);
-      else show(res.message || '+10 XP / feedback received', 'success');
+      if (res.cp_earned) show(`Feedback submitted +${res.cp_earned} CP`, 'success');
+      else show(res.message || 'Feedback submitted +10 CP', 'success');
       resetAndClose();
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Could not send feedback. Please try again.');
