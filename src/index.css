@@ -239,14 +239,18 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ─── FeedPage full-screen shell ──────────────────────────────── */
 .feed-container {
-  position: relative;
-  width: 100%;
-  height: calc(100vh - env(safe-area-inset-bottom, 0px));
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px)) !important;
   overflow: hidden;
+  z-index: 10;
 }
 @media (min-width: 1024px) {
   .feed-container {
-    height: 100vh;
+    left: 240px !important;
+    bottom: 0 !important;
   }
 }
 
