@@ -54,6 +54,10 @@ export default function OraOnboarding() {
   const [loading, setLoading] = useState(false);
   const [complete, setComplete] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(TOTAL_QUESTIONS);
+  const [variantId, setVariantId] = useState<string | null>(null);
+  const [renderHint, setRenderHint] = useState<string | null>(null);
+  const [energyScores, setEnergyScores] = useState({ iVive: 5, Eviva: 5, Aventi: 5 });
   const [checked, setChecked] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -75,11 +79,15 @@ export default function OraOnboarding() {
         }
         setVisible(true);
         setQuestionIndex(Math.min(status.question_index || 0, TOTAL_QUESTIONS - 1));
+        if (status.variant_id) setVariantId(status.variant_id);
         setLoading(true);
         const res = await OraClient.advanceOnboarding([]);
         if (cancelled) return;
         setMessages([{ id: 'opening', role: 'ora', content: res.message }]);
         setQuestionIndex(res.question_index);
+        setTotalQuestions(res.total_questions || TOTAL_QUESTIONS);
+        setVariantId(res.variant_id || status.variant_id || null);
+        setRenderHint(res.render_hint || null);
       } catch (e) {
         console.error('Onboarding status failed:', e);
       } finally {
@@ -98,8 +106,8 @@ export default function OraOnboarding() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading, complete]);
 
-  const sendMessage = async () => {
-    const text = input.trim();
+  const sendMessage = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
     if (!text || loading || complete) return;
     const userMessage: ChatMessage = { id: `${Date.now()}-user`, role: 'user', content: text };
     const nextMessages = [...messages, userMessage];
@@ -112,6 +120,9 @@ export default function OraOnboarding() {
       const res = await OraClient.advanceOnboarding(conversation);
       setMessages(prev => [...prev, { id: `${Date.now()}-ora`, role: 'ora', content: res.message }]);
       setQuestionIndex(Math.min(res.question_index, res.total_questions - 1));
+      setTotalQuestions(res.total_questions || TOTAL_QUESTIONS);
+      setVariantId(res.variant_id || variantId);
+      setRenderHint(res.render_hint || null);
       if (res.is_complete) {
         setComplete(true);
         localStorage.setItem(ONBOARDING_CACHE_KEY, 'true');
@@ -129,14 +140,29 @@ export default function OraOnboarding() {
     }
   };
 
+  const sendQuickReply = (text: string) => {
+    if (loading || complete) return;
+    setInput(text);
+    window.setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  };
+
+  const submitEnergyScores = () => {
+    const text = `iVive: ${energyScores.iVive}/10\nEviva: ${energyScores.Eviva}/10\nAventi: ${energyScores.Aventi}/10`;
+    sendMessage(text);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') sendMessage();
   };
 
   if (!checked || !visible) return null;
 
-  const progressStep = Math.min(questionIndex + 1, TOTAL_QUESTIONS);
-  const progressPct = complete ? 100 : (progressStep / TOTAL_QUESTIONS) * 100;
+  const progressStep = Math.min(questionIndex + 1, totalQuestions);
+  const progressPct = complete ? 100 : (progressStep / totalQuestions) * 100;
+  const showDomainCards = variantId === 'A' && renderHint === 'domain_cards' && questionIndex === 1 && !loading;
+  const showEnergySliders = variantId === 'D' && renderHint === 'energy_sliders' && questionIndex === 1 && !loading;
 
   return (
     <div style={{
@@ -165,7 +191,7 @@ export default function OraOnboarding() {
             <div>
               <div style={{ fontSize: 20, fontWeight: 900 }}>Getting to know you</div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.56)', marginTop: 3 }}>
-                Step {progressStep} of {TOTAL_QUESTIONS} — so Ora can build your path.
+                Step {progressStep} of {totalQuestions} — so Ora can build your path.
               </div>
             </div>
           </div>
@@ -193,6 +219,48 @@ export default function OraOnboarding() {
 
         {!complete && (
           <div style={{ padding: '14px 18px 18px', borderTop: '1px solid rgba(255,255,255,0.07)', background: 'rgba(10,10,15,0.96)' }}>
+            {showDomainCards && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 12 }}>
+                {[
+                  ['🌱', 'iVive', 'Vitality, health, mind, inner world'],
+                  ['🌊', 'Eviva', 'Work, contribution, social life, love'],
+                  ['🚀', 'Aventi', 'Adventures, fun, travel, experiences'],
+                ].map(([icon, title, desc]) => (
+                  <button
+                    key={title}
+                    onClick={() => sendQuickReply(`${title} feels alive right now. I also want to notice what feels quiet or neglected.`)}
+                    disabled={loading}
+                    style={{
+                      textAlign: 'left', padding: 12, borderRadius: 16,
+                      background: 'rgba(0,212,170,0.10)', border: '1px solid rgba(0,212,170,0.24)',
+                      color: '#f8f8fc', cursor: 'pointer', minHeight: 104,
+                    }}
+                  >
+                    <div style={{ fontSize: 22, marginBottom: 6 }}>{icon}</div>
+                    <div style={{ fontWeight: 900, marginBottom: 4 }}>{title}</div>
+                    <div style={{ fontSize: 12, lineHeight: 1.35, color: 'rgba(248,248,252,0.62)' }}>{desc}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+            {showEnergySliders && (
+              <div style={{ marginBottom: 12, padding: 14, borderRadius: 18, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.22)' }}>
+                {(['iVive', 'Eviva', 'Aventi'] as const).map(domain => (
+                  <label key={domain} style={{ display: 'grid', gridTemplateColumns: '72px 1fr 44px', alignItems: 'center', gap: 10, marginBottom: 10, fontSize: 13 }}>
+                    <span style={{ fontWeight: 800 }}>{domain}</span>
+                    <input
+                      type="range"
+                      min={1}
+                      max={10}
+                      value={energyScores[domain]}
+                      onChange={(e) => setEnergyScores(prev => ({ ...prev, [domain]: Number(e.target.value) }))}
+                    />
+                    <span style={{ color: '#00d4aa', fontWeight: 900 }}>{energyScores[domain]}/10</span>
+                  </label>
+                ))}
+                <button onClick={submitEnergyScores} disabled={loading} style={{ width: '100%', minHeight: 40, borderRadius: 20, background: '#00d4aa', color: '#0a0a0f', fontWeight: 950, border: 0 }}>Send scores</button>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 10 }}>
               <input
                 ref={inputRef}
@@ -203,7 +271,7 @@ export default function OraOnboarding() {
                 disabled={loading}
                 style={{ flex: 1, minHeight: 48, borderRadius: 24, padding: '0 16px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#f8f8fc', outline: 'none', fontSize: 15 }}
               />
-              <button onClick={sendMessage} disabled={loading || !input.trim()} style={{ width: 48, height: 48, borderRadius: 24, background: input.trim() ? '#00d4aa' : 'rgba(255,255,255,0.08)', color: input.trim() ? '#0a0a0f' : 'rgba(248,248,252,0.35)', fontWeight: 950, fontSize: 18 }}>↑</button>
+              <button onClick={() => sendMessage()} disabled={loading || !input.trim()} style={{ width: 48, height: 48, borderRadius: 24, background: input.trim() ? '#00d4aa' : 'rgba(255,255,255,0.08)', color: input.trim() ? '#0a0a0f' : 'rgba(248,248,252,0.35)', fontWeight: 950, fontSize: 18 }}>↑</button>
             </div>
           </div>
         )}
