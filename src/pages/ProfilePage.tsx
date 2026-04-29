@@ -27,7 +27,9 @@ export default function ProfilePage() {
   const [runningAutonomy, setRunningAutonomy] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsLoading, setProposalsLoading] = useState(false);
-  const [section, setSection] = useState<'profile' | 'ab' | 'experiments' | 'system' | 'google' | 'surfaces' | 'council'>('profile');
+  const [section, setSection] = useState<'profile' | 'ab' | 'experiments' | 'system' | 'google' | 'surfaces' | 'council' | 'dashboard'>('profile');
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
   const [allExperiments, setAllExperiments] = useState<any>(null);
   const [allExperimentsLoading, setAllExperimentsLoading] = useState(false);
   const [applyingWinner, setApplyingWinner] = useState<string | null>(null);
@@ -307,7 +309,7 @@ export default function ProfilePage() {
 
       {/* Tab bar */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto', paddingBottom: 4 }}>
-        {(['profile', 'google', 'surfaces', ...(isAdmin ? ['ab', 'experiments', 'system', 'council'] : [])] as string[]).map((s) => (
+        {(['profile', 'google', 'surfaces', ...(isAdmin ? ['dashboard', 'ab', 'experiments', 'system', 'council'] : [])] as string[]).map((s) => (
           <button
             key={s}
             onClick={() => {
@@ -317,6 +319,11 @@ export default function ProfilePage() {
               if (s === 'system') { loadAgentPopulation(); loadEvolutionProposals(); }
               if (s === 'surfaces') loadSurfaces();
               if (s === 'council') loadCouncilData();
+              if (s === 'dashboard') {
+                setDashboardLoading(true);
+                OraClient['client'].get('/api/admin/dashboard', { headers: { 'X-Admin-Token': localStorage.getItem('admin_token') || 'connectome-admin-secret' } })
+                  .then(r => setDashboard(r.data)).catch(() => {}).finally(() => setDashboardLoading(false));
+              }
             }}
             style={{
               padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
@@ -332,6 +339,7 @@ export default function ProfilePage() {
               : s === 'system' ? '⚡ System'
               : s === 'surfaces' ? '🌐 My Surfaces'
               : s === 'council' ? '◈ Council'
+              : s === 'dashboard' ? '📊 Dashboard'
               : '🔗 Google'}
           </button>
         ))}
@@ -1178,6 +1186,46 @@ export default function ProfilePage() {
               ))}
             </div>
           </Card>
+        </div>
+      )}
+
+      {/* ── Admin Dashboard ── */}
+      {section === 'dashboard' && isAdmin && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {dashboardLoading ? (
+            <div style={{ textAlign: 'center', color: 'rgba(248,248,252,0.3)', padding: 40 }}>Loading…</div>
+          ) : dashboard ? (
+            <>
+              <Card title="Users">
+                <Row label="Total" value={String(dashboard.users?.total ?? 0)} />
+                <Row label="New (24h)" value={String(dashboard.users?.new_24h ?? 0)} valueColor="#00d4aa" />
+                <Row label="New (7d)" value={String(dashboard.users?.new_7d ?? 0)} />
+                <Row label="Active (24h)" value={String(dashboard.users?.active_24h ?? 0)} valueColor="#00d4aa" />
+                <Row label="Active (7d)" value={String(dashboard.users?.active_7d ?? 0)} />
+                <Row label="Paying" value={String(dashboard.users?.paying ?? 0)} valueColor="#8b5cf6" />
+              </Card>
+              <Card title="Revenue & Costs">
+                <Row label="MRR (est.)" value={`$${dashboard.revenue?.mrr_est_usd ?? 0}`} valueColor="#10b981" />
+                <Row label="Monthly Burn" value={`$${dashboard.costs?.total_burn_30d_usd ?? 0}`} valueColor="#ef4444" />
+                <Row label="API Cost (30d)" value={`$${dashboard.costs?.api_cost_30d_usd ?? 0}`} />
+                <Row label="API Cost (24h)" value={`$${dashboard.costs?.api_cost_24h_usd ?? 0}`} />
+                <Row label="Status" value={dashboard.sustainability?.status ?? '—'} valueColor={dashboard.sustainability?.status === 'profitable' ? '#10b981' : '#f59e0b'} />
+              </Card>
+              <Card title="Activity (24h)">
+                <Row label="Screens served" value={String(dashboard.activity?.screens_today ?? 0)} />
+                <Row label="Users active" value={String(dashboard.activity?.users_with_screens_today ?? 0)} />
+                <Row label="Goals total" value={String(dashboard.activity?.goals_total ?? 0)} />
+                <Row label="Goals completed" value={String(dashboard.activity?.goals_completed ?? 0)} valueColor="#00d4aa" />
+              </Card>
+              <Card title="Top Agents">
+                {(dashboard.top_agents || []).map((a: any) => (
+                  <Row key={a.name} label={a.name} value={`${a.screens} screens`} />
+                ))}
+              </Card>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center', color: 'rgba(248,248,252,0.3)', padding: 40 }}>No data</div>
+          )}
         </div>
       )}
     </div>
