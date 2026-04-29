@@ -163,6 +163,23 @@ export interface GoalClarifyResponse {
   suggested_ioo_path: any[];
 }
 
+export interface OnboardingMessage {
+  role: 'user' | 'ora';
+  content: string;
+}
+
+export interface OnboardingResponse {
+  message: string;
+  is_complete: boolean;
+  question_index: number;
+  total_questions: number;
+}
+
+export interface OnboardingStatus {
+  completed: boolean;
+  question_index: number;
+}
+
 export interface FeedbackPayload {
   screen_spec_id: string;
   rating?: number;
@@ -304,6 +321,16 @@ class OraClientClass {
       user_profile: userProfile,
     });
     return res.data as GoalClarifyResponse;
+  }
+
+  async getOnboardingStatus(): Promise<OnboardingStatus> {
+    const res = await this.client.get('/api/discovery/onboarding/status');
+    return res.data as OnboardingStatus;
+  }
+
+  async advanceOnboarding(conversation: OnboardingMessage[]): Promise<OnboardingResponse> {
+    const res = await this.client.post('/api/discovery/onboarding', { conversation });
+    return res.data as OnboardingResponse;
   }
 
   async breakdownGoal(goalId: string): Promise<Goal> {
