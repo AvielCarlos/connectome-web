@@ -1,0 +1,32 @@
+{
+  "name": "iDo — Ora",
+  "short_name": "iDo",
+  "description": "Your AI OS for human fulfilment, powered by Ora",
+  "start_url": "/connectome-web/",
+  "scope": "/connectome-web/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00d4aa",
+  "icons": [
+    {
+      "src": "https://atdao.org/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "https://avatars.githubusercontent.com/u/91352614?v=4",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://avatars.githubusercontent.com/u/91352614?v=4",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "health", "productivity"],
+  "lang": "en"
+}
