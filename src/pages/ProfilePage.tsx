@@ -280,7 +280,7 @@ export default function ProfilePage() {
   const upgradeCTAText = UPGRADE_CTAS[ctaButtonVariant] || UPGRADE_CTAS['A'];
 
   return (
-    <div className="page-content" style={{ maxWidth: 480, margin: '0 auto', overflowY: 'auto' }}>
+    <div style={{ maxWidth: 480, margin: '0 auto', padding: '16px 16px', paddingBottom: 'calc(var(--bottom-nav-height, 80px) + env(safe-area-inset-bottom, 0px) + 16px)', overflowY: 'auto' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24, paddingTop: 8 }}>
