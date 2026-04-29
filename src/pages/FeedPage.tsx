@@ -536,7 +536,7 @@ export default function FeedPage() {
         setDailyLimit(batch[batch.length - 1].daily_limit);
       }
       // Award card_view XP
-      OraClient.post('/api/gamification/checkin', { reason: 'card_view' }).catch(() => {});
+      OraClient['client'].post('/api/gamification/checkin', { reason: 'card_view' }).catch(() => {});
     } catch (e: any) {
       if (e?.response?.status === 402) setIsLimited(true);
       else setError(e?.response?.data?.detail || 'Failed to load feed');
@@ -622,7 +622,7 @@ export default function FeedPage() {
         completed: true,
       });
       // Award XP
-      OraClient.post('/api/gamification/checkin', { reason: 'card_rate', ref_id: screenId }).catch(() => {});
+      OraClient['client'].post('/api/gamification/checkin', { reason: 'card_rate', ref_id: screenId }).catch(() => {});
       showToast(rating >= 4 ? `♥ Loved it (+15 XP)` : `Rated ${rating}★`);
       if (rating >= 4) setTimeout(goNext, 700);
     } catch {}
