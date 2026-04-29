@@ -191,6 +191,14 @@ export interface FeedbackPayload {
   completed?: boolean;
 }
 
+export interface GlobalFeedbackPayload {
+  category: 'Bug' | 'Confusing' | 'Idea' | 'Design' | 'Praise' | 'Other';
+  message: string;
+  route: string;
+  screenshot_data_url?: string | null;
+  metadata?: Record<string, any>;
+}
+
 export interface JournalEntry {
   id: string;
   prompt: string;
@@ -303,6 +311,19 @@ class OraClientClass {
       completed: payload.completed ?? false,
     });
     return res.data as { ok: boolean; fulfilment_delta: number; message: string };
+  }
+
+  async submitGlobalFeedback(payload: GlobalFeedbackPayload) {
+    const res = await this.client.post('/api/feedback', payload);
+    return res.data as {
+      ok: boolean;
+      message: string;
+      xp_earned?: number;
+      cp_earned?: number;
+      cp_balance?: number;
+      total_dao_cp?: number;
+      contribution_id?: string;
+    };
   }
 
   // ── Goals ─────────────────────────────────────────────────────────────────
