@@ -735,39 +735,59 @@ export default function FeedPage() {
               : 'Ora returned an empty batch. Retry will request a single fallback card.'}
         </div>
         {hasGoals === false && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 320 }}>
+            <button
+              onClick={() => navigate('/')}
+              style={{
+                marginTop: 12,
+                background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                border: 'none',
+                color: '#fff',
+                padding: '12px 20px',
+                borderRadius: 24,
+                fontSize: 14,
+                fontWeight: 800,
+                cursor: 'pointer',
+                boxShadow: '0 0 24px rgba(139,92,246,0.25)',
+              }}
+            >
+              I know what I want to do →
+            </button>
+            <button
+              onClick={() => loadInitial()}
+              style={{
+                background: 'rgba(0,212,170,0.15)',
+                border: '1px solid rgba(0,212,170,0.4)',
+                color: '#00d4aa',
+                padding: '12px 20px',
+                borderRadius: 24,
+                fontSize: 14,
+                fontWeight: 800,
+                cursor: 'pointer',
+              }}
+            >
+              I don't know what I want to do →
+            </button>
+          </div>
+        )}
+        {hasGoals !== false && (
           <button
-            onClick={() => navigate('/goals')}
+            onClick={() => loadInitial()}
             style={{
               marginTop: 12,
-              background: 'linear-gradient(135deg, #00d4aa, #00b896)',
-              border: 'none',
-              color: '#0a0a0f',
+              background: 'rgba(0,212,170,0.15)',
+              border: '1px solid rgba(0,212,170,0.4)',
+              color: '#00d4aa',
               padding: '10px 24px',
               borderRadius: 24,
               fontSize: 14,
-              fontWeight: 800,
+              fontWeight: 600,
               cursor: 'pointer',
             }}
           >
-            Set a goal →
+            Refresh →
           </button>
         )}
-        <button
-          onClick={() => loadInitial()}
-          style={{
-            marginTop: 12,
-            background: 'rgba(0,212,170,0.15)',
-            border: '1px solid rgba(0,212,170,0.4)',
-            color: '#00d4aa',
-            padding: '10px 24px',
-            borderRadius: 24,
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          Refresh →
-        </button>
       </div>
     );
   }
