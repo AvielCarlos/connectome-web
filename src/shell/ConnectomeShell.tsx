@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AppLauncher from './AppLauncher';
 import OraOverlay from './OraOverlay';
+import GlobalFeedbackButton from '../components/GlobalFeedbackButton';
 
 interface ConnectomeShellProps {
   children: React.ReactNode;
@@ -222,6 +223,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       )}
 
       <button className="connectome-signout" type="button" onClick={() => { logout(); navigate('/'); }}>Sign out</button>
+      <GlobalFeedbackButton />
       <OraOverlay open={oraOpen} onClose={() => setOraOpen(false)} />
     </div>
   );
