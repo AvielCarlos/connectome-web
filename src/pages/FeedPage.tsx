@@ -2,7 +2,7 @@
  * FeedPage — TikTok-style vertical snap-scroll feed.
  *
  * v2: Full-bleed visual design (Airbnb/TikTok quality), collection save,
- * streak-aware header, XP awards on interaction.
+ * streak-aware header, backend progress signals on interaction.
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -534,7 +534,7 @@ export default function FeedPage() {
         setIsLimited(batch[batch.length - 1].is_limited);
         setDailyLimit(batch[batch.length - 1].daily_limit);
       }
-      // Award card_view XP
+      // Send backend progress signal.
       OraClient['client'].post('/api/gamification/checkin', { reason: 'card_view' }).catch(() => {});
     } catch (e: any) {
       if (e?.response?.status === 402) setIsLimited(true);
@@ -620,9 +620,9 @@ export default function FeedPage() {
         exit_point: 'rate',
         completed: true,
       });
-      // Award XP
+      // Send backend progress signal.
       OraClient['client'].post('/api/gamification/checkin', { reason: 'card_rate', ref_id: screenId }).catch(() => {});
-      showToast(rating >= 4 ? `♥ Loved it (+15 XP)` : `Rated ${rating}★`);
+      showToast(rating >= 4 ? `♥ Loved it` : `Rated ${rating}★`);
       if (rating >= 4) setTimeout(goNext, 700);
     } catch {}
   };
@@ -636,7 +636,7 @@ export default function FeedPage() {
       setSavedIds((prev) => new Set([...prev, collectionPickerCard.screen_spec_id]));
     }
     setCollectionPickerCard(null);
-    showToast(`✦ Saved to ${collectionName} (+20 XP)`);
+    showToast(`✦ Saved to ${collectionName}`);
     // Navigate to next card after short delay
     setTimeout(goNext, 800);
   };

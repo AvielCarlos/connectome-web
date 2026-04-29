@@ -297,13 +297,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .streak-flame { animation: streakFlame 0.9s ease-in-out infinite; }
 
-@keyframes xpPop {
-  0%   { opacity: 0; transform: translateY(0) scale(0.6); }
-  40%  { opacity: 1; transform: translateY(-20px) scale(1.1); }
-  100% { opacity: 0; transform: translateY(-48px) scale(0.9); }
-}
-.xp-pop { animation: xpPop 1.2s ease-out forwards; }
-
 @keyframes badgeEarn {
   0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
   60%  { transform: scale(1.2) rotate(5deg);  opacity: 1; }
@@ -566,23 +559,12 @@ body {
   gap: 8px;
 }
 
-.connectome-xp,
 .connectome-bell,
 .connectome-avatar {
   min-height: 38px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,0.09);
   background: rgba(255,255,255,0.04) !important;
-}
-
-.connectome-xp {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 12px;
-  color: #00d4aa;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.09em;
 }
 
 .connectome-bell,
@@ -924,7 +906,6 @@ body {
   .connectome-brand small,
   .connectome-context-label,
   .connectome-ora-indicator span:last-child,
-  .connectome-xp,
   .connectome-app-titlebar small,
   .connectome-signout { display: none; }
   .connectome-brand strong { font-size: 14px; }

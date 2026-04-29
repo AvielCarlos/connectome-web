@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { CONNECTOME_APPS } from '../shell/AppLauncher';
 
 const highlights = [
-  { label: 'Next IOO node', title: 'Clarify your next 24-hour move', meta: '+25 XP when completed' },
+  { label: 'Next IOO node', title: 'Clarify your next 24-hour move', meta: 'Ready when you are' },
   { label: 'Pending challenge', title: 'Aventi discovery streak is waiting', meta: '12 minutes to start' },
   { label: 'Signal from the network', title: '2 friends logged new intentions', meta: 'Reflect or join' },
 ];
