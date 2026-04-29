@@ -8,7 +8,7 @@ import GoalClarifyModal from '../components/GoalClarifyModal';
 const DOMAIN_CONFIG: Record<string, { emoji: string; color: string }> = {
   iVive:  { emoji: '🌱', color: '#10b981' },
   Eviva:  { emoji: '🌊', color: '#6366f1' },
-  Aventi: { emoji: '✨', color: '#f59e0b' },
+  Aventi: { emoji: '🚀', color: '#f59e0b' },
 };
 
 const GOAL_STARTERS = [

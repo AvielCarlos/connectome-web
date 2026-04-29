@@ -16,7 +16,6 @@ import { useExperiment } from '../lib/useExperiment';
 const DOMAIN_CONFIG: Record<string, { color: string; gradient: string; emoji: string }> = {
   iVive:   { color: '#10b981', gradient: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #0a0a0f 100%)', emoji: '🌱' },
   Eviva:   { color: '#3b82f6', gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #0a0a0f 100%)', emoji: '🌊' },
-  Animus:  { color: '#a855f7', gradient: 'linear-gradient(135deg, #3b0764 0%, #6b21a8 50%, #0a0a0f 100%)', emoji: '✨' },
   Aventi:  { color: '#f59e0b', gradient: 'linear-gradient(135deg, #451a03 0%, #92400e 50%, #0a0a0f 100%)', emoji: '🚀' },
 };
 const DEFAULT_DOMAIN = { color: '#00d4aa', gradient: 'linear-gradient(135deg, #042f2e 0%, #0f766e 50%, #0a0a0f 100%)', emoji: '◈' };

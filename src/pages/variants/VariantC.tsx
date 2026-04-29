@@ -13,7 +13,7 @@ const VARIANT = 'C';
 const DOMAIN_COLORS: Record<string, string> = {
   iVive: '#10b981',
   Eviva: '#3b82f6',
-  Animus: '#a855f7',
+  Aventi: '#f59e0b',
 };
 
 function getDomainColor(domain?: string) {

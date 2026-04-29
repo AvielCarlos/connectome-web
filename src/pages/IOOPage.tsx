@@ -29,7 +29,7 @@ const TYPE_LABELS: Record<string, string> = {
 const DOMAIN_COLORS: Record<string, string> = {
   iVive:  '#06b6d4',
   Eviva:  '#f43f5e',
-  Animus: '#a855f7',
+  Aventi: '#f59e0b',
 }
 
 interface IOONode {
