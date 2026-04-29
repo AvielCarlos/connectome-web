@@ -22,6 +22,19 @@ This means UI work should assume:
 
 Apps/domains such as **iVive**, **Eviva**, and **Aventi** are reusable modules/modes used by Ora to guide the user. They should bend around the user's path rather than behave like isolated apps with hard walls.
 
+## Screen Pattern Library principle
+
+Reusable screen patterns should behave like living UI memory, not a pile of templates. Ora can create or reuse a pattern, test small variants, reinforce the winners, and trim patterns that are stale, unused, or low-outcome.
+
+Foundational lifecycle:
+
+- **Create/reuse** patterns for recurring intents or pathway shapes.
+- **Test variants** across layout, copy, ordering, and interaction mechanism.
+- **Reinforce winners** when users reach clarity, completion, execution, or other positive outcomes.
+- **Trim stale/unused/low-outcome patterns** so the library stays sharp and does not keep resurfacing weak experiences.
+
+Pattern metadata should preserve enough lifecycle signal for pruning: `last_used_at`, `usage_count`, `success_score` / `outcome_score`, and deprecated/pruned state. Prefer soft-pruning over deletion so Ora can retain historical learning while avoiding reuse.
+
 Primary feed responses are graph-learning signals:
 
 - **Do Now** — user is ready for execution; strengthen execution/pathway edges and open the relevant action flow.
