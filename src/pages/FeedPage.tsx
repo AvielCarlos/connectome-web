@@ -10,6 +10,7 @@ import { OraClient, ScreenResponse } from '../lib/OraClient';
 import { OraCard } from '../components/OraCard';
 import { CollectionPicker } from '../components/CollectionPicker';
 import { StreakBadge } from '../components/StreakBadge';
+import { FEED_SURFACES } from '../runtime/ontology';
 import { useExperiment } from '../lib/useExperiment';
 
 // ─── Domain config ────────────────────────────────────────────────────────────
@@ -494,6 +495,9 @@ export default function FeedPage() {
   const { variant: goalBannerVariant } = useExperiment('feed_goal_banner');
   const { variant: emptyStateVariant, trackEvent: trackEmptyState } = useExperiment('feed_empty_state');
 
+  const iDoFeed = FEED_SURFACES.find((surface) => surface.owner === 'ido_meta_feed');
+  const blendedFeedCount = iDoFeed?.blendsOwners?.length || 0;
+
   const goalId = searchParams.get('goal') || undefined;
   const [goalTitle, setGoalTitle] = useState<string | null>(null);
 
@@ -893,7 +897,12 @@ export default function FeedPage() {
             </span>
           </div>
         ) : (
-          <div style={{ fontWeight: 900, fontSize: 16, letterSpacing: -0.3, color: '#f8f8fc' }}>iDo</div>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 16, letterSpacing: -0.3, color: '#f8f8fc' }}>iDo</div>
+            <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.42)', fontWeight: 700, marginTop: 2 }}>
+              What should I do next? · {blendedFeedCount} signal streams
+            </div>
+          </div>
         )}
 
         {/* Streak indicator */}

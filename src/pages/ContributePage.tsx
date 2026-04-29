@@ -145,9 +145,9 @@ export default function ContributePage() {
 
       <div className="contribute-page" style={{ maxWidth: 980, margin: '0 auto' }}>
         <section style={{ textAlign: 'center', marginBottom: 30 }}>
-          <div style={{ display: 'inline-flex', border: '1px solid rgba(0,212,170,0.28)', background: 'rgba(0,212,170,0.08)', color: ACCENT, borderRadius: 999, padding: '7px 12px', fontSize: 12, fontWeight: 900, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 16 }}>◈ Ora Contribution Portal</div>
-          <h1 style={{ fontSize: 'clamp(36px, 7vw, 70px)', lineHeight: 0.98, letterSpacing: -2.2, margin: '0 0 16px', fontWeight: 950 }}>Submit work. Earn CP. Shape Ora.</h1>
-          <p style={{ margin: '0 auto', maxWidth: 690, color: 'rgba(248,248,252,0.62)', fontSize: 17, lineHeight: 1.65 }}>Contributions are not just code. Send design work, research, content, community support, ideas, and evidence of useful progress directly to Ora for review.</p>
+          <div style={{ display: 'inline-flex', border: '1px solid rgba(0,212,170,0.28)', background: 'rgba(0,212,170,0.08)', color: ACCENT, borderRadius: 999, padding: '7px 12px', fontSize: 12, fontWeight: 900, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 16 }}>Internal ecosystem workbench</div>
+          <h1 style={{ fontSize: 'clamp(36px, 7vw, 70px)', lineHeight: 0.98, letterSpacing: -2.2, margin: '0 0 16px', fontWeight: 950 }}>Submit work. Earn CP. Move the ecosystem forward.</h1>
+          <p style={{ margin: '0 auto', maxWidth: 690, color: 'rgba(248,248,252,0.62)', fontSize: 17, lineHeight: 1.65 }}>Contribute is the workbench: concrete tasks, evidence, review, and delivery. DAO governs and rewards the work; Eviva handles world-facing missions and opportunities.</p>
         </section>
 
         <section style={{ ...card, padding: 22, marginBottom: 22 }}>

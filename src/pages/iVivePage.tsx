@@ -1,11 +1,14 @@
 import React from 'react';
+import { FEED_SURFACES } from '../runtime/ontology';
 
 const domains = [
-  { title: 'Physical Health', body: 'Track workouts, nutrition, sleep, and body energy.' },
-  { title: 'Mental & Emotional', body: 'Understand stress, mood, mindfulness, and resilience patterns.' },
-  { title: 'Inner World', body: 'Deepen spiritual practice, purpose, creativity, and meaning.' },
-  { title: 'Longevity', body: 'Bring biometrics, longevity protocols, HRV, and recovery into one path.' },
+  { title: 'Biometrics', body: 'HRV, sleep, recovery, energy, mood, focus, and biomarker signals in one readiness layer.' },
+  { title: 'Sleep & Recovery', body: 'Rest is treated as substrate — nudges, protocols, and recovery windows that make action sustainable.' },
+  { title: 'Pomodoro Rest Loops', body: 'Work/rest cycles that protect nervous-system capacity instead of pushing endless output.' },
+  { title: 'Vitality Path', body: 'Physical health, mental resilience, inner world, creativity, finances, and longevity as one growth path.' },
 ];
+
+const iviveFeed = FEED_SURFACES.find((surface) => surface.owner === 'ivive_domain_feed');
 
 function openOraOverlay() {
   window.dispatchEvent(new CustomEvent('connectome:open-ora'));
@@ -16,9 +19,9 @@ export default function iVivePage() {
     <section className="meta-app-page meta-app-page--ivive">
       <div className="meta-app-page__glow" aria-hidden="true" />
       <header className="meta-app-page__hero">
-        <span className="meta-app-page__eyebrow">Meta-app shell</span>
+        <span className="meta-app-page__eyebrow">Domain feed · readiness substrate</span>
         <h1>iVive 🌱</h1>
-        <p>Your vitality OS — coming soon</p>
+        <p>Your vitality OS — sleep, recovery, biometrics, rest loops, and human readiness.</p>
       </header>
 
       <div className="meta-app-page__grid meta-app-page__grid--two">
@@ -31,8 +34,11 @@ export default function iVivePage() {
       </div>
 
       <div className="meta-app-page__footer-card">
-        <p>Ora is building your personalized vitality path based on your iVive goals.</p>
-        <button type="button" onClick={openOraOverlay}>Tell Ora about your health goals</button>
+        <p>
+          iVive runs a {iviveFeed?.rankingStrategy.replace(/_/g, ' ')} feed. The best signals can flow into iDo’s daily
+          “what should I do next?” feed when recovery, energy, or sleep should shape the next action.
+        </p>
+        <button type="button" onClick={openOraOverlay}>Tell Ora about your recovery and vitality goals</button>
       </div>
     </section>
   );

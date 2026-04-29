@@ -1,30 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OraClient } from '../lib/OraClient';
+import { APP_MANIFEST, type AppManifestEntry } from '../runtime/ontology';
 
-type ConnectomeApp = {
-  path: string;
-  icon: string;
-  name: string;
-  description: string;
-  soon?: boolean;
-  external?: boolean;
-};
+type ConnectomeApp = AppManifestEntry;
 
 type AiosState = {
   featured_apps?: string[];
   ora_mission_statement?: string;
 };
 
-export const CONNECTOME_APPS: ConnectomeApp[] = [
-  { path: '/app/ido', icon: '🚀', name: 'iDo', description: 'Daily feed, goals, routines, and delegate / plan / ditch decisions.' },
-  { path: 'https://aventi.app', icon: '🎉', name: 'Aventi', description: 'Experience discovery for adventures, events, and IRL momentum.', external: true },
-  { path: '/app/ivive', icon: '🌱', name: 'iVive', description: 'Vitality, health, biometrics, and wellness guidance.' },
-  { path: '/app/eviva', icon: '🌊', name: 'Eviva', description: 'Meaningful missions, services, products, and civilization work.' },
-  { path: '/app/goals', icon: '🎯', name: 'Goals', description: 'Your IOO path, broken into living quests.' },
-  { path: '/app/dao', icon: '🏛️', name: 'DAO', description: 'Contribute, coordinate, and earn CP.' },
-  { path: '/app/profile', icon: '👤', name: 'Profile', description: 'Identity, stats, streaks, and sovereignty.' },
-];
+export const CONNECTOME_APPS: ConnectomeApp[] = APP_MANIFEST.filter((app) => app.visibleToUser);
 
 interface AppLauncherProps {
   onLaunch?: () => void;
@@ -72,10 +58,10 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
   };
 
   return (
-    <section className="app-launcher" aria-label="AIOS app launcher">
+    <section className="app-launcher" aria-label="App launcher">
       <div className="app-launcher__intro">
-        <span>Ora AIOS</span>
-        <h2>Choose the life domain Ora should focus.</h2>
+        <span>Ora</span>
+        <h2>Choose where Ora should focus.</h2>
         {aiosState.ora_mission_statement && (
           <p className="app-launcher__mission">{aiosState.ora_mission_statement}</p>
         )}
@@ -86,7 +72,7 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
           const isFeatured = featuredIndex >= 0 && featuredIndex <= 1;
           return (
             <button
-              key={app.name}
+              key={app.id}
               type="button"
               className={`app-launcher__card ${isFeatured ? 'app-launcher__card--featured' : ''}`}
               onClick={() => launch(app)}

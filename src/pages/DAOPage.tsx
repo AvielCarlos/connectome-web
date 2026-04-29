@@ -130,11 +130,11 @@ function DAOStatusCard({ cp, tier, rank }: { cp: number; tier: string; rank: num
             {tier} tier · {rank ? `Rank #${rank}` : 'Not ranked yet'}
           </div>
         </div>
-        <a href="/connectome-web/contribute" style={{
+        <a href="/connectome-web/app/contribute" style={{
           background: '#00d4aa', color: '#0a0a0f', textDecoration: 'none',
           padding: '11px 14px', borderRadius: 12, fontSize: 13, fontWeight: 800,
           boxShadow: '0 8px 24px rgba(0,212,170,0.25)', whiteSpace: 'nowrap' as const,
-        }}>Submit a Contribution →</a>
+        }}>Open Contribute →</a>
       </div>
     </div>
   );
@@ -175,9 +175,9 @@ function HowItWorks() {
     }}>
       <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 10 }}>How it works</div>
       {[
-        'Build something → open a PR on GitHub',
-        'Get reviewed → a core steward merges it',
-        'Earn CP → governance votes, future revenue share',
+        'DAO governs ownership, proposals, CP, voting, and contributor identity',
+        'Contribute routes concrete work through review and evidence',
+        'Eviva stays world-facing: missions, services, products, and meaningful work',
       ].map((text) => (
         <div key={text} style={{ display: 'flex', gap: 10, fontSize: 13, color: 'rgba(248,248,252,0.68)', marginBottom: 7 }}>
           <span style={{ color: '#00d4aa' }}>✦</span><span>{text}</span>

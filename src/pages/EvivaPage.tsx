@@ -17,9 +17,9 @@ export default function EvivaPage() {
     <section className="meta-app-page meta-app-page--eviva">
       <div className="meta-app-page__glow" aria-hidden="true" />
       <header className="meta-app-page__hero">
-        <span className="meta-app-page__eyebrow">Meta-app shell</span>
+        <span className="meta-app-page__eyebrow">World-facing missions</span>
         <h1>Eviva 🌊</h1>
-        <p>Civilization&apos;s best — for you</p>
+        <p>Meaningful work, missions, products, and services beyond the internal DAO.</p>
       </header>
 
       <div className="meta-app-page__section">
@@ -54,7 +54,7 @@ export default function EvivaPage() {
       </div>
 
       <div className="meta-app-page__footer-card">
-        <p>Connect your aspirations so Ora can curate the work, causes, products, and services that fit your life.</p>
+        <p>Eviva is the world-facing opportunity layer. Internal ecosystem work stays in Contribute; governance and rewards stay in DAO.</p>
         <button type="button" onClick={openOraOverlay}>Connect your Eviva goals</button>
       </div>
     </section>

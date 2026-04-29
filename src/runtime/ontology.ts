@@ -60,6 +60,7 @@ export interface AppManifestEntry {
   domain?: LifeDomain;
   visibleToUser: boolean;
   external?: boolean;
+  soon?: boolean;
   permissions: PermissionDomain[];
   description: string;
   purpose: string;

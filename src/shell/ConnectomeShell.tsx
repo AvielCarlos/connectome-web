@@ -4,25 +4,19 @@ import { useAuth } from '../context/AuthContext';
 import AppLauncher from './AppLauncher';
 import OraOverlay from './OraOverlay';
 import GlobalFeedbackButton from '../components/GlobalFeedbackButton';
+import { appById, type AppId } from '../runtime/ontology';
+
+type ShellApp = Exclude<AppId, 'aventi'>;
 
 interface ConnectomeShellProps {
   children: React.ReactNode;
-  activeApp?: 'home' | 'ido' | 'goals' | 'routines' | 'dao' | 'contribute' | 'profile' | 'services' | 'ioo' | 'ivive' | 'eviva';
+  activeApp?: ShellApp;
 }
 
-const appLabels: Record<string, string> = {
-  home: 'Ora',
-  ido: 'iDo',
-  goals: 'Goals',
-  routines: 'Routines',
-  dao: 'DAO',
-  contribute: 'Contribute',
-  profile: 'Profile',
-  services: 'Services',
-  ioo: 'IOO Map',
-  ivive: 'iVive',
-  eviva: 'Eviva',
-};
+function appLabel(appId: ShellApp) {
+  if (appId === 'home') return 'Ora';
+  return appById(appId)?.name || 'Ora';
+}
 
 type DockItem = {
   id: string;
@@ -32,7 +26,7 @@ type DockItem = {
   action?: 'ora' | 'launcher';
 };
 
-const dockMenus: Record<string, DockItem[]> = {
+const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   home: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
     { id: 'ivive', label: 'iVive', icon: '🌱', path: '/app/ivive' },
@@ -133,7 +127,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
     return () => window.removeEventListener('connectome:open-ora', openOra);
   }, []);
 
-  const dockItems = dockMenus[activeApp] || dockMenus.home;
+  const dockItems = dockMenus[activeApp] || dockMenus.home || [];
 
   const handleDock = (item: DockItem) => {
     if (item.action === 'ora') {
@@ -164,7 +158,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
           <span className="connectome-launcher-toggle__line" />
         </button>
 
-        <span className="connectome-context-label connectome-context-label--ambient" aria-live="polite">{appLabels[activeApp] || 'Ora'}</span>
+        <span className="connectome-context-label connectome-context-label--ambient" aria-live="polite">{appLabel(activeApp)}</span>
 
         <div className="connectome-status">
           <button type="button" className="connectome-bell" aria-label="Notifications">🔔</button>
@@ -178,7 +172,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
         {children}
       </main>
 
-      <nav className={`connectome-dock connectome-dock--${dockItems.length}`} aria-label={`${appLabels[activeApp] || 'Ora'} navigation`}>
+      <nav className={`connectome-dock connectome-dock--${dockItems.length}`} aria-label={`${appLabel(activeApp)} navigation`}>
         {dockItems.map((item) => {
           const active = item.id === activeApp || (item.path && location.pathname === item.path) || (activeApp === 'ido' && item.id === 'feed');
           return (
