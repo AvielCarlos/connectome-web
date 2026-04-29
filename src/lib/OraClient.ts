@@ -173,11 +173,14 @@ export interface OnboardingResponse {
   is_complete: boolean;
   question_index: number;
   total_questions: number;
+  variant_id?: string;
+  render_hint?: 'domain_cards' | 'energy_sliders' | string | null;
 }
 
 export interface OnboardingStatus {
   completed: boolean;
   question_index: number;
+  variant_id?: string | null;
 }
 
 export interface FeedbackPayload {
