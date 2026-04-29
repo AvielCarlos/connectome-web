@@ -8,6 +8,7 @@ const NAV_ITEMS: Array<{ path: string; label: string; icon: string | null; emoji
   { path: '/feed',    label: 'Feed',    icon: '✦',  emoji: true  },
   { path: '/ora',     label: 'Ora',     icon: '◈',  special: true },
   { path: '/goals',   label: 'Goals',   icon: '◎',  emoji: false },
+  { path: '/ioo',     label: 'Map',     icon: '🗺',  emoji: true  },
   { path: '/journal', label: 'Journal', icon: '✍',  emoji: false },
   { path: '/dao',      label: 'DAO',      icon: '🏛', emoji: true  },
   { path: '/services', label: 'Services', icon: '⚡',  emoji: true  },

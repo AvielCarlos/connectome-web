@@ -15,6 +15,7 @@ import ServicesPage from './pages/ServicesPage'
 import ProfilePage from './pages/ProfilePage'
 import SurfacePage from './pages/SurfacePage'
 import HomePage from './pages/HomePage'
+import IOOPage from './pages/IOOPage'
 import { NavBar } from './components/NavBar'
 import SuggestionButton from './components/SuggestionButton'
 import './index.css'
@@ -42,6 +43,7 @@ function App() {
         <Route path="/dao"      element={<ProtectedRoute><DAOPage /></ProtectedRoute>} />
         <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
         <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/ioo"      element={<ProtectedRoute><IOOPage /></ProtectedRoute>} />
         {/* WebSpawn surfaces — auth-gated but accessible via direct link */}
         <Route path="/surfaces/:surfaceId" element={<SurfacePage />} />
       </Routes>
