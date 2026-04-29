@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { OraClient } from '../lib/OraClient';
 import { authStorage } from '../lib/OraClient';
 import { useExperiment } from '../lib/useExperiment';
+import { useAuth } from '../context/AuthContext';
 
 const TIER_CONFIG: Record<string, { color: string; label: string }> = {
   observer:    { color: '#6b7280', label: 'Observer' },
@@ -99,6 +100,113 @@ function FoundingStewardCard({ item, number }: { item: any; number: number }) {
           @{item.github_username} · {(item.total_cp || 0).toLocaleString()} CP
         </div>
       </div>
+    </div>
+  );
+}
+
+function daoTierFromCP(cp: number, profileTier?: string) {
+  if (profileTier && TIER_CONFIG[profileTier]) return TIER_CONFIG[profileTier].label;
+  if (cp >= 3000) return 'Steward';
+  if (cp >= 500) return 'Builder';
+  if (cp >= 100) return 'Contributor';
+  return 'Observer';
+}
+
+function DAOStatusCard({ cp, tier, rank }: { cp: number; tier: string; rank: number | null }) {
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, rgba(0,212,170,0.12), rgba(99,102,241,0.09))',
+      border: '1px solid rgba(0,212,170,0.28)',
+      borderRadius: 18,
+      padding: 18,
+      marginBottom: 20,
+      boxShadow: '0 16px 44px rgba(0,0,0,0.22)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' as const }}>
+        <div>
+          <div style={{ color: '#00d4aa', fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: 'uppercase' as const, marginBottom: 6 }}>Your DAO Status</div>
+          <div style={{ fontSize: 31, fontWeight: 900, letterSpacing: -1.2 }}>{cp.toLocaleString()} CP</div>
+          <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.52)', marginTop: 3 }}>
+            {tier} tier · {rank ? `Rank #${rank}` : 'Not ranked yet'}
+          </div>
+        </div>
+        <a href="/connectome-web/contribute" style={{
+          background: '#00d4aa', color: '#0a0a0f', textDecoration: 'none',
+          padding: '11px 14px', borderRadius: 12, fontSize: 13, fontWeight: 800,
+          boxShadow: '0 8px 24px rgba(0,212,170,0.25)', whiteSpace: 'nowrap' as const,
+        }}>Submit a Contribution →</a>
+      </div>
+    </div>
+  );
+}
+
+function WeeklyLeaderboard({ items }: { items: any[] }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 10 }}>This Week's Builders 🔥</div>
+      <div style={{ background: '#12121a', border: '1px solid rgba(0,212,170,0.14)', borderRadius: 14, overflow: 'hidden' }}>
+        {items.length === 0 ? (
+          <div style={{ padding: 18, textAlign: 'center' as const, color: 'rgba(248,248,252,0.35)', fontSize: 13 }}>No weekly XP yet. Open a PR and light it up.</div>
+        ) : items.slice(0, 10).map((item, i) => {
+          const rank = item.rank || i + 1;
+          const xp = item.weekly_xp ?? item.xp_this_week ?? item.total_xp ?? item.xp ?? 0;
+          const name = item.display_name || item.name || item.github_username || item.username || 'Builder';
+          return (
+            <div key={item.id || item.user_id || item.github_username || i} style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+              borderBottom: i < Math.min(items.length, 10) - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+            }}>
+              <div style={{ width: 30, color: rank <= 3 ? '#fbbf24' : 'rgba(248,248,252,0.35)', fontWeight: 800 }}>#{rank}</div>
+              <div style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 650, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{name}</div>
+              <div style={{ color: '#00d4aa', fontWeight: 800 }}>{Number(xp || 0).toLocaleString()} XP</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function HowItWorks() {
+  return (
+    <div style={{
+      background: '#12121a', border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: 14, padding: 16, marginBottom: 20,
+    }}>
+      <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 10 }}>How it works</div>
+      {[
+        'Build something → open a PR on GitHub',
+        'Get reviewed → a core steward merges it',
+        'Earn CP → governance votes, future revenue share',
+      ].map((text) => (
+        <div key={text} style={{ display: 'flex', gap: 10, fontSize: 13, color: 'rgba(248,248,252,0.68)', marginBottom: 7 }}>
+          <span style={{ color: '#00d4aa' }}>✦</span><span>{text}</span>
+        </div>
+      ))}
+      <a href="https://github.com/AvielCarlos/connectome-backend/issues" target="_blank" rel="noopener noreferrer" style={{ color: '#00d4aa', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
+        Browse open issues →
+      </a>
+    </div>
+  );
+}
+
+function ActiveProposals({ proposals }: { proposals: any[] }) {
+  const open = proposals.filter((p) => ['open', 'active', 'proposed'].includes(String(p.status || 'open').toLowerCase())).slice(0, 5);
+  return (
+    <div style={{ background: '#12121a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 16, marginBottom: 20 }}>
+      <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 10 }}>Active proposals / ideas</div>
+      {open.length === 0 ? (
+        <a href="https://t.me/ascensiontechai" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(248,248,252,0.55)', fontSize: 13, textDecoration: 'none' }}>
+          No active proposals yet — propose one in Telegram →
+        </a>
+      ) : open.map((proposal, i) => (
+        <a key={proposal.id || i} href={proposal.url || proposal.github_url || 'https://t.me/ascensiontechai'} target="_blank" rel="noopener noreferrer" style={{
+          display: 'block', padding: '10px 0', borderBottom: i < open.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none', textDecoration: 'none',
+        }}>
+          <div style={{ color: '#f8f8fc', fontSize: 14, fontWeight: 700 }}>{proposal.title || proposal.name || 'Untitled proposal'}</div>
+          {(proposal.summary || proposal.description) && <div style={{ color: 'rgba(248,248,252,0.42)', fontSize: 12, marginTop: 3, lineHeight: 1.4 }}>{proposal.summary || proposal.description}</div>}
+        </a>
+      ))}
     </div>
   );
 }
@@ -305,6 +413,7 @@ function ClaimModal({
 
 // ─── Main DAO Page ─────────────────────────────────────────────────────────
 export default function DAOPage() {
+  const { profile } = useAuth();
   // ─── A/B experiments ────────────────────────────────────────────────────
   const { variant: taskDisplayVariant } = useExperiment('dao_task_display');
   const { variant: firstCTAVariant, trackEvent: trackDAOEvent } = useExperiment('dao_first_cta');
@@ -320,14 +429,15 @@ export default function DAOPage() {
   const [foundingStewards, setFoundingStewards] = useState<any>(null);
   const [contributions, setContributions] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [weeklyLeaderboard, setWeeklyLeaderboard] = useState<any[]>([]);
+  const [proposals, setProposals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'tasks' | 'leaderboard' | 'contributions'>('tasks');
   const [claimedTask, setClaimedTask] = useState<any>(null);
   const [toast, setToast] = useState('');
   const isLoggedIn = authStorage.isAuthenticated();
-  const profile = (authStorage as any).getProfile?.() || null;
 
-  const cpBalance = profile?.total_dao_cp ?? profile?.contributor?.cp_balance ?? null;
+  const cpBalance = profile?.total_dao_cp ?? profile?.contributor?.cp_balance ?? 0;
 
   useEffect(() => {
     Promise.all([
@@ -335,7 +445,9 @@ export default function DAOPage() {
       OraClient.getFoundingStewards().catch(() => null),
       OraClient.getDAOContributions(15).catch(() => null),
       OraClient.getDAOTasks().catch(() => null),
-    ]).then(([lb, fs, contribs, t]) => {
+      OraClient.getWeeklyLeaderboard(10).catch(() => null),
+      OraClient.getDAOProposals().catch(() => null),
+    ]).then(([lb, fs, contribs, t, weekly, proposalRes]) => {
       if (lb) {
         setLeaderboard(lb.leaderboard || []);
         setDaoStats({ total_contributors: lb.total_contributors, total_cp_awarded: lb.total_cp_awarded });
@@ -343,8 +455,18 @@ export default function DAOPage() {
       if (fs) setFoundingStewards(fs);
       if (contribs) setContributions(contribs.contributions || []);
       if (t) setTasks(t.tasks || []);
+      if (weekly) setWeeklyLeaderboard(weekly.leaderboard || weekly.builders || weekly.results || (Array.isArray(weekly) ? weekly : []));
+      if (proposalRes) setProposals(proposalRes.proposals || proposalRes.items || (Array.isArray(proposalRes) ? proposalRes : []));
     }).finally(() => setLoading(false));
   }, []);
+
+  const currentRank = (() => {
+    const profileKeys = [profile?.id, profile?.user_id, profile?.github_username, profile?.email, profile?.display_name].filter(Boolean).map(String);
+    const idx = leaderboard.findIndex((item) => [item.id, item.user_id, item.github_username, item.email, item.display_name].filter(Boolean).map(String).some((key) => profileKeys.includes(key)));
+    return idx >= 0 ? idx + 1 : null;
+  })();
+
+  const daoTier = daoTierFromCP(cpBalance, profile?.tier || profile?.dao_tier || profile?.contributor?.tier);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -403,30 +525,10 @@ export default function DAOPage() {
         )}
       </div>
 
-      {/* CP Balance (if logged in) */}
-      {isLoggedIn && cpBalance != null && (
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(99,102,241,0.1))',
-          border: '1px solid rgba(139,92,246,0.3)',
-          borderRadius: 14, padding: '14px 18px', marginBottom: 20,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        }}>
-          <div>
-            <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.45)', fontWeight: 600, letterSpacing: 0.5, marginBottom: 4 }}>YOUR CP BALANCE</div>
-            <div style={{ fontWeight: 800, fontSize: 28, color: '#a78bfa', letterSpacing: -1 }}>
-              {cpBalance.toLocaleString()} CP
-            </div>
-          </div>
-          <div style={{ textAlign: 'right' as const }}>
-            <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)' }}>
-              {cpBalance >= 3000 ? '⚡ Steward' : cpBalance >= 500 ? '⬡ Builder' : cpBalance >= 100 ? '◆ Contributor' : '○ Observer'}
-            </div>
-            <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.25)', marginTop: 2 }}>
-              {cpBalance < 3000 ? `${(3000 - cpBalance).toLocaleString()} CP to Founding Steward` : 'Founding Steward eligible!'}
-            </div>
-          </div>
-        </div>
-      )}
+      <DAOStatusCard cp={cpBalance} tier={daoTier} rank={currentRank} />
+      <WeeklyLeaderboard items={weeklyLeaderboard} />
+      <HowItWorks />
+      <ActiveProposals proposals={proposals} />
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>

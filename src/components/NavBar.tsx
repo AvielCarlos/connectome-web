@@ -2,7 +2,7 @@
  * NavBar — WeChat-inspired navigation shell.
  *
  * Mobile: 5-tab bottom bar with elevated center Ora button.
- *   Tabs: Feed · Goals · [Ora] · Map · Me
+ *   Tabs: Feed · Goals · [Ora] · DAO · Me
  *   Active state: filled icon + label + accent underline
  *   Ora button: elevated, glowing, always prominent
  *
@@ -23,7 +23,7 @@ const MOBILE_TABS = [
   { path: '/feed',    icon: '◉',  label: 'Discover' },
   { path: '/goals',   icon: '◎',  label: 'Goals'    },
   { path: '/ora',     icon: null, label: 'Ora',  isOra: true },
-  { path: '/ioo',     icon: '🗺', label: 'Map'      },
+  { path: '/dao',     icon: '🏛', label: 'DAO'      },
   { path: '/profile', icon: null, label: 'Me',   isProfile: true },
 ] as const;
 
@@ -33,7 +33,7 @@ const SIDEBAR_ITEMS = [
   { path: '/feed',       icon: '✦',  label: 'Discover'   },
   { path: '/ora',        icon: '◈',  label: 'Ora',        special: true },
   { path: '/goals',      icon: '◎',  label: 'Goals'      },
-  { path: '/ioo',        icon: '🗺', label: 'Map'        },
+  { path: '/dao',        icon: '🏛', label: 'DAO'        },
   { path: '/contribute', icon: '✚',  label: 'Contribute' },
   { path: '/profile',    icon: null, label: 'Me',         isProfile: true },
 ] as const;
@@ -53,6 +53,7 @@ export function NavBar() {
 
   // More menu items for Me tab
   const ME_MORE = [
+    { path: '/dao',        icon: '🏛', label: 'DAO & Contributions' },
     { path: '/contribute', icon: '✚', label: 'Contribute & Earn' },
     { path: '/home',       icon: '◉', label: 'Home' },
   ];
