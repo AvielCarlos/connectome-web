@@ -307,77 +307,47 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Tab bar */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto', paddingBottom: 4 }}>
-        {(['profile', 'google', 'surfaces', ...(isAdmin ? ['dashboard', 'ab', 'experiments', 'system', 'council'] : [])] as string[]).map((s) => (
+      {/* Sub-section back navigation — only shown when NOT on main profile view */}
+      {section !== 'profile' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <button
-            key={s}
-            onClick={() => {
-              setSection(s as any);
-              if (s === 'ab') loadAbResults();
-              if (s === 'experiments') loadAllExperiments();
-              if (s === 'system') { loadAgentPopulation(); loadEvolutionProposals(); }
-              if (s === 'surfaces') loadSurfaces();
-              if (s === 'council') loadCouncilData();
-              if (s === 'dashboard') {
-                setDashboardLoading(true);
-                OraClient['client'].get('/api/admin/dashboard', { headers: { 'X-Admin-Token': localStorage.getItem('admin_token') || 'connectome-admin-secret' } })
-                  .then(r => setDashboard(r.data)).catch(() => {}).finally(() => setDashboardLoading(false));
-              }
-            }}
+            onClick={() => setSection('profile')}
             style={{
-              padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700,
-              background: section === s ? '#00d4aa' : 'rgba(255,255,255,0.06)',
-              color: section === s ? '#0a0a0f' : 'rgba(248,248,252,0.5)',
-              border: `1px solid ${section === s ? '#00d4aa' : 'rgba(255,255,255,0.1)'}`,
-              whiteSpace: 'nowrap',
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              color: '#00d4aa', fontSize: 14, fontWeight: 600, padding: '6px 0',
             }}
           >
-            {s === 'profile' ? '👤 Profile'
-              : s === 'ab' ? '🧪 A/B Tests'
-              : s === 'experiments' ? '⚗️ Experiments'
-              : s === 'system' ? '⚡ System'
-              : s === 'surfaces' ? '🌐 My Surfaces'
-              : s === 'council' ? '◈ Council'
-              : s === 'dashboard' ? '📊 Dashboard'
-              : '🔗 Google'}
+            ‹ Back
           </button>
-        ))}
-      </div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#f8f8fc' }}>
+            {section === 'google' ? 'Google Account'
+              : section === 'surfaces' ? 'My Surfaces'
+              : section === 'ab' ? 'A/B Tests'
+              : section === 'experiments' ? 'Experiments'
+              : section === 'system' ? 'System'
+              : section === 'council' ? 'Executive Council'
+              : section === 'dashboard' ? 'Dashboard'
+              : section}
+          </span>
+        </div>
+      )}
 
       {/* ── Profile section ── */}
       {section === 'profile' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* ── Streak + XP + Badges ── */}
           <StreakBadge />
 
+          {/* ── Account Info ── */}
           <Card title="Account">
             <Row label="Email" value={profile?.email} />
             <Row label="Member since" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '\u2014'} />
             <Row label="Fulfilment score" value={`${((profile?.fulfilment_score || 0) * 100).toFixed(0)}%`} />
             <Row label="Tier" value={tier} valueColor={tierColor} />
-
           </Card>
 
-          <Card title="Current A/B Variant">
-            <Row label="Landing variant" value={VARIANT_LABELS[currentVariant] || currentVariant} />
-            {isAdmin && (
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.4)', marginBottom: 8 }}>Switch variant:</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {VARIANTS.map((v) => (
-                    <button key={v} onClick={() => setVariant(v)} style={{
-                      padding: '6px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700,
-                      background: currentVariant === v ? '#00d4aa' : 'rgba(255,255,255,0.07)',
-                      color: currentVariant === v ? '#0a0a0f' : 'rgba(248,248,252,0.6)',
-                      border: `1px solid ${currentVariant === v ? '#00d4aa' : 'rgba(255,255,255,0.12)'}`,
-                    }}>{v}</button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </Card>
-
+          {/* ── Upgrade prompt for free users ── */}
           {tier === 'free' && (
             <div style={{
               background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
@@ -392,25 +362,63 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* ── Get the App ── */}
-          <div style={{
-            background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)',
-            borderRadius: 14, padding: '16px 18px',
-          }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', marginBottom: 10 }}>Get the App</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-              <span style={{ fontSize: 24 }}>📱</span>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>iDo Android App</div>
-                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.5)', marginTop: 2 }}>Add to your home screen for the best experience</div>
-              </div>
-            </div>
+          {/* ── Secondary Navigation — iOS Settings style ── */}
+          <div style={{ background: '#12121e', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>Community</div>
+            <MenuRow icon="🏛" label="DAO & Contributions" sublabel="Earn CP, vote on proposals" onClick={() => navigate('/dao')} />
+            <MenuRow icon="✍" label="Journal" sublabel="Your personal log" onClick={() => navigate('/journal')} />
+            <MenuRow icon="⚡" label="Services" sublabel="Ora-powered tools" onClick={() => navigate('/services')} last />
           </div>
 
+          <div style={{ background: '#12121e', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>My Account</div>
+            <MenuRow icon="🌐" label="My Surfaces" sublabel="Personalized pages Ora built" onClick={() => { setSection('surfaces'); loadSurfaces(); }} />
+            <MenuRow icon="🔗" label="Google Account" sublabel="Drive sync & calendar" onClick={() => setSection('google')} />
+            <MenuRow icon="📱" label="Get the App" sublabel="Add iDo to your home screen" onClick={() => {}} last />
+          </div>
+
+          {/* ── Admin shortcut ── */}
+          {isAdmin && (
+            <div style={{ background: '#12121e', border: '1px solid rgba(0,212,170,0.15)', borderRadius: 16, overflow: 'hidden' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#00d4aa', textTransform: 'uppercase', padding: '14px 18px 6px', opacity: 0.7 }}>Admin</div>
+              <MenuRow icon="📊" label="Dashboard" sublabel="User & revenue metrics" onClick={() => {
+                setSection('dashboard');
+                setDashboardLoading(true);
+                OraClient['client'].get('/api/admin/dashboard', { headers: { 'X-Admin-Token': localStorage.getItem('admin_token') || 'connectome-admin-secret' } })
+                  .then(r => setDashboard(r.data)).catch(() => {}).finally(() => setDashboardLoading(false));
+              }} />
+              <MenuRow icon="🧪" label="A/B Tests" sublabel="Experiment results" onClick={() => { setSection('ab'); loadAbResults(); }} />
+              <MenuRow icon="⚗️" label="Experiments" sublabel="All active experiments" onClick={() => { setSection('experiments'); loadAllExperiments(); }} />
+              <MenuRow icon="⚡" label="System" sublabel="Autonomy engine & agents" onClick={() => { setSection('system'); loadAgentPopulation(); loadEvolutionProposals(); }} />
+              <MenuRow icon="◈" label="Council" sublabel="Executive agent council" onClick={() => { setSection('council'); loadCouncilData(); }} last />
+            </div>
+          )}
+
+          {/* ── Current A/B Variant (admin debug) ── */}
+          {isAdmin && (
+            <Card title="Current A/B Variant">
+              <Row label="Landing variant" value={VARIANT_LABELS[currentVariant] || currentVariant} />
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.4)', marginBottom: 8 }}>Switch variant:</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {VARIANTS.map((v) => (
+                    <button key={v} onClick={() => setVariant(v)} style={{
+                      padding: '6px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700,
+                      background: currentVariant === v ? '#00d4aa' : 'rgba(255,255,255,0.07)',
+                      color: currentVariant === v ? '#0a0a0f' : 'rgba(248,248,252,0.6)',
+                      border: `1px solid ${currentVariant === v ? '#00d4aa' : 'rgba(255,255,255,0.12)'}`,
+                    }}>{v}</button>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* ── Sign Out ── */}
           <button onClick={handleLogout} style={{
             width: '100%', padding: '13px', borderRadius: 12,
             background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-            color: '#ef4444', fontWeight: 700, fontSize: 14, marginTop: 8,
+            color: '#ef4444', fontWeight: 700, fontSize: 14, marginTop: 4,
           }}>
             Sign out
           </button>
@@ -1238,5 +1246,49 @@ function Row({ label, value, valueColor }: { label: string; value: string; value
       <span style={{ fontSize: 13, color: 'rgba(248,248,252,0.45)' }}>{label}</span>
       <span style={{ fontSize: 13, fontWeight: 600, color: valueColor || 'rgba(248,248,252,0.8)' }}>{value}</span>
     </div>
+  );
+}
+
+// iOS Settings-style menu row
+function MenuRow({
+  icon, label, sublabel, onClick, last = false,
+}: {
+  icon: string;
+  label: string;
+  sublabel?: string;
+  onClick: () => void;
+  last?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+        padding: '13px 18px',
+        background: 'transparent', border: 'none', cursor: 'pointer',
+        borderBottom: last ? 'none' : '1px solid rgba(255,255,255,0.05)',
+        textAlign: 'left', minHeight: 56,
+        transition: 'background 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    >
+      {/* Icon */}
+      <div style={{
+        width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+        background: 'rgba(255,255,255,0.07)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 16,
+      }}>{icon}</div>
+      {/* Labels */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#f8f8fc' }}>{label}</div>
+        {sublabel && (
+          <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.35)', marginTop: 1 }}>{sublabel}</div>
+        )}
+      </div>
+      {/* Chevron */}
+      <span style={{ fontSize: 14, color: 'rgba(248,248,252,0.2)', flexShrink: 0 }}>›</span>
+    </button>
   );
 }

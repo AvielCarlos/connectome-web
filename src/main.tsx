@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './components/Toast'
 import { NavBar } from './components/NavBar'
-import SuggestionButton from './components/SuggestionButton'
 import './index.css'
 
 // Eagerly load auth pages (small, needed immediately)
@@ -34,7 +33,6 @@ function App() {
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: '#f8f8fc' }}>
       {isAuthenticated && <NavBar />}
-      {isAuthenticated && <SuggestionButton />}
       <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', color: '#888' }}>Loading…</div>}>
         <Routes>
           <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />} />
