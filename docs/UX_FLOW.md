@@ -9,6 +9,25 @@
 
 Public site (`web/atdao`) is the Ascension/DAO front door. GitHub Pages `connectome-web` remains the app surface until the domain strategy changes.
 
+## Screen Graph principle
+
+Connectome screens are not fixed destinations. A generated screen is a pathway node: a temporary interface between the user's current state, Ora's IOO possibility graph, and the execution layer.
+
+This means UI work should assume:
+
+- a page/card can clarify intent, route to another card, execute an action, or belong to an IOO node;
+- screens should preserve enough metadata for Ora to learn why they were shown;
+- transitions matter as much as the screen itself — what the screen leads to, requires, clarifies, or executes is part of the product;
+- multiple possible paths can exist from point A to point B, and Ora may rank or reroute them over time.
+
+Apps/domains such as **iVive**, **Eviva**, and **Aventi** are reusable modules/modes used by Ora to guide the user. They should bend around the user's path rather than behave like isolated apps with hard walls.
+
+Primary feed responses are graph-learning signals:
+
+- **Do Now** — user is ready for execution; strengthen execution/pathway edges and open the relevant action flow.
+- **Do Later** — user wants the option but not now; save/schedule/resurface without treating it as rejection.
+- **Not Interested** — down-rank or refine similar pathways for this user while preserving the broader graph.
+
 ## Current audit summary
 
 ### Confusing/broken patterns found
