@@ -369,6 +369,16 @@ class OraClientClass {
     return res.data;
   }
 
+  async getWeeklyLeaderboard(limit = 10): Promise<any> {
+    const res = await this.client.get(`/api/leaderboard/weekly?limit=${limit}`);
+    return res.data;
+  }
+
+  async getDAOProposals(): Promise<any> {
+    const res = await this.client.get('/api/dao/proposals');
+    return res.data;
+  }
+
   async getDAOTasks(): Promise<any> {
     const res = await this.client.get('/api/dao/tasks');
     return res.data;
