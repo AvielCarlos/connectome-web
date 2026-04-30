@@ -583,7 +583,7 @@ function FeedCard({
         {/* Card content */}
         {spec.components.map((comp: any, i: number) => (
           <AuraCard key={i} component={comp} index={i} onAction={(action: any) => {
-            if (action.type === 'navigate' && action.url === '/app/goals') navigate('/app/goals');
+            if (action.type === 'navigate' && action.url === '/app/goals') onDoNow(item, cardData);
             if (action.type === 'open_url' && /^(ido|ioo):\/\//i.test(String(action.url || ''))) {
               onDoNow(item, cardData);
             }
@@ -1132,13 +1132,13 @@ export default function FeedPage() {
             <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.4)', maxWidth: 280, lineHeight: 1.7 }}>
               {dailyLimit} cards/day keeps insights sharp. Aura will have fresh ones ready tomorrow.
             </div>
-            <button onClick={() => navigate('/app/goals')} style={{
+            <button onClick={() => loadInitial()} style={{
               background: 'linear-gradient(135deg, #00d4aa, #00b896)',
               color: '#0a0a0f', padding: '14px 32px', borderRadius: 14,
               fontWeight: 800, fontSize: 16, marginTop: 8,
               boxShadow: '0 4px 24px rgba(0,212,170,0.3)',
             }}>
-              Work on goals →
+              Show me another node →
             </button>
           </div>
         )}
