@@ -20,6 +20,7 @@ const RoutinesPage = lazy(() => import('./pages/RoutinesPage'))
 const DAOPage = lazy(() => import('./pages/DAOPage'))
 const ContributePage = lazy(() => import('./pages/ContributePage'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
+const AiOsSetupLandingPage = lazy(() => import('./pages/AiOsSetupLandingPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SurfacePage = lazy(() => import('./pages/SurfacePage'))
 const IOOPage = lazy(() => import('./pages/IOOPage'))
@@ -63,6 +64,8 @@ function App() {
           <Route path="/app/journal" element={<Navigate to="/app/ido" replace />} />
           <Route path="/app/services" element={<ShellRoute activeApp="services"><ServicesPage /></ShellRoute>} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/ai-os-setup" element={<AiOsSetupLandingPage />} />
+          <Route path="/services/ai-os-setup" element={<AiOsSetupLandingPage />} />
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
           <Route path="/app/ivive" element={<ShellRoute activeApp="ivive"><IVivePage /></ShellRoute>} />
           <Route path="/app/eviva" element={<ShellRoute activeApp="eviva"><EvivaPage /></ShellRoute>} />
