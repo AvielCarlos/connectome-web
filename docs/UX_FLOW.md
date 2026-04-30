@@ -32,6 +32,12 @@ The IOO graph is not a flat list of categories. It should behave like a three-di
 
 Edges should therefore express relations like `contributes_to`, `unlocks_possibility`, `prerequisite_for`, `supports_domain`, `feeds_macro_node`, and `reinforces_state`, not just `leads_to`.
 
+The core life domains should be reciprocal, not siloed:
+
+- **iVive → Aventi + Eviva**: vitality, health, learning, nervous-system capacity, and mental/physical fitness increase the person’s ability to adventure, explore, relate, create, and contribute.
+- **Eviva → iVive + Aventi**: meaningful contribution, service, income creation, and purpose can unlock better vitality resources and greater freedom/adventure possibilities.
+- **Aventi → iVive + Eviva**: experience, travel, relationships, novelty, and real-world exploration can restore vitality and open new contribution/service pathways.
+
 A card/micro-node shown to the user should know which macro nodes it contributes to, which domains it crosses, and which future possibilities it may unlock. The user should experience a simple decision/action; Aura should maintain the multi-dimensional graph underneath.
 
 ## Background execution principle
