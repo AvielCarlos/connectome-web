@@ -16,19 +16,16 @@ interface AppLauncherProps {
   onLaunch?: () => void;
 }
 
-const DEFAULT_FEATURED_APPS = ['iDo', 'Aventi', 'iVive', 'Eviva'];
+const DEFAULT_FEATURED_APPS = ['iDo', 'IOO Graph', 'Goals', 'Contribute'];
 
 const OUTCOME_LABELS: Partial<Record<ConnectomeApp['id'], { title: string; description: string; badge?: string }>> = {
   ido: { title: 'Find one thing to do now', description: 'A simple action feed when you want momentum but not more planning.', badge: 'Daily' },
   goals: { title: 'Clarify a goal with Ora', description: 'Turn an intention into steps, constraints, and a path you can act on.', badge: 'Plan' },
   routines: { title: 'Build a repeatable rhythm', description: 'Make the helpful action automatic with small routines.', badge: 'Habits' },
-  ivive: { title: 'Improve vitality', description: 'Care for energy, health, recovery, and inner stability.', badge: 'Vitality' },
-  eviva: { title: 'Serve a meaningful mission', description: 'Find contribution, work, services, and world-facing opportunities.', badge: 'Mission' },
-  aventi: { title: 'Discover life experiences', description: 'Open adventures, events, friends, dating, and spontaneity.', badge: 'External' },
   dao: { title: 'Understand the DAO', description: 'See governance, CP, proposals, and the contribution economy.', badge: 'DAO' },
   contribute: { title: 'Submit work and earn CP', description: 'Share code, design, research, ideas, or feedback for review.', badge: 'Build' },
   services: { title: 'Use Ora-powered tools', description: 'Open integrations and generated surfaces around your current path.', badge: 'Tools' },
-  ioo: { title: 'View the life map', description: 'Explore the graph Ora uses to reason about what matters next.', badge: 'Map' },
+  ioo: { title: 'Build the IOO neural graph', description: 'The core intelligence layer: paths, nodes, prerequisites, actions, and outcomes.', badge: 'Core' },
   profile: { title: 'Manage identity and settings', description: 'Control profile, accounts, permissions, experiments, and system tools.', badge: 'You' },
 };
 

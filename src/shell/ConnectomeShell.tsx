@@ -6,7 +6,7 @@ import OraOverlay from './OraOverlay';
 import GlobalFeedbackButton from '../components/GlobalFeedbackButton';
 import { appById, type AppId } from '../runtime/ontology';
 
-type ShellApp = Exclude<AppId, 'aventi'>;
+type ShellApp = Exclude<AppId, 'aventi' | 'ivive' | 'eviva'>;
 
 interface ConnectomeShellProps {
   children: React.ReactNode;
@@ -29,9 +29,9 @@ type DockItem = {
 const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   home: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
-    { id: 'ivive', label: 'iVive', icon: '🌱', path: '/app/ivive' },
+    { id: 'ioo', label: 'Graph', icon: '🧬', path: '/app/ioo' },
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
-    { id: 'eviva', label: 'Eviva', icon: '🌊', path: '/app/eviva' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
   ],
   ido: [
@@ -55,20 +55,6 @@ const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
     { id: 'feed', label: 'Feed', icon: '✦', path: '/app/ido' },
   ],
-  ivive: [
-    { id: 'vitality', label: 'Vitality', icon: '🌱', path: '/app/ivive' },
-    { id: 'rest', label: 'Rest', icon: '🌙', path: '/app/ivive' },
-    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
-  ],
-  eviva: [
-    { id: 'missions', label: 'Missions', icon: '🌊', path: '/app/eviva' },
-    { id: 'services', label: 'Services', icon: '🛠️', path: '/app/services' },
-    { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
-    { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
-    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
-  ],
   dao: [
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
     { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
@@ -81,13 +67,13 @@ const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
     { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
     { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
-    { id: 'eviva', label: 'Missions', icon: '🌊', path: '/app/eviva' },
+    { id: 'ioo', label: 'Graph', icon: '🧬', path: '/app/ioo' },
   ],
   services: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
     { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
     { id: 'ora', label: 'Ora', icon: '◈', action: 'ora' },
-    { id: 'eviva', label: 'Eviva', icon: '🌊', path: '/app/eviva' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
   ],
   ioo: [

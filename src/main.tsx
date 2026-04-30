@@ -24,8 +24,6 @@ const AiOsSetupLandingPage = lazy(() => import('./pages/AiOsSetupLandingPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const SurfacePage = lazy(() => import('./pages/SurfacePage'))
 const IOOPage = lazy(() => import('./pages/IOOPage'))
-const IVivePage = lazy(() => import('./pages/iVivePage'))
-const EvivaPage = lazy(() => import('./pages/EvivaPage'))
 
 type ShellApp = React.ComponentProps<typeof ConnectomeShell>['activeApp']
 
@@ -67,8 +65,9 @@ function App() {
           <Route path="/ai-os-setup" element={<AiOsSetupLandingPage />} />
           <Route path="/services/ai-os-setup" element={<AiOsSetupLandingPage />} />
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
-          <Route path="/app/ivive" element={<ShellRoute activeApp="ivive"><IVivePage /></ShellRoute>} />
-          <Route path="/app/eviva" element={<ShellRoute activeApp="eviva"><EvivaPage /></ShellRoute>} />
+          <Route path="/app/ivive" element={<Navigate to="/app/ioo" replace />} />
+          <Route path="/app/eviva" element={<Navigate to="/app/ioo" replace />} />
+          <Route path="/app/aventi" element={<Navigate to="/app/ioo" replace />} />
           <Route path="/onboarding" element={<ShellRoute activeApp="home"><OraOnboarding /></ShellRoute>} />
 
           {/* Backward-compatible redirects */}
