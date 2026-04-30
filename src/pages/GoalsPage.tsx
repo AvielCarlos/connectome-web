@@ -43,10 +43,10 @@ function stateFor(goal: Goal) {
 }
 
 function stateCopy(state: string) {
-  if (state === 'seed') return 'Seed';
-  if (state === 'mapped') return 'Mapped path';
-  if (state === 'moving') return 'In motion';
-  return 'Integrated';
+  if (state === 'seed') return 'Intention spark';
+  if (state === 'mapped') return 'Measurable goal';
+  if (state === 'moving') return 'Steps underway';
+  return 'Achieved';
 }
 
 function UserStateStrip({ goals }: { goals: Goal[] }) {
@@ -58,10 +58,10 @@ function UserStateStrip({ goals }: { goals: Goal[] }) {
   const cfg = domainConfig(strongest);
 
   const cells = [
-    ['Active intentions', active.length],
-    ['Mapped paths', mapped],
-    ['In motion', moving],
-    ['Integrated', done],
+    ['Intention sparks', active.length],
+    ['Measurable goals', mapped],
+    ['Steps underway', moving],
+    ['Achieved', done],
   ];
 
   return (
@@ -74,7 +74,7 @@ function UserStateStrip({ goals }: { goals: Goal[] }) {
       ))}
       <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: 9, color: 'rgba(248,248,252,0.52)', fontSize: 12, padding: '0 2px' }}>
         <span style={{ color: cfg.color }}>{cfg.emoji}</span>
-        This collection is part of user state — every edit, step, and pause teaches Ora what path to compose next.
+        Intentions are the spark and fuel. Ora turns them into specific, measurable, attainable goals — then breaks those into steps the IOO graph can execute.
       </div>
     </div>
   );
@@ -87,10 +87,10 @@ function CaptureBar({ onClarify }: { onClarify: (title: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { variant, trackEvent } = useExperiment('goals_input_placeholder');
   const placeholders: Record<string, string> = {
-    A: 'Add an intention, plan, desire, or possibility…',
-    B: 'What should Ora remember you might want?',
-    C: 'Capture something you may want to become/do/experience…',
-    D: 'Tell Ora a direction — she will help it evolve',
+    A: 'Add an intention — Ora will make it measurable…',
+    B: 'What spark should become a real goal?',
+    C: 'Capture a desire to turn into steps…',
+    D: 'Tell Ora the direction — she will make it achievable',
   };
 
   useEffect(() => {
@@ -144,7 +144,7 @@ function StarterRail({ onClarify }: { onClarify: (title: string) => void }) {
 }
 
 function LensTabs({ lens, setLens, counts }: { lens: Lens; setLens: (l: Lens) => void; counts: Record<Lens, number> }) {
-  const tabs: Array<[Lens, string]> = [['active', 'Active'], ['paths', 'Paths'], ['saved', 'Seeds'], ['done', 'Done'], ['all', 'All']];
+  const tabs: Array<[Lens, string]> = [['active', 'Sparks'], ['paths', 'Goals'], ['saved', 'Unmapped'], ['done', 'Achieved'], ['all', 'All']];
   return (
     <div style={{ display: 'flex', gap: 8, overflowX: 'auto', margin: '8px 0 16px', paddingBottom: 4 }}>
       {tabs.map(([id, label]) => (
@@ -172,7 +172,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
       const updated = await OraClient.breakdownGoal(goal.id);
       onUpdate(updated);
       setOpen(true);
-      show('Ora mapped this into a path.', 'success');
+      show('Ora made this measurable and mapped steps.', 'success');
     } finally { setBusy(null); }
   };
 
@@ -188,7 +188,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
       if (status === 'completed') {
         await OraClient.completeGoal(goal.id);
         onUpdate({ ...goal, status: 'completed', progress: 1 });
-        show('Integrated into your state.', 'success');
+        show('Achieved and added to your state.', 'success');
       } else {
         const updated = await OraClient.updateGoal(goal.id, { status });
         onUpdate(updated);
@@ -200,7 +200,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
     if (!step) return;
     setBusy('ora');
     try {
-      const res = await OraClient.chat(`This is part of my living goal collection: "${goal.title}". Current next step: "${step.text}". Help me evolve this into the smallest useful next move, in 2-3 sentences.`, []);
+      const res = await OraClient.chat(`This intention has become a specific goal in my living collection: "${goal.title}". Current step: "${step.text}". Help me refine the smallest measurable next move, in 2-3 sentences.`, []);
       setOraReply(res.reply);
       setOpen(true);
     } finally { setBusy(null); }
@@ -237,10 +237,10 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center', marginTop: 14 }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ color: 'rgba(248,248,252,0.34)', fontSize: 10, fontWeight: 900, letterSpacing: 0.8, textTransform: 'uppercase' }}>Next signal</div>
-            <div style={{ color: step ? 'rgba(248,248,252,0.78)' : 'rgba(248,248,252,0.42)', fontSize: 13, lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{step?.text || 'Needs Ora to map the first path'}</div>
+            <div style={{ color: 'rgba(248,248,252,0.34)', fontSize: 10, fontWeight: 900, letterSpacing: 0.8, textTransform: 'uppercase' }}>Next measurable step</div>
+            <div style={{ color: step ? 'rgba(248,248,252,0.78)' : 'rgba(248,248,252,0.42)', fontSize: 13, lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{step?.text || 'Needs Ora to turn the spark into a measurable goal'}</div>
           </div>
-          <button onClick={step ? askOra : breakdown} disabled={!!busy} style={{ border: '1px solid rgba(0,212,170,0.35)', background: 'rgba(0,212,170,0.12)', color: '#00d4aa', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>{busy ? '◈…' : step ? 'Evolve' : 'Map'}</button>
+          <button onClick={step ? askOra : breakdown} disabled={!!busy} style={{ border: '1px solid rgba(0,212,170,0.35)', background: 'rgba(0,212,170,0.12)', color: '#00d4aa', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>{busy ? '◈…' : step ? 'Refine' : 'Make measurable'}</button>
         </div>
 
         {open && (
@@ -259,10 +259,10 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
                 ))}
               </div>
             ) : (
-              <button onClick={breakdown} disabled={busy === 'breakdown'} style={{ width: '100%', border: '1px solid rgba(0,212,170,0.25)', background: 'rgba(0,212,170,0.09)', color: '#00d4aa', borderRadius: 16, padding: 13, fontWeight: 900 }}>Ask Ora to map this into a path</button>
+              <button onClick={breakdown} disabled={busy === 'breakdown'} style={{ width: '100%', border: '1px solid rgba(0,212,170,0.25)', background: 'rgba(0,212,170,0.09)', color: '#00d4aa', borderRadius: 16, padding: 13, fontWeight: 900 }}>Ask Ora to make this specific, measurable, and actionable</button>
             )}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 13 }}>
-              {goal.status !== 'completed' && <button onClick={() => setStatus('completed')} style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.24)', color: '#34d399', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Integrated</button>}
+              {goal.status !== 'completed' && <button onClick={() => setStatus('completed')} style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.24)', color: '#34d399', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Achieved</button>}
               {goal.status === 'active' && <button onClick={() => setStatus('paused')} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(248,248,252,0.55)', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Pause</button>}
               {goal.status !== 'active' && goal.status !== 'completed' && <button onClick={() => setStatus('active')} style={{ background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.24)', color: '#00d4aa', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Reactivate</button>}
               <button onClick={remove} style={{ marginLeft: 'auto', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Remove</button>
@@ -278,8 +278,8 @@ function EmptyState({ onClarify }: { onClarify: (title: string) => void }) {
   return (
     <div style={{ textAlign: 'center', padding: '42px 18px', borderRadius: 28, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
       <div className="brain-float" style={{ fontSize: 48, color: '#00d4aa', marginBottom: 14 }}>◎</div>
-      <div style={{ fontWeight: 950, fontSize: 20, marginBottom: 8 }}>Start the collection</div>
-      <div style={{ color: 'rgba(248,248,252,0.48)', fontSize: 14, lineHeight: 1.65, maxWidth: 320, margin: '0 auto 18px' }}>Capture anything you may want to become, do, build, feel, repair, or experience. Ora will turn it into evolving user state.</div>
+      <div style={{ fontWeight: 950, fontSize: 20, marginBottom: 8 }}>Start with a spark</div>
+      <div style={{ color: 'rgba(248,248,252,0.48)', fontSize: 14, lineHeight: 1.65, maxWidth: 320, margin: '0 auto 18px' }}>Capture an intention. Ora will refine it into a specific measurable goal, then break it into achievable steps.</div>
       <button onClick={() => onClarify('I want to create a clearer direction for my life')} style={{ border: 0, borderRadius: 999, padding: '12px 16px', background: '#00d4aa', color: '#06110f', fontWeight: 950 }}>Clarify with Ora</button>
     </div>
   );
@@ -337,16 +337,16 @@ export default function GoalsPage() {
     setGoals((prev) => [goal, ...prev]);
     setClarifyingGoal(null);
     setLens('active');
-    show('Added to your living collection.', 'success');
+    show('Spark refined into a measurable goal.', 'success');
   };
 
   return (
     <div className="page-content" style={{ maxWidth: 720, margin: '0 auto' }}>
       <header style={{ paddingTop: 6, marginBottom: 16 }}>
-        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 950, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>User state collection</div>
-        <h1 style={{ fontWeight: 950, fontSize: 'clamp(30px, 8vw, 48px)', letterSpacing: -1.4, lineHeight: 0.98, margin: 0 }}>Intentions that evolve with Ora.</h1>
+        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 950, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>Intentions → goals → steps</div>
+        <h1 style={{ fontWeight: 950, fontSize: 'clamp(30px, 8vw, 48px)', letterSpacing: -1.4, lineHeight: 0.98, margin: 0 }}>Sparks become achievable goals.</h1>
         <p style={{ color: 'rgba(248,248,252,0.54)', fontSize: 14, lineHeight: 1.65, marginTop: 12, maxWidth: 560 }}>
-          Goals, plans, saved possibilities, and active paths live here as one evolving collection — not a static checklist. Ora uses this as part of your state when choosing the next IOO node.
+          Intentions are the spark and fuel. Ora refines them into specific, measurable, attainable goals, then breaks them into IOO steps you can actually complete.
         </p>
       </header>
 
@@ -364,7 +364,7 @@ export default function GoalsPage() {
       ) : <EmptyState onClarify={setClarifyingGoal} />}
 
       <button onClick={() => navigate('/app/ido')} style={{ width: '100%', marginTop: 16, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.035)', color: 'rgba(248,248,252,0.64)', borderRadius: 18, padding: 14, fontWeight: 850 }}>
-        Let iDo recommend from this state →
+        Let iDo recommend from these goals →
       </button>
 
       {clarifyingGoal && <GoalClarifyModal goalTitle={clarifyingGoal} onClose={() => setClarifyingGoal(null)} onComplete={handleClarifiedGoal} />}
