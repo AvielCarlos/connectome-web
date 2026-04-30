@@ -93,7 +93,9 @@ export function OraCard({ component: comp, index, onAction }: OraCardProps) {
       );
 
     case 'category_badge':
-    case 'type_badge': {
+    case 'type_badge':
+    case 'pattern_badge':
+    case 'meta': {
       const color = comp.color || '#00d4aa';
       return (
         <span key={index} style={{
@@ -111,6 +113,98 @@ export function OraCard({ component: comp, index, onAction }: OraCardProps) {
           {comp.text}
         </span>
       );
+    }
+
+    case 'body':
+      return (
+        <p key={index} style={{
+          color: 'rgba(248,248,252,0.68)',
+          fontSize: 15,
+          lineHeight: 1.68,
+          marginBottom: 14,
+        }}>{comp.text}</p>
+      );
+
+    case 'context_strip': {
+      const items: any[] = comp.items || [];
+      return (
+        <div key={index} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+          {items.map((item, i) => (
+            <div key={i} style={{ background: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 14, padding: '8px 10px', minWidth: 78 }}>
+              <div style={{ color: 'rgba(248,248,252,0.38)', fontSize: 10, fontWeight: 800, textTransform: 'uppercase' }}>{item.label}</div>
+              <div style={{ color: '#f8f8fc', fontSize: 13, fontWeight: 850, marginTop: 2 }}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    case 'choice_grid': {
+      const items: any[] = comp.items || [];
+      return (
+        <div key={index} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 8, marginBottom: 14 }}>
+          {items.map((item, i) => (
+            <button key={i} onClick={() => handleAction({ type: 'screen_signal', payload: item })} style={{ textAlign: 'left', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 14, padding: '11px 12px', color: '#f8f8fc', fontWeight: 750, fontSize: 13 }}>
+              {item.label || item.text || item.value}
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    case 'timeline_steps': {
+      const items: any[] = comp.items || [];
+      return (
+        <div key={index} style={{ display: 'grid', gap: 9, marginBottom: 14 }}>
+          {items.map((item, i) => (
+            <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: 'rgba(0,0,0,0.22)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 11 }}>
+              <div style={{ width: 24, height: 24, borderRadius: 12, background: 'rgba(0,212,170,0.16)', color: '#00d4aa', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 900, flexShrink: 0 }}>{i + 1}</div>
+              <div>
+                <div style={{ color: '#f8f8fc', fontSize: 13, fontWeight: 850 }}>{item.title || item}</div>
+                {item.body && <div style={{ color: 'rgba(248,248,252,0.48)', fontSize: 12, lineHeight: 1.45, marginTop: 2 }}>{item.body}</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    case 'kanban_lite': {
+      const columns: any[] = comp.columns || [];
+      return (
+        <div key={index} style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(columns.length || 1, 3)}, minmax(0,1fr))`, gap: 8, marginBottom: 14 }}>
+          {columns.map((col, i) => (
+            <div key={i} style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 10 }}>
+              <div style={{ color: '#00d4aa', fontSize: 11, fontWeight: 900, marginBottom: 7 }}>{col.label}</div>
+              {(col.items || []).map((it: string, j: number) => <div key={j} style={{ color: 'rgba(248,248,252,0.58)', fontSize: 11, lineHeight: 1.45 }}>• {it}</div>)}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    case 'readiness_meter': {
+      const items: string[] = comp.items || [];
+      return (
+        <div key={index} style={{ display: 'grid', gap: 8, marginBottom: 14 }}>
+          {items.map((it, i) => <div key={it} style={{ display: 'flex', alignItems: 'center', gap: 10 }}><span style={{ width: 70, color: 'rgba(248,248,252,0.58)', fontSize: 12 }}>{it}</span><span style={{ flex: 1, height: 7, borderRadius: 99, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}><span style={{ display: 'block', width: `${35 + i * 12}%`, height: '100%', background: '#00d4aa', borderRadius: 99 }} /></span></div>)}
+        </div>
+      );
+    }
+
+    case 'question_stack': {
+      const items: string[] = comp.items || [];
+      return <div key={index} style={{ display: 'grid', gap: 8, marginBottom: 14 }}>{items.map((q, i) => <div key={i} style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.24)', borderRadius: 14, padding: 12, color: 'rgba(248,248,252,0.76)', fontSize: 13, lineHeight: 1.45 }}>？ {q}</div>)}</div>;
+    }
+
+    case 'split_actions': {
+      const items: any[] = comp.items || [];
+      return <div key={index} style={{ display: 'grid', gap: 8, marginBottom: 14 }}>{items.map((it, i) => <div key={i} style={{ background: it.owner === 'Ora' ? 'rgba(0,212,170,0.09)' : 'rgba(255,255,255,0.045)', border: it.owner === 'Ora' ? '1px solid rgba(0,212,170,0.2)' : '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 12 }}><div style={{ color: it.owner === 'Ora' ? '#00d4aa' : 'rgba(248,248,252,0.55)', fontSize: 11, fontWeight: 900, marginBottom: 4 }}>{it.owner}</div><div style={{ color: '#f8f8fc', fontSize: 13, lineHeight: 1.45 }}>{it.text}</div></div>)}</div>;
+    }
+
+    case 'constraint_panel': {
+      const items: any[] = comp.items || [];
+      return <div key={index} style={{ background: 'rgba(245,158,11,0.09)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: 14, padding: 12, marginBottom: 14 }}><div style={{ color: '#fbbf24', fontSize: 11, fontWeight: 900, marginBottom: 7 }}>Prerequisites</div>{items.map((it, i) => <div key={i} style={{ color: 'rgba(248,248,252,0.66)', fontSize: 12, lineHeight: 1.5 }}>• {it.label || it}</div>)}</div>;
     }
 
     case 'domain_badge': {
