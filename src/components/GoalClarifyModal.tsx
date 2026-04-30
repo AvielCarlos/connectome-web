@@ -52,6 +52,26 @@ function TypingDots() {
   );
 }
 
+function isAuraManagedNode(node: any) {
+  const haystack = [node.owner, node.node_type, node.step_type, node.title, node.description]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return node.owner === 'ora'
+    || haystack.includes('aura')
+    || haystack.includes('ora')
+    || haystack.includes('map prerequisite')
+    || haystack.includes('bridge node')
+    || haystack.includes('find real options')
+    || haystack.includes('search for concrete')
+    || haystack.includes('set the attainable target');
+}
+
+function userActionNodes(path: any[]) {
+  const nodes = (path || []).filter((node) => !isAuraManagedNode(node));
+  return nodes.length ? nodes : (path || []).filter((node) => node.user_action || node.owner !== 'ora');
+}
+
 export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: GoalClarifyModalProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([{
     id: 'opening',
@@ -191,7 +211,12 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
               )}
               {iooPath.length > 0 ? (
                 <div style={{ display: 'grid', gap: 8 }}>
-                  {iooPath.slice(0, 5).map((node, i) => (
+                  {isAuraManagedNode(iooPath[0]) && (
+                    <div style={{ border: '1px solid rgba(0,212,170,0.18)', background: 'rgba(0,212,170,0.07)', borderRadius: 12, padding: 10, color: 'rgba(248,248,252,0.58)', fontSize: 12, lineHeight: 1.45 }}>
+                      Aura will automatically handle mapping, prerequisite research, bridge-node discovery, and option finding in the background. Your journey only shows the actions that actually need you.
+                    </div>
+                  )}
+                  {userActionNodes(iooPath).slice(0, 5).map((node, i) => (
                     <div key={node.id || i} style={{ display: 'flex', gap: 10, padding: 10, borderRadius: 12, background: node.owner === 'ora' ? 'rgba(0,212,170,0.07)' : 'rgba(255,255,255,0.04)', border: node.owner === 'ora' ? '1px solid rgba(0,212,170,0.18)' : '1px solid rgba(255,255,255,0.06)' }}>
                       <div style={{ width: 24, height: 24, borderRadius: 12, background: '#00d4aa', color: '#0a0a0f', fontSize: 12, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</div>
                       <div style={{ minWidth: 0, flex: 1 }}>

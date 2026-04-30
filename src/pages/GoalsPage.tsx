@@ -49,6 +49,26 @@ function stateCopy(state: string) {
   return 'Achieved';
 }
 
+function isAuraManagedNode(node: any) {
+  const haystack = [node.owner, node.node_type, node.step_type, node.title, node.description]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return node.owner === 'ora'
+    || haystack.includes('aura')
+    || haystack.includes('ora')
+    || haystack.includes('map prerequisite')
+    || haystack.includes('bridge node')
+    || haystack.includes('find real options')
+    || haystack.includes('search for concrete')
+    || haystack.includes('set the attainable target');
+}
+
+function userActionNodes(path: any[]) {
+  const nodes = (path || []).filter((node) => !isAuraManagedNode(node));
+  return nodes.length ? nodes : (path || []).filter((node) => node.user_action || node.owner !== 'ora');
+}
+
 function UserStateStrip({ goals }: { goals: Goal[] }) {
   const active = goals.filter((g) => g.status === 'active');
   const mapped = active.filter((g) => g.steps?.length).length;
@@ -168,6 +188,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
   const intention = goal.intention_text || goal.graph_metadata?.intention_text;
   const measurable = goal.measurable_outcome || goal.graph_metadata?.measurable_outcome || goal.title;
   const metricLine = [goal.success_metric, goal.target_value, goal.target_date].filter(Boolean).join(' • ');
+  const auraManagedCount = goal.graph_metadata?.aura_managed_nodes?.length || goal.graph_metadata?.ora_nodes?.length || 0;
 
   const breakdown = async () => {
     setBusy('breakdown');
@@ -233,6 +254,11 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
             </div>
           </div>
           {goal.description && <p style={{ color: 'rgba(248,248,252,0.52)', fontSize: 13, lineHeight: 1.55, margin: '11px 0 0', whiteSpace: 'pre-line' }}>{goal.description.split('\n').slice(0, 2).join(' • ')}</p>}
+          {auraManagedCount > 0 && (
+            <div style={{ marginTop: 10, color: 'rgba(0,212,170,0.74)', fontSize: 11, fontWeight: 850 }}>
+              Aura is automatically handling {auraManagedCount} background mapping/research step{auraManagedCount === 1 ? '' : 's'}.
+            </div>
+          )}
           {(intention || measurable || metricLine) && (
             <div style={{ display: 'grid', gap: 7, marginTop: 12, padding: 12, borderRadius: 16, background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)' }}>
               {intention && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.48)', lineHeight: 1.45 }}><b style={{ color: cfg.color }}>Spark:</b> {intention}</div>}
@@ -334,7 +360,8 @@ export default function GoalsPage() {
       structuredGoal?.timeline ? `Timeline: ${structuredGoal.timeline}` : null,
       structuredGoal?.constraints ? `Constraints: ${structuredGoal.constraints}` : null,
     ].filter(Boolean);
-    const steps = iooPath.slice(0, 6).map((node, i) => ({
+    const actionablePath = userActionNodes(iooPath).slice(0, 6);
+    const steps = actionablePath.map((node, i) => ({
       id: node.id || `${Date.now()}-${i}`,
       text: node.title || `Step ${i + 1}`,
       detail: [
@@ -363,6 +390,7 @@ export default function GoalsPage() {
         intention_text: clarifyingGoal || title,
         measurable_outcome: structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
         suggested_ioo_path: iooPath,
+        aura_managed_nodes: iooPath.filter(isAuraManagedNode),
         user_nodes: iooPath.filter((node) => node.owner !== 'ora'),
         ora_nodes: iooPath.filter((node) => node.owner === 'ora'),
         paid_ora_nodes: iooPath.filter((node) => node.requires_payment),
