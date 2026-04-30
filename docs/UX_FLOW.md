@@ -24,7 +24,17 @@ Apps/domains such as **iVive**, **Eviva**, and **Aventi** are reusable modules/m
 
 ## Background execution principle
 
-Do not send users into other apps or websites unless absolutely necessary. Ora should use external apps, websites, APIs, browser automation, or virtual-machine workers in the background when that is the best way to fulfil the user's desire. The foreground experience should stay focused on the user's path: pull relevant external data/actions back into the current surface and present them as IOO Nodes, pathway sheets, or clear next-step outcomes.
+Do not send users into other apps or websites unless absolutely necessary. Aura should use external apps, websites, APIs, browser automation, or virtual-machine workers in the background when that is the best way to fulfil the user's desire. The foreground experience should stay focused on the user's path: pull relevant external data/actions back into the current surface and present them as IOO Nodes, pathway sheets, or clear next-step outcomes.
+
+The user should not be managing the system's workflow. Their primary job is to:
+
+1. make decisions;
+2. clarify what they want, what is true, and what constraints matter;
+3. do the real-world action when Aura has reduced the path to something concrete.
+
+Aura/Connectome should automatically handle planning scaffolding: prerequisite mapping, bridge-node discovery, search/research, option gathering, matching services/tools, scheduling suggestions, reminders, background execution, graph updates, and follow-up routing. If a screen is asking the user to maintain, configure, or sequence the machine's internal work, the UI is probably wrong.
+
+The product should therefore prefer: **decision → clarification → IRL action**, with Aura quietly doing the connective tissue in between.
 
 The purpose is not app navigation. The purpose is helping people fulfil their desires in a way that supports growth, integration, and ultimately enlightenment.
 

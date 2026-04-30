@@ -363,17 +363,37 @@ function DetailSheet({ card, color, onClose, onDoNow }: { card: any; color: stri
   );
 }
 
+function isSystemManagedPathStep(step: any) {
+  const text = [step?.owner, step?.type, step?.title || step, step?.description]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return text.includes('map prerequisite')
+    || text.includes('bridge node')
+    || text.includes('research options')
+    || text.includes('find real options')
+    || text.includes('search for')
+    || text.includes('gather options')
+    || text.includes('generate')
+    || text.includes('rank')
+    || text.includes('aura should')
+    || text.includes('ora should');
+}
+
 function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
   const card = data?.card || {};
   const protocol = data?.execution?.protocol || null;
   const plan = protocol?.execution_plan || null;
   const questions = protocol?.clarifying_questions || [];
   const fallbackSteps = card?.deep_dive?.steps || [
-    'Confirm your current capacity, location, budget, and energy.',
-    'Choose the lowest-friction version of this action.',
-    'Take the first concrete step now, or schedule it for a real time.',
+    'Clarify any missing preference, constraint, timing, or budget.',
+    'Choose from Aura’s best concrete options.',
+    'Do the real-world action, or schedule it for a real time.',
   ];
-  const steps = plan?.steps?.length ? plan.steps : fallbackSteps.map((s: string) => ({ title: s, description: '' }));
+  const rawSteps = plan?.steps?.length ? plan.steps : fallbackSteps.map((s: string) => ({ title: s, description: '' }));
+  const systemManagedSteps = rawSteps.filter(isSystemManagedPathStep);
+  const userSteps = rawSteps.filter((step: any) => !isSystemManagedPathStep(step));
+  const steps = userSteps.length ? userSteps : fallbackSteps.map((s: string) => ({ title: s, description: '' }));
 
   return (
     <div
@@ -393,7 +413,14 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
         <div style={{ width: 44, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.16)', margin: '0 auto 18px' }} />
         <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Aura pathway</div>
         <h2 style={{ margin: 0, color: '#f8f8fc', fontSize: 24, lineHeight: 1.15 }}>{card.title || 'Your next step'}</h2>
-        <p style={{ color: 'rgba(248,248,252,0.58)', lineHeight: 1.65, fontSize: 14 }}>{protocol?.summary || 'Before this becomes a card to consume, Aura turns it into a path from your current state to a doable first action.'}</p>
+        <p style={{ color: 'rgba(248,248,252,0.58)', lineHeight: 1.65, fontSize: 14 }}>{protocol?.summary || 'Aura handles the connective tissue. You clarify, decide, and then do the real-world action.'}</p>
+
+        {systemManagedSteps.length > 0 && (
+          <div style={{ background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', borderRadius: 18, padding: 14, marginBottom: 14 }}>
+            <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 850, marginBottom: 5 }}>Aura is handling in the background</div>
+            <div style={{ color: 'rgba(248,248,252,0.56)', fontSize: 13, lineHeight: 1.5 }}>Research, prerequisite mapping, option gathering, ranking, and pathway routing stay out of your checklist.</div>
+          </div>
+        )}
 
         {questions.length > 0 && (
           <div style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.28)', borderRadius: 18, padding: 14, marginBottom: 18 }}>
