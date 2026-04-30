@@ -1,7 +1,7 @@
 {
-  "name": "iDo — Ora",
-  "short_name": "iDo",
-  "description": "Your AI OS for human fulfilment, powered by Ora",
+  "name": "Connectome — Aura",
+  "short_name": "Connectome",
+  "description": "Your AI OS for human fulfilment, powered by Aura",
   "start_url": "/connectome-web/",
   "scope": "/connectome-web/",
   "display": "standalone",

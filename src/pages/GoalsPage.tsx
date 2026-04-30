@@ -74,7 +74,7 @@ function UserStateStrip({ goals }: { goals: Goal[] }) {
       ))}
       <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: 9, color: 'rgba(248,248,252,0.52)', fontSize: 12, padding: '0 2px' }}>
         <span style={{ color: cfg.color }}>{cfg.emoji}</span>
-        Intentions are the spark and fuel. Ora turns them into specific, measurable, attainable goals — then breaks those into steps the IOO graph can execute.
+        Intentions are the spark and fuel. Aura turns them into specific, measurable, attainable goals — then breaks those into steps the IOO graph can execute.
       </div>
     </div>
   );
@@ -87,10 +87,10 @@ function CaptureBar({ onClarify }: { onClarify: (title: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { variant, trackEvent } = useExperiment('goals_input_placeholder');
   const placeholders: Record<string, string> = {
-    A: 'Add an intention — Ora will make it measurable…',
+    A: 'Add an intention — Aura will make it measurable…',
     B: 'What spark should become a real goal?',
     C: 'Capture a desire to turn into steps…',
-    D: 'Tell Ora the direction — she will make it achievable',
+    D: 'Tell Aura the direction — she will make it achievable',
   };
 
   useEffect(() => {
@@ -175,7 +175,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
       const updated = await OraClient.breakdownGoal(goal.id);
       onUpdate(updated);
       setOpen(true);
-      show('Ora made this measurable and mapped steps.', 'success');
+      show('Aura made this measurable and mapped steps.', 'success');
     } finally { setBusy(null); }
   };
 
@@ -199,7 +199,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
     } finally { setBusy(null); }
   };
 
-  const askOra = async () => {
+  const askAura = async () => {
     if (!step) return;
     setBusy('ora');
     try {
@@ -248,14 +248,14 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center', marginTop: 14 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ color: 'rgba(248,248,252,0.34)', fontSize: 10, fontWeight: 900, letterSpacing: 0.8, textTransform: 'uppercase' }}>Next measurable step</div>
-            <div style={{ color: step ? 'rgba(248,248,252,0.78)' : 'rgba(248,248,252,0.42)', fontSize: 13, lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{step?.text || 'Needs Ora to turn the spark into a measurable goal'}</div>
+            <div style={{ color: step ? 'rgba(248,248,252,0.78)' : 'rgba(248,248,252,0.42)', fontSize: 13, lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{step?.text || 'Needs Aura to turn the spark into a measurable goal'}</div>
           </div>
-          <button onClick={step ? askOra : breakdown} disabled={!!busy} style={{ border: '1px solid rgba(0,212,170,0.35)', background: 'rgba(0,212,170,0.12)', color: '#00d4aa', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>{busy ? '◈…' : step ? 'Refine' : 'Make measurable'}</button>
+          <button onClick={step ? askAura : breakdown} disabled={!!busy} style={{ border: '1px solid rgba(0,212,170,0.35)', background: 'rgba(0,212,170,0.12)', color: '#00d4aa', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>{busy ? '◈…' : step ? 'Refine' : 'Make measurable'}</button>
         </div>
 
         {open && (
           <div className="fade-in" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: 16, paddingTop: 14 }}>
-            {oraReply && <div style={{ border: '1px solid rgba(0,212,170,0.22)', background: 'rgba(0,212,170,0.08)', color: 'rgba(248,248,252,0.78)', borderRadius: 16, padding: 13, fontSize: 13, lineHeight: 1.55, marginBottom: 12 }}><b style={{ color: '#00d4aa' }}>Ora: </b>{oraReply}</div>}
+            {oraReply && <div style={{ border: '1px solid rgba(0,212,170,0.22)', background: 'rgba(0,212,170,0.08)', color: 'rgba(248,248,252,0.78)', borderRadius: 16, padding: 13, fontSize: 13, lineHeight: 1.55, marginBottom: 12 }}><b style={{ color: '#00d4aa' }}>Aura: </b>{oraReply}</div>}
             {goal.steps?.length ? (
               <div style={{ display: 'grid', gap: 8 }}>
                 {goal.steps.map((s, i) => (
@@ -269,7 +269,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
                 ))}
               </div>
             ) : (
-              <button onClick={breakdown} disabled={busy === 'breakdown'} style={{ width: '100%', border: '1px solid rgba(0,212,170,0.25)', background: 'rgba(0,212,170,0.09)', color: '#00d4aa', borderRadius: 16, padding: 13, fontWeight: 900 }}>Ask Ora to make this specific, measurable, and actionable</button>
+              <button onClick={breakdown} disabled={busy === 'breakdown'} style={{ width: '100%', border: '1px solid rgba(0,212,170,0.25)', background: 'rgba(0,212,170,0.09)', color: '#00d4aa', borderRadius: 16, padding: 13, fontWeight: 900 }}>Ask Aura to make this specific, measurable, and actionable</button>
             )}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 13 }}>
               {goal.status !== 'completed' && <button onClick={() => setStatus('completed')} style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.24)', color: '#34d399', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Achieved</button>}
@@ -289,8 +289,8 @@ function EmptyState({ onClarify }: { onClarify: (title: string) => void }) {
     <div style={{ textAlign: 'center', padding: '42px 18px', borderRadius: 28, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
       <div className="brain-float" style={{ fontSize: 48, color: '#00d4aa', marginBottom: 14 }}>◎</div>
       <div style={{ fontWeight: 950, fontSize: 20, marginBottom: 8 }}>Start with a spark</div>
-      <div style={{ color: 'rgba(248,248,252,0.48)', fontSize: 14, lineHeight: 1.65, maxWidth: 320, margin: '0 auto 18px' }}>Capture an intention. Ora will refine it into a specific measurable goal, then break it into achievable steps.</div>
-      <button onClick={() => onClarify('I want to create a clearer direction for my life')} style={{ border: 0, borderRadius: 999, padding: '12px 16px', background: '#00d4aa', color: '#06110f', fontWeight: 950 }}>Clarify with Ora</button>
+      <div style={{ color: 'rgba(248,248,252,0.48)', fontSize: 14, lineHeight: 1.65, maxWidth: 320, margin: '0 auto 18px' }}>Capture an intention. Aura will refine it into a specific measurable goal, then break it into achievable steps.</div>
+      <button onClick={() => onClarify('I want to create a clearer direction for my life')} style={{ border: 0, borderRadius: 999, padding: '12px 16px', background: '#00d4aa', color: '#06110f', fontWeight: 950 }}>Clarify with Aura</button>
     </div>
   );
 }
@@ -340,8 +340,8 @@ export default function GoalsPage() {
       detail: [
         node.description,
         node.user_action ? `You: ${node.user_action}` : null,
-        node.ora_action ? `Ora: ${node.ora_action}` : null,
-        node.requires_payment ? `Unlock: ${node.service_id || 'Ora service'}${node.price_usd ? ` • $${node.price_usd}` : ''}` : null,
+        node.ora_action ? `Aura: ${node.ora_action}` : null,
+        node.requires_payment ? `Unlock: ${node.service_id || 'Aura service'}${node.price_usd ? ` • $${node.price_usd}` : ''}` : null,
       ].filter(Boolean).join('\n'),
       resources: [],
       completed: false,
@@ -381,7 +381,7 @@ export default function GoalsPage() {
         <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 950, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>Intentions → goals → steps</div>
         <h1 style={{ fontWeight: 950, fontSize: 'clamp(30px, 8vw, 48px)', letterSpacing: -1.4, lineHeight: 0.98, margin: 0 }}>Sparks become achievable goals.</h1>
         <p style={{ color: 'rgba(248,248,252,0.54)', fontSize: 14, lineHeight: 1.65, marginTop: 12, maxWidth: 560 }}>
-          Intentions are the spark and fuel. Ora refines them into specific, measurable, attainable goals, then breaks them into IOO steps you can actually complete.
+          Intentions are the spark and fuel. Aura refines them into specific, measurable, attainable goals, then breaks them into IOO steps you can actually complete.
         </p>
       </header>
 

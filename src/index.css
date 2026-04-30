@@ -232,7 +232,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 }
 
-/* ─── OraPage fixed chat shell ────────────────────────────────── */
+/* ─── AuraPage fixed chat shell ────────────────────────────────── */
 .ora-container {
   position: fixed !important;
   top: 0 !important;
@@ -354,7 +354,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   animation: gradShimmer 5s ease infinite;
 }
 
-/* ─── Ora AIOS shell ───────────────────────────────────────── */
+/* ─── Aura AIOS shell ───────────────────────────────────────── */
 :root {
   --bg: #060610;
   --surface: rgba(16, 17, 31, 0.78);

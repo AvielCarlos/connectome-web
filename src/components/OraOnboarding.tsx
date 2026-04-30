@@ -10,10 +10,10 @@ const TOTAL_QUESTIONS = 6;
 const ONBOARDING_CACHE_KEY = 'onboarding_done';
 
 function Bubble({ message }: { message: ChatMessage }) {
-  const isOra = message.role === 'ora';
+  const isAura = message.role === 'ora';
   return (
-    <div style={{ display: 'flex', flexDirection: isOra ? 'row' : 'row-reverse', gap: 10, marginBottom: 12, alignItems: 'flex-end' }}>
-      {isOra && (
+    <div style={{ display: 'flex', flexDirection: isAura ? 'row' : 'row-reverse', gap: 10, marginBottom: 12, alignItems: 'flex-end' }}>
+      {isAura && (
         <div style={{
           width: 32, height: 32, borderRadius: 16,
           background: 'linear-gradient(135deg, rgba(0,212,170,0.22), rgba(0,212,170,0.46))',
@@ -25,9 +25,9 @@ function Bubble({ message }: { message: ChatMessage }) {
       <div style={{
         maxWidth: '78%',
         padding: '11px 14px',
-        borderRadius: isOra ? '5px 18px 18px 18px' : '18px 5px 18px 18px',
-        background: isOra ? 'rgba(0,212,170,0.14)' : '#15151f',
-        border: isOra ? '1px solid rgba(0,212,170,0.32)' : '1px solid rgba(255,255,255,0.08)',
+        borderRadius: isAura ? '5px 18px 18px 18px' : '18px 5px 18px 18px',
+        background: isAura ? 'rgba(0,212,170,0.14)' : '#15151f',
+        border: isAura ? '1px solid rgba(0,212,170,0.32)' : '1px solid rgba(255,255,255,0.08)',
         color: '#f8f8fc',
         lineHeight: 1.55,
         fontSize: 14,
@@ -193,7 +193,7 @@ export default function OraOnboarding() {
               boxShadow: '0 0 34px rgba(0,212,170,0.35)',
             }}>◈</div>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 900 }}>Ora — your AI guide</div>
+              <div style={{ fontSize: 20, fontWeight: 900 }}>Aura — your AI guide</div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.56)', marginTop: 3 }}>
                 Step {progressStep} of {totalQuestions} — mapping your iVive, Eviva, Aventi, and iDo domains with Ascension Technologies DAO.
               </div>
@@ -271,7 +271,7 @@ export default function OraOnboarding() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Reply to Ora…"
+                placeholder="Reply to Aura…"
                 disabled={loading}
                 style={{ flex: 1, minHeight: 48, borderRadius: 24, padding: '0 16px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#f8f8fc', outline: 'none', fontSize: 15 }}
               />

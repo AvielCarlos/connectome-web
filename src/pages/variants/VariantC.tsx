@@ -80,7 +80,7 @@ export default function VariantC() {
         <div style={{ fontSize: 48, lineHeight: 1 }}>🎯</div>
         <div style={{ fontSize: 22, fontWeight: 700, color: '#f8f8fc' }}>No goals yet</div>
         <div style={{ fontSize: 15, color: 'rgba(248,248,252,0.6)', maxWidth: 280, lineHeight: 1.6 }}>
-          Set your first goal and let Ora help you achieve it step by step.
+          Set your first goal and let Aura help you achieve it step by step.
         </div>
         <button
           onClick={() => trackAndNavigate('set_first_goal', '/app/goals')}
@@ -179,7 +179,7 @@ export default function VariantC() {
         Today: {intensity} intensity
       </div>
 
-      {/* Ora coaching bubble */}
+      {/* Aura coaching bubble */}
       <div
         style={{
           width: '100%',
@@ -212,7 +212,7 @@ export default function VariantC() {
           onClick={() => trackAndNavigate('goal_engaged', '/app')}
           style={btnStyle('#a855f7')}
         >
-          💬 Ask Ora
+          💬 Ask Aura
         </button>
         <button
           onClick={() => trackAndNavigate('feed_opened', '/app/ido')}

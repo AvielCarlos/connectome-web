@@ -299,7 +299,7 @@ class OraClientClass {
 
   async connectGoogleDrive() {
     const res = await this.client.post('/api/auth/google/drive/connect');
-    return res.data as { ok: boolean; auth_url: string; message?: string };
+    return res.data as { ok: boolean; auth_url: string; already_connected?: boolean; message?: string };
   }
 
   async setDrivePrivacy(level: 'none' | 'goals_only' | 'full') {
@@ -446,7 +446,7 @@ class OraClientClass {
     return res.data as JournalEntry[];
   }
 
-  // ── Ora Chat ──────────────────────────────────────────────────────────────
+  // ── Aura Chat ──────────────────────────────────────────────────────────────
 
   async chat(message: string, history: { role: string; content: string }[]): Promise<{ reply: string; ora_state: any }> {
     const res = await this.client.post('/api/ora/chat', {
@@ -665,7 +665,7 @@ class OraClientClass {
   // ── Payments & Subscriptions ─────────────────────────────────────────────────────
 
   /**
-   * Get Ora's current tier definitions (public, no auth needed).
+   * Get Aura's current tier definitions (public, no auth needed).
    */
   async getTiers(): Promise<TiersResponse> {
     const res = await this.client.get('/api/payments/tiers');

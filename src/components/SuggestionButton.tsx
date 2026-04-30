@@ -1,6 +1,6 @@
 /**
  * SuggestionButton — Floating Action Button for user suggestions
- * Fixed bottom-right, opens a modal to submit feedback/ideas to Ora.
+ * Fixed bottom-right, opens a modal to submit feedback/ideas to Aura.
  * Awards 5 CP per submission.
  */
 import React, { useState, useEffect, useRef } from 'react';
@@ -93,7 +93,7 @@ export default function SuggestionButton() {
       {/* FAB Button */}
       <button
         onClick={() => setOpen(true)}
-        title="Share a suggestion with Ora (+5 CP)"
+        title="Share a suggestion with Aura (+5 CP)"
         style={{
           position: 'fixed',
           top: 12,
@@ -160,7 +160,7 @@ export default function SuggestionButton() {
               <div style={{ textAlign: 'center', padding: '8px 0' }}>
                 <div style={{ fontSize: 40, marginBottom: 12 }}>✨</div>
                 <h3 style={{ fontWeight: 700, fontSize: 18, marginBottom: 12 }}>
-                  Ora heard you
+                  Aura heard you
                 </h3>
                 <div style={{
                   background: 'rgba(99,102,241,0.08)',
@@ -219,7 +219,7 @@ export default function SuggestionButton() {
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
                   <div>
-                    <h3 style={{ fontWeight: 700, fontSize: 17, margin: 0 }}>Share with Ora</h3>
+                    <h3 style={{ fontWeight: 700, fontSize: 17, margin: 0 }}>Share with Aura</h3>
                     <p style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)', margin: '3px 0 0' }}>
                       Every suggestion earns{' '}
                       <span style={{ color: '#f4c26b', fontWeight: 600 }}>+5 CP</span>
@@ -265,7 +265,7 @@ export default function SuggestionButton() {
                   value={content}
                   onChange={e => { setContent(e.target.value); setError(null); }}
                   placeholder={
-                    category === 'feature' ? "What would make Ora more valuable for you?"
+                    category === 'feature' ? "What would make Aura more valuable for you?"
                     : category === 'bug' ? "Describe what happened and what you expected..."
                     : category === 'ux' ? "What felt confusing or could feel better?"
                     : category === 'content' ? "What topics or content would you love to see?"
@@ -322,7 +322,7 @@ export default function SuggestionButton() {
                     transition: 'all 0.15s',
                   }}
                 >
-                  {submitting ? 'Sending to Ora…' : 'Send + Earn 5 CP →'}
+                  {submitting ? 'Sending to Aura…' : 'Send + Earn 5 CP →'}
                 </button>
               </>
             )}

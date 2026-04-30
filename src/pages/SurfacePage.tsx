@@ -1,8 +1,8 @@
 /**
- * SurfacePage — Ora's generative web surface renderer.
+ * SurfacePage — Aura's generative web surface renderer.
  *
  * Loads the surface spec from /api/surfaces/:surfaceId/data and renders it
- * dynamically. Ora freely designs any layout; this renderer supports the full
+ * dynamically. Aura freely designs any layout; this renderer supports the full
  * section vocabulary she generates.
  *
  * Sections:  header | metric | progress | checklist | countdown |
@@ -701,7 +701,7 @@ function UpgradePrompt() {
         This surface is private
       </h2>
       <p style={{ color: 'rgba(248,248,252,0.5)', fontSize: 14, lineHeight: 1.6 }}>
-        Ora's WebSpawn pages are personal — each one is built for its owner.
+        Aura's WebSpawn pages are personal — each one is built for its owner.
         Sign in to access your surfaces, or upgrade to create your own.
       </p>
       <a href="/connectome-web/" style={{
@@ -874,7 +874,7 @@ export default function SurfacePage() {
             href="/connectome-web/"
             style={{ fontSize: 11, color: 'rgba(248,248,252,0.25)', textDecoration: 'none' }}
           >
-            Powered by iDo · Ora
+            Powered by Connectome · Aura
           </a>
         </div>
       </div>

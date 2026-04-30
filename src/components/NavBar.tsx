@@ -1,10 +1,10 @@
 /**
  * NavBar — WeChat-inspired navigation shell.
  *
- * Mobile: 5-tab bottom bar with elevated center Ora button.
- *   Tabs: Feed · Goals · [Ora] · DAO · Me
+ * Mobile: 5-tab bottom bar with elevated center Aura button.
+ *   Tabs: Feed · Goals · [Aura] · DAO · Me
  *   Active state: filled icon + label + accent underline
- *   Ora button: elevated, glowing, always prominent
+ *   Aura button: elevated, glowing, always prominent
  *
  * Desktop: sidebar with brand + nav links + user card.
  *
@@ -22,7 +22,7 @@ import { useAuth } from '../context/AuthContext';
 const MOBILE_TABS = [
   { path: '/app/ido',    icon: '◉',  label: 'Discover' },
   { path: '/app/goals',   icon: '◎',  label: 'Goals'    },
-  { path: '/app',     icon: null, label: 'Ora',  isOra: true },
+  { path: '/app',     icon: null, label: 'Aura',  isOra: true },
   { path: '/app/dao',     icon: '🏛', label: 'DAO'      },
   { path: '/app/profile', icon: null, label: 'Me',   isProfile: true },
 ] as const;
@@ -31,7 +31,7 @@ const MOBILE_TABS = [
 const SIDEBAR_ITEMS = [
   { path: '/app',       icon: '◉',  label: 'Home'       },
   { path: '/app/ido',       icon: '✦',  label: 'Discover'   },
-  { path: '/app',        icon: '◈',  label: 'Ora',        special: true },
+  { path: '/app',        icon: '◈',  label: 'Aura',        special: true },
   { path: '/app/goals',      icon: '◎',  label: 'Goals'      },
   { path: '/app/dao',        icon: '🏛', label: 'DAO'        },
   { path: '/app/contribute', icon: '✚',  label: 'Contribute' },
@@ -100,7 +100,7 @@ export function NavBar() {
           }}>◈</div>
           <div>
             <div style={{ fontWeight: 900, fontSize: 17, letterSpacing: -0.6, color: '#f8f8fc' }}>iDo</div>
-            <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.25)', letterSpacing: 2, textTransform: 'uppercase', marginTop: 1 }}>by Ora</div>
+            <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.25)', letterSpacing: 2, textTransform: 'uppercase', marginTop: 1 }}>by Aura</div>
           </div>
         </div>
 
@@ -228,11 +228,11 @@ export function NavBar() {
                 (tab.path === '/app/ido' && location.pathname === '/');
 
               if ((tab as any).isOra) {
-                // ─── Center Ora button — elevated like WeChat "+" ──────────
+                // ─── Center Aura button — elevated like WeChat "+" ──────────
                 return (
                   <div key={tab.path} style={{ flex: 1, display: 'flex', justifyContent: 'center', paddingBottom: 6 }}>
                     <NavLink to={tab.path} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
-                      {/* Elevated Ora button */}
+                      {/* Elevated Aura button */}
                       <div style={{
                         width: 54, height: 54,
                         borderRadius: 20,
@@ -252,7 +252,7 @@ export function NavBar() {
                         fontSize: 10, fontWeight: 700, letterSpacing: 0.3,
                         color: isActive ? '#00d4aa' : 'rgba(248,248,252,0.4)',
                         paddingBottom: 2,
-                      }}>Ora</span>
+                      }}>Aura</span>
                     </NavLink>
                   </div>
                 );

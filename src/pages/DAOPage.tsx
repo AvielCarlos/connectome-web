@@ -623,7 +623,7 @@ export default function DAOPage() {
                     icon: '🐦',
                     label: 'Share on Twitter',
                     sub: 'Spread the word',
-                    href: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Just discovered iDo by @OraAI — a daily AI life app for personal growth. Check it out! https://avielcarlos.github.io/connectome-web/')}`,
+                    href: `https://twitter.com/intent/tweet?text=${encodeURIComponent('Just discovered Connectome — a living AI OS for human flourishing. Check it out! https://avielcarlos.github.io/connectome-web/')}`,
                   },
                   {
                     icon: '🔗',
@@ -736,7 +736,7 @@ export default function DAOPage() {
                           borderLeft: '2px solid #6366f1', borderRadius: '0 8px 8px 0',
                           padding: '8px 12px',
                         }}>
-                          <div style={{ fontSize: 9, color: '#6366f1', fontWeight: 700, letterSpacing: 0.5, marginBottom: 3 }}>ORA'S TAKE</div>
+                          <div style={{ fontSize: 9, color: '#6366f1', fontWeight: 700, letterSpacing: 0.5, marginBottom: 3 }}>AURA'S TAKE</div>
                           <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.55)', fontStyle: 'italic', lineHeight: 1.5 }}>
                             {item.ora_evaluation}
                           </div>

@@ -120,7 +120,7 @@ export default function ContributePage() {
         evidence_text: evidence.trim() || undefined,
         attachment_urls: attachmentUrls.map((url) => url.trim()).filter(Boolean),
       });
-      setMessage('Contribution submitted! Ora will review within 24h.');
+      setMessage('Contribution submitted! Aura will review within 24h.');
       setTitle('');
       setDescription('');
       setLink('');
@@ -218,7 +218,7 @@ export default function ContributePage() {
 
         <details style={{ ...card, padding: 20 }}>
           <summary style={{ cursor: 'pointer', color: ACCENT, fontWeight: 950, fontSize: 16 }}>How contributions are evaluated</summary>
-          <ul style={{ margin: '16px 0 0', paddingLeft: 20, color: 'rgba(248,248,252,0.66)', lineHeight: 1.75 }}><li>Quality over quantity.</li><li>Must be implemented or documented evidence of real work.</li><li>Ora reviews every submission within 24h.</li><li>CP awarded based on impact and complexity.</li></ul>
+          <ul style={{ margin: '16px 0 0', paddingLeft: 20, color: 'rgba(248,248,252,0.66)', lineHeight: 1.75 }}><li>Quality over quantity.</li><li>Must be implemented or documented evidence of real work.</li><li>Aura reviews every submission within 24h.</li><li>CP awarded based on impact and complexity.</li></ul>
         </details>
       </div>
       <CPExplainerModal open={cpExplainerOpen} onClose={() => setCpExplainerOpen(false)} />

@@ -14,16 +14,16 @@ function formatTime(ts: number) {
 }
 
 function OraMessage({ msg, showTime }: { msg: Message; showTime: boolean }) {
-  const isOra = msg.role === 'ora';
+  const isAura = msg.role === 'ora';
   return (
     <div style={{
       display: 'flex',
-      flexDirection: isOra ? 'row' : 'row-reverse',
+      flexDirection: isAura ? 'row' : 'row-reverse',
       gap: 8,
       alignItems: 'flex-end',
       marginBottom: 6,
     }}>
-      {isOra && (
+      {isAura && (
         <div style={{
           width: 28, height: 28, borderRadius: 14,
           background: 'linear-gradient(135deg, rgba(0,212,170,0.2), rgba(0,212,170,0.4))',
@@ -32,18 +32,18 @@ function OraMessage({ msg, showTime }: { msg: Message; showTime: boolean }) {
           fontSize: 13, flexShrink: 0,
         }}>◈</div>
       )}
-      <div style={{ maxWidth: '78%', display: 'flex', flexDirection: 'column', alignItems: isOra ? 'flex-start' : 'flex-end', gap: 3 }}>
+      <div style={{ maxWidth: '78%', display: 'flex', flexDirection: 'column', alignItems: isAura ? 'flex-start' : 'flex-end', gap: 3 }}>
         <div style={{
           padding: '10px 14px',
-          borderRadius: isOra ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
-          background: isOra ? '#1a1a2e' : 'rgba(0,212,170,0.18)',
-          border: isOra ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,212,170,0.35)',
+          borderRadius: isAura ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
+          background: isAura ? '#1a1a2e' : 'rgba(0,212,170,0.18)',
+          border: isAura ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,212,170,0.35)',
           fontSize: 15,
           lineHeight: 1.65,
           color: '#f8f8fc',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
-          boxShadow: isOra ? 'none' : '0 2px 12px rgba(0,212,170,0.1)',
+          boxShadow: isAura ? 'none' : '0 2px 12px rgba(0,212,170,0.1)',
         }}>
           {msg.content}
         </div>
@@ -89,14 +89,14 @@ function TypingIndicator() {
   );
 }
 
-export default function OraPage() {
+export default function AuraPage() {
   // ─── A/B experiments ────────────────────────────────────────────────────
   const { variant: greetingVariant } = useExperiment('ora_greeting');
   const { variant: responseLengthVariant } = useExperiment('ora_response_length');
   const { variant: proactiveSuggestionsVariant, trackEvent: trackOraEvent } = useExperiment('ora_proactive_suggestions');
 
-  const ORA_GREETINGS: Record<string, string> = {
-    A: "Hey! I'm Ora. What do you want to work toward?",
+  const AURA_GREETINGS: Record<string, string> = {
+    A: "Hey! I'm Aura. What do you want to work toward?",
     B: '◈ What\'s on your mind?',
     C: 'Hey. What are we working on today?',
     D: "I've been thinking about your goals. Want to pick up where we left off?",
@@ -118,7 +118,7 @@ export default function OraPage() {
       OraClient.getOraSelf().catch(() => null),
     ]).then(([opening, self]) => {
       // Use A/B greeting variant if no server-provided message
-      const defaultGreeting = ORA_GREETINGS[greetingVariant] || ORA_GREETINGS['A'];
+      const defaultGreeting = AURA_GREETINGS[greetingVariant] || AURA_GREETINGS['A'];
       const content = opening?.message || defaultGreeting;
       setMessages([{ id: 'opening', role: 'ora', content, ts: Date.now() }]);
       if (self) setOraInfo(self);
@@ -236,7 +236,7 @@ export default function OraPage() {
             boxShadow: '0 0 16px rgba(0,212,170,0.15)',
           }}>◈</div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 16 }}>Ora</div>
+            <div style={{ fontWeight: 800, fontSize: 16 }}>Aura</div>
             <div style={{ fontSize: 11, color: '#00d4aa', display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ width: 6, height: 6, borderRadius: 3, background: '#00d4aa', display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
               Online
@@ -293,7 +293,7 @@ export default function OraPage() {
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Message Ora…"
+            placeholder="Message Aura…"
             disabled={loading}
             rows={1}
             style={{

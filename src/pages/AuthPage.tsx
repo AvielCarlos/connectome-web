@@ -11,9 +11,9 @@ export default function AuthPage() {
 
   const REGISTER_HEADLINES: Record<string, string> = {
     A: 'Create your account',
-    B: 'Meet Ora',
+    B: 'Meet Aura',
     C: 'Start your journey',
-    D: 'Join iDo',
+    D: 'Join Connectome',
   };
   const registerHeadlineText = REGISTER_HEADLINES[registerHeadlineVariant] || REGISTER_HEADLINES['A'];
 
@@ -52,8 +52,9 @@ export default function AuthPage() {
   };
 
   const handleGoogleSignIn = () => {
-    // Redirect to backend Google OAuth flow
-    window.location.href = apiUrl('/api/auth/google/login');
+    // Request Drive access during first Google sign-in so users don't have to
+    // complete a second Google consent flow later from Profile → Google.
+    window.location.href = apiUrl('/api/auth/google/login?include_drive=true');
   };
 
   return (
@@ -101,10 +102,10 @@ export default function AuthPage() {
             ◈
           </div>
           <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: -0.5, marginBottom: 8 }}>
-            iDo
+            Connectome
           </h1>
           <p style={{ color: 'rgba(248,248,252,0.45)', fontSize: 15 }}>
-            Your daily AI life app, guided by Ora
+            Begin your path, guided by Aura
           </p>
         </div>
 
@@ -207,7 +208,7 @@ export default function AuthPage() {
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="How Ora will know you"
+                  placeholder="How Aura will know you"
                   autoComplete="name"
                 />
               </div>
@@ -270,7 +271,7 @@ export default function AuthPage() {
                 letterSpacing: 0.3,
               }}
             >
-              {loading ? '...' : mode === 'login' ? 'Continue with Ora →' : 'Create Account →'}
+              {loading ? '...' : mode === 'login' ? 'Continue with Aura →' : 'Create Account →'}
             </button>
           </form>
         </div>

@@ -243,6 +243,10 @@ export default function ProfilePage() {
   const connectGoogle = async () => {
     try {
       const res = await OraClient.connectGoogleDrive();
+      if (res.already_connected) {
+        alert('Google Drive is already connected.');
+        return;
+      }
       if (res.auth_url) window.location.href = res.auth_url;
       else alert('Google Drive connection did not return a sign-in URL.');
     } catch (e: any) {
@@ -268,7 +272,7 @@ export default function ProfilePage() {
   const tierColor = tier === 'sovereign' ? '#a855f7' : tier === 'explorer' ? '#3b82f6' : '#6b7280';
 
   const UPGRADE_HEADLINES: Record<string, string> = {
-    A: 'Unlock the full Ora',
+    A: 'Unlock the full Aura',
     B: 'Go deeper with Explorer',
     C: "You're using iDo like a power user",
     D: 'Explorer — built for people serious about their goals',
@@ -403,12 +407,12 @@ export default function ProfilePage() {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>Community</div>
             <MenuRow icon="🏛" label="DAO & Contributions" sublabel="Earn CP, vote on proposals" onClick={() => navigate('/app/dao')} />
             <MenuRow icon="✍" label="Journal" sublabel="Your personal log" onClick={() => navigate('/app/ido')} />
-            <MenuRow icon="⚡" label="Services" sublabel="Ora-powered tools" onClick={() => navigate('/app/services')} last />
+            <MenuRow icon="⚡" label="Services" sublabel="Aura-powered tools" onClick={() => navigate('/app/services')} last />
           </div>
 
           <div style={{ background: '#12121e', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>My Account</div>
-            <MenuRow icon="🌐" label="My Surfaces" sublabel="Personalized pages Ora built" onClick={() => { setSection('surfaces'); loadSurfaces(); }} />
+            <MenuRow icon="🌐" label="My Surfaces" sublabel="Personalized pages Aura built" onClick={() => { setSection('surfaces'); loadSurfaces(); }} />
             <MenuRow icon="🔗" label="Google Account" sublabel="Drive sync & calendar" onClick={() => setSection('google')} />
             <MenuRow icon="📱" label="Get the App" sublabel="Add iDo to your home screen" onClick={() => {}} last />
           </div>
@@ -481,10 +485,10 @@ export default function ProfilePage() {
                 maxWidth: 440,
               }}>
                 <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 6, color: '#f8f8fc' }}>
-                  What should Ora build for you?
+                  What should Aura build for you?
                 </div>
                 <p style={{ fontSize: 13, color: 'rgba(248,248,252,0.45)', marginBottom: 16 }}>
-                  Describe your goal or need in plain language. Ora will design the perfect page for you — no templates.
+                  Describe your goal or need in plain language. Aura will design the perfect page for you — no templates.
                 </p>
                 <textarea
                   rows={4}
@@ -557,7 +561,7 @@ export default function ProfilePage() {
                       color: '#fff', border: 'none', cursor: spawning ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    {spawning ? 'Ora is designing…' : 'Build my surface'}
+                    {spawning ? 'Aura is designing…' : 'Build my surface'}
                   </button>
                 </div>
               </div>
@@ -569,7 +573,7 @@ export default function ProfilePage() {
             <div>
               <div style={{ fontWeight: 800, fontSize: 17, color: '#f8f8fc' }}>🌐 My Surfaces</div>
               <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)', marginTop: 2 }}>
-                Personalized pages Ora built for you
+                Personalized pages Aura built for you
               </div>
             </div>
             <button
@@ -594,7 +598,7 @@ export default function ProfilePage() {
               fontSize: 13,
               color: 'rgba(248,248,252,0.7)',
             }}>
-              ✨ WebSpawn is an Explorer &amp; Sovereign feature. Ora builds personalized pages for any goal — a dashboard, a plan, a tracker, whatever fits. <a href="/connectome-web/#upgrade" style={{ color: '#8b5cf6', fontWeight: 700 }}>Upgrade to unlock it.</a>
+              ✨ WebSpawn is an Explorer &amp; Sovereign feature. Aura builds personalized pages for any goal — a dashboard, a plan, a tracker, whatever fits. <a href="/connectome-web/#upgrade" style={{ color: '#8b5cf6', fontWeight: 700 }}>Upgrade to unlock it.</a>
             </div>
           )}
 
@@ -613,7 +617,7 @@ export default function ProfilePage() {
                 No surfaces yet
               </div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', lineHeight: 1.5 }}>
-                Tell Ora what you want to track, build, or plan.<br />
+                Tell Aura what you want to track, build, or plan.<br />
                 She’ll design a page just for you.
               </div>
             </div>
@@ -718,7 +722,7 @@ export default function ProfilePage() {
 
           <Card title="Drive Sync">
             <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 12 }}>
-              Once connected, Ora indexes your Drive documents as personalized coaching content.
+              Once connected, Aura indexes your Drive documents as personalized coaching content.
             </div>
             <button
               onClick={async () => {
@@ -1029,9 +1033,9 @@ export default function ProfilePage() {
       {/* ── System section (admin only) ── */}
       {section === 'system' && isAdmin && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <Card title="Ora Autonomy Engine">
+          <Card title="Aura Autonomy Engine">
             <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.55)', lineHeight: 1.6, marginBottom: 14 }}>
-              Triggers Ora's full self-improvement cycle: A/B analysis, feed weight optimization, bug detection, and daily report.
+              Triggers Aura's full self-improvement cycle: A/B analysis, feed weight optimization, bug detection, and daily report.
             </div>
             <button
               onClick={runAutonomy}
@@ -1067,9 +1071,9 @@ export default function ProfilePage() {
             </button>
           </Card>
 
-          <Card title="Ora's Self-Improvement Proposals">
+          <Card title="Aura's Self-Improvement Proposals">
             <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 12 }}>
-              High-risk improvements Ora wants to make — review and approve or reject.
+              High-risk improvements Aura wants to make — review and approve or reject.
             </div>
             <button
               onClick={loadProposals}
@@ -1119,7 +1123,7 @@ export default function ProfilePage() {
 
           <Card title="Agent Population">
             <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.55)', lineHeight: 1.6, marginBottom: 12 }}>
-              Ora's living agent roster — builtin, spawned, partitioned, and merged agents.
+              Aura's living agent roster — builtin, spawned, partitioned, and merged agents.
             </div>
             <button
               onClick={loadAgentPopulation}
@@ -1168,7 +1172,7 @@ export default function ProfilePage() {
 
           <Card title="Evolution Proposals">
             <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 12 }}>
-              Risky evolutions Ora wants to run — review and approve or reject.
+              Risky evolutions Aura wants to run — review and approve or reject.
             </div>
             <button
               onClick={loadEvolutionProposals}

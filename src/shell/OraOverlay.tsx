@@ -15,7 +15,7 @@ export default function OraOverlay({ open, onClose }: OraOverlayProps) {
     {
       id: 'opening',
       role: 'ora',
-      content: "I'm Ora — your AI OS for human flourishing. Ask me anything, or choose a signal below and I'll orient the day around it.",
+      content: "I'm Aura — your AI OS for human flourishing. Ask me anything, or choose a signal below and I'll orient the day around it.",
     },
   ]);
   const [input, setInput] = useState('');
@@ -73,7 +73,7 @@ export default function OraOverlay({ open, onClose }: OraOverlayProps) {
   if (!open) return null;
 
   return (
-    <div className="ora-overlay" role="dialog" aria-modal="true" aria-label="Ora OS overlay">
+    <div className="ora-overlay" role="dialog" aria-modal="true" aria-label="Aura OS overlay">
       <div className="ora-overlay__scrim" onClick={onClose} />
       <div className="ora-overlay__panel" ref={panelRef} onPointerDown={handlePointerDown}>
         <header className="ora-overlay__header">
@@ -81,11 +81,11 @@ export default function OraOverlay({ open, onClose }: OraOverlayProps) {
           <div className="ora-overlay__identity">
             <span className="ora-orb ora-orb--large" />
             <div>
-              <div className="ora-overlay__eyebrow">Ora · AIOS</div>
-              <h2>Ora — your guide</h2>
+              <div className="ora-overlay__eyebrow">Aura · AIOS</div>
+              <h2>Aura — your guide</h2>
             </div>
           </div>
-          <button className="ora-overlay__close" type="button" onClick={onClose} aria-label="Close Ora">×</button>
+          <button className="ora-overlay__close" type="button" onClick={onClose} aria-label="Close Aura">×</button>
         </header>
 
         <div className="ora-overlay__messages">
@@ -114,7 +114,7 @@ export default function OraOverlay({ open, onClose }: OraOverlayProps) {
           <input
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Ask Ora to navigate, reflect, plan, or decide…"
+            placeholder="Ask Aura to navigate, reflect, plan, or decide…"
             autoFocus
           />
           <button type="submit" disabled={!input.trim() || loading}>Send</button>

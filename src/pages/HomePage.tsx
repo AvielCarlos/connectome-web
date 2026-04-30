@@ -2,12 +2,12 @@
  * HomePage — iDo's philosophical entry point.
  *
  * Two paths, every session:
- *   "I know what I want to do" → Ora goal creation/clarification + directed feed
+ *   "I know what I want to do" → Aura goal creation/clarification + directed feed
  *   "I don't know what I want to do" → randomized/recommended IOO feed discovery
  *
  * "I know" path also A/B tested:
  *   Variant A (immediate): straight to input
- *   Variant B (clarifying): Ora asks "What does success look like?" first
+ *   Variant B (clarifying): Aura asks "What does success look like?" first
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -197,7 +197,7 @@ export default function HomePage() {
           Building your path…
         </div>
         <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.4)', textAlign: 'center', maxWidth: 300, lineHeight: 1.6 }}>
-          Ora is breaking down{' '}
+          Aura is breaking down{' '}
           <em style={{ color: 'rgba(248,248,252,0.7)' }}>"{creatingGoalTitle}"</em>{' '}
           into concrete steps
         </div>
@@ -228,7 +228,7 @@ export default function HomePage() {
           width: '100%',
           paddingBottom: 'calc(var(--bottom-nav-height, 80px) + 24px)',
         }}>
-          {/* Ora mark */}
+          {/* Aura mark */}
           <div style={{ fontSize: 26, color: '#8b5cf6', marginBottom: 18, animation: 'oraFade 3s ease-in-out infinite' }}>✦</div>
 
           {/* Heading */}
@@ -236,7 +236,7 @@ export default function HomePage() {
             What do you want to do?
           </h1>
           <p style={{ fontSize: 15, color: 'rgba(248,248,252,0.45)', marginBottom: 32, lineHeight: 1.6, margin: '0 0 32px' }}>
-            Tell Ora your goal. She'll build a breakdown and guide every step.
+            Tell Aura your goal. She'll build a breakdown and guide every step.
           </p>
 
           {/* Clarifying question — Variant B only */}
@@ -385,7 +385,7 @@ export default function HomePage() {
             Quick check-in
           </h2>
           <p style={{ fontSize: 14, color: 'rgba(248,248,252,0.4)', marginBottom: 32, lineHeight: 1.6 }}>
-            Help Ora tune your feed for this session.
+            Help Aura tune your feed for this session.
           </p>
 
           {/* Q1: Mood */}
@@ -478,7 +478,7 @@ export default function HomePage() {
             What's on your mind?
           </h2>
           <p style={{ fontSize: 14, color: 'rgba(248,248,252,0.4)', textAlign: 'center', marginBottom: 28, lineHeight: 1.6 }}>
-            Ora will use this to personalise your feed — or skip and she'll figure it out.
+            Aura will use this to personalise your feed — or skip and she'll figure it out.
           </p>
 
           <input
@@ -521,7 +521,7 @@ export default function HomePage() {
   // ── View: choice (default) ─────────────────────────────────────────────────
   return (
     <div style={{ ...SHARED_STYLES.pageBase, ...SHARED_STYLES.centered }}>
-      {/* Ora's mark */}
+      {/* Aura's mark */}
       <div style={{
         fontSize: 52,
         color: '#8b5cf6',
@@ -556,7 +556,7 @@ export default function HomePage() {
           accentColor="rgba(139,92,246,0.5)"
           hoverBorder="rgba(139,92,246,0.4)"
           title="I know what I want to do"
-          subtitle="Tell Ora your goal. She builds your path and gets you moving."
+          subtitle="Tell Aura your goal. She builds your path and gets you moving."
           onClick={handleKnow}
           selected={selectedChoice === 'know'}
         />
@@ -570,7 +570,7 @@ export default function HomePage() {
           accentColor="rgba(0,212,170,0.4)"
           hoverBorder="rgba(0,212,170,0.4)"
           title="I don't know what I want to do"
-          subtitle="Ora reads the moment and picks what's right for you, right now."
+          subtitle="Aura reads the moment and picks what's right for you, right now."
           onClick={handleExplore}
           selected={selectedChoice === 'explore'}
         />
@@ -584,7 +584,7 @@ export default function HomePage() {
         textAlign: 'center',
         letterSpacing: 0.2,
       }}>
-        Ora remembers your choice and learns from it
+        Aura remembers your choice and learns from it
       </div>
 
       <GlobalStyles />

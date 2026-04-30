@@ -343,10 +343,10 @@ export default function ServicesPage() {
           FOUNDER BETA · 3 PRIVATE BUILDS
         </div>
         <div style={{ fontWeight: 850, fontSize: 22, letterSpacing: -0.5, marginBottom: 8 }}>
-          Ora Personal AI OS Setup
+          Aura Personal AI OS Setup
         </div>
         <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.62)', lineHeight: 1.65, marginBottom: 14 }}>
-          Avi turns your goals, knowledge, work, and habits into a practical AI-powered operating system — with a custom Ora persona, workflow map, and 30-day implementation path.
+          Avi turns your goals, knowledge, work, and habits into a practical AI-powered operating system — with a custom Aura persona, workflow map, and 30-day implementation path.
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const, marginBottom: 16 }}>
           {['Founder-led setup', '7-day beta from $1,500', 'Standard 14-day build'].map((text) => (
@@ -379,7 +379,7 @@ export default function ServicesPage() {
         borderRadius: 12, flexWrap: 'wrap' as const,
       }}>
         {[
-          { icon: '🤖', text: 'Powered by Ora AI' },
+          { icon: '🤖', text: 'Powered by Aura AI' },
           { icon: '⚡', text: 'Fast delivery' },
           { icon: '🔒', text: 'Secure payment' },
           { icon: '✉️', text: 'Delivered to inbox' },

@@ -38,7 +38,7 @@ const CAPABILITY_CARDS = [
     field: 'today_capacity',
     eyebrow: 'Before the feed',
     title: 'What can you realistically do today?',
-    body: 'Ora needs your actual capacity before recommending the next move.',
+    body: 'Aura needs your actual capacity before recommending the next move.',
     options: ['5 minutes', '15–30 minutes', '1–2 hours', 'A deeper block'],
   },
   {
@@ -46,7 +46,7 @@ const CAPABILITY_CARDS = [
     field: 'current_energy_state',
     eyebrow: 'iVive signal',
     title: 'Where is your energy right now?',
-    body: 'This changes whether Ora should suggest action, preparation, or restoration.',
+    body: 'This changes whether Aura should suggest action, preparation, or restoration.',
     options: ['Low / need gentleness', 'Steady', 'High / ready to move', 'Scattered / need focus'],
   },
   {
@@ -63,7 +63,7 @@ const CAPABILITY_CARDS = [
     field: 'current_constraint',
     eyebrow: 'Constraint check',
     title: 'What would block you from doing something today?',
-    body: 'Ora should bridge the gap instead of pretending the obstacle is not there.',
+    body: 'Aura should bridge the gap instead of pretending the obstacle is not there.',
     options: ['Time', 'Money', 'Location', 'Energy/health', 'Confidence/skill', 'Nothing major'],
   },
   {
@@ -90,13 +90,13 @@ function fallbackDeepDive(card: any, spec: any, domain: string) {
     time_to_start: spec?.metadata?.requires_time_hours ? `~${spec.metadata.requires_time_hours}h` : isFallback ? '2–10 minutes' : 'Start small',
     difficulty: 'easy',
     why_it_matters: body
-      ? `This is a ${domain || 'life'} action, not just content. Ora is testing whether this kind of step fits your current capacity and direction: ${body}`
-      : `Ora is testing whether ${title} fits your current capacity and direction.`,
-    stat: 'Your response teaches Ora what to recommend, what to avoid, and what bridge steps you may need first.',
+      ? `This is a ${domain || 'life'} action, not just content. Aura is testing whether this kind of step fits your current capacity and direction: ${body}`
+      : `Aura is testing whether ${title} fits your current capacity and direction.`,
+    stat: 'Your response teaches Aura what to recommend, what to avoid, and what bridge steps you may need first.',
     steps: [
       'Check whether your current time, energy, location, and resources make this realistic.',
       'Choose the smallest version that can be done today.',
-      'Tap Do now when you want Ora to turn it into a concrete pathway.',
+      'Tap Do now when you want Aura to turn it into a concrete pathway.',
     ],
     resources: [],
   };
@@ -204,7 +204,7 @@ function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
           </button>
         )}
         <div style={{ marginTop: 18, color: 'rgba(248,248,252,0.34)', fontSize: 12, lineHeight: 1.55 }}>
-          Ora updates this regularly so cards match what you can actually do, not a fantasy version of your day.
+          Aura updates this regularly so cards match what you can actually do, not a fantasy version of your day.
         </div>
       </div>
     </div>
@@ -393,9 +393,9 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
     >
       <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxHeight: 'calc(100dvh - var(--shell-top-clearance) - var(--shell-bottom-clearance) - 18px)', overflowY: 'auto', background: '#11111c', borderRadius: '28px 28px 0 0', border: '1px solid rgba(0,212,170,0.22)', padding: '18px 22px 34px' }}>
         <div style={{ width: 44, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.16)', margin: '0 auto 18px' }} />
-        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Ora pathway</div>
+        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Aura pathway</div>
         <h2 style={{ margin: 0, color: '#f8f8fc', fontSize: 24, lineHeight: 1.15 }}>{card.title || 'Your next step'}</h2>
-        <p style={{ color: 'rgba(248,248,252,0.58)', lineHeight: 1.65, fontSize: 14 }}>{protocol?.summary || 'Before this becomes a card to consume, Ora turns it into a path from your current state to a doable first action.'}</p>
+        <p style={{ color: 'rgba(248,248,252,0.58)', lineHeight: 1.65, fontSize: 14 }}>{protocol?.summary || 'Before this becomes a card to consume, Aura turns it into a path from your current state to a doable first action.'}</p>
 
         {questions.length > 0 && (
           <div style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.28)', borderRadius: 18, padding: 14, marginBottom: 18 }}>
@@ -417,7 +417,7 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
         </div>
 
         <button onClick={onClose} style={{ marginTop: 18, width: '100%', border: 'none', borderRadius: 18, padding: '14px 18px', background: 'linear-gradient(135deg,#00d4aa,#14f1c1)', color: '#06110f', fontWeight: 950 }}>
-          Keep going with Ora →
+          Keep going with Aura →
         </button>
       </div>
     </div>
@@ -820,7 +820,7 @@ export default function FeedPage() {
         setIsLimited(nextCards[nextCards.length - 1].is_limited);
         setDailyLimit(nextCards[nextCards.length - 1].daily_limit);
       } else {
-        setError('Ora could not prepare cards yet. Try again in a moment.');
+        setError('Aura could not prepare cards yet. Try again in a moment.');
       }
       // Send backend progress signal.
       OraClient['client'].post('/api/gamification/checkin', { reason: 'card_view' }).catch(() => {});
@@ -1017,10 +1017,10 @@ export default function FeedPage() {
         <div style={{ fontWeight: 700, fontSize: 18 }}>{isLimited ? 'Cards are refreshing' : 'Preparing your first card'}</div>
         <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', textAlign: 'center' }}>
           {isLimited
-            ? 'Ora hit a temporary feed limit. Retry now — the feed should reopen.'
+            ? 'Aura hit a temporary feed limit. Retry now — the feed should reopen.'
             : hasGoals === false
-              ? 'You can set a goal, or retry and Ora will suggest a discovery card.'
-              : 'Ora returned an empty batch. Retry will request a single fallback card.'}
+              ? 'You can set a goal, or retry and Aura will suggest a discovery card.'
+              : 'Aura returned an empty batch. Retry will request a single fallback card.'}
         </div>
         {hasGoals === false && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 320 }}>
@@ -1143,7 +1143,7 @@ export default function FeedPage() {
             <div style={{ fontSize: 56 }}>✨</div>
             <div style={{ fontWeight: 900, fontSize: 24 }}>You're done for today</div>
             <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.4)', maxWidth: 280, lineHeight: 1.7 }}>
-              {dailyLimit} cards/day keeps insights sharp. Ora will have fresh ones ready tomorrow.
+              {dailyLimit} cards/day keeps insights sharp. Aura will have fresh ones ready tomorrow.
             </div>
             <button onClick={() => navigate('/app/goals')} style={{
               background: 'linear-gradient(135deg, #00d4aa, #00b896)',

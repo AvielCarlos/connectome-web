@@ -1,7 +1,7 @@
 /**
  * UpgradeModal — shown when a user hits a tier limit (402 response).
  *
- * Displays Ora's warm upgrade message, a tier comparison table,
+ * Displays Aura's warm upgrade message, a tier comparison table,
  * and routes to Stripe Checkout on click.
  */
 
@@ -15,7 +15,7 @@ const ora = OraClient;
 interface UpgradeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Ora's warm message for the specific limit hit */
+  /** Aura's warm message for the specific limit hit */
   upgradeMessage?: string;
   /** Which resource triggered the limit (e.g. "daily_screens") */
   resource?: string;
@@ -108,7 +108,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
     : [];
 
   const defaultMessage =
-    "You've reached your plan limit ✦\n\nExplorer unlocks the full Ora experience — " +
+    "You've reached your plan limit ✦\n\nExplorer unlocks the full Aura experience — " +
     'unlimited discovery, goals, and coaching. $12.99/mo.';
 
   return (
@@ -129,7 +129,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
           >
             ✕
           </button>
-          <h2 className="text-white text-xl font-semibold">Unlock More with Ora ✦</h2>
+          <h2 className="text-white text-xl font-semibold">Unlock More with Aura ✦</h2>
           <p className="text-indigo-100 text-sm mt-1">
             {resource === 'daily_screens'
               ? "You've explored today's cards — come back tomorrow or unlock unlimited."
@@ -140,7 +140,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
         {/* Scrollable content */}
         <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
 
-          {/* Ora's message */}
+          {/* Aura's message */}
           {(upgradeMessage || defaultMessage) && (
             <div className="rounded-xl bg-indigo-50 border border-indigo-100 px-4 py-3">
               <p className="text-indigo-800 text-sm leading-relaxed whitespace-pre-line">

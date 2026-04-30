@@ -230,7 +230,7 @@ export interface MemoryRecord {
   id: string;
   kind: MemoryKind;
   text: string;
-  framing?: MemoryFraming; // A/B: 'Ora remembers...' vs profile/OS memory framing
+  framing?: MemoryFraming; // A/B: 'Aura remembers...' vs profile/OS memory framing
   salience: number;
   privacyTier: PrivacyTier;
   recordedAt: string;
@@ -346,7 +346,7 @@ export const ONTOLOGY_RELATIONSHIPS: OntologyRelationship[] = [
   { kind: 'unlocks_readiness_for', fromKind: 'iVive', toKind: 'Eviva', description: 'iVive readiness unlocks Eviva opportunities.' },
   { kind: 'governs', fromKind: 'Dao', toKind: 'Connectome', description: 'The DAO governs Connectome.' },
   { kind: 'hosts', fromKind: 'Connectome', toKind: 'App', description: 'Connectome hosts apps.' },
-  { kind: 'recommends', fromKind: 'Ora', toKind: 'Entity', description: 'Ora recommends entities to a person.' },
+  { kind: 'recommends', fromKind: 'Aura', toKind: 'Entity', description: 'Aura recommends entities to a person.' },
   { kind: 'renders', fromKind: 'FeedSurface', toKind: 'Entity', description: 'A feed renders opportunities, events, missions, routines, services, and DAO signals.' },
   { kind: 'blends', fromKind: 'iDoFeed', toKind: 'DomainFeed', description: 'iDo blends domain feeds into the daily what-should-I-do-next meta-feed.' },
 ];
@@ -470,8 +470,8 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'system',
     visibleToUser: true,
     permissions: ['files', 'memory'],
-    description: 'Tools, integrations, Ora-generated surfaces.',
-    purpose: 'Lets Ora create or connect tools around the user’s current path.',
+    description: 'Tools, integrations, Aura-generated surfaces.',
+    purpose: 'Lets Aura create or connect tools around the user’s current path.',
   },
   {
     id: 'ioo',
@@ -493,7 +493,7 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     visibleToUser: true,
     permissions: ['memory', 'notifications'],
     description: 'Single top-right identity, permissions, sovereignty, stats, and connected accounts surface.',
-    purpose: 'Gives the user control over who Ora thinks they are and what the OS may access.',
+    purpose: 'Gives the user control over who Aura thinks they are and what the OS may access.',
   },
 ];
 

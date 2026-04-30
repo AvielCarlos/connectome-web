@@ -1,5 +1,5 @@
 /**
- * MiniAppSurface — renders any Ora surface spec as a dynamic mini-app.
+ * MiniAppSurface — renders any Aura surface spec as a dynamic mini-app.
  *
  * Supported templates:
  *   habit_tracker  | checklist     | challenge

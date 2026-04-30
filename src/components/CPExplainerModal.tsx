@@ -21,11 +21,11 @@ export default function CPExplainerModal({ open, onClose }: CPExplainerModalProp
         <div className="cp-explainer-kicker">Contribution Points</div>
         <h2 id="cp-explainer-title">What is CP?</h2>
         <p>
-          CP is Ora’s contribution score — a simple way to recognize people who help improve the product,
+          CP is Aura’s contribution score — a simple way to recognize people who help improve the product,
           community, and mission.
         </p>
         <ul>
-          <li><strong>Feedback earns CP</strong> because noticing what’s broken, confusing, or useful helps Ora learn faster.</li>
+          <li><strong>Feedback earns CP</strong> because noticing what’s broken, confusing, or useful helps Aura learn faster.</li>
           <li><strong>Bigger contributions earn more</strong>: code, design, docs, research, community support, and useful ideas all count.</li>
           <li><strong>CP builds reputation</strong> in the Ascension DAO and may unlock governance, rewards, and future participation as the system matures.</li>
         </ul>

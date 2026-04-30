@@ -35,7 +35,7 @@ export default function ConnectomeHome() {
     <div className="connectome-home" style={{ maxWidth: 1040, margin: '0 auto', padding: '78px 18px 120px' }}>
       <section className="connectome-home__hero" style={{ textAlign: 'center', marginBottom: 26 }}>
         <div className="connectome-home__signal">
-          <span className="ora-orb" /> Ora is online
+          <span className="ora-orb" /> Aura is online
         </div>
         <h1>Your AI OS for Human Flourishing</h1>
         <p style={{ maxWidth: 720, margin: '0 auto 10px' }}>
@@ -50,7 +50,7 @@ export default function ConnectomeHome() {
           style={{ ...panel, padding: 24, color: '#f8f8fc', textAlign: 'left', cursor: 'pointer' }}
         >
           <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>I know what I want to do</div>
-          <h2 style={{ margin: '0 0 10px', fontSize: 28, letterSpacing: -0.7 }}>Clarify it with Ora</h2>
+          <h2 style={{ margin: '0 0 10px', fontSize: 28, letterSpacing: -0.7 }}>Clarify it with Aura</h2>
           <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)', lineHeight: 1.6 }}>Turn a goal, feeling, or problem into a concrete path with steps, constraints, and support.</p>
           <div style={{ marginTop: 18, color: '#00d4aa', fontWeight: 900 }}>Start with a goal →</div>
         </button>
@@ -73,7 +73,7 @@ export default function ConnectomeHome() {
           {[
             ['Ascension', 'The DAO and mission ecosystem.'],
             ['Connectome', 'The AIOS that connects your life context.'],
-            ['Ora', 'The brain and interface that helps you decide.'],
+            ['Aura', 'The brain and interface that helps you decide.'],
             ['iDo', 'The daily app for one next action.'],
           ].map(([name, copy]) => (
             <div key={name} style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 15 }}>

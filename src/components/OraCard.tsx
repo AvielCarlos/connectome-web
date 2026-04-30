@@ -25,7 +25,7 @@ export function OraCard({ component: comp, index, onAction }: OraCardProps) {
     if (!action) return;
     if (action.type === 'open_url' && action.url) {
       const url = String(action.url);
-      // Internal app protocols such as ido:// and ioo:// are signals for Ora's
+      // Internal app protocols such as ido:// and ioo:// are signals for Aura's
       // pathway/execution layer. Browsers open them as blank pages, so pass
       // them to the parent instead of window.open.
       if (!/^https?:\/\//i.test(url) && !/^mailto:/i.test(url) && !/^tel:/i.test(url)) {
@@ -199,7 +199,7 @@ export function OraCard({ component: comp, index, onAction }: OraCardProps) {
 
     case 'split_actions': {
       const items: any[] = comp.items || [];
-      return <div key={index} style={{ display: 'grid', gap: 8, marginBottom: 14 }}>{items.map((it, i) => <div key={i} style={{ background: it.owner === 'Ora' ? 'rgba(0,212,170,0.09)' : 'rgba(255,255,255,0.045)', border: it.owner === 'Ora' ? '1px solid rgba(0,212,170,0.2)' : '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 12 }}><div style={{ color: it.owner === 'Ora' ? '#00d4aa' : 'rgba(248,248,252,0.55)', fontSize: 11, fontWeight: 900, marginBottom: 4 }}>{it.owner}</div><div style={{ color: '#f8f8fc', fontSize: 13, lineHeight: 1.45 }}>{it.text}</div></div>)}</div>;
+      return <div key={index} style={{ display: 'grid', gap: 8, marginBottom: 14 }}>{items.map((it, i) => <div key={i} style={{ background: it.owner === 'Aura' ? 'rgba(0,212,170,0.09)' : 'rgba(255,255,255,0.045)', border: it.owner === 'Aura' ? '1px solid rgba(0,212,170,0.2)' : '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: 12 }}><div style={{ color: it.owner === 'Aura' ? '#00d4aa' : 'rgba(248,248,252,0.55)', fontSize: 11, fontWeight: 900, marginBottom: 4 }}>{it.owner}</div><div style={{ color: '#f8f8fc', fontSize: 13, lineHeight: 1.45 }}>{it.text}</div></div>)}</div>;
     }
 
     case 'constraint_panel': {
@@ -373,7 +373,7 @@ export function OraCard({ component: comp, index, onAction }: OraCardProps) {
           marginBottom: 14,
         }}>
           <div style={{ fontSize: 12, color: '#00d4aa', fontWeight: 700, letterSpacing: 0.5, marginBottom: 10 }}>
-            ◈ WEEKLY LETTER FROM ORA
+            ◈ WEEKLY LETTER FROM AURA
           </div>
           <p style={{ fontSize: 15, color: 'rgba(248,248,252,0.8)', lineHeight: 1.7 }}>
             {comp.text}

@@ -1,6 +1,6 @@
 /**
  * Variant B — "Morning Brief"
- * Full-screen Ora greeting with a personalized welcome and CTA to enter the feed.
+ * Full-screen Aura greeting with a personalized welcome and CTA to enter the feed.
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -88,7 +88,7 @@ export default function VariantB() {
         </div>
       )}
 
-      {/* Ora glyph with glow */}
+      {/* Aura glyph with glow */}
       <div
         style={{
           fontSize: 72,

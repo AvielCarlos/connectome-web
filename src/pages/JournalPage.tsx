@@ -48,7 +48,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
               padding: '12px 18px',
             }}>
               <div style={{ fontSize: 10, color: '#00d4aa', fontWeight: 700, letterSpacing: 0.8, marginBottom: 6 }}>
-                ◈ ORA'S REFLECTION
+                ◈ AURA'S REFLECTION
               </div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.65)', lineHeight: 1.65, fontStyle: 'italic' }}>
                 {entry.ora_reflection}
@@ -105,7 +105,7 @@ export default function JournalPage() {
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: -0.5 }}>✍ Journal</h1>
         <p style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 4 }}>
-          Daily reflection with Ora
+          Daily reflection with Aura
         </p>
       </div>
 
@@ -122,7 +122,7 @@ export default function JournalPage() {
           }}
         >
           <div style={{ fontSize: 10, color: '#6366f1', fontWeight: 700, letterSpacing: 1.5, marginBottom: 14 }}>
-            TODAY'S PROMPT FROM ORA
+            TODAY'S PROMPT FROM AURA
           </div>
           <p style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.55, marginBottom: 20, color: '#f8f8fc' }}>
             {prompt.prompt}
@@ -131,7 +131,7 @@ export default function JournalPage() {
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Write freely. Ora is listening..."
+              placeholder="Write freely. Aura is listening..."
               style={{ minHeight: 140, fontSize: 15, lineHeight: 1.7 }}
               required
             />
@@ -149,13 +149,13 @@ export default function JournalPage() {
                 fontSize: 15,
               }}
             >
-              {submitting ? 'Sending to Ora...' : 'Submit ✓'}
+              {submitting ? 'Sending to Aura...' : 'Submit ✓'}
             </button>
           </form>
         </div>
       )}
 
-      {/* Ora's reflection after submit */}
+      {/* Aura's reflection after submit */}
       {submitted && reflection && (
         <div
           className="fade-in"
@@ -168,7 +168,7 @@ export default function JournalPage() {
           }}
         >
           <div style={{ fontSize: 10, color: '#00d4aa', fontWeight: 700, letterSpacing: 1.2, marginBottom: 10 }}>
-            ◈ ORA'S REFLECTION
+            ◈ AURA'S REFLECTION
           </div>
           <p style={{ fontSize: 15, color: 'rgba(248,248,252,0.8)', lineHeight: 1.7, fontStyle: 'italic' }}>
             {reflection}

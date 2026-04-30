@@ -20,11 +20,11 @@ const DEFAULT_FEATURED_APPS = ['iDo', 'IOO Graph', 'Goals', 'Contribute'];
 
 const OUTCOME_LABELS: Partial<Record<ConnectomeApp['id'], { title: string; description: string; badge?: string }>> = {
   ido: { title: 'Find one thing to do now', description: 'A simple action feed when you want momentum but not more planning.', badge: 'Daily' },
-  goals: { title: 'Clarify a goal with Ora', description: 'Turn an intention into steps, constraints, and a path you can act on.', badge: 'Plan' },
+  goals: { title: 'Clarify a goal with Aura', description: 'Turn an intention into steps, constraints, and a path you can act on.', badge: 'Plan' },
   routines: { title: 'Build a repeatable rhythm', description: 'Make the helpful action automatic with small routines.', badge: 'Habits' },
   dao: { title: 'Understand the DAO', description: 'See governance, CP, proposals, and the contribution economy.', badge: 'DAO' },
   contribute: { title: 'Submit work and earn CP', description: 'Share code, design, research, ideas, or feedback for review.', badge: 'Build' },
-  services: { title: 'Use Ora-powered tools', description: 'Open integrations and generated surfaces around your current path.', badge: 'Tools' },
+  services: { title: 'Use Aura-powered tools', description: 'Open integrations and generated surfaces around your current path.', badge: 'Tools' },
   ioo: { title: 'Build the IOO neural graph', description: 'The core intelligence layer: paths, nodes, prerequisites, actions, and outcomes.', badge: 'Core' },
   profile: { title: 'Manage identity and settings', description: 'Control profile, accounts, permissions, experiments, and system tools.', badge: 'You' },
 };

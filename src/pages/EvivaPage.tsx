@@ -31,7 +31,7 @@ export default function EvivaPage() {
           {serveCards.map((card) => (
             <article className="meta-app-page__card" key={card}>
               <h3>{card}</h3>
-              <p>Ora will match your strengths with real-world opportunities.</p>
+              <p>Aura will match your strengths with real-world opportunities.</p>
             </article>
           ))}
         </div>
@@ -50,7 +50,7 @@ export default function EvivaPage() {
         <div className="meta-app-page__pills">
           {categories.map((category) => <span key={category}>{category}</span>)}
         </div>
-        <p className="meta-app-page__note">AI-researched reviews — coming soon. We&apos;re training Ora to surface the world&apos;s best.</p>
+        <p className="meta-app-page__note">AI-researched reviews — coming soon. We&apos;re training Aura to surface the world&apos;s best.</p>
       </div>
 
       <div className="meta-app-page__footer-card">

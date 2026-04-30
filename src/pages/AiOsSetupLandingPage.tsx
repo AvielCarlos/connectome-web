@@ -5,7 +5,7 @@ const MAP_CALL_MAILTO = 'mailto:nea@atdao.org?subject=20-min%20AI%20OS%20map&bod
 
 const sections = {
   pains: ['Goals live in one place, notes in another, tasks somewhere else', 'AI chats are useful but forget your context and direction', 'Habits, content, clients, offers, and decisions compete for attention', 'You sense AI could change everything, but you do not have an architecture for it'],
-  gets: ['Personal AI OS map across life, work, vitality, creativity, relationships, and money/admin', 'Custom Ora persona and system instructions tuned to your voice, values, boundaries, and decision rules', 'Knowledge/context structure for the information your AI needs to remember', '3–5 practical workflows for weekly planning, content, client prep, research, decisions, or vitality', '30-day implementation path so the system becomes usable without overwhelm'],
+  gets: ['Personal AI OS map across life, work, vitality, creativity, relationships, and money/admin', 'Custom Aura persona and system instructions tuned to your voice, values, boundaries, and decision rules', 'Knowledge/context structure for the information your AI needs to remember', '3–5 practical workflows for weekly planning, content, client prep, research, decisions, or vitality', '30-day implementation path so the system becomes usable without overwhelm'],
   fit: ['Founders and operators carrying too many open loops', 'Coaches, healers, consultants, and practitioners turning expertise into leverage', 'Creators, writers, educators, and mission-led builders with a serious body of work', 'High-agency people ready to share context and implement quickly'],
   notFit: ['You only want a generic chatbot setup', 'You are looking for free coaching or enterprise software', 'You do not want to map your real goals, tools, habits, and constraints', 'You are not ready to act on the system after it is built'],
 };
@@ -58,7 +58,7 @@ export default function AiOsSetupLandingPage() {
         <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 56 }}>
           <Link to="/" style={{ color: '#f8f8fc', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, fontWeight: 900 }}>
             <span style={{ width: 34, height: 34, borderRadius: 12, display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, rgba(0,212,170,0.28), rgba(99,102,241,0.32))', border: '1px solid rgba(0,212,170,0.35)' }}>◈</span>
-            <span>Ora</span>
+            <span>Aura</span>
           </Link>
           <Link to={SERVICES_UTM} style={{ color: 'rgba(248,248,252,0.62)', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
             View checkout →
@@ -130,7 +130,7 @@ export default function AiOsSetupLandingPage() {
           <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8 }}>Trust note</div>
           <h2 style={{ fontSize: 28, letterSpacing: -1, margin: '0 0 12px' }}>Founder-led, limited beta, not a generic chatbot setup.</h2>
           <p style={{ color: 'rgba(248,248,252,0.7)', lineHeight: 1.75, margin: 0 }}>
-            Ora is being built as an AI operating system for human fulfilment. This private setup is the human-delivered precursor: a focused build around your actual life, business, knowledge, values, and execution rhythm. Founder beta is intentionally limited so each system can be mapped with care.
+            Aura is being built as an AI operating system for human fulfilment. This private setup is the human-delivered precursor: a focused build around your actual life, business, knowledge, values, and execution rhythm. Founder beta is intentionally limited so each system can be mapped with care.
           </p>
         </section>
 
