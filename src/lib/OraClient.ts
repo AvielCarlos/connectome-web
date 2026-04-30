@@ -211,7 +211,7 @@ export interface FeedbackPayload {
 }
 
 export interface GlobalFeedbackPayload {
-  category: 'Bug' | 'Confusing' | 'Idea' | 'Design' | 'Praise' | 'Other';
+  category: 'Bug' | 'Malfunction' | 'Bad Card/Node' | 'Confusing' | 'Idea' | 'Design' | 'Praise' | 'Other';
   message: string;
   route: string;
   screenshot_data_url?: string | null;

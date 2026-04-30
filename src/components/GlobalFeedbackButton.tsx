@@ -4,13 +4,13 @@ import { OraClient, GlobalFeedbackPayload } from '../lib/OraClient';
 import CPExplainerModal from './CPExplainerModal';
 import { useToast } from './Toast';
 
-const CATEGORIES: GlobalFeedbackPayload['category'][] = ['Bug', 'Confusing', 'Idea', 'Design', 'Praise', 'Other'];
+const CATEGORIES: GlobalFeedbackPayload['category'][] = ['Bad Card/Node', 'Malfunction', 'Bug', 'Confusing', 'Idea', 'Design', 'Praise', 'Other'];
 
 export default function GlobalFeedbackButton() {
   const { show } = useToast();
   const [open, setOpen] = useState(false);
   const [cpExplainerOpen, setCpExplainerOpen] = useState(false);
-  const [category, setCategory] = useState<GlobalFeedbackPayload['category']>('Idea');
+  const [category, setCategory] = useState<GlobalFeedbackPayload['category']>('Bad Card/Node');
   const [message, setMessage] = useState('');
   const [includeScreenshot, setIncludeScreenshot] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -44,7 +44,7 @@ export default function GlobalFeedbackButton() {
   const resetAndClose = () => {
     setOpen(false);
     setMessage('');
-    setCategory('Idea');
+    setCategory('Bad Card/Node');
     setIncludeScreenshot(true);
     setError(null);
   };
@@ -70,11 +70,13 @@ export default function GlobalFeedbackButton() {
           userAgent: navigator.userAgent,
           timestamp: new Date().toISOString(),
           title: document.title,
+          report_type: 'bad_or_malfunctional_card_or_node',
+          activeElement: document.activeElement instanceof HTMLElement ? { tag: document.activeElement.tagName, id: document.activeElement.id || null, name: document.activeElement.getAttribute('name'), ariaLabel: document.activeElement.getAttribute('aria-label') } : null,
         },
       });
 
-      if (res.cp_earned) show(`Feedback submitted +${res.cp_earned} CP`, 'success');
-      else show(res.message || 'Feedback submitted +10 CP', 'success');
+      if (res.cp_earned) show(`Report sent +${res.cp_earned} CP`, 'success');
+      else show(res.message || 'Report sent +10 CP', 'success');
       resetAndClose();
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Could not send feedback. Please try again.');
@@ -89,11 +91,11 @@ export default function GlobalFeedbackButton() {
         type="button"
         className="global-feedback-fab"
         data-feedback-widget="true"
-        aria-label="Give feedback & earn CP"
-        title="Give feedback & earn CP"
+        aria-label="Report bad card or node"
+        title="Report bad card/node or give feedback"
         onClick={() => setOpen(true)}
       >
-        ?
+        !
       </button>
 
       {open && (
@@ -107,7 +109,7 @@ export default function GlobalFeedbackButton() {
           >
             <div className="global-feedback-modal__header">
               <div>
-                <h2 id="global-feedback-title">Help improve Ora</h2>
+                <h2 id="global-feedback-title">Report bad card/node</h2>
                 <p className="global-feedback-reward">
                   <span>Earn +10 CP</span>
                   <span aria-hidden="true">·</span>
@@ -118,14 +120,14 @@ export default function GlobalFeedbackButton() {
             </div>
 
             <label className="global-feedback-label" htmlFor="global-feedback-message">
-              What feels confusing, broken, beautiful, or missing?
+              What card, node, pathway, or screen feels bad, broken, misleading, or missing?
             </label>
             <textarea
               id="global-feedback-message"
               ref={textareaRef}
               value={message}
               onChange={(event) => setMessage(event.target.value)}
-              placeholder="Tell Ora what you’re noticing…"
+              placeholder="Tell Aura what went wrong, what should have appeared, or why this card/node did not fit…"
               rows={5}
             />
 
@@ -148,13 +150,13 @@ export default function GlobalFeedbackButton() {
                 checked={includeScreenshot}
                 onChange={(event) => setIncludeScreenshot(event.target.checked)}
               />
-              <span>Include screenshot of this screen</span>
+              <span>Include screenshot and current route/context</span>
             </label>
 
             {error && <div className="global-feedback-error" role="alert">{error}</div>}
 
             <button type="button" className="global-feedback-submit" onClick={handleSubmit} disabled={submitting}>
-              {submitting ? 'Sending…' : 'Send feedback + earn 10 CP'}
+              {submitting ? 'Sending…' : 'Report to Aura + earn 10 CP'}
             </button>
           </section>
         </div>
