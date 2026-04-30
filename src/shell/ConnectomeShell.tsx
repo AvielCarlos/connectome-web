@@ -5,6 +5,7 @@ import AppLauncher from './AppLauncher';
 import AuraOverlay from './AuraOverlay';
 import GlobalFeedbackButton from '../components/GlobalFeedbackButton';
 import { appById, type AppId } from '../runtime/ontology';
+import { AuraClient } from '../lib/AuraClient';
 
 type ShellApp = Exclude<AppId, 'aventi' | 'ivive' | 'eviva'>;
 
@@ -98,12 +99,39 @@ function initials(profile: any) {
   return String(raw).trim().slice(0, 1).toUpperCase();
 }
 
+const LIVE_LOCATION_SYNC_KEY = `connectome_live_location_${new Date().toISOString().slice(0, 10)}`;
+const LIVE_LOCATION_DISMISSED_KEY = 'connectome_live_location_dismissed_session';
+
+function LocationEntryPrompt({ onAllow, onSkip, syncing }: { onAllow: () => void; onSkip: () => void; syncing: boolean }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 80, display: 'grid', placeItems: 'center', padding: 22, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(18px)' }}>
+      <div style={{ width: 'min(420px, 100%)', border: '1px solid rgba(0,212,170,0.26)', background: 'linear-gradient(180deg, rgba(18,24,30,0.98), rgba(8,10,15,0.98))', borderRadius: 28, padding: 24, boxShadow: '0 24px 80px rgba(0,0,0,0.45)' }}>
+        <div style={{ width: 48, height: 48, borderRadius: 18, display: 'grid', placeItems: 'center', background: 'rgba(0,212,170,0.13)', color: '#00d4aa', fontSize: 24, marginBottom: 14 }}>📍</div>
+        <h2 style={{ color: '#f8f8fc', margin: '0 0 8px', fontSize: 24, letterSpacing: -0.6 }}>Activate local intelligence?</h2>
+        <p style={{ color: 'rgba(248,248,252,0.62)', margin: '0 0 18px', fontSize: 14, lineHeight: 1.65 }}>
+          Connectome can use your location to tune the IOO graph toward nearby events, classes, places, adventures, and realistic next steps. You can skip this anytime.
+        </p>
+        <div style={{ display: 'grid', gap: 10 }}>
+          <button type="button" disabled={syncing} onClick={onAllow} style={{ border: 0, borderRadius: 16, padding: '14px 16px', background: '#00d4aa', color: '#06110f', fontWeight: 900, fontSize: 15 }}>
+            {syncing ? 'Activating…' : 'Share location'}
+          </button>
+          <button type="button" onClick={onSkip} style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '12px 16px', background: 'rgba(255,255,255,0.04)', color: 'rgba(248,248,252,0.68)', fontWeight: 800 }}>
+            Not now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ConnectomeShell({ children, activeApp = 'home' }: ConnectomeShellProps) {
   const { profile, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [auraOpen, setAuraOpen] = useState(false);
   const [launcherOpen, setLauncherOpen] = useState(false);
+  const [locationPromptOpen, setLocationPromptOpen] = useState(false);
+  const [locationSyncing, setLocationSyncing] = useState(false);
 
   const closeApps = () => setLauncherOpen(false);
   const toggleApps = () => setLauncherOpen((open) => !open);
@@ -113,6 +141,58 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
     window.addEventListener('connectome:open-aura', openAura);
     return () => window.removeEventListener('connectome:open-aura', openAura);
   }, []);
+
+  const syncLiveLocation = async () => {
+    if (!('geolocation' in navigator)) {
+      setLocationPromptOpen(false);
+      return;
+    }
+    setLocationSyncing(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await AuraClient.syncLiveLocation({
+            location_lat: pos.coords.latitude,
+            location_lng: pos.coords.longitude,
+            accuracy_m: pos.coords.accuracy,
+            event_preferences: ['wellness', 'music', 'arts', 'community', 'sports', 'tech'],
+          });
+          localStorage.setItem(LIVE_LOCATION_SYNC_KEY, new Date().toISOString());
+          localStorage.setItem(`${LIVE_LOCATION_SYNC_KEY}_city`, res.city || 'near you');
+          setLocationPromptOpen(false);
+        } catch {
+          setLocationPromptOpen(false);
+        } finally {
+          setLocationSyncing(false);
+        }
+      },
+      () => {
+        setLocationPromptOpen(false);
+        setLocationSyncing(false);
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 10 * 60 * 1000 },
+    );
+  };
+
+  useEffect(() => {
+    if (!profile) return;
+    if (localStorage.getItem(LIVE_LOCATION_SYNC_KEY)) return;
+    if (sessionStorage.getItem(LIVE_LOCATION_DISMISSED_KEY)) return;
+    if (!('geolocation' in navigator)) return;
+
+    const permissions = (navigator as any).permissions;
+    if (!permissions?.query) {
+      setLocationPromptOpen(true);
+      return;
+    }
+
+    permissions.query({ name: 'geolocation' as PermissionName })
+      .then((status: PermissionStatus) => {
+        if (status.state === 'granted') syncLiveLocation();
+        else if (status.state === 'prompt') setLocationPromptOpen(true);
+      })
+      .catch(() => setLocationPromptOpen(true));
+  }, [profile]);
 
   const dockItems = dockMenus[activeApp] || dockMenus.home || [];
 
@@ -192,6 +272,16 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       <button className="connectome-signout" type="button" onClick={() => { logout(); navigate('/'); }}>Sign out</button>
       <GlobalFeedbackButton />
       <AuraOverlay open={auraOpen} onClose={() => setAuraOpen(false)} />
+      {locationPromptOpen && (
+        <LocationEntryPrompt
+          syncing={locationSyncing}
+          onAllow={syncLiveLocation}
+          onSkip={() => {
+            sessionStorage.setItem(LIVE_LOCATION_DISMISSED_KEY, '1');
+            setLocationPromptOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
