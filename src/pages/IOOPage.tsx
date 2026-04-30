@@ -9,8 +9,9 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import MiniAppSurface, { SurfaceSpec } from '../components/MiniAppSurface'
+import { API_URL } from '../lib/config'
 
-const API = 'https://connectome-api-production.up.railway.app'
+const API = API_URL
 
 const TYPE_COLORS: Record<string, string> = {
   activity:   '#3b82f6',

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useExperiment } from '../lib/useExperiment';
-
-const API_URL = 'https://connectome-api-production.up.railway.app';
+import { apiUrl } from '../lib/config';
 
 export default function AuthPage() {
   // A/B experiments
@@ -26,6 +25,8 @@ export default function AuthPage() {
   const [error, setError] = useState('');
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/app';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,12 +35,12 @@ export default function AuthPage() {
     try {
       if (mode === 'login') {
         await login(email, password);
-        navigate('/app', { replace: true });
+        navigate(redirectTo, { replace: true });
       } else {
         await register(email, password, displayName || undefined);
         // A/B: login_after_register_destination
         const dest = postRegisterDestVariant === 'B' ? '/onboarding'
-          : '/app';
+          : redirectTo;
         navigate(dest, { replace: true });
       }
     } catch (err: any) {
@@ -52,7 +53,7 @@ export default function AuthPage() {
 
   const handleGoogleSignIn = () => {
     // Redirect to backend Google OAuth flow
-    window.location.href = `${API_URL}/api/auth/google/login`;
+    window.location.href = apiUrl('/api/auth/google/login');
   };
 
   return (

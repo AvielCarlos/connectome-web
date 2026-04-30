@@ -47,17 +47,9 @@ self.addEventListener('fetch', (event) => {
   // Skip chrome-extension and other non-http
   if (!url.protocol.startsWith('http')) return;
 
-  // API calls → network-first, cache fallback for GETs
-  if (url.hostname === 'connectome-api-production.up.railway.app') {
-    // Only cache safe read endpoints
-    const cacheable = url.pathname.startsWith('/api/dao') ||
-                      url.pathname.startsWith('/api/journal/entries') ||
-                      url.pathname.startsWith('/api/goals');
-    if (cacheable) {
-      event.respondWith(networkFirstWithCache(request, API_CACHE, 60));
-    }
-    return;
-  }
+  // Cross-origin API calls are intentionally not cached here. The API host is
+  // deployment-configurable and may serve private authenticated data.
+  if (url.origin !== self.location.origin) return;
 
   // App shell → network-first so updates are picked up immediately
   if (url.origin === self.location.origin) {

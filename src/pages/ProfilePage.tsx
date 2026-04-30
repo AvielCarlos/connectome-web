@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OraClient } from '../lib/OraClient';
 import { useAuth } from '../context/AuthContext';
+import { apiUrl } from '../lib/config';
 import { useExperiment } from '../lib/useExperiment';
 import { StreakBadge } from '../components/StreakBadge';
 
@@ -241,7 +242,7 @@ export default function ProfilePage() {
   };
 
   const connectGoogle = () => {
-    window.location.href = 'https://connectome-api-production.up.railway.app/api/auth/google/login';
+    window.location.href = apiUrl('/api/auth/google/login');
   };
 
   const handleLogout = () => {

@@ -47,6 +47,7 @@ function App() {
       <Suspense fallback={<div className="connectome-loading">Loading…</div>}>
         <Routes>
           <Route path="/" element={isAuthenticated ? <ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute> : <AuthPage />} />
+          <Route path="/auth" element={isAuthenticated ? <Navigate to="/app" replace /> : <AuthPage />} />
           {/* Google OAuth callback — must be accessible without auth */}
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/auth/github-callback" element={<GitHubCallbackPage />} />

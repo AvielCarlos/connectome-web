@@ -10,8 +10,9 @@
  */
 
 import React, { useEffect, useState } from 'react'
+import { API_URL } from '../lib/config'
 
-const API = 'https://connectome-api-production.up.railway.app'
+const API = API_URL
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

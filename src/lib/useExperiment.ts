@@ -11,8 +11,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-
-const API_URL = 'https://connectome-api-production.up.railway.app';
+import { API_URL } from './config';
 const TOKEN_KEY = 'connectome_token';
 const USER_ID_KEY = 'connectome_user_id';
 

@@ -746,7 +746,7 @@ export default function FeedPage() {
 
   React.useEffect(() => {
     if (!localStorage.getItem('connectome_token')) {
-      navigate('/auth?redirect=/feed', { replace: true });
+      navigate('/auth?redirect=/app/ido', { replace: true });
     }
   }, [navigate]);
 

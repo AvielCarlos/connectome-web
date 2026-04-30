@@ -3,8 +3,7 @@
  * JWT token stored in localStorage, injected on every request
  */
 import axios, { AxiosInstance, AxiosError } from 'axios';
-
-const API_URL = 'https://connectome-api-production.up.railway.app';
+import { API_URL, apiUrl } from './config';
 const TOKEN_KEY = 'connectome_token';
 const USER_ID_KEY = 'connectome_user_id';
 
@@ -527,7 +526,7 @@ class OraClientClass {
 
   getGitHubLoginUrl(): string {
     const token = localStorage.getItem('connectome_token') || '';
-    return `https://connectome-api-production.up.railway.app/api/auth/github/login?token=${encodeURIComponent(token)}`;
+    return apiUrl(`/api/auth/github/login?token=${encodeURIComponent(token)}`);
   }
 
   // ── Services (Nea-as-Agent-for-Hire) ─────────────────────────────────────

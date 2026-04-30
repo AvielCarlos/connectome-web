@@ -12,8 +12,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { API_URL } from '../lib/config';
 
-const API = 'https://connectome-api-production.up.railway.app';
+const API = API_URL;
 
 // ─── Colour tokens ────────────────────────────────────────────────────────────
 const C = {
