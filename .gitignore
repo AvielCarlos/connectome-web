@@ -3,3 +3,16 @@ dist/
 .DS_Store
 .env
 .env.local
+
+# Local-only/private notes and secrets must never be committed
+TOOLS.md
+MEMORY.md
+SOUL.md
+AGENTS.md
+DREAMS.md
+USER.md
+IDENTITY.md
+HEARTBEAT.md
+.env
+.env.*
+!.env.example
