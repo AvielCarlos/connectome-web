@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AppLauncher from './AppLauncher';
-import OraOverlay from './OraOverlay';
+import AuraOverlay from './AuraOverlay';
 import GlobalFeedbackButton from '../components/GlobalFeedbackButton';
 import { appById, type AppId } from '../runtime/ontology';
 
@@ -23,70 +23,70 @@ type DockItem = {
   label: string;
   icon: string;
   path?: string;
-  action?: 'ora' | 'launcher';
+  action?: 'aura' | 'launcher';
 };
 
 const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   home: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
     { id: 'ioo', label: 'Graph', icon: '🧬', path: '/app/ioo' },
-    { id: 'ora', label: 'Aura', icon: '◈', action: 'ora' },
+    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
   ],
   ido: [
     { id: 'feed', label: 'Feed', icon: '✦', path: '/app/ido' },
-    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'ora' },
+    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'aura' },
     { id: 'plan', label: 'Plan', icon: '🎯', path: '/app/goals' },
-    { id: 'ora', label: 'Aura', icon: '◈', action: 'ora' },
+    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'ditch', label: 'Ditch', icon: '🗑️', path: '/app/routines' },
   ],
   goals: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
-    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'ora' },
-    { id: 'ora', label: 'Aura', icon: '◈', action: 'ora' },
+    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'aura' },
+    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
     { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
   ],
   routines: [
     { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
-    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'ora' },
+    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'aura' },
     { id: 'plan', label: 'Plan', icon: '🎯', path: '/app/goals' },
-    { id: 'ora', label: 'Aura', icon: '◈', action: 'ora' },
+    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'feed', label: 'Feed', icon: '✦', path: '/app/ido' },
   ],
   dao: [
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
     { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
-    { id: 'ora', label: 'Aura', icon: '◈', action: 'ora' },
+    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
     { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
   ],
   contribute: [
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
     { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
-    { id: 'ora', label: 'Aura', icon: '◈', action: 'ora' },
+    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
     { id: 'ioo', label: 'Graph', icon: '🧬', path: '/app/ioo' },
   ],
   services: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
     { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
-    { id: 'ora', label: 'Aura', icon: '◈', action: 'ora' },
+    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
   ],
   ioo: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'ora', label: 'Aura', icon: '◈', action: 'ora' },
+    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
     { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
   ],
   profile: [
     { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'ora', label: 'Aura', icon: '◈', action: 'ora' },
+    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
     { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
   ],
@@ -101,23 +101,23 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   const { profile, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [oraOpen, setOraOpen] = useState(false);
+  const [auraOpen, setAuraOpen] = useState(false);
   const [launcherOpen, setLauncherOpen] = useState(false);
 
   const closeApps = () => setLauncherOpen(false);
   const toggleApps = () => setLauncherOpen((open) => !open);
 
   useEffect(() => {
-    const openOra = () => setOraOpen(true);
-    window.addEventListener('connectome:open-ora', openOra);
-    return () => window.removeEventListener('connectome:open-ora', openOra);
+    const openAura = () => setAuraOpen(true);
+    window.addEventListener('connectome:open-aura', openAura);
+    return () => window.removeEventListener('connectome:open-aura', openAura);
   }, []);
 
   const dockItems = dockMenus[activeApp] || dockMenus.home || [];
 
   const handleDock = (item: DockItem) => {
-    if (item.action === 'ora') {
-      setOraOpen(true);
+    if (item.action === 'aura') {
+      setAuraOpen(true);
       return;
     }
     if (item.action === 'launcher') {
@@ -165,7 +165,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
             <button
               key={item.id}
               type="button"
-              className={`connectome-dock__item ${active ? 'connectome-dock__item--active' : ''} ${item.action === 'ora' ? 'connectome-dock__item--ora' : ''}`}
+              className={`connectome-dock__item ${active ? 'connectome-dock__item--active' : ''} ${item.action === 'aura' ? 'connectome-dock__item--aura' : ''}`}
               onClick={() => handleDock(item)}
               aria-label={item.label}
             >
@@ -190,7 +190,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
 
       <button className="connectome-signout" type="button" onClick={() => { logout(); navigate('/'); }}>Sign out</button>
       <GlobalFeedbackButton />
-      <OraOverlay open={oraOpen} onClose={() => setOraOpen(false)} />
+      <AuraOverlay open={auraOpen} onClose={() => setAuraOpen(false)} />
     </div>
   );
 }

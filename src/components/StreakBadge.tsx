@@ -6,7 +6,7 @@
  * Keeps progress signals soft and non-score-like.
  */
 import React, { useEffect, useState } from 'react';
-import { OraClient } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
 
 interface StreakData {
   streak: {
@@ -36,7 +36,7 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
 
   const fetchStatus = async () => {
     try {
-      const data = await OraClient.get<StreakData>('/api/gamification/status');
+      const data = await AuraClient.get<StreakData>('/api/gamification/status');
       setData(data);
     } catch {
       // Non-critical
@@ -45,7 +45,7 @@ export function StreakBadge({ compact = false }: { compact?: boolean }) {
 
   const doCheckin = async () => {
     try {
-      const result = await OraClient.post<any>('/api/gamification/checkin', { reason: 'daily_login' });
+      const result = await AuraClient.post<any>('/api/gamification/checkin', { reason: 'daily_login' });
 
       if (result.new_badges?.length > 0) {
         setNewBadge(result.new_badges[0]);

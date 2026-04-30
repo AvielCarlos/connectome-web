@@ -22,7 +22,7 @@ import { useAuth } from '../context/AuthContext';
 const MOBILE_TABS = [
   { path: '/app/ido',    icon: '◉',  label: 'Discover' },
   { path: '/app/goals',   icon: '◎',  label: 'Goals'    },
-  { path: '/app',     icon: null, label: 'Aura',  isOra: true },
+  { path: '/app',     icon: null, label: 'Aura',  isAura: true },
   { path: '/app/dao',     icon: '🏛', label: 'DAO'      },
   { path: '/app/profile', icon: null, label: 'Me',   isProfile: true },
 ] as const;
@@ -227,7 +227,7 @@ export function NavBar() {
               const isActive = location.pathname === tab.path ||
                 (tab.path === '/app/ido' && location.pathname === '/');
 
-              if ((tab as any).isOra) {
+              if ((tab as any).isAura) {
                 // ─── Center Aura button — elevated like WeChat "+" ──────────
                 return (
                   <div key={tab.path} style={{ flex: 1, display: 'flex', justifyContent: 'center', paddingBottom: 6 }}>

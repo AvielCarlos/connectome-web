@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { authStorage, OraClient } from '../lib/OraClient';
+import { authStorage, AuraClient } from '../lib/AuraClient';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshProfile = useCallback(async () => {
     if (!authStorage.isAuthenticated()) return;
     try {
-      const data = await OraClient.getProfile();
+      const data = await AuraClient.getProfile();
       setProfile(data);
     } catch (e) {
       console.warn('Failed to load profile:', e);
@@ -35,14 +35,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, refreshProfile]);
 
   const login = async (email: string, password: string) => {
-    const res = await OraClient.login(email, password);
+    const res = await AuraClient.login(email, password);
     authStorage.setAuth(res.access_token, res.user_id);
     setIsAuthenticated(true);
     setUserId(res.user_id);
   };
 
   const register = async (email: string, password: string, displayName?: string) => {
-    const res = await OraClient.register(email, password, displayName);
+    const res = await AuraClient.register(email, password, displayName);
     authStorage.setAuth(res.access_token, res.user_id);
     setIsAuthenticated(true);
     setUserId(res.user_id);

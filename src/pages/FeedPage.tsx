@@ -6,8 +6,8 @@
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { OraClient, ScreenResponse } from '../lib/OraClient';
-import { OraCard } from '../components/OraCard';
+import { AuraClient, ScreenResponse } from '../lib/AuraClient';
+import { AuraCard } from '../components/AuraCard';
 import { CollectionPicker } from '../components/CollectionPicker';
 import { StreakBadge } from '../components/StreakBadge';
 import { FEED_SURFACES } from '../runtime/ontology';
@@ -160,12 +160,12 @@ function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
   const advance = async (answer = chosen) => {
     if (!answer.length) return;
     setSaving(true);
-    OraClient.submitDiscoveryAnswer({
+    AuraClient.submitDiscoveryAnswer({
       question_id: `feed_capability_${card.id}`,
       profile_field: card.field,
       answer: answer.length === 1 ? answer[0] : answer,
     }).catch(() => {});
-    OraClient['client'].post('/api/gamification/checkin', { reason: 'capability_pulse', ref_id: card.id }).catch(() => {});
+    AuraClient['client'].post('/api/gamification/checkin', { reason: 'capability_pulse', ref_id: card.id }).catch(() => {});
     setTimeout(() => {
       if (step >= CAPABILITY_CARDS.length - 1) {
         localStorage.setItem(todayCapabilityKey(), JSON.stringify({ completed_at: new Date().toISOString(), answers: { ...selected, [card.id]: answer } }));
@@ -584,7 +584,7 @@ function FeedCard({
 
         {/* Card content */}
         {spec.components.map((comp: any, i: number) => (
-          <OraCard key={i} component={comp} index={i} onAction={(action: any) => {
+          <AuraCard key={i} component={comp} index={i} onAction={(action: any) => {
             if (action.type === 'navigate' && action.url === '/app/goals') navigate('/app/goals');
             if (action.type === 'open_url' && /^(ido|ioo):\/\//i.test(String(action.url || ''))) {
               onDoNow(item, cardData);
@@ -786,7 +786,7 @@ export default function FeedPage() {
 
   // Fetch streak for header
   useEffect(() => {
-    OraClient.get<any>('/api/gamification/status')
+    AuraClient.get<any>('/api/gamification/status')
       .then((data) => setStreak(data.streak))
       .catch(() => {});
   }, []);
@@ -794,7 +794,7 @@ export default function FeedPage() {
   // Fetch goal title
   useEffect(() => {
     if (!goalId) return;
-    OraClient.listGoals()
+    AuraClient.listGoals()
       .then((goals) => {
         const found = goals.find((g: any) => g.id === goalId);
         if (found) setGoalTitle(found.title);
@@ -806,12 +806,12 @@ export default function FeedPage() {
     setLoading(true);
     setError('');
     try {
-      const goals = await OraClient.listGoals().catch(() => []);
+      const goals = await AuraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
-      const batch = await OraClient.getNextScreenBatch(5, goalId);
+      const batch = await AuraClient.getNextScreenBatch(5, goalId);
       let nextCards = batch;
       if (!nextCards.length) {
-        const single = await OraClient.getNextScreen(undefined, goalId).catch(() => null);
+        const single = await AuraClient.getNextScreen(undefined, goalId).catch(() => null);
         nextCards = single ? [single] : [];
       }
       setCards(nextCards);
@@ -823,7 +823,7 @@ export default function FeedPage() {
         setError('Aura could not prepare cards yet. Try again in a moment.');
       }
       // Send backend progress signal.
-      OraClient['client'].post('/api/gamification/checkin', { reason: 'card_view' }).catch(() => {});
+      AuraClient['client'].post('/api/gamification/checkin', { reason: 'card_view' }).catch(() => {});
     } catch (e: any) {
       if (e?.response?.status === 402) {
         setIsLimited(true);
@@ -842,10 +842,10 @@ export default function FeedPage() {
     if (loadingMore || isLimited) return;
     setLoadingMore(true);
     try {
-      const batch = await OraClient.getNextScreenBatch(3, goalId);
+      const batch = await AuraClient.getNextScreenBatch(3, goalId);
       let nextCards = batch;
       if (!nextCards.length) {
-        const single = await OraClient.getNextScreen(undefined, goalId).catch(() => null);
+        const single = await AuraClient.getNextScreen(undefined, goalId).catch(() => null);
         nextCards = single ? [single] : [];
       }
       if (nextCards.length > 0) {
@@ -912,7 +912,7 @@ export default function FeedPage() {
     const card = cards[index];
     if (!card) return;
     try {
-      await OraClient.submitFeedback({
+      await AuraClient.submitFeedback({
         screen_spec_id: screenId,
         rating,
         time_on_screen_ms: 0,
@@ -920,7 +920,7 @@ export default function FeedPage() {
         completed: true,
       });
       // Send backend progress signal.
-      OraClient['client'].post('/api/gamification/checkin', { reason: 'card_rate', ref_id: screenId }).catch(() => {});
+      AuraClient['client'].post('/api/gamification/checkin', { reason: 'card_rate', ref_id: screenId }).catch(() => {});
       showToast(rating >= 4 ? `♥ Loved it` : `Rated ${rating}★`);
       if (rating >= 4) setTimeout(goNext, 700);
     } catch {}
@@ -929,7 +929,7 @@ export default function FeedPage() {
   const handleDoNow = async (item: ScreenResponse, cardData: any) => {
     setRatings((prev) => ({ ...prev, [item.screen_spec_db_id]: 5 }));
     showToast('Opening next steps…');
-    OraClient.submitFeedback({
+    AuraClient.submitFeedback({
       screen_spec_id: item.screen_spec_db_id,
       rating: 5,
       time_on_screen_ms: 0,
@@ -939,7 +939,7 @@ export default function FeedPage() {
     const nodeId = (item.screen as any)?.metadata?.node_id || (item.screen as any)?.card_data?.node_id;
     let execution = null;
     if (nodeId) {
-      execution = await OraClient.executeIOONode(String(nodeId), 'do_now').catch(() => null);
+      execution = await AuraClient.executeIOONode(String(nodeId), 'do_now').catch(() => null);
     }
     setPathwaySheet({ item, card: cardData, execution });
   };
@@ -961,7 +961,7 @@ export default function FeedPage() {
   const handleSkip = () => {
     const card = cards[index];
     if (card) {
-      OraClient.submitFeedback({
+      AuraClient.submitFeedback({
         screen_spec_id: card.screen_spec_db_id,
         rating: 1, time_on_screen_ms: 0,
         exit_point: 'skip', completed: false,

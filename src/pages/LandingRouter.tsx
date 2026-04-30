@@ -4,7 +4,7 @@
  * Override: ?variant=B  |  Force feed: sessionStorage.ab_skip = '1'
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { OraClient } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
 import VariantA from './variants/VariantA';
 import VariantB from './variants/VariantB';
 import VariantC from './variants/VariantC';
@@ -79,7 +79,7 @@ export default function LandingRouter() {
 
   // Detect admin from profile — must be at top level (no conditional hooks)
   useEffect(() => {
-    OraClient.getProfile().then((p: any) => {
+    AuraClient.getProfile().then((p: any) => {
       if (p?.profile?.is_admin) {
         localStorage.setItem('ab_admin', 'true');
         setIsAdmin(true);
@@ -119,7 +119,7 @@ export default function LandingRouter() {
       setVariant((v) => v ?? 'A');
     }, 3000);
 
-    OraClient.getAbWinner(EXPERIMENT_ID)
+    AuraClient.getAbWinner(EXPERIMENT_ID)
       .then((winner) => {
         if (winner && (VALID_VARIANTS as readonly string[]).includes(winner)) {
           clearTimeout(fallbackTimer);
@@ -127,27 +127,27 @@ export default function LandingRouter() {
           localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, winnerV);
           localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
           setVariant(winnerV);
-          OraClient.trackAbEvent(EXPERIMENT_ID, winnerV, 'session_start', 1).catch(() => {});
+          AuraClient.trackAbEvent(EXPERIMENT_ID, winnerV, 'session_start', 1).catch(() => {});
           return;
         }
-        return OraClient.assignAbVariant(EXPERIMENT_ID).then((v) => {
+        return AuraClient.assignAbVariant(EXPERIMENT_ID).then((v) => {
           clearTimeout(fallbackTimer);
           const safeV = (VALID_VARIANTS as readonly string[]).includes(v) ? (v as Variant) : 'A';
           localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, safeV);
           localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
           setVariant(safeV);
-          OraClient.trackAbEvent(EXPERIMENT_ID, safeV, 'session_start', 1).catch(() => {});
+          AuraClient.trackAbEvent(EXPERIMENT_ID, safeV, 'session_start', 1).catch(() => {});
         });
       })
       .catch(() =>
-        OraClient.assignAbVariant(EXPERIMENT_ID)
+        AuraClient.assignAbVariant(EXPERIMENT_ID)
           .then((v) => {
             clearTimeout(fallbackTimer);
             const safeV = (VALID_VARIANTS as readonly string[]).includes(v) ? (v as Variant) : 'A';
             localStorage.setItem(`ab_variant_${EXPERIMENT_ID}`, safeV);
             localStorage.setItem(`ab_variant_ts_${EXPERIMENT_ID}`, Date.now().toString());
             setVariant(safeV);
-            OraClient.trackAbEvent(EXPERIMENT_ID, safeV, 'session_start', 1).catch(() => {});
+            AuraClient.trackAbEvent(EXPERIMENT_ID, safeV, 'session_start', 1).catch(() => {});
           })
           .catch(() => {
             clearTimeout(fallbackTimer);
@@ -163,7 +163,7 @@ export default function LandingRouter() {
     if (!variant) return;
     const start = sessionStart.current;
     return () => {
-      OraClient.trackAbEvent(
+      AuraClient.trackAbEvent(
         EXPERIMENT_ID,
         variant,
         'session_duration_ms',

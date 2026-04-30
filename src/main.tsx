@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ToastProvider } from './components/Toast'
 import ConnectomeShell from './shell/ConnectomeShell'
-import OraOnboarding from './components/OraOnboarding'
+import AuraOnboarding from './components/AuraOnboarding'
 import './index.css'
 
 // Eagerly load auth pages (small, needed immediately)
@@ -137,7 +137,7 @@ function App() {
           <Route path="/app/ivive" element={<Navigate to="/app/ioo" replace />} />
           <Route path="/app/eviva" element={<Navigate to="/app/ioo" replace />} />
           <Route path="/app/aventi" element={<Navigate to="/app/ioo" replace />} />
-          <Route path="/onboarding" element={<ShellRoute activeApp="home"><OraOnboarding /></ShellRoute>} />
+          <Route path="/onboarding" element={<ShellRoute activeApp="home"><AuraOnboarding /></ShellRoute>} />
 
           {/* Backward-compatible redirects */}
           <Route path="/home" element={<Navigate to="/app" replace />} />

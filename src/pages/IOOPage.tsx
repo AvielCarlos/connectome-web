@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import MiniAppSurface, { SurfaceSpec } from '../components/MiniAppSurface'
 import { API_URL } from '../lib/config'
-import { authStorage } from '../lib/OraClient'
+import { authStorage } from '../lib/AuraClient'
 
 const API = API_URL
 

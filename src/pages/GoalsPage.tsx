@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { OraClient, Goal } from '../lib/OraClient';
+import { AuraClient, Goal } from '../lib/AuraClient';
 import { useToast } from '../components/Toast';
 import { useExperiment } from '../lib/useExperiment';
 import GoalClarifyModal from '../components/GoalClarifyModal';
@@ -159,7 +159,7 @@ function LensTabs({ lens, setLens, counts }: { lens: Lens; setLens: (l: Lens) =>
 function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal) => void; onDelete: (id: string) => void }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
-  const [oraReply, setOraReply] = useState('');
+  const [auraReply, setAuraReply] = useState('');
   const { show } = useToast();
   const cfg = domainConfig(goal.domain);
   const progress = progressFor(goal);
@@ -172,7 +172,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
   const breakdown = async () => {
     setBusy('breakdown');
     try {
-      const updated = await OraClient.breakdownGoal(goal.id);
+      const updated = await AuraClient.breakdownGoal(goal.id);
       onUpdate(updated);
       setOpen(true);
       show('Aura made this measurable and mapped steps.', 'success');
@@ -181,7 +181,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
 
   const toggleStep = async (index: number) => {
     const steps = (goal.steps || []).map((s, i) => i === index ? { ...s, completed: !s.completed } : s);
-    const updated = await OraClient.updateGoal(goal.id, { steps });
+    const updated = await AuraClient.updateGoal(goal.id, { steps });
     onUpdate(updated);
   };
 
@@ -189,11 +189,11 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
     setBusy(status);
     try {
       if (status === 'completed') {
-        await OraClient.completeGoal(goal.id);
+        await AuraClient.completeGoal(goal.id);
         onUpdate({ ...goal, status: 'completed', progress: 1 });
         show('Achieved and added to your state.', 'success');
       } else {
-        const updated = await OraClient.updateGoal(goal.id, { status });
+        const updated = await AuraClient.updateGoal(goal.id, { status });
         onUpdate(updated);
       }
     } finally { setBusy(null); }
@@ -203,15 +203,15 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
     if (!step) return;
     setBusy('ora');
     try {
-      const res = await OraClient.chat(`This intention has become a specific goal in my living collection: "${goal.title}". Current step: "${step.text}". Help me refine the smallest measurable next move, in 2-3 sentences.`, []);
-      setOraReply(res.reply);
+      const res = await AuraClient.chat(`This intention has become a specific goal in my living collection: "${goal.title}". Current step: "${step.text}". Help me refine the smallest measurable next move, in 2-3 sentences.`, []);
+      setAuraReply(res.reply);
       setOpen(true);
     } finally { setBusy(null); }
   };
 
   const remove = async () => {
     if (!confirm('Remove this from your collection?')) return;
-    await OraClient.deleteGoal(goal.id);
+    await AuraClient.deleteGoal(goal.id);
     onDelete(goal.id);
   };
 
@@ -255,7 +255,7 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
 
         {open && (
           <div className="fade-in" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: 16, paddingTop: 14 }}>
-            {oraReply && <div style={{ border: '1px solid rgba(0,212,170,0.22)', background: 'rgba(0,212,170,0.08)', color: 'rgba(248,248,252,0.78)', borderRadius: 16, padding: 13, fontSize: 13, lineHeight: 1.55, marginBottom: 12 }}><b style={{ color: '#00d4aa' }}>Aura: </b>{oraReply}</div>}
+            {auraReply && <div style={{ border: '1px solid rgba(0,212,170,0.22)', background: 'rgba(0,212,170,0.08)', color: 'rgba(248,248,252,0.78)', borderRadius: 16, padding: 13, fontSize: 13, lineHeight: 1.55, marginBottom: 12 }}><b style={{ color: '#00d4aa' }}>Aura: </b>{auraReply}</div>}
             {goal.steps?.length ? (
               <div style={{ display: 'grid', gap: 8 }}>
                 {goal.steps.map((s, i) => (
@@ -304,7 +304,7 @@ export default function GoalsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    OraClient.listGoals('all').then(setGoals).catch(console.error).finally(() => setLoading(false));
+    AuraClient.listGoals('all').then(setGoals).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   const counts = useMemo<Record<Lens, number>>(() => ({
@@ -352,7 +352,7 @@ export default function GoalsPage() {
         node.node_type || node.step_type || null,
       ].filter(Boolean).join(' • '),
     }));
-    const goal = await OraClient.createGoal(title, descriptionParts.join('\n') || undefined, undefined, steps.length ? steps : undefined, {
+    const goal = await AuraClient.createGoal(title, descriptionParts.join('\n') || undefined, undefined, steps.length ? steps : undefined, {
       intention_text: clarifyingGoal || title,
       measurable_outcome: structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
       success_metric: structuredGoal?.success_metric || structuredGoal?.metric || structuredGoal?.specifics || undefined,

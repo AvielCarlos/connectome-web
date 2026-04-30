@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { OraClient, authStorage } from '../lib/OraClient';
+import { AuraClient, authStorage } from '../lib/AuraClient';
 import CPExplainerModal from '../components/CPExplainerModal';
 
 const ACCENT = '#00d4aa';
@@ -63,7 +63,7 @@ export default function ContributePage() {
     if (!authStorage.isAuthenticated()) return;
     setLoadingMine(true);
     try {
-      const rows = await OraClient.getMyContributions();
+      const rows = await AuraClient.getMyContributions();
       setContributions(rows || []);
     } catch (err) {
       console.error(err);
@@ -74,7 +74,7 @@ export default function ContributePage() {
 
   useEffect(() => {
     loadMine();
-    OraClient.getGitHubStatus().then(setGithubStatus);
+    AuraClient.getGitHubStatus().then(setGithubStatus);
   }, []);
 
   const syncGitHub = async () => {
@@ -82,7 +82,7 @@ export default function ContributePage() {
     setError(null);
     setSyncing(true);
     try {
-      const res = await OraClient.syncGitHubContributions();
+      const res = await AuraClient.syncGitHubContributions();
       const count = Number(res?.synced || 0);
       setMessage(count > 0 ? `Synced ${count} merged PR${count === 1 ? '' : 's'} from GitHub.` : 'No new merged PRs found on GitHub.');
       await loadMine();
@@ -111,7 +111,7 @@ export default function ContributePage() {
     setSubmitting(true);
     try {
       const trimmedLink = link.trim();
-      await OraClient.submitContribution({
+      await AuraClient.submitContribution({
         contribution_type: type,
         title: title.trim(),
         description: description.trim(),
@@ -193,7 +193,7 @@ export default function ContributePage() {
                 <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.6)', marginBottom: 16 }}>
                   For code contributions, we verify your GitHub account to automatically track your merged PRs and award CP accurately.
                 </div>
-                <a href={OraClient.getGitHubLoginUrl()} style={{ display: 'inline-block', background: '#24292e', color: '#fff', padding: '10px 20px', borderRadius: 24, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
+                <a href={AuraClient.getGitHubLoginUrl()} style={{ display: 'inline-block', background: '#24292e', color: '#fff', padding: '10px 20px', borderRadius: 24, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
                   Connect GitHub →
                 </a>
               </div>
@@ -205,7 +205,7 @@ export default function ContributePage() {
             <div><label>Attachment URLs (optional)</label><div style={{ display: 'grid', gap: 10 }}>{attachmentUrls.map((url, i) => <input key={i} value={url} onChange={(e) => { const next = [...attachmentUrls]; next[i] = e.target.value; setAttachmentUrls(next); }} placeholder={`Screenshot, Drive, Figma, Loom, or proof URL ${i + 1}`} />)}</div></div>
             {!githubStatus.connected && type !== 'code' && (
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 8, textAlign: 'center' }}>
-                <a href={OraClient.getGitHubLoginUrl()} style={{ color: '#00d4aa', textDecoration: 'none' }}>
+                <a href={AuraClient.getGitHubLoginUrl()} style={{ color: '#00d4aa', textDecoration: 'none' }}>
                   Connect GitHub
                 </a>{' '}to link your profile and get more accurate CP attribution.
               </div>

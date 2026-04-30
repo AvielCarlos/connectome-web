@@ -10,8 +10,8 @@ const domains = [
 
 const iviveFeed = FEED_SURFACES.find((surface) => surface.owner === 'ivive_domain_feed');
 
-function openOraOverlay() {
-  window.dispatchEvent(new CustomEvent('connectome:open-ora'));
+function openAuraOverlay() {
+  window.dispatchEvent(new CustomEvent('connectome:open-aura'));
 }
 
 export default function iVivePage() {
@@ -38,7 +38,7 @@ export default function iVivePage() {
           iVive runs a {iviveFeed?.rankingStrategy.replace(/_/g, ' ')} feed. The best signals can flow into iDo’s daily
           “what should I do next?” feed when recovery, energy, or sleep should shape the next action.
         </p>
-        <button type="button" onClick={openOraOverlay}>Tell Aura about your recovery and vitality goals</button>
+        <button type="button" onClick={openAuraOverlay}>Tell Aura about your recovery and vitality goals</button>
       </div>
     </section>
   );

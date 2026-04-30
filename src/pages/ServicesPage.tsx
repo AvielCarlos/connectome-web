@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { OraClient } from '../lib/OraClient';
-import { authStorage } from '../lib/OraClient';
-import type { ServiceAttribution } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
+import { authStorage } from '../lib/AuraClient';
+import type { ServiceAttribution } from '../lib/AuraClient';
 
 interface Service {
   id: string;
@@ -270,8 +270,8 @@ export default function ServicesPage() {
 
   useEffect(() => {
     Promise.all([
-      OraClient.getServicesCatalog().catch(() => null),
-      isLoggedIn ? OraClient.getMyServiceOrders().catch(() => null) : Promise.resolve(null),
+      AuraClient.getServicesCatalog().catch(() => null),
+      isLoggedIn ? AuraClient.getMyServiceOrders().catch(() => null) : Promise.resolve(null),
     ]).then(([catalog, myOrders]) => {
       if (catalog) setServices(catalog.services || []);
       if (myOrders) setOrders(myOrders.orders || []);
@@ -285,7 +285,7 @@ export default function ServicesPage() {
 
   const handleOrder = async (serviceId: string, description: string) => {
     try {
-      const res = await OraClient.createServiceOrder(serviceId, description, undefined, getServiceAttribution());
+      const res = await AuraClient.createServiceOrder(serviceId, description, undefined, getServiceAttribution());
       setSelectedService(null);
       if (res.custom) {
         window.location.href = res.checkout_url;

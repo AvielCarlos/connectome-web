@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OraClient } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
 import { APP_MANIFEST, type AppManifestEntry } from '../runtime/ontology';
 
 type ConnectomeApp = AppManifestEntry;
@@ -35,7 +35,7 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
 
   useEffect(() => {
     let cancelled = false;
-    OraClient.get<AiosState>('/api/system/aios-state')
+    AuraClient.get<AiosState>('/api/system/aios-state')
       .then((state) => {
         if (!cancelled) setAiosState(state);
       })

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { OraClient, JournalEntry } from '../lib/OraClient';
+import { AuraClient, JournalEntry } from '../lib/AuraClient';
 import { useToast } from '../components/Toast';
 
 function EntryCard({ entry }: { entry: JournalEntry }) {
@@ -73,8 +73,8 @@ export default function JournalPage() {
 
   useEffect(() => {
     Promise.all([
-      OraClient.getJournalPrompt().catch(() => null),
-      OraClient.getJournalEntries().catch(() => []),
+      AuraClient.getJournalPrompt().catch(() => null),
+      AuraClient.getJournalEntries().catch(() => []),
     ]).then(([p, e]) => {
       if (p) setPrompt(p);
       setEntries(e);
@@ -86,12 +86,12 @@ export default function JournalPage() {
     if (!text.trim() || !prompt) return;
     setSubmitting(true);
     try {
-      const res = await OraClient.submitJournalEntry(prompt.id, text.trim());
+      const res = await AuraClient.submitJournalEntry(prompt.id, text.trim());
       setReflection(res.ora_reflection || '');
       setSubmitted(true);
       show('Journal entry saved!', 'success');
       // Refresh entries
-      const updated = await OraClient.getJournalEntries().catch(() => entries);
+      const updated = await AuraClient.getJournalEntries().catch(() => entries);
       setEntries(updated);
     } catch (e) {
       console.error('Submit journal failed:', e);

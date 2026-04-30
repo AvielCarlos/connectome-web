@@ -1,9 +1,9 @@
 /**
  * Variant D — "Discovery Grid"
- * 2-column card grid from OraClient.getNextScreenBatch
+ * 2-column card grid from AuraClient.getNextScreenBatch
  */
 import React, { useEffect, useState } from 'react';
-import { OraClient, ScreenResponse } from '../../lib/OraClient';
+import { AuraClient, ScreenResponse } from '../../lib/AuraClient';
 import { useAuth } from '../../context/AuthContext';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
@@ -183,9 +183,9 @@ export default function VariantD() {
 
   const loadBatch = async (append = false) => {
     try {
-      const batch = await OraClient.getNextScreenBatch(10);
+      const batch = await AuraClient.getNextScreenBatch(10);
       setScreens((prev) => append ? [...prev, ...batch] : batch);
-      OraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, 'batch_loaded', batch.length).catch(() => {});
+      AuraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, 'batch_loaded', batch.length).catch(() => {});
     } catch {
       // graceful fail
     } finally {
@@ -244,7 +244,7 @@ export default function VariantD() {
             screen={s}
             onClick={() => {
               setSelected(s);
-              OraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, 'card_tapped', 1).catch(() => {});
+              AuraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, 'card_tapped', 1).catch(() => {});
             }}
           />
         ))}

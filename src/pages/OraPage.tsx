@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { OraClient } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
 import { useExperiment } from '../lib/useExperiment';
 
 interface Message {
@@ -93,7 +93,7 @@ export default function AuraPage() {
   // ─── A/B experiments ────────────────────────────────────────────────────
   const { variant: greetingVariant } = useExperiment('ora_greeting');
   const { variant: responseLengthVariant } = useExperiment('ora_response_length');
-  const { variant: proactiveSuggestionsVariant, trackEvent: trackOraEvent } = useExperiment('ora_proactive_suggestions');
+  const { variant: proactiveSuggestionsVariant, trackEvent: trackAuraEvent } = useExperiment('ora_proactive_suggestions');
 
   const AURA_GREETINGS: Record<string, string> = {
     A: "Hey! I'm Aura. What do you want to work toward?",
@@ -106,7 +106,7 @@ export default function AuraPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingOpening, setLoadingOpening] = useState(true);
-  const [oraInfo, setOraInfo] = useState<any>(null);
+  const [auraInfo, setAuraInfo] = useState<any>(null);
   const [keyboardUp, setKeyboardUp] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -114,14 +114,14 @@ export default function AuraPage() {
 
   useEffect(() => {
     Promise.all([
-      OraClient.getOpeningMessage().catch(() => null),
-      OraClient.getOraSelf().catch(() => null),
+      AuraClient.getOpeningMessage().catch(() => null),
+      AuraClient.getOraSelf().catch(() => null),
     ]).then(([opening, self]) => {
       // Use A/B greeting variant if no server-provided message
       const defaultGreeting = AURA_GREETINGS[greetingVariant] || AURA_GREETINGS['A'];
       const content = opening?.message || defaultGreeting;
       setMessages([{ id: 'opening', role: 'ora', content, ts: Date.now() }]);
-      if (self) setOraInfo(self);
+      if (self) setAuraInfo(self);
     }).finally(() => setLoadingOpening(false));
   }, []);
 
@@ -157,14 +157,14 @@ export default function AuraPage() {
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
     // Track message sent event
-    trackOraEvent('message_sent', 1);
+    trackAuraEvent('message_sent', 1);
 
     try {
       const history = messages.slice(-12).map((m) => ({
         role: m.role === 'ora' ? 'assistant' : 'user',
         content: m.content,
       }));
-      const res = await OraClient.chat(text, history);
+      const res = await AuraClient.chat(text, history);
       setMessages((prev) => [...prev, {
         id: Date.now().toString() + '-ora',
         role: 'ora',

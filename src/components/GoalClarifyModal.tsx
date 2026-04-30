@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { OraClient, GoalClarifyMessage } from '../lib/OraClient';
+import { AuraClient, GoalClarifyMessage } from '../lib/AuraClient';
 
 interface GoalClarifyModalProps {
   goalTitle: string;
@@ -11,7 +11,7 @@ interface ChatMessage extends GoalClarifyMessage {
   id: string;
 }
 
-function OraBubble({ message }: { message: ChatMessage }) {
+function AuraBubble({ message }: { message: ChatMessage }) {
   const isAura = message.role === 'ora';
   return (
     <div style={{ display: 'flex', flexDirection: isAura ? 'row' : 'row-reverse', gap: 8, marginBottom: 10, alignItems: 'flex-end' }}>
@@ -86,7 +86,7 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
 
     try {
       const conversation = nextMessages.map(({ role, content }) => ({ role, content }));
-      const res = await OraClient.clarifyGoal(goalTitle, conversation);
+      const res = await AuraClient.clarifyGoal(goalTitle, conversation);
       setMessages(prev => [...prev, { id: `${Date.now()}-ora`, role: 'ora', content: res.message }]);
       if (res.is_complete) {
         setStructuredGoal(res.structured_goal || { title: goalTitle });
@@ -113,11 +113,11 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
     }
   };
 
-  const unlockOraNode = async (node: any) => {
+  const unlockAuraNode = async (node: any) => {
     if (!node?.service_id || checkoutBusy) return;
     setCheckoutBusy(node.id || node.service_id);
     try {
-      const res = await OraClient.createServiceOrder(
+      const res = await AuraClient.createServiceOrder(
         node.service_id,
         `Goal: ${structuredGoal?.title || goalTitle}\nNode: ${node.title}\nAura action: ${node.ora_action || node.description || ''}`,
         undefined,
@@ -169,7 +169,7 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 8px' }}>
-          {messages.map(msg => <OraBubble key={msg.id} message={msg} />)}
+          {messages.map(msg => <AuraBubble key={msg.id} message={msg} />)}
           {loading && <TypingDots />}
 
           {structuredGoal && (
@@ -206,7 +206,7 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
                         {node.requires_payment && node.service_id && (
                           <>
                           {(node.pricing_level || node.pricing_note) && <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.38)', lineHeight: 1.4, marginTop: 7 }}>{node.pricing_level ? `Quote: ${node.pricing_level}. ` : ''}{node.pricing_note || ''}</div>}
-                          <button onClick={() => unlockOraNode(node)} disabled={!!checkoutBusy} style={{ marginTop: 9, border: '1px solid rgba(0,212,170,0.36)', background: 'rgba(0,212,170,0.14)', color: '#00d4aa', borderRadius: 999, padding: '8px 10px', fontSize: 12, fontWeight: 850 }}>
+                          <button onClick={() => unlockAuraNode(node)} disabled={!!checkoutBusy} style={{ marginTop: 9, border: '1px solid rgba(0,212,170,0.36)', background: 'rgba(0,212,170,0.14)', color: '#00d4aa', borderRadius: 999, padding: '8px 10px', fontSize: 12, fontWeight: 850 }}>
                             {checkoutBusy === (node.id || node.service_id) ? 'Opening…' : `Unlock Aura ${node.price_usd ? `$${node.price_usd}` : ''} →`}
                           </button>
                           </>

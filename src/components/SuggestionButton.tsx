@@ -4,7 +4,7 @@
  * Awards 5 CP per submission.
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { OraClient } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
 import { useToast } from './Toast';
 
 const CATEGORIES = [
@@ -74,7 +74,7 @@ export default function SuggestionButton() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await OraClient.submitSuggestion(content.trim(), category, pageContext);
+      const res = await AuraClient.submitSuggestion(content.trim(), category, pageContext);
       setResult({
         ora_response: res.ora_response,
         cp_earned: res.cp_earned,

@@ -6,9 +6,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { OraClient, OrasTier, TiersResponse } from '../lib/OraClient';
+import { AuraClient, AurasTier, TiersResponse } from '../lib/AuraClient';
 
-const ora = OraClient;
+const aura = AuraClient;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -66,7 +66,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   // Load tier definitions when modal opens
   useEffect(() => {
     if (isOpen && !tiers) {
-      ora.getTiers().then(setTiers).catch(console.error);
+      aura.getTiers().then(setTiers).catch(console.error);
     }
   }, [isOpen]);
 
@@ -86,7 +86,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
     setCheckoutTier(tier);
     setError(null);
     try {
-      const session = await ora.createCheckout(
+      const session = await aura.createCheckout(
         tier,
         billing,
         `${window.location.origin}/upgrade/success`,
@@ -182,7 +182,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {paidTiers.map((tierKey) => {
-                const tier = tiers.tiers[tierKey] as OrasTier;
+                const tier = tiers.tiers[tierKey] as AurasTier;
                 const style = TIER_STYLES[tierKey] || TIER_STYLES.explorer;
                 const price =
                   billing === 'monthly' ? tier.price_monthly : tier.price_yearly;

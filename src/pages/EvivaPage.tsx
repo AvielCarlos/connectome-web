@@ -8,8 +8,8 @@ const serveCards = [
 
 const categories = ['Health & Wellness', 'Tech', 'Travel', 'Food', 'Finance', 'Education', 'Home', 'Entertainment'];
 
-function openOraOverlay() {
-  window.dispatchEvent(new CustomEvent('connectome:open-ora'));
+function openAuraOverlay() {
+  window.dispatchEvent(new CustomEvent('connectome:open-aura'));
 }
 
 export default function EvivaPage() {
@@ -55,7 +55,7 @@ export default function EvivaPage() {
 
       <div className="meta-app-page__footer-card">
         <p>Eviva is the world-facing opportunity layer. Internal ecosystem work stays in Contribute; governance and rewards stay in DAO.</p>
-        <button type="button" onClick={openOraOverlay}>Connect your Eviva goals</button>
+        <button type="button" onClick={openAuraOverlay}>Connect your Eviva goals</button>
       </div>
     </section>
   );

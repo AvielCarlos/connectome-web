@@ -6,7 +6,7 @@
  * Fires on-save callback with collection name for toast feedback.
  */
 import React, { useEffect, useState, useRef } from 'react';
-import { OraClient } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
 
 interface Collection {
   id: string;
@@ -53,7 +53,7 @@ export function CollectionPicker({ card, onClose, onSaved }: Props) {
 
   const loadCollections = async () => {
     try {
-      const data = await OraClient.get<Collection[]>('/api/gamification/collections');
+      const data = await AuraClient.get<Collection[]>('/api/gamification/collections');
       setCollections(data);
     } catch {
       setCollections([]);
@@ -65,7 +65,7 @@ export function CollectionPicker({ card, onClose, onSaved }: Props) {
   const saveToCollection = async (collId: string, collName: string) => {
     setSaving(collId);
     try {
-      await OraClient.post(`/api/gamification/collections/${collId}/items`, {
+      await AuraClient.post(`/api/gamification/collections/${collId}/items`, {
         screen_spec_id: card.screen_spec_id,
         card_title: card.card_title,
         card_body: card.card_body,
@@ -85,7 +85,7 @@ export function CollectionPicker({ card, onClose, onSaved }: Props) {
   const quickSave = async () => {
     setSaving('quick');
     try {
-      await OraClient.post('/api/gamification/save', {
+      await AuraClient.post('/api/gamification/save', {
         screen_spec_id: card.screen_spec_id,
         card_title: card.card_title,
         card_body: card.card_body,
@@ -107,7 +107,7 @@ export function CollectionPicker({ card, onClose, onSaved }: Props) {
     if (!name) return;
     setSaving('new');
     try {
-      const newColl = await OraClient.post<Collection>('/api/gamification/collections', {
+      const newColl = await AuraClient.post<Collection>('/api/gamification/collections', {
         name,
         emoji: newEmoji,
         color: newColor,

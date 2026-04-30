@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
-import { OraClient, GlobalFeedbackPayload } from '../lib/OraClient';
+import { AuraClient, GlobalFeedbackPayload } from '../lib/AuraClient';
 import CPExplainerModal from './CPExplainerModal';
 import { useToast } from './Toast';
 
@@ -60,7 +60,7 @@ export default function GlobalFeedbackButton() {
     setError(null);
     try {
       const screenshot = await captureScreenshot();
-      const res = await OraClient.submitGlobalFeedback({
+      const res = await AuraClient.submitGlobalFeedback({
         category,
         message: trimmed,
         route: window.location.pathname + window.location.search + window.location.hash,

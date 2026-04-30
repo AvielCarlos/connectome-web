@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OraClient } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
 import { useAuth } from '../context/AuthContext';
 import { useExperiment } from '../lib/useExperiment';
 import { StreakBadge } from '../components/StreakBadge';
@@ -59,9 +59,9 @@ export default function ProfilePage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const p = await OraClient.getProfile();
+      const p = await AuraClient.getProfile();
       setProfile(p);
-      OraClient.getContributionStats().then(setContributionStats).catch(() => {});
+      AuraClient.getContributionStats().then(setContributionStats).catch(() => {});
       const adminFlag = p?.profile?.is_admin || localStorage.getItem('ab_admin') === 'true';
       setIsAdmin(adminFlag);
       if (adminFlag) localStorage.setItem('ab_admin', 'true');
@@ -81,9 +81,9 @@ export default function ProfilePage() {
       const adminToken = localStorage.getItem('admin_token') || 'connectome-admin-secret';
       const headers = { 'X-Admin-Token': adminToken };
       const [briefRes, agentsRes, metricsRes] = await Promise.allSettled([
-        OraClient['client'].get('/api/executive/brief', { headers }),
-        OraClient['client'].get('/api/executive/agents', { headers }),
-        OraClient['client'].get('/api/executive/metrics', { headers }),
+        AuraClient['client'].get('/api/executive/brief', { headers }),
+        AuraClient['client'].get('/api/executive/agents', { headers }),
+        AuraClient['client'].get('/api/executive/metrics', { headers }),
       ]);
       if (briefRes.status === 'fulfilled') setCouncilBrief(briefRes.value.data);
       if (agentsRes.status === 'fulfilled') setCouncilAgents(agentsRes.value.data?.agents || []);
@@ -97,7 +97,7 @@ export default function ProfilePage() {
     setRunningAgent(agentName);
     try {
       const adminToken = localStorage.getItem('admin_token') || 'connectome-admin-secret';
-      await OraClient['client'].post(`/api/executive/run/${agentName}`, {}, {
+      await AuraClient['client'].post(`/api/executive/run/${agentName}`, {}, {
         headers: { 'X-Admin-Token': adminToken },
       });
       // Refresh after a short delay
@@ -112,9 +112,9 @@ export default function ProfilePage() {
 
   const loadAbResults = async () => {
     try {
-      const res = await OraClient['client'].get(`/api/ab/results/${EXPERIMENT_ID}`);
+      const res = await AuraClient['client'].get(`/api/ab/results/${EXPERIMENT_ID}`);
       setAbResults(res.data);
-      const winnerRes = await OraClient['client'].get(`/api/ab/winner/${EXPERIMENT_ID}`).catch(() => ({ data: { winner: null } }));
+      const winnerRes = await AuraClient['client'].get(`/api/ab/winner/${EXPERIMENT_ID}`).catch(() => ({ data: { winner: null } }));
       setAbWinner(winnerRes.data.winner);
     } catch {}
   };
@@ -122,7 +122,7 @@ export default function ProfilePage() {
   const loadAllExperiments = async () => {
     setAllExperimentsLoading(true);
     try {
-      const res = await OraClient['client'].get('/api/ab/results');
+      const res = await AuraClient['client'].get('/api/ab/results');
       setAllExperiments(res.data);
     } catch {}
     setAllExperimentsLoading(false);
@@ -131,7 +131,7 @@ export default function ProfilePage() {
   const applyExperimentWinner = async (experiment: string, winner: string) => {
     setApplyingWinner(experiment);
     try {
-      await OraClient['client'].post('/api/ab/winner', { experiment, winner });
+      await AuraClient['client'].post('/api/ab/winner', { experiment, winner });
       await loadAllExperiments();
     } catch (e: any) {
       alert(`Failed to apply winner: ${e?.response?.data?.detail || 'Unknown error'}`);
@@ -149,7 +149,7 @@ export default function ProfilePage() {
   const loadSurfaces = async () => {
     setSurfacesLoading(true);
     try {
-      const res = await OraClient['client'].get('/api/surfaces/my');
+      const res = await AuraClient['client'].get('/api/surfaces/my');
       setSurfaces(res.data?.surfaces || []);
     } catch {}
     setSurfacesLoading(false);
@@ -161,7 +161,7 @@ export default function ProfilePage() {
     setSpawnResult(null);
     setSpawnError(null);
     try {
-      const res = await OraClient['client'].post('/api/surfaces/spawn', { request: spawnRequest });
+      const res = await AuraClient['client'].post('/api/surfaces/spawn', { request: spawnRequest });
       setSpawnResult(res.data);
       setSpawnRequest('');
       await loadSurfaces();
@@ -179,7 +179,7 @@ export default function ProfilePage() {
   const handleRetireSurface = async (id: string) => {
     if (!window.confirm('Remove this surface? This cannot be undone.')) return;
     try {
-      await OraClient['client'].delete(`/api/surfaces/${id}`);
+      await AuraClient['client'].delete(`/api/surfaces/${id}`);
       setSurfaces((prev) => prev.filter((s) => s.id !== id));
     } catch {}
   };
@@ -187,7 +187,7 @@ export default function ProfilePage() {
   const loadProposals = async () => {
     setProposalsLoading(true);
     try {
-      const res = await OraClient['client'].get('/api/ora/autonomy/proposals');
+      const res = await AuraClient['client'].get('/api/ora/autonomy/proposals');
       setProposals(res.data?.proposals || []);
     } catch {}
     setProposalsLoading(false);
@@ -196,7 +196,7 @@ export default function ProfilePage() {
   const loadAgentPopulation = async () => {
     setAgentPopulationLoading(true);
     try {
-      const res = await OraClient['client'].get('/api/ora/autonomy/evolution/population');
+      const res = await AuraClient['client'].get('/api/ora/autonomy/evolution/population');
       setAgentPopulation(res.data?.population || []);
     } catch {}
     setAgentPopulationLoading(false);
@@ -205,7 +205,7 @@ export default function ProfilePage() {
   const loadEvolutionProposals = async () => {
     setEvolutionProposalsLoading(true);
     try {
-      const res = await OraClient['client'].get('/api/ora/autonomy/evolution/proposals');
+      const res = await AuraClient['client'].get('/api/ora/autonomy/evolution/proposals');
       setEvolutionProposals(res.data?.proposals || []);
     } catch {}
     setEvolutionProposalsLoading(false);
@@ -213,7 +213,7 @@ export default function ProfilePage() {
 
   const handleEvolutionProposal = async (id: string, action: 'approve' | 'reject') => {
     try {
-      await OraClient['client'].post(`/api/ora/autonomy/evolution/proposals/${id}/${action}`);
+      await AuraClient['client'].post(`/api/ora/autonomy/evolution/proposals/${id}/${action}`);
       await loadEvolutionProposals();
     } catch (e: any) {
       alert(`Failed to ${action}: ${e?.response?.data?.detail || 'Unknown error'}`);
@@ -222,7 +222,7 @@ export default function ProfilePage() {
 
   const handleProposal = async (id: string, action: 'approve' | 'reject') => {
     try {
-      await OraClient['client'].post(`/api/ora/autonomy/proposals/${id}/${action}`);
+      await AuraClient['client'].post(`/api/ora/autonomy/proposals/${id}/${action}`);
       await loadProposals();
     } catch (e: any) {
       alert(`Failed to ${action}: ${e?.response?.data?.detail || 'Unknown error'}`);
@@ -232,7 +232,7 @@ export default function ProfilePage() {
   const runAutonomy = async () => {
     setRunningAutonomy(true);
     try {
-      const res = await OraClient['client'].post('/api/ora/autonomy/run');
+      const res = await AuraClient['client'].post('/api/ora/autonomy/run');
       setAutonomyStatus(res.data);
     } catch (e: any) {
       setAutonomyStatus({ error: e?.response?.data?.detail || 'Failed' });
@@ -242,7 +242,7 @@ export default function ProfilePage() {
 
   const connectGoogle = async () => {
     try {
-      const res = await OraClient.connectGoogleDrive();
+      const res = await AuraClient.connectGoogleDrive();
       if (res.already_connected) {
         alert('Google Drive is already connected.');
         return;
@@ -383,7 +383,7 @@ export default function ProfilePage() {
               </div>
             )}
             {!contributionStats?.github_connected && (
-              <button onClick={() => { window.location.href = OraClient.getGitHubLoginUrl(); }} style={{ marginTop: 12, background: '#00d4aa', color: '#07110f', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 800 }}>Connect GitHub</button>
+              <button onClick={() => { window.location.href = AuraClient.getGitHubLoginUrl(); }} style={{ marginTop: 12, background: '#00d4aa', color: '#07110f', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 800 }}>Connect GitHub</button>
             )}
           </Card>
 
@@ -424,7 +424,7 @@ export default function ProfilePage() {
               <MenuRow icon="📊" label="Dashboard" sublabel="User & revenue metrics" onClick={() => {
                 setSection('dashboard');
                 setDashboardLoading(true);
-                OraClient['client'].get('/api/admin/dashboard', { headers: { 'X-Admin-Token': localStorage.getItem('admin_token') || 'connectome-admin-secret' } })
+                AuraClient['client'].get('/api/admin/dashboard', { headers: { 'X-Admin-Token': localStorage.getItem('admin_token') || 'connectome-admin-secret' } })
                   .then(r => setDashboard(r.data)).catch(() => {}).finally(() => setDashboardLoading(false));
               }} />
               <MenuRow icon="🧪" label="A/B Tests" sublabel="Experiment results" onClick={() => { setSection('ab'); loadAbResults(); }} />
@@ -727,8 +727,8 @@ export default function ProfilePage() {
             <button
               onClick={async () => {
                 try {
-                  await OraClient.setDrivePrivacy('full');
-                  await OraClient.syncGoogleDrive();
+                  await AuraClient.setDrivePrivacy('full');
+                  await AuraClient.syncGoogleDrive();
                   alert('Drive sync started — Aura is indexing your approved docs');
                 } catch (e: any) {
                   alert(e?.response?.data?.detail || 'Connect Google Drive first');
@@ -1062,7 +1062,7 @@ export default function ProfilePage() {
           <Card title="Health Dashboard">
             <button
               onClick={async () => {
-                const res = await OraClient['client'].get('/api/ora/health/dashboard').catch(() => ({ data: null }));
+                const res = await AuraClient['client'].get('/api/ora/health/dashboard').catch(() => ({ data: null }));
                 alert(JSON.stringify(res.data, null, 2));
               }}
               style={{ width: '100%', padding: '10px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(248,248,252,0.7)', fontWeight: 600, fontSize: 13 }}
@@ -1213,10 +1213,10 @@ export default function ProfilePage() {
               {[...VARIANTS, 'auto'].map((v) => (
                 <button key={v} onClick={async () => {
                   if (v === 'auto') {
-                    await OraClient['client'].delete(`/api/ab/winner/${EXPERIMENT_ID}`).catch(() => {});
+                    await AuraClient['client'].delete(`/api/ab/winner/${EXPERIMENT_ID}`).catch(() => {});
                     alert('Winner cleared — back to random assignment');
                   } else {
-                    await OraClient['client'].post(`/api/ab/set-winner/${EXPERIMENT_ID}`, { winner: v }).catch(() => {});
+                    await AuraClient['client'].post(`/api/ab/set-winner/${EXPERIMENT_ID}`, { winner: v }).catch(() => {});
                     alert(`Variant ${v} set as winner for all new users`);
                   }
                 }} style={{

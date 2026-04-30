@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OraClient, Goal } from '../../lib/OraClient';
+import { AuraClient, Goal } from '../../lib/AuraClient';
 import { useAuth } from '../../context/AuthContext';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
@@ -37,7 +37,7 @@ export default function VariantC() {
   const intensityColor = INTENSITY_COLORS[intensity] || INTENSITY_COLORS.medium;
 
   useEffect(() => {
-    OraClient.listGoals('active')
+    AuraClient.listGoals('active')
       .then((goals) => {
         setGoal(goals.length > 0 ? goals[0] : null);
       })
@@ -46,7 +46,7 @@ export default function VariantC() {
   }, []);
 
   const trackAndNavigate = (eventType: string, path: string) => {
-    OraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, eventType, 1).catch(() => {});
+    AuraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, eventType, 1).catch(() => {});
     if (path === '/app/ido') sessionStorage.setItem('ab_skip', '1');
     navigate(path);
   };

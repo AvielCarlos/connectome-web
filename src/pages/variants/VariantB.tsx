@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OraClient } from '../../lib/OraClient';
+import { AuraClient } from '../../lib/AuraClient';
 import { useAuth } from '../../context/AuthContext';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
@@ -40,7 +40,7 @@ export default function VariantB() {
   const topics: string[] = (profile as any)?.twitter_topics || [];
 
   useEffect(() => {
-    OraClient.listGoals('active')
+    AuraClient.listGoals('active')
       .then((goals) => {
         if (goals.length > 0) setTopGoal(goals[0].title);
       })
@@ -48,7 +48,7 @@ export default function VariantB() {
   }, []);
 
   const handleCTA = () => {
-    OraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, 'cta_tapped', 1).catch(() => {});
+    AuraClient.trackAbEvent(EXPERIMENT_ID, VARIANT, 'cta_tapped', 1).catch(() => {});
     sessionStorage.setItem('ab_skip', '1');
     navigate('/app/ido');
   };

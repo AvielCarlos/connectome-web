@@ -12,7 +12,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OraClient } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
 import { useAuth } from '../context/AuthContext';
 import { useExperiment } from '../lib/useExperiment';
 
@@ -130,7 +130,7 @@ export default function HomePage() {
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleKnow = () => {
-    OraClient.trackAbEvent('home_session_v1', 'know', 'home_choice').catch(() => {});
+    AuraClient.trackAbEvent('home_session_v1', 'know', 'home_choice').catch(() => {});
     setSelectedChoice('know');
     // TODO(IOO): persist this low-friction selection into the user preference
     // vector/profile. Avoid typed questionnaires; learn from taps/swipes over time.
@@ -138,13 +138,13 @@ export default function HomePage() {
   };
 
   const handleExplore = () => {
-    OraClient.trackAbEvent('home_session_v1', 'explore', 'home_choice').catch(() => {});
+    AuraClient.trackAbEvent('home_session_v1', 'explore', 'home_choice').catch(() => {});
     setSelectedChoice('explore');
     // TODO(IOO): seed randomized/recommended discovery using the user's current
     // IOO vector, then refine it from not interested / do later / do now taps.
 
     if (exploreVariant === 'instant') {
-      OraClient.trackAbEvent('home_intake_v1', 'instant', 'intake_depth').catch(() => {});
+      AuraClient.trackAbEvent('home_intake_v1', 'instant', 'intake_depth').catch(() => {});
       setTimeout(() => navigate('/app/ido'), 180);
       return;
     }
@@ -161,17 +161,17 @@ export default function HomePage() {
     setGoalError('');
 
     // Track A/B
-    OraClient.trackAbEvent('home_know_v1', knowVariant, 'goal_submitted').catch(() => {});
+    AuraClient.trackAbEvent('home_know_v1', knowVariant, 'goal_submitted').catch(() => {});
 
     try {
       // Create the goal (include clarifying answer as description if provided)
-      const goal = await OraClient.createGoal(
+      const goal = await AuraClient.createGoal(
         title,
         clarifyAnswer.trim() || undefined,
       );
 
       // Kick off breakdown (best-effort — feed can still load without it)
-      OraClient.breakdownGoal(goal.id).catch(() => {});
+      AuraClient.breakdownGoal(goal.id).catch(() => {});
 
       // Navigate to goal-directed feed
       navigate(`/feed?goal=${goal.id}`);
@@ -184,7 +184,7 @@ export default function HomePage() {
 
   const handleIntakeSubmit = () => {
     const variant = exploreVariant === 'deep' ? 'deep' : 'one_q';
-    OraClient.trackAbEvent('home_intake_v1', variant, 'intake_depth').catch(() => {});
+    AuraClient.trackAbEvent('home_intake_v1', variant, 'intake_depth').catch(() => {});
     navigate('/app/ido');
   };
 

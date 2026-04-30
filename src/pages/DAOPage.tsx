@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { OraClient } from '../lib/OraClient';
-import { authStorage } from '../lib/OraClient';
+import { AuraClient } from '../lib/AuraClient';
+import { authStorage } from '../lib/AuraClient';
 import { useExperiment } from '../lib/useExperiment';
 import { useAuth } from '../context/AuthContext';
 
@@ -441,12 +441,12 @@ export default function DAOPage() {
 
   useEffect(() => {
     Promise.all([
-      OraClient.getDAOLeaderboard(20).catch(() => null),
-      OraClient.getFoundingStewards().catch(() => null),
-      OraClient.getDAOContributions(15).catch(() => null),
-      OraClient.getDAOTasks().catch(() => null),
-      OraClient.getWeeklyLeaderboard(10).catch(() => null),
-      OraClient.getDAOProposals().catch(() => null),
+      AuraClient.getDAOLeaderboard(20).catch(() => null),
+      AuraClient.getFoundingStewards().catch(() => null),
+      AuraClient.getDAOContributions(15).catch(() => null),
+      AuraClient.getDAOTasks().catch(() => null),
+      AuraClient.getWeeklyLeaderboard(10).catch(() => null),
+      AuraClient.getDAOProposals().catch(() => null),
     ]).then(([lb, fs, contribs, t, weekly, proposalRes]) => {
       if (lb) {
         setLeaderboard(lb.leaderboard || []);
@@ -476,7 +476,7 @@ export default function DAOPage() {
   const handleClaim = async (task: any) => {
     if (!isLoggedIn) { showToast('Sign in to claim tasks'); return; }
     try {
-      await OraClient.claimDAOTask(task.id);
+      await AuraClient.claimDAOTask(task.id);
       setClaimedTask(task);
     } catch (err: any) {
       const msg = err?.response?.data?.detail || 'Could not claim task';
@@ -486,7 +486,7 @@ export default function DAOPage() {
 
   const handleSubmit = async (taskId: string, prUrl: string, notes: string) => {
     try {
-      const res = await OraClient.submitDAOTask(taskId, prUrl, notes);
+      const res = await AuraClient.submitDAOTask(taskId, prUrl, notes);
       showToast(res.message || `Submitted! ${res.cp_awarded || 50} CP awarded 🎉`);
     } catch (err: any) {
       showToast('Submission failed. Please try again.');

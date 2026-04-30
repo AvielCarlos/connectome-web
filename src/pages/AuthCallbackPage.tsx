@@ -9,7 +9,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authStorage } from '../lib/OraClient';
+import { authStorage } from '../lib/AuraClient';
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
