@@ -25,7 +25,7 @@ const OUTCOME_LABELS: Partial<Record<ConnectomeApp['id'], { title: string; descr
   dao: { title: 'Understand the DAO', description: 'See governance, CP, proposals, and the contribution economy.', badge: 'DAO' },
   contribute: { title: 'Submit work and earn CP', description: 'Share code, design, research, ideas, or feedback for review.', badge: 'Build' },
   services: { title: 'Use Aura-powered tools', description: 'Open integrations and generated surfaces around your current path.', badge: 'Tools' },
-  ioo: { title: 'Build the IOO neural graph', description: 'The core intelligence layer: paths, nodes, prerequisites, actions, and outcomes.', badge: 'Core' },
+  ioo: { title: 'Explore the IOO neural graph', description: 'See how Aura maps goals into nodes, prerequisites, actions, tools, and outcomes.', badge: 'Core' },
   profile: { title: 'Manage identity and settings', description: 'Control profile, accounts, permissions, experiments, and system tools.', badge: 'You' },
 };
 

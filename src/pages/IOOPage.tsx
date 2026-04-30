@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import MiniAppSurface, { SurfaceSpec } from '../components/MiniAppSurface'
 import { API_URL } from '../lib/config'
+import { authStorage } from '../lib/OraClient'
 
 const API = API_URL
 
@@ -172,7 +173,7 @@ function NodeCard({
 }
 
 export default function IOOPage() {
-  const { token } = useAuth() as any
+  useAuth()
   const navigate = useNavigate()
 
   const [goals, setGoals] = useState<Goal[]>([])
@@ -186,14 +187,21 @@ export default function IOOPage() {
   const [activeSurface, setActiveSurface] = useState<(SurfaceSpec & { id: string }) | null>(null)
   const [surfaceLoading, setSurfaceLoading] = useState(false)
 
-  const authHeaders = { Authorization: `Bearer ${token}` }
+  const token = authStorage.getToken()
+  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
   async function loadData() {
     setLoading(true)
     setError(null)
     try {
+      if (!token) {
+        setError('Sign in to explore your IOO neural graph.')
+        return
+      }
+
       // Load active goals
       const goalsRes = await fetch(`${API}/api/goals`, { headers: authHeaders })
+      if (!goalsRes.ok) throw new Error(`Goals request failed: ${goalsRes.status}`)
       const goalsData = await goalsRes.json()
       const activeGoals: Goal[] = (goalsData.goals || []).filter((g: Goal) => g.status === 'active').slice(0, 5)
       setGoals(activeGoals)
@@ -213,10 +221,11 @@ export default function IOOPage() {
 
       // Also load global top nodes (no goal filter)
       const globalRes = await fetch(`${API}/api/ioo/graph?limit=5`, { headers: authHeaders })
+      if (!globalRes.ok) throw new Error(`Graph request failed: ${globalRes.status}`)
       const globalData = await globalRes.json()
       setGlobalNodes(globalData.nodes || [])
     } catch (e: any) {
-      setError('Failed to load map data. Try again.')
+      setError('Failed to load the IOO neural graph. Try again.')
     } finally {
       setLoading(false)
     }
@@ -343,10 +352,10 @@ export default function IOOPage() {
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>
-          🗺 Experience Map
+          🧬 IOO Neural Graph
         </h1>
-        <p style={{ fontSize: 14, color: 'rgba(248,248,252,0.45)', marginTop: 6, marginBottom: 0 }}>
-          Real-world steps toward your goals — ranked by what actually works.
+        <p style={{ fontSize: 14, color: 'rgba(248,248,252,0.55)', marginTop: 6, marginBottom: 0, lineHeight: 1.55 }}>
+          This is Aura’s internal map of human possibility: goals, prerequisites, actions, tools, services, and state transitions. It should help Connectome choose your next best card, pathway, agent, or real-world step.
         </p>
       </div>
 
@@ -361,9 +370,9 @@ export default function IOOPage() {
           marginBottom: 32,
         }}>
           <div style={{ fontSize: 32, marginBottom: 10 }}>🌱</div>
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Map is empty</div>
-          <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.45)', marginBottom: 16 }}>
-            Seed 20 starter nodes across fitness, travel, creativity, community & music.
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>The graph has no visible nodes yet</div>
+          <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.52)', marginBottom: 16, lineHeight: 1.55 }}>
+            Seed starter nodes to give Aura an initial map of actions and experiences. As people use Connectome, this graph should learn which paths actually move them toward fulfilment.
           </div>
           <button
             onClick={handleSeed}
@@ -379,7 +388,7 @@ export default function IOOPage() {
               cursor: seeding ? 'wait' : 'pointer',
             }}
           >
-            {seeding ? 'Seeding…' : '+ Seed Starter Nodes'}
+            {seeding ? 'Seeding…' : '+ Seed Starter Graph Nodes'}
           </button>
           {seedDone && (
             <div style={{ marginTop: 10, fontSize: 12, color: '#00d4aa' }}>✓ Seeded!</div>
@@ -465,7 +474,7 @@ export default function IOOPage() {
               cursor: 'pointer',
             }}
           >
-            Browse all nodes →
+            Browse all graph nodes →
           </button>
         </div>
       )}
@@ -488,7 +497,7 @@ export default function IOOPage() {
       {activeSurface && (
         <MiniAppSurface
           surface={activeSurface}
-          token={token as string}
+          token={token || ''}
           onClose={handleSurfaceClose}
           onComplete={handleSurfaceComplete}
         />
