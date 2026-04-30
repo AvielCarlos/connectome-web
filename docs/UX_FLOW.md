@@ -36,6 +36,26 @@ Aura/Connectome should automatically handle planning scaffolding: prerequisite m
 
 The product should therefore prefer: **decision → clarification → IRL action**, with Aura quietly doing the connective tissue in between.
 
+## Card-as-mini-app / micro-node principle
+
+A card should usually behave like a mini-app for actually achieving the outcome or experience, not like a static content tile. The card should resolve the user downward through levels of agency:
+
+1. **High-level decision** — what kind of outcome/experience/path does the user want?
+2. **Mid-level decision** — which concrete option, provider, class, event, route, tutorial, person, or service is best?
+3. **Micro-node confirmation** — the lowest real-world unit Aura can hand to the user.
+4. **IRL execution** — the user does the thing, then Aura captures evidence/learning and routes the next step.
+
+A **micro-node** should aim to include, when relevant:
+
+- exact location, venue, URL, route, provider, class, tutorial, event, or booking link;
+- exact activity to do, including micro-steps for workouts, learning sessions, practices, or routines;
+- time selection or an existing external event time;
+- real Calendar event creation when the time is user-selected rather than already fixed;
+- friend/invite option when social execution would help;
+- budget/funds fit confirmation or a free/low-cost alternative;
+- transport/directions, weather/safety constraints, gear/prep checklist, and fallback option when useful;
+- completion evidence to capture after action so IOO learns.
+
 The purpose is not app navigation. The purpose is helping people fulfil their desires in a way that supports growth, integration, and ultimately enlightenment.
 
 ## Screen Pattern Library principle

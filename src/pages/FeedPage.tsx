@@ -384,6 +384,8 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
   const card = data?.card || {};
   const protocol = data?.execution?.protocol || null;
   const plan = protocol?.execution_plan || null;
+  const microNode = plan?.micro_node || null;
+  const decisionLevels = plan?.decision_levels || [];
   const questions = protocol?.clarifying_questions || [];
   const fallbackSteps = card?.deep_dive?.steps || [
     'Clarify any missing preference, constraint, timing, or budget.',
@@ -426,6 +428,27 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
           <div style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.28)', borderRadius: 18, padding: 14, marginBottom: 18 }}>
             <div style={{ color: '#c4b5fd', fontSize: 12, fontWeight: 850, marginBottom: 8 }}>Needed before execution</div>
             {questions.map((q: string, i: number) => <div key={i} style={{ color: 'rgba(248,248,252,0.78)', fontSize: 14, lineHeight: 1.55 }}>• {q}</div>)}
+          </div>
+        )}
+
+        {(decisionLevels.length > 0 || microNode) && (
+          <div style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, padding: 14, marginBottom: 18 }}>
+            <div style={{ color: '#f8f8fc', fontSize: 13, fontWeight: 900, marginBottom: 8 }}>Mini-app path</div>
+            {decisionLevels.length > 0 && (
+              <div style={{ display: 'grid', gap: 8, marginBottom: microNode ? 12 : 0 }}>
+                {decisionLevels.map((level: any, i: number) => (
+                  <div key={level.level || i} style={{ color: 'rgba(248,248,252,0.64)', fontSize: 12, lineHeight: 1.45 }}>
+                    <b style={{ color: '#00d4aa' }}>{level.label || `Decision ${i + 1}`}:</b> {level.description || ''}
+                  </div>
+                ))}
+              </div>
+            )}
+            {microNode && (
+              <div style={{ borderTop: decisionLevels.length ? '1px solid rgba(255,255,255,0.08)' : 'none', paddingTop: decisionLevels.length ? 10 : 0 }}>
+                <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 850, marginBottom: 5 }}>Micro-node target</div>
+                <div style={{ color: 'rgba(248,248,252,0.56)', fontSize: 12, lineHeight: 1.5 }}>{microNode.definition}</div>
+              </div>
+            )}
           </div>
         )}
 
