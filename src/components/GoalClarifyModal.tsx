@@ -63,6 +63,7 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
   const [saving, setSaving] = useState(false);
   const [structuredGoal, setStructuredGoal] = useState<any>(null);
   const [iooPath, setIooPath] = useState<any[]>([]);
+  const [checkoutBusy, setCheckoutBusy] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -109,6 +110,22 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
       await onComplete(structuredGoal, iooPath);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const unlockOraNode = async (node: any) => {
+    if (!node?.service_id || checkoutBusy) return;
+    setCheckoutBusy(node.id || node.service_id);
+    try {
+      const res = await OraClient.createServiceOrder(
+        node.service_id,
+        `Goal: ${structuredGoal?.title || goalTitle}\nNode: ${node.title}\nOra action: ${node.ora_action || node.description || ''}`,
+        undefined,
+        { source: 'goal_clarify_modal', campaign: 'ioo_paid_ora_node', content: node.node_type || node.step_type },
+      );
+      if (res?.checkout_url) window.location.href = res.checkout_url;
+    } finally {
+      setCheckoutBusy(null);
     }
   };
 
@@ -161,18 +178,35 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
               border: '1px solid rgba(0,212,170,0.25)',
               borderRadius: 18,
             }}>
-              <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>Your Path</div>
+              <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 6 }}>Attainable Goal + IOO Map</div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.62)', lineHeight: 1.55, marginBottom: 12 }}>
-                {structuredGoal.why || structuredGoal.specifics || 'Ora has shaped this into a clearer, actionable goal.'}
+                {structuredGoal.measurable_outcome || structuredGoal.specifics || 'Ora has shaped this into a clearer, actionable goal.'}
               </div>
+              {(structuredGoal.success_metric || structuredGoal.timeline) && (
+                <div style={{ display: 'grid', gap: 6, marginBottom: 12, padding: 10, borderRadius: 12, background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)', fontSize: 12, color: 'rgba(248,248,252,0.58)' }}>
+                  {structuredGoal.success_metric && <div><b style={{ color: '#00d4aa' }}>Measure:</b> {structuredGoal.success_metric}</div>}
+                  {structuredGoal.timeline && <div><b style={{ color: '#00d4aa' }}>Timeline:</b> {structuredGoal.timeline}</div>}
+                </div>
+              )}
               {iooPath.length > 0 ? (
                 <div style={{ display: 'grid', gap: 8 }}>
                   {iooPath.slice(0, 5).map((node, i) => (
-                    <div key={node.id || i} style={{ display: 'flex', gap: 10, padding: 10, borderRadius: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div key={node.id || i} style={{ display: 'flex', gap: 10, padding: 10, borderRadius: 12, background: node.owner === 'ora' ? 'rgba(0,212,170,0.07)' : 'rgba(255,255,255,0.04)', border: node.owner === 'ora' ? '1px solid rgba(0,212,170,0.18)' : '1px solid rgba(255,255,255,0.06)' }}>
                       <div style={{ width: 24, height: 24, borderRadius: 12, background: '#00d4aa', color: '#0a0a0f', fontSize: 12, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</div>
-                      <div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 3 }}>
+                          <span style={{ fontSize: 10, color: node.owner === 'ora' ? '#00d4aa' : 'rgba(248,248,252,0.48)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 999, padding: '2px 7px', fontWeight: 800 }}>{node.owner === 'ora' ? 'Ora can do' : 'You do'}</span>
+                          {node.node_type && <span style={{ fontSize: 10, color: 'rgba(248,248,252,0.36)' }}>{node.node_type}</span>}
+                        </div>
                         <div style={{ fontSize: 13, fontWeight: 700 }}>{node.title || 'First step'}</div>
                         {node.description && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.5)', lineHeight: 1.45, marginTop: 2 }}>{node.description}</div>}
+                        {node.user_action && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.56)', lineHeight: 1.45, marginTop: 6 }}><b>You:</b> {node.user_action}</div>}
+                        {node.ora_action && <div style={{ fontSize: 12, color: 'rgba(0,212,170,0.78)', lineHeight: 1.45, marginTop: 4 }}><b>Ora:</b> {node.ora_action}</div>}
+                        {node.requires_payment && node.service_id && (
+                          <button onClick={() => unlockOraNode(node)} disabled={!!checkoutBusy} style={{ marginTop: 9, border: '1px solid rgba(0,212,170,0.36)', background: 'rgba(0,212,170,0.14)', color: '#00d4aa', borderRadius: 999, padding: '8px 10px', fontSize: 12, fontWeight: 850 }}>
+                            {checkoutBusy === (node.id || node.service_id) ? 'Opening…' : `Unlock Ora ${node.price_usd ? `$${node.price_usd}` : ''} →`}
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}

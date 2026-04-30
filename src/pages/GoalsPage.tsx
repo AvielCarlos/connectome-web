@@ -337,22 +337,35 @@ export default function GoalsPage() {
     const steps = iooPath.slice(0, 6).map((node, i) => ({
       id: node.id || `${Date.now()}-${i}`,
       text: node.title || `Step ${i + 1}`,
-      detail: node.description,
+      detail: [
+        node.description,
+        node.user_action ? `You: ${node.user_action}` : null,
+        node.ora_action ? `Ora: ${node.ora_action}` : null,
+        node.requires_payment ? `Unlock: ${node.service_id || 'Ora service'}${node.price_usd ? ` • $${node.price_usd}` : ''}` : null,
+      ].filter(Boolean).join('\n'),
       resources: [],
       completed: false,
       order: i,
-      ora_note: node.domain ? `IOO graph • ${node.domain}` : 'IOO graph',
+      ora_note: [
+        node.domain ? `IOO graph • ${node.domain}` : 'IOO graph',
+        node.owner ? `Owner: ${node.owner}` : null,
+        node.node_type || node.step_type || null,
+      ].filter(Boolean).join(' • '),
     }));
     const goal = await OraClient.createGoal(title, descriptionParts.join('\n') || undefined, undefined, steps.length ? steps : undefined, {
       intention_text: clarifyingGoal || title,
-      measurable_outcome: structuredGoal?.specifics || structuredGoal?.title || title,
+      measurable_outcome: structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
       success_metric: structuredGoal?.success_metric || structuredGoal?.metric || structuredGoal?.specifics || undefined,
+      target_value: structuredGoal?.target_value || undefined,
       target_date: structuredGoal?.timeline || undefined,
       graph_metadata: {
         state_model: 'intention_to_measurable_goal_to_steps',
         intention_text: clarifyingGoal || title,
-        measurable_outcome: structuredGoal?.specifics || structuredGoal?.title || title,
+        measurable_outcome: structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
         suggested_ioo_path: iooPath,
+        user_nodes: iooPath.filter((node) => node.owner !== 'ora'),
+        ora_nodes: iooPath.filter((node) => node.owner === 'ora'),
+        paid_ora_nodes: iooPath.filter((node) => node.requires_payment),
         source: 'goals_collection',
       },
     });
