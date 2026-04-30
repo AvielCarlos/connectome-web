@@ -139,6 +139,12 @@ export interface Goal {
   progress: number;
   created_at: string;
   domain?: string;
+  intention_text?: string;
+  measurable_outcome?: string;
+  success_metric?: string;
+  target_value?: string;
+  target_date?: string;
+  graph_metadata?: Record<string, any>;
 }
 
 export interface GoalStep {
@@ -356,8 +362,8 @@ class OraClientClass {
     return res.data as Goal[];
   }
 
-  async createGoal(title: string, description?: string, domain?: string, steps?: GoalStep[]): Promise<Goal> {
-    const res = await this.client.post('/api/goals/', { title, description, domain, steps });
+  async createGoal(title: string, description?: string, domain?: string, steps?: GoalStep[], metadata?: Partial<Goal>): Promise<Goal> {
+    const res = await this.client.post('/api/goals/', { title, description, domain, steps, ...metadata });
     return res.data as Goal;
   }
 

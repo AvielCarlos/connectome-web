@@ -165,6 +165,9 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
   const progress = progressFor(goal);
   const step = nextStep(goal);
   const state = stateFor(goal);
+  const intention = goal.intention_text || goal.graph_metadata?.intention_text;
+  const measurable = goal.measurable_outcome || goal.graph_metadata?.measurable_outcome || goal.title;
+  const metricLine = [goal.success_metric, goal.target_value, goal.target_date].filter(Boolean).join(' • ');
 
   const breakdown = async () => {
     setBusy('breakdown');
@@ -230,6 +233,13 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
             </div>
           </div>
           {goal.description && <p style={{ color: 'rgba(248,248,252,0.52)', fontSize: 13, lineHeight: 1.55, margin: '11px 0 0', whiteSpace: 'pre-line' }}>{goal.description.split('\n').slice(0, 2).join(' • ')}</p>}
+          {(intention || measurable || metricLine) && (
+            <div style={{ display: 'grid', gap: 7, marginTop: 12, padding: 12, borderRadius: 16, background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              {intention && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.48)', lineHeight: 1.45 }}><b style={{ color: cfg.color }}>Spark:</b> {intention}</div>}
+              <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.72)', lineHeight: 1.45 }}><b style={{ color: '#00d4aa' }}>Goal:</b> {measurable}</div>
+              {metricLine && <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.42)' }}><b>Measure:</b> {metricLine}</div>}
+            </div>
+          )}
           <div style={{ height: 5, borderRadius: 999, background: 'rgba(255,255,255,0.07)', overflow: 'hidden', marginTop: 14 }}>
             <div style={{ width: `${Math.max(progress * 100, goal.steps?.length ? 8 : 0)}%`, height: '100%', background: `linear-gradient(90deg, ${cfg.color}, #00d4aa)`, borderRadius: 999 }} />
           </div>
@@ -333,7 +343,19 @@ export default function GoalsPage() {
       order: i,
       ora_note: node.domain ? `IOO graph • ${node.domain}` : 'IOO graph',
     }));
-    const goal = await OraClient.createGoal(title, descriptionParts.join('\n') || undefined, undefined, steps.length ? steps : undefined);
+    const goal = await OraClient.createGoal(title, descriptionParts.join('\n') || undefined, undefined, steps.length ? steps : undefined, {
+      intention_text: clarifyingGoal || title,
+      measurable_outcome: structuredGoal?.specifics || structuredGoal?.title || title,
+      success_metric: structuredGoal?.success_metric || structuredGoal?.metric || structuredGoal?.specifics || undefined,
+      target_date: structuredGoal?.timeline || undefined,
+      graph_metadata: {
+        state_model: 'intention_to_measurable_goal_to_steps',
+        intention_text: clarifyingGoal || title,
+        measurable_outcome: structuredGoal?.specifics || structuredGoal?.title || title,
+        suggested_ioo_path: iooPath,
+        source: 'goals_collection',
+      },
+    });
     setGoals((prev) => [goal, ...prev]);
     setClarifyingGoal(null);
     setLens('active');
