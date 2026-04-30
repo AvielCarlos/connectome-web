@@ -235,6 +235,17 @@ export interface ServiceAttribution {
   referrer?: string;
 }
 
+export interface LiveLocationSyncResponse {
+  status: string;
+  city: string;
+  country?: string | null;
+  location_lat: number;
+  location_lng: number;
+  accuracy_m?: number | null;
+  ioo_location_active: boolean;
+  events_location_active: boolean;
+}
+
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 
 export const authStorage = {
@@ -310,6 +321,16 @@ class AuraClientClass {
   async syncGoogleDrive() {
     const res = await this.client.post('/api/users/integrations/drive/sync');
     return res.data;
+  }
+
+  async syncLiveLocation(payload: {
+    location_lat: number;
+    location_lng: number;
+    accuracy_m?: number | null;
+    event_preferences?: string[];
+  }): Promise<LiveLocationSyncResponse> {
+    const res = await this.client.post('/api/users/location/live', payload);
+    return res.data as LiveLocationSyncResponse;
   }
 
   // ── Screens ───────────────────────────────────────────────────────────────

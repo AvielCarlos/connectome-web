@@ -31,6 +31,7 @@ const DOMAIN_IMAGE_FALLBACK: Record<string, string> = {
 };
 
 const CAPABILITY_PULSE_VERSION = 'v2';
+const LIVE_LOCATION_SYNC_KEY = `connectome_live_location_${new Date().toISOString().slice(0, 10)}`;
 
 const CAPABILITY_CARDS = [
   {
@@ -774,6 +775,11 @@ export default function FeedPage() {
   const [streak, setStreak] = useState<{ current: number; at_risk: boolean } | null>(null);
   const [capabilityReady, setCapabilityReady] = useState(() => !!localStorage.getItem(todayCapabilityKey()));
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
+  const [locationStatus, setLocationStatus] = useState<'unknown' | 'ready' | 'syncing' | 'synced' | 'denied' | 'error'>(() => {
+    const cached = localStorage.getItem(LIVE_LOCATION_SYNC_KEY);
+    return cached ? 'synced' : 'unknown';
+  });
+  const [locationCity, setLocationCity] = useState<string>(() => localStorage.getItem(`${LIVE_LOCATION_SYNC_KEY}_city`) || '');
 
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
@@ -783,6 +789,56 @@ export default function FeedPage() {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 2500);
   };
+
+  const syncLiveLocation = useCallback(async (explicit = false) => {
+    if (!('geolocation' in navigator)) {
+      setLocationStatus('error');
+      if (explicit) showToast('Location is not available in this browser');
+      return;
+    }
+    setLocationStatus('syncing');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await AuraClient.syncLiveLocation({
+            location_lat: pos.coords.latitude,
+            location_lng: pos.coords.longitude,
+            accuracy_m: pos.coords.accuracy,
+            event_preferences: ['wellness', 'music', 'arts', 'community', 'sports', 'tech'],
+          });
+          localStorage.setItem(LIVE_LOCATION_SYNC_KEY, new Date().toISOString());
+          localStorage.setItem(`${LIVE_LOCATION_SYNC_KEY}_city`, res.city || 'near you');
+          setLocationCity(res.city || 'near you');
+          setLocationStatus('synced');
+          showToast(`Local path activated: ${res.city || 'near you'}`);
+        } catch {
+          setLocationStatus('error');
+          if (explicit) showToast('Could not sync location with Aura');
+        }
+      },
+      () => {
+        setLocationStatus('denied');
+        if (explicit) showToast('Location permission was not granted');
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 10 * 60 * 1000 },
+    );
+  }, []);
+
+  useEffect(() => {
+    if (localStorage.getItem(LIVE_LOCATION_SYNC_KEY)) return;
+    const permissions = (navigator as any).permissions;
+    if (!permissions?.query) {
+      setLocationStatus('ready');
+      return;
+    }
+    permissions.query({ name: 'geolocation' as PermissionName })
+      .then((status: PermissionStatus) => {
+        if (status.state === 'granted') syncLiveLocation(false);
+        else if (status.state === 'prompt') setLocationStatus('ready');
+        else setLocationStatus('denied');
+      })
+      .catch(() => setLocationStatus('ready'));
+  }, [syncLiveLocation]);
 
   // Fetch streak for header
   useEffect(() => {
@@ -1192,15 +1248,57 @@ export default function FeedPage() {
           </div>
         )}
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'auto' }}>
+          {locationStatus !== 'synced' && locationStatus !== 'denied' && (
+            <button
+              onClick={() => syncLiveLocation(true)}
+              disabled={locationStatus === 'syncing'}
+              style={{
+                border: '1px solid rgba(0,212,170,0.35)',
+                background: 'rgba(0,212,170,0.11)',
+                color: '#00d4aa',
+                borderRadius: 999,
+                padding: '7px 10px',
+                fontSize: 11,
+                fontWeight: 900,
+                backdropFilter: 'blur(14px)',
+              }}
+            >
+              {locationStatus === 'syncing' ? 'Locating…' : 'Use location'}
+            </button>
+          )}
+          {locationStatus === 'synced' && (
+            <button
+              onClick={() => syncLiveLocation(true)}
+              title="Refresh live location"
+              style={{
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.07)',
+                color: 'rgba(248,248,252,0.74)',
+                borderRadius: 999,
+                padding: '7px 10px',
+                fontSize: 11,
+                fontWeight: 850,
+                maxWidth: 130,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                backdropFilter: 'blur(14px)',
+              }}
+            >
+              📍 {locationCity || 'Local'}
+            </button>
+          )}
+
         {/* Streak indicator */}
         {streak && (
           <div
-            style={{ pointerEvents: 'auto' }}
             onClick={() => navigate('/app/profile')}
           >
             <StreakBadge compact />
           </div>
         )}
+        </div>
       </div>
 
       {/* Card counter dots */}
