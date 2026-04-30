@@ -47,6 +47,25 @@ function useKeyboardViewport() {
 
     const root = document.documentElement
     const body = document.body
+    let settleTimer: number | undefined
+
+    const keepFocusedFieldVisible = () => {
+      const active = document.activeElement
+      if (!(active instanceof HTMLElement)) return
+      if (!active.matches('input, textarea, select, [contenteditable="true"]')) return
+
+      window.requestAnimationFrame(() => {
+        const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+        const rect = active.getBoundingClientRect()
+        const safeTop = 92
+        const safeBottom = Math.max(120, viewportHeight * 0.34)
+        const isCovered = rect.bottom > viewportHeight - safeBottom || rect.top < safeTop
+
+        if (isCovered) {
+          active.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' })
+        }
+      })
+    }
 
     const update = () => {
       const viewport = window.visualViewport
@@ -54,21 +73,31 @@ function useKeyboardViewport() {
       const visualHeight = viewport?.height ?? layoutHeight
       const offsetTop = viewport?.offsetTop ?? 0
       const keyboardInset = Math.max(0, Math.round(layoutHeight - visualHeight - offsetTop))
+      const keyboardOpen = keyboardInset > 80
 
       root.style.setProperty('--visual-viewport-height', `${Math.round(visualHeight)}px`)
       root.style.setProperty('--keyboard-inset', `${keyboardInset}px`)
-      body.classList.toggle('keyboard-open', keyboardInset > 80)
+      body.classList.toggle('keyboard-open', keyboardOpen)
+
+      if (keyboardOpen) {
+        keepFocusedFieldVisible()
+        if (settleTimer) window.clearTimeout(settleTimer)
+        settleTimer = window.setTimeout(keepFocusedFieldVisible, 260)
+      }
     }
 
     update()
     window.addEventListener('resize', update)
     window.addEventListener('orientationchange', update)
+    window.addEventListener('focusin', update)
     window.visualViewport?.addEventListener('resize', update)
     window.visualViewport?.addEventListener('scroll', update)
 
     return () => {
+      if (settleTimer) window.clearTimeout(settleTimer)
       window.removeEventListener('resize', update)
       window.removeEventListener('orientationchange', update)
+      window.removeEventListener('focusin', update)
       window.visualViewport?.removeEventListener('resize', update)
       window.visualViewport?.removeEventListener('scroll', update)
       root.style.removeProperty('--visual-viewport-height')
