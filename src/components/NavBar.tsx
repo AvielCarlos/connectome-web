@@ -99,7 +99,7 @@ export function NavBar() {
             fontSize: 20, boxShadow: '0 0 24px rgba(0,212,170,0.15)',
           }}>◈</div>
           <div>
-            <div style={{ fontWeight: 900, fontSize: 17, letterSpacing: -0.6, color: '#f8f8fc' }}>iDo</div>
+            <div style={{ fontWeight: 900, fontSize: 17, letterSpacing: -0.6, color: '#f8f8fc' }}>Connectome</div>
             <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.25)', letterSpacing: 2, textTransform: 'uppercase', marginTop: 1 }}>by Aura</div>
           </div>
         </div>

@@ -715,7 +715,7 @@ function UpgradePrompt() {
         fontSize: 13,
         textDecoration: 'none',
       }}>
-        Go to iDo
+        Open Path Feed
       </a>
     </div>
   );

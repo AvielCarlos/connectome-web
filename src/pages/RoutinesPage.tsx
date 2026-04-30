@@ -23,7 +23,7 @@ export default function RoutinesPage() {
     <div className="meta-app-page meta-app-page--ivive">
       <div className="meta-app-page__glow" />
       <section className="meta-app-page__hero">
-        <div className="meta-app-page__eyebrow">iDo subroutines</div>
+        <div className="meta-app-page__eyebrow">Path subroutines</div>
         <h1>Routines</h1>
         <p>Goal-achievement loops that appear when Aura sees a useful path — tiny, actionable, and tuned to what you are trying to become.</p>
       </section>

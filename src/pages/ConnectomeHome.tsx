@@ -39,7 +39,7 @@ export default function ConnectomeHome() {
         </div>
         <h1>Your AI OS for Human Flourishing</h1>
         <p style={{ maxWidth: 720, margin: '0 auto 10px' }}>
-          Good {dayPart()}, {greetingName(profile)}. This is the Connectome home base: choose whether you already know your aim, or want iDo to surface a next action.
+          Good {dayPart()}, {greetingName(profile)}. This is the Connectome home base: choose whether you already know your aim, or want the Path Feed to surface a next action.
         </p>
       </section>
 
@@ -61,9 +61,9 @@ export default function ConnectomeHome() {
           style={{ ...panel, padding: 24, color: '#f8f8fc', textAlign: 'left', cursor: 'pointer' }}
         >
           <div style={{ color: '#f4c26b', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>I don’t know what I want to do</div>
-          <h2 style={{ margin: '0 0 10px', fontSize: 28, letterSpacing: -0.7 }}>Let iDo suggest one action</h2>
+          <h2 style={{ margin: '0 0 10px', fontSize: 28, letterSpacing: -0.7 }}>Begin your path</h2>
           <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)', lineHeight: 1.6 }}>Open the discovery feed and choose, save, skip, or act on one useful possibility at a time.</p>
-          <div style={{ marginTop: 18, color: '#f4c26b', fontWeight: 900 }}>Open iDo feed →</div>
+          <div style={{ marginTop: 18, color: '#f4c26b', fontWeight: 900 }}>Open Path Feed →</div>
         </button>
       </section>
 
@@ -74,7 +74,7 @@ export default function ConnectomeHome() {
             ['Ascension', 'The DAO and mission ecosystem.'],
             ['Connectome', 'The AIOS that connects your life context.'],
             ['Aura', 'The brain and interface that helps you decide.'],
-            ['iDo', 'The daily app for one next action.'],
+            ['Path Feed', 'One concrete next action from the IOO graph.'],
           ].map(([name, copy]) => (
             <div key={name} style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 15 }}>
               <strong>{name}</strong>

@@ -15,6 +15,7 @@ interface ConnectomeShellProps {
 
 function appLabel(appId: ShellApp) {
   if (appId === 'home') return 'Aura';
+  if (appId === 'ido') return 'Path Feed';
   return appById(appId)?.name || 'Aura';
 }
 
@@ -28,7 +29,7 @@ type DockItem = {
 
 const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   home: [
-    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
     { id: 'ioo', label: 'Graph', icon: '🧬', path: '/app/ioo' },
     { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
@@ -42,7 +43,7 @@ const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
     { id: 'ditch', label: 'Ditch', icon: '🗑️', path: '/app/routines' },
   ],
   goals: [
-    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
     { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'aura' },
     { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
@@ -70,21 +71,21 @@ const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
     { id: 'ioo', label: 'Graph', icon: '🧬', path: '/app/ioo' },
   ],
   services: [
-    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
     { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
     { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
   ],
   ioo: [
-    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
     { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
   ],
   profile: [
-    { id: 'ido', label: 'iDo', icon: '🚀', path: '/app/ido' },
+    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },

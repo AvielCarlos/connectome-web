@@ -195,7 +195,7 @@ export default function AuraOnboarding() {
             <div>
               <div style={{ fontSize: 20, fontWeight: 900 }}>Aura — your AI guide</div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.56)', marginTop: 3 }}>
-                Step {progressStep} of {totalQuestions} — mapping your iVive, Eviva, Aventi, and iDo domains with Ascension Technologies DAO.
+                Step {progressStep} of {totalQuestions} — mapping your vitality, contribution, aliveness, and path inside Connectome.
               </div>
             </div>
           </div>

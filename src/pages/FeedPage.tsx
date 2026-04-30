@@ -492,7 +492,7 @@ function FeedCard({
       {cardImage && (
         <img
           src={cardImage}
-          alt={cardData.title || domain || 'iDo activity'}
+          alt={cardData.title || domain || 'Connectome activity'}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.42, zIndex: 0 }}
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
         />
@@ -1185,7 +1185,7 @@ export default function FeedPage() {
           </div>
         ) : (
           <div>
-            <div style={{ fontWeight: 900, fontSize: 16, letterSpacing: -0.3, color: '#f8f8fc' }}>iDo</div>
+            <div style={{ fontWeight: 900, fontSize: 16, letterSpacing: -0.3, color: '#f8f8fc' }}>Path Feed</div>
             <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.42)', fontWeight: 700, marginTop: 2 }}>
               What should I do next? · {blendedFeedCount} signal streams
             </div>

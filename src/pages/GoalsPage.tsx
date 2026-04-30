@@ -399,7 +399,7 @@ export default function GoalsPage() {
       ) : <EmptyState onClarify={setClarifyingGoal} />}
 
       <button onClick={() => navigate('/app/ido')} style={{ width: '100%', marginTop: 16, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.035)', color: 'rgba(248,248,252,0.64)', borderRadius: 18, padding: 14, fontWeight: 850 }}>
-        Let iDo recommend from these goals →
+        Let Aura recommend from these goals →
       </button>
 
       {clarifyingGoal && <GoalClarifyModal goalTitle={clarifyingGoal} onClose={() => setClarifyingGoal(null)} onComplete={handleClarifiedGoal} />}

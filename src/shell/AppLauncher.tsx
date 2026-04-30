@@ -16,10 +16,10 @@ interface AppLauncherProps {
   onLaunch?: () => void;
 }
 
-const DEFAULT_FEATURED_APPS = ['iDo', 'IOO Graph', 'Goals', 'Contribute'];
+const DEFAULT_FEATURED_APPS = ['Path Feed', 'IOO Graph', 'Goals', 'Contribute'];
 
 const OUTCOME_LABELS: Partial<Record<ConnectomeApp['id'], { title: string; description: string; badge?: string }>> = {
-  ido: { title: 'Find one thing to do now', description: 'A simple action feed when you want momentum but not more planning.', badge: 'Daily' },
+  ido: { title: 'Begin your path', description: 'The Connectome action feed: one concrete next step from Aura and the IOO graph.', badge: 'Path' },
   goals: { title: 'Clarify a goal with Aura', description: 'Turn an intention into steps, constraints, and a path you can act on.', badge: 'Plan' },
   routines: { title: 'Build a repeatable rhythm', description: 'Make the helpful action automatic with small routines.', badge: 'Habits' },
   dao: { title: 'Understand the DAO', description: 'See governance, CP, proposals, and the contribution economy.', badge: 'DAO' },

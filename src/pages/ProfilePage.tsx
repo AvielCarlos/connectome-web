@@ -274,7 +274,7 @@ export default function ProfilePage() {
   const UPGRADE_HEADLINES: Record<string, string> = {
     A: 'Unlock the full Aura',
     B: 'Go deeper with Explorer',
-    C: "You're using iDo like a power user",
+    C: "You're using Connectome like a power user",
     D: 'Explorer — built for people serious about their goals',
   };
   const UPGRADE_PRICES: Record<string, string> = {
@@ -414,7 +414,7 @@ export default function ProfilePage() {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>My Account</div>
             <MenuRow icon="🌐" label="My Surfaces" sublabel="Personalized pages Aura built" onClick={() => { setSection('surfaces'); loadSurfaces(); }} />
             <MenuRow icon="🔗" label="Google Account" sublabel="Drive sync & calendar" onClick={() => setSection('google')} />
-            <MenuRow icon="📱" label="Get the App" sublabel="Add iDo to your home screen" onClick={() => {}} last />
+            <MenuRow icon="📱" label="Get the App" sublabel="Add Connectome to your home screen" onClick={() => {}} last />
           </div>
 
           {/* ── Admin shortcut ── */}

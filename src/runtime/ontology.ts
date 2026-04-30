@@ -348,7 +348,7 @@ export const ONTOLOGY_RELATIONSHIPS: OntologyRelationship[] = [
   { kind: 'hosts', fromKind: 'Connectome', toKind: 'App', description: 'Connectome hosts apps.' },
   { kind: 'recommends', fromKind: 'Aura', toKind: 'Entity', description: 'Aura recommends entities to a person.' },
   { kind: 'renders', fromKind: 'FeedSurface', toKind: 'Entity', description: 'A feed renders opportunities, events, missions, routines, services, and DAO signals.' },
-  { kind: 'blends', fromKind: 'iDoFeed', toKind: 'DomainFeed', description: 'iDo blends domain feeds into the daily what-should-I-do-next meta-feed.' },
+  { kind: 'blends', fromKind: 'iDoFeed', toKind: 'DomainFeed', description: 'The Path Feed blends domain feeds into the daily what-should-I-do-next surface.' },
 ];
 
 export const FEED_SURFACES: FeedSurface[] = [
@@ -370,7 +370,7 @@ export const FEED_SURFACES: FeedSurface[] = [
 export const APP_MANIFEST: AppManifestEntry[] = [
   {
     id: 'ido',
-    name: 'iDo',
+    name: 'Path Feed',
     icon: '🚀',
     path: '/app/ido',
     category: 'daily',
@@ -426,7 +426,7 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'daily',
     visibleToUser: true,
     permissions: ['memory', 'notifications'],
-    description: 'Primarily iDo feature: living quests across all three domains, also producing shared datapoints for other apps.',
+    description: 'Path/Connectome feature: living quests across all three domains, also producing shared datapoints for other apps.',
     purpose: 'Turns desires into structured goals with constraints, paths, and routines for the delegate/plan/ditch loop.',
   },
   {
@@ -437,7 +437,7 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     category: 'daily',
     visibleToUser: true,
     permissions: ['memory', 'calendar', 'health', 'notifications'],
-    description: 'Primarily iDo feature: goal-achievement subroutines that other apps can read as shared datapoints.',
+    description: 'Path/Connectome feature: goal-achievement subroutines that other apps can read as shared datapoints.',
     purpose: 'Makes becoming automatic by running small, repeatable loops across domains.',
   },
   {

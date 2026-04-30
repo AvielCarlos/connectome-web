@@ -35,7 +35,7 @@ export default function iVivePage() {
 
       <div className="meta-app-page__footer-card">
         <p>
-          iVive runs a {iviveFeed?.rankingStrategy.replace(/_/g, ' ')} feed. The best signals can flow into iDo’s daily
+          iVive runs a {iviveFeed?.rankingStrategy.replace(/_/g, ' ')} feed. The best signals can flow into the Path Feed’s daily
           “what should I do next?” feed when recovery, energy, or sleep should shape the next action.
         </p>
         <button type="button" onClick={openAuraOverlay}>Tell Aura about your recovery and vitality goals</button>

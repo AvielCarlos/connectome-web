@@ -1,5 +1,5 @@
 /**
- * HomePage — iDo's philosophical entry point.
+ * HomePage — Connectome's philosophical entry point.
  *
  * Two paths, every session:
  *   "I know what I want to do" → Aura goal creation/clarification + directed feed

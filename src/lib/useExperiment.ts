@@ -1,5 +1,5 @@
 /**
- * useExperiment — Universal A/B testing hook for iDo.
+ * useExperiment — Universal A/B testing hook for Connectome surfaces.
  *
  * Fetches all experiment assignments in one call (cached per session),
  * auto-tracks exposures, and provides a trackEvent helper.
