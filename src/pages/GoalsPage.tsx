@@ -1,524 +1,286 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { OraClient, Goal } from '../lib/OraClient';
 import { useToast } from '../components/Toast';
 import { useExperiment } from '../lib/useExperiment';
 import GoalClarifyModal from '../components/GoalClarifyModal';
 
-const DOMAIN_CONFIG: Record<string, { emoji: string; color: string }> = {
-  iVive:  { emoji: '🌱', color: '#10b981' },
-  Eviva:  { emoji: '🌊', color: '#6366f1' },
-  Aventi: { emoji: '🚀', color: '#f59e0b' },
+type Lens = 'active' | 'paths' | 'saved' | 'done' | 'all';
+
+const DOMAIN_CONFIG: Record<string, { emoji: string; color: string; label: string }> = {
+  iVive: { emoji: '🌱', color: '#10b981', label: 'Self / capacity' },
+  Eviva: { emoji: '🌊', color: '#6366f1', label: 'Contribution' },
+  Aventi: { emoji: '🚀', color: '#f59e0b', label: 'Experience' },
+  Rest: { emoji: '🌙', color: '#8b5cf6', label: 'Recovery' },
 };
 
-const GOAL_STARTERS = [
-  { title: 'Get fit', domain: 'iVive', emoji: '🌱' },
-  { title: 'Feel calmer', domain: 'Eviva', emoji: '🌊' },
-  { title: 'Build a new habit', domain: 'iVive', emoji: '◎' },
-  { title: 'Explore more of life', domain: 'Aventi', emoji: '✨' },
+const STARTERS = [
+  { title: 'Build the body and energy I need', tag: 'capacity', domain: 'iVive' },
+  { title: 'Find meaningful work or contribution', tag: 'mission', domain: 'Eviva' },
+  { title: 'Make life feel more alive', tag: 'experience', domain: 'Aventi' },
+  { title: 'Turn a vague desire into a real path', tag: 'clarify', domain: 'iVive' },
 ];
 
-function DomainBadge({ domain }: { domain?: string }) {
-  if (!domain) return null;
-  const cfg = DOMAIN_CONFIG[domain] || { emoji: '◈', color: '#00d4aa' };
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      background: cfg.color + '18', border: `1px solid ${cfg.color}44`,
-      color: cfg.color, fontSize: 11, fontWeight: 700, letterSpacing: 0.5,
-      padding: '2px 8px', borderRadius: 20,
-    }}>
-      {cfg.emoji} {domain}
-    </span>
-  );
+function domainConfig(domain?: string) {
+  return DOMAIN_CONFIG[domain || ''] || { emoji: '◈', color: '#00d4aa', label: 'IOO path' };
 }
 
-// Skeleton
-function GoalSkeleton() {
+function progressFor(goal: Goal) {
+  const steps = goal.steps || [];
+  if (!steps.length) return goal.progress || 0;
+  return steps.filter((s) => s.completed).length / steps.length;
+}
+
+function nextStep(goal: Goal) {
+  return (goal.steps || []).find((s) => !s.completed) || goal.steps?.[0] || null;
+}
+
+function stateFor(goal: Goal) {
+  if (goal.status === 'completed' || progressFor(goal) >= 1) return 'integrated';
+  if (!goal.steps?.length) return 'seed';
+  if (progressFor(goal) > 0) return 'moving';
+  return 'mapped';
+}
+
+function stateCopy(state: string) {
+  if (state === 'seed') return 'Seed';
+  if (state === 'mapped') return 'Mapped path';
+  if (state === 'moving') return 'In motion';
+  return 'Integrated';
+}
+
+function UserStateStrip({ goals }: { goals: Goal[] }) {
+  const active = goals.filter((g) => g.status === 'active');
+  const mapped = active.filter((g) => g.steps?.length).length;
+  const moving = active.filter((g) => progressFor(g) > 0 && progressFor(g) < 1).length;
+  const done = goals.filter((g) => g.status === 'completed').length;
+  const strongest = active[0]?.domain || 'IOO';
+  const cfg = domainConfig(strongest);
+
+  const cells = [
+    ['Active intentions', active.length],
+    ['Mapped paths', mapped],
+    ['In motion', moving],
+    ['Integrated', done],
+  ];
+
   return (
-    <div style={{ background: '#12121a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, marginBottom: 12, overflow: 'hidden' }}>
-      <div style={{ padding: 20 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ height: 18, width: '70%', borderRadius: 6, marginBottom: 10 }} className="skeleton" />
-            <div style={{ height: 12, width: '30%', borderRadius: 6 }} className="skeleton" />
-          </div>
-          <div style={{ width: 40, height: 40, borderRadius: 20 }} className="skeleton" />
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 8, margin: '16px 0 18px' }}>
+      {cells.map(([label, value]) => (
+        <div key={label} style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.035)', borderRadius: 18, padding: '12px 10px' }}>
+          <div style={{ color: '#f8f8fc', fontWeight: 950, fontSize: 18 }}>{value}</div>
+          <div style={{ color: 'rgba(248,248,252,0.42)', fontWeight: 750, fontSize: 10, lineHeight: 1.2 }}>{label}</div>
         </div>
-        <div style={{ height: 6, borderRadius: 4, marginTop: 14 }} className="skeleton" />
+      ))}
+      <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: 9, color: 'rgba(248,248,252,0.52)', fontSize: 12, padding: '0 2px' }}>
+        <span style={{ color: cfg.color }}>{cfg.emoji}</span>
+        This collection is part of user state — every edit, step, and pause teaches Ora what path to compose next.
       </div>
     </div>
   );
 }
 
-function AskOraStep({ goalId, stepIndex, stepText, onOraReply }: {
-  goalId: string; stepIndex: number; stepText: string; onOraReply: (reply: string) => void;
-}) {
-  const [loading, setLoading] = useState(false);
-  const [asked, setAsked] = useState(false);
-
-  const ask = async () => {
-    if (loading || asked) return;
-    setLoading(true);
-    try {
-      // Use chat API to ask about the step
-      const res = await OraClient.chat(
-        `Help me with this step from my goal: "${stepText}". Give me specific, actionable advice in 2-3 sentences.`,
-        []
-      );
-      onOraReply(res.reply);
-      setAsked(true);
-    } catch {
-      onOraReply("I couldn't connect right now. Try again in a moment.");
-      setAsked(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <button
-      onClick={ask}
-      disabled={loading}
-      title="Ask Ora for help with this step"
-      style={{
-        background: loading ? 'rgba(0,212,170,0.05)' : 'rgba(0,212,170,0.08)',
-        border: '1px solid rgba(0,212,170,0.2)',
-        color: '#00d4aa',
-        padding: '3px 8px',
-        borderRadius: 6,
-        fontSize: 10,
-        fontWeight: 700,
-        flexShrink: 0,
-        marginTop: 2,
-        letterSpacing: 0.3,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {loading ? '◈…' : '◈ Ask Ora'}
-    </button>
-  );
-}
-
-function GoalCard({
-  goal,
-  onUpdate,
-  onDelete,
-}: {
-  goal: Goal;
-  onUpdate: (g: Goal) => void;
-  onDelete: (id: string) => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const [breaking, setBreaking] = useState(false);
-  const [completing, setCompleting] = useState(false);
-  const [oraReplies, setOraReplies] = useState<Record<number, string>>({});
-  const { show } = useToast();
-
-  const completedSteps = goal.steps?.filter((s) => s.completed).length || 0;
-  const totalSteps = goal.steps?.length || 0;
-  const progress = totalSteps > 0 ? completedSteps / totalSteps : goal.progress || 0;
-  const progressDeg = Math.round(progress * 360);
-
-  const handleBreakdown = async () => {
-    setBreaking(true);
-    try {
-      const updated = await OraClient.breakdownGoal(goal.id);
-      onUpdate(updated);
-      setExpanded(true);
-      show('✦ Ora mapped your path!', 'success');
-    } catch (e) {
-      console.error('Breakdown failed:', e);
-    } finally {
-      setBreaking(false);
-    }
-  };
-
-  const handleComplete = async () => {
-    setCompleting(true);
-    try {
-      await OraClient.completeGoal(goal.id);
-      onDelete(goal.id);
-      show('🎉 Done!', 'success');
-    } catch (e) {
-      console.error('Complete goal failed:', e);
-    } finally {
-      setCompleting(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm('Remove this?')) return;
-    try {
-      await OraClient.deleteGoal(goal.id);
-      onDelete(goal.id);
-    } catch (e) {
-      console.error('Delete failed:', e);
-    }
-  };
-
-  const handleToggleStep = async (stepIndex: number) => {
-    const updatedSteps = goal.steps.map((s, si) =>
-      si === stepIndex ? { ...s, completed: !s.completed } : s
-    );
-    try {
-      const updated = await OraClient.updateGoal(goal.id, { steps: updatedSteps });
-      onUpdate(updated);
-    } catch {
-      // silent fail, optimistic update already done above locally
-    }
-  };
-
-  return (
-    <div
-      className="fade-in"
-      style={{
-        background: '#12121a',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 16,
-        marginBottom: 12,
-        overflow: 'hidden',
-        transition: 'all 0.2s',
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{ padding: 20, cursor: 'pointer' }}
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: 16, lineHeight: 1.4, marginBottom: 6 }}>
-              {goal.title}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const }}>
-              <DomainBadge domain={goal.domain} />
-              {totalSteps > 0 && (
-                <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.4)' }}>
-                  {completedSteps}/{totalSteps} steps
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Progress ring */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 22,
-              background: `conic-gradient(#00d4aa ${progressDeg}deg, rgba(255,255,255,0.07) 0deg)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              position: 'relative',
-            }}>
-              <div style={{
-                position: 'absolute',
-                width: 32, height: 32, borderRadius: 16,
-                background: '#12121a',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 10, fontWeight: 800, color: '#00d4aa',
-              }}>
-                {Math.round(progress * 100)}%
-              </div>
-            </div>
-            <span style={{
-              fontSize: 12, color: 'rgba(248,248,252,0.3)',
-              transform: expanded ? 'rotate(90deg)' : 'none',
-              transition: 'transform 0.2s',
-              display: 'inline-block',
-            }}>
-              ▶
-            </span>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="progress-track">
-          <div className="progress-fill" style={{ width: `${progress * 100}%` }} />
-        </div>
-      </div>
-
-      {/* Steps (expanded) */}
-      {expanded && (
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '4px 20px 16px' }} className="fade-in">
-          {goal.description && (
-            <p style={{ fontSize: 13, color: 'rgba(248,248,252,0.55)', lineHeight: 1.6, margin: '12px 0' }}>
-              {goal.description}
-            </p>
-          )}
-
-          {goal.steps?.length > 0 ? (
-            <div style={{ marginTop: 8 }}>
-              <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)', fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>
-                STEPS
-              </div>
-              {goal.steps.map((step, i) => (
-                <div key={step.id || i} style={{ marginBottom: 12 }}>
-                  <div style={{
-                    display: 'flex',
-                    gap: 12,
-                    padding: '10px 0',
-                    borderBottom: '1px solid rgba(255,255,255,0.04)',
-                    alignItems: 'flex-start',
-                  }}>
-                    {/* Checkbox */}
-                    <div
-                      style={{
-                        width: 20, height: 20, borderRadius: 4,
-                        border: step.completed ? 'none' : '1.5px solid rgba(255,255,255,0.25)',
-                        background: step.completed ? '#00d4aa' : 'transparent',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        flexShrink: 0, cursor: 'pointer', marginTop: 2,
-                        transition: 'all 0.15s',
-                      }}
-                      onClick={() => handleToggleStep(i)}
-                    >
-                      {step.completed && <span style={{ fontSize: 12, color: '#0a0a0f', fontWeight: 900 }}>✓</span>}
-                    </div>
-
-                    {/* Content */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontSize: 14, fontWeight: 500,
-                        color: step.completed ? 'rgba(248,248,252,0.35)' : '#f8f8fc',
-                        textDecoration: step.completed ? 'line-through' : 'none',
-                        lineHeight: 1.5,
-                        marginBottom: 2,
-                      }}>
-                        {step.text}
-                      </div>
-                      {step.ora_note && (
-                        <div style={{ fontSize: 12, color: '#00d4aa', fontStyle: 'italic', marginTop: 4, lineHeight: 1.5 }}>
-                          ✦ {step.ora_note}
-                        </div>
-                      )}
-                      {step.detail && (
-                        <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.45)', marginTop: 4, lineHeight: 1.5 }}>
-                          {step.detail}
-                        </div>
-                      )}
-                      {step.resources?.map((r, ri) => (
-                        <a key={ri} href={r.url} target="_blank" rel="noopener noreferrer" style={{
-                          display: 'inline-block', fontSize: 11, color: '#00d4aa',
-                          textDecoration: 'none', marginTop: 4,
-                        }}>
-                          🔗 {r.label}
-                        </a>
-                      ))}
-                      {/* Ora reply for this step */}
-                      {oraReplies[i] && (
-                        <div style={{
-                          marginTop: 8,
-                          background: 'rgba(0,212,170,0.07)',
-                          border: '1px solid rgba(0,212,170,0.2)',
-                          borderRadius: 8,
-                          padding: '8px 12px',
-                          fontSize: 12,
-                          color: 'rgba(248,248,252,0.75)',
-                          lineHeight: 1.55,
-                          fontStyle: 'italic',
-                        }}>
-                          <span style={{ color: '#00d4aa', fontStyle: 'normal', fontWeight: 700 }}>◈ </span>
-                          {oraReplies[i]}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Ask Ora button */}
-                    {!step.completed && (
-                      <AskOraStep
-                        goalId={goal.id}
-                        stepIndex={i}
-                        stepText={step.text}
-                        onOraReply={(reply) => setOraReplies((prev) => ({ ...prev, [i]: reply }))}
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ marginTop: 12 }}>
-              <button
-                onClick={handleBreakdown}
-                disabled={breaking}
-                style={{
-                  background: breaking ? 'rgba(0,212,170,0.05)' : 'rgba(0,212,170,0.1)',
-                  border: '1px solid rgba(0,212,170,0.3)',
-                  color: '#00d4aa',
-                  padding: '12px 16px',
-                  borderRadius: 10,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  width: '100%',
-                  transition: 'all 0.2s',
-                }}
-              >
-                {breaking
-                  ? <span>◈ <span style={{ animation: 'pulse 1s ease-in-out infinite', display: 'inline-block' }}>Ora is breaking this down…</span></span>
-                  : '✦ Ask Ora to break this down'}
-              </button>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-            {progress >= 1 && (
-              <button
-                onClick={handleComplete}
-                disabled={completing}
-                style={{
-                  flex: 1,
-                  background: '#10b981', color: '#fff',
-                  padding: '11px', borderRadius: 10, fontSize: 13, fontWeight: 700,
-                }}
-              >
-                {completing ? '…' : '🎉 Mark Complete'}
-              </button>
-            )}
-            <button
-              onClick={handleDelete}
-              style={{
-                background: 'rgba(239,68,68,0.08)',
-                border: '1px solid rgba(239,68,68,0.2)',
-                color: '#ef4444',
-                padding: '11px 16px', borderRadius: 10, fontSize: 13,
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Quick inline goal creation bar
-function QuickAddGoal({ onClarify }: { onClarify: (title: string) => void }) {
-  const [focused, setFocused] = useState(false);
+function CaptureBar({ onClarify }: { onClarify: (title: string) => void }) {
   const [title, setTitle] = useState('');
-  const [domain, setDomain] = useState('');
-  const [creating, setCreating] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { show } = useToast();
+  const [focused, setFocused] = useState(false);
   const [searchParams] = useSearchParams();
-
-  // A/B: goals_input_placeholder
-  const { variant: placeholderVariant, trackEvent: trackGoalEvent } = useExperiment('goals_input_placeholder');
-  const GOAL_PLACEHOLDERS: Record<string, string> = {
-    A: 'I want to…',
-    B: 'What do you want?',
-    C: 'My goal is to…',
-    D: 'Tell Ora what you want',
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { variant, trackEvent } = useExperiment('goals_input_placeholder');
+  const placeholders: Record<string, string> = {
+    A: 'Add an intention, plan, desire, or possibility…',
+    B: 'What should Ora remember you might want?',
+    C: 'Capture something you may want to become/do/experience…',
+    D: 'Tell Ora a direction — she will help it evolve',
   };
-  const goalPlaceholder = GOAL_PLACEHOLDERS[placeholderVariant] || GOAL_PLACEHOLDERS['A'];
 
-  // Auto-focus when navigated here from Home with ?focus=true or ?clarify=1
   useEffect(() => {
     if (searchParams.get('focus') === 'true' || searchParams.get('clarify') === '1') {
-      setTimeout(() => {
-        inputRef.current?.focus();
-        setFocused(true);
-      }, 150);
+      setTimeout(() => { inputRef.current?.focus(); setFocused(true); }, 150);
     }
   }, [searchParams]);
 
-  const handleSubmit = async () => {
-    if (!title.trim() || creating) return;
-    setCreating(true);
-    try {
-      trackGoalEvent('goal_clarification_started', 1);
-      onClarify(title.trim());
-      setTitle('');
-      setDomain('');
-      setFocused(false);
-    } catch (e) {
-      console.error('Start clarification failed:', e);
-      show('Could not start Ora right now.', 'error');
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSubmit();
-    if (e.key === 'Escape') { setFocused(false); setTitle(''); setDomain(''); }
+  const submit = () => {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+    trackEvent('goal_collection_capture_started', 1);
+    onClarify(trimmed);
+    setTitle('');
+    setFocused(false);
   };
 
   return (
-    <div style={{
-      background: focused ? '#12121a' : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${focused ? 'rgba(0,212,170,0.35)' : 'rgba(255,255,255,0.08)'}`,
-      borderRadius: 14,
-      marginBottom: 20,
-      overflow: 'hidden',
-      transition: 'all 0.2s',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
-        <span style={{ fontSize: 18, color: '#00d4aa', flexShrink: 0 }}>+</span>
+    <div style={{ borderRadius: 24, padding: 3, background: focused ? 'linear-gradient(135deg, rgba(0,212,170,0.42), rgba(99,102,241,0.28))' : 'rgba(255,255,255,0.08)', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 14px', borderRadius: 21, background: 'rgba(10,10,18,0.94)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <span style={{ color: '#00d4aa', fontSize: 18 }}>＋</span>
         <input
           ref={inputRef}
-          type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
           onFocus={() => setFocused(true)}
-          onKeyDown={handleKeyDown}
-          placeholder={goalPlaceholder}
-          style={{
-            flex: 1,
-            background: 'transparent',
-            border: 'none',
-            color: '#f8f8fc',
-            fontSize: 15,
-            fontWeight: 500,
-            padding: 0,
-            outline: 'none',
-            width: '100%',
-          }}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') { setTitle(''); setFocused(false); } }}
+          placeholder={placeholders[variant] || placeholders.A}
+          style={{ flex: 1, background: 'transparent', border: 0, outline: 0, color: '#f8f8fc', fontSize: 15, minWidth: 0 }}
         />
-        {title.trim() && (
-          <button
-            onClick={handleSubmit}
-            disabled={creating}
-            style={{
-              background: '#00d4aa', color: '#0a0a0f',
-              padding: '6px 14px', borderRadius: 8,
-              fontSize: 13, fontWeight: 700,
-              flexShrink: 0,
-            }}
-          >
-            {creating ? '…' : '→'}
+        <button onClick={submit} disabled={!title.trim()} style={{ border: 0, borderRadius: 999, minWidth: 42, height: 34, background: title.trim() ? '#00d4aa' : 'rgba(255,255,255,0.08)', color: title.trim() ? '#06110f' : 'rgba(248,248,252,0.28)', fontWeight: 950 }}>→</button>
+      </div>
+    </div>
+  );
+}
+
+function StarterRail({ onClarify }: { onClarify: (title: string) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 14 }}>
+      {STARTERS.map((starter) => {
+        const cfg = domainConfig(starter.domain);
+        return (
+          <button key={starter.title} onClick={() => onClarify(starter.title)} style={{ flex: '0 0 210px', textAlign: 'left', border: `1px solid ${cfg.color}24`, borderRadius: 20, padding: 14, background: 'rgba(255,255,255,0.035)', color: '#f8f8fc' }}>
+            <div style={{ color: cfg.color, fontWeight: 900, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>{cfg.emoji} {starter.tag}</div>
+            <div style={{ fontWeight: 850, fontSize: 14, lineHeight: 1.35 }}>{starter.title}</div>
           </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function LensTabs({ lens, setLens, counts }: { lens: Lens; setLens: (l: Lens) => void; counts: Record<Lens, number> }) {
+  const tabs: Array<[Lens, string]> = [['active', 'Active'], ['paths', 'Paths'], ['saved', 'Seeds'], ['done', 'Done'], ['all', 'All']];
+  return (
+    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', margin: '8px 0 16px', paddingBottom: 4 }}>
+      {tabs.map(([id, label]) => (
+        <button key={id} onClick={() => setLens(id)} style={{ flex: '0 0 auto', border: lens === id ? '1px solid rgba(0,212,170,0.58)' : '1px solid rgba(255,255,255,0.08)', background: lens === id ? 'rgba(0,212,170,0.13)' : 'rgba(255,255,255,0.035)', color: lens === id ? '#dffcf6' : 'rgba(248,248,252,0.56)', borderRadius: 999, padding: '9px 13px', fontSize: 12, fontWeight: 850 }}>
+          {label} <span style={{ opacity: 0.55 }}>{counts[id]}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal) => void; onDelete: (id: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [oraReply, setOraReply] = useState('');
+  const { show } = useToast();
+  const cfg = domainConfig(goal.domain);
+  const progress = progressFor(goal);
+  const step = nextStep(goal);
+  const state = stateFor(goal);
+
+  const breakdown = async () => {
+    setBusy('breakdown');
+    try {
+      const updated = await OraClient.breakdownGoal(goal.id);
+      onUpdate(updated);
+      setOpen(true);
+      show('Ora mapped this into a path.', 'success');
+    } finally { setBusy(null); }
+  };
+
+  const toggleStep = async (index: number) => {
+    const steps = (goal.steps || []).map((s, i) => i === index ? { ...s, completed: !s.completed } : s);
+    const updated = await OraClient.updateGoal(goal.id, { steps });
+    onUpdate(updated);
+  };
+
+  const setStatus = async (status: string) => {
+    setBusy(status);
+    try {
+      if (status === 'completed') {
+        await OraClient.completeGoal(goal.id);
+        onUpdate({ ...goal, status: 'completed', progress: 1 });
+        show('Integrated into your state.', 'success');
+      } else {
+        const updated = await OraClient.updateGoal(goal.id, { status });
+        onUpdate(updated);
+      }
+    } finally { setBusy(null); }
+  };
+
+  const askOra = async () => {
+    if (!step) return;
+    setBusy('ora');
+    try {
+      const res = await OraClient.chat(`This is part of my living goal collection: "${goal.title}". Current next step: "${step.text}". Help me evolve this into the smallest useful next move, in 2-3 sentences.`, []);
+      setOraReply(res.reply);
+      setOpen(true);
+    } finally { setBusy(null); }
+  };
+
+  const remove = async () => {
+    if (!confirm('Remove this from your collection?')) return;
+    await OraClient.deleteGoal(goal.id);
+    onDelete(goal.id);
+  };
+
+  return (
+    <article className="fade-in" style={{ position: 'relative', overflow: 'hidden', borderRadius: 26, border: `1px solid ${cfg.color}22`, background: 'linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025))', marginBottom: 12 }}>
+      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 12% 0%, ${cfg.color}24, transparent 38%)`, pointerEvents: 'none' }} />
+      <div style={{ position: 'relative', padding: 18 }}>
+        <button onClick={() => setOpen(!open)} style={{ display: 'block', width: '100%', textAlign: 'left', color: 'inherit' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10 }}>
+                <span style={{ color: cfg.color, background: cfg.color + '16', border: `1px solid ${cfg.color}33`, borderRadius: 999, padding: '4px 9px', fontSize: 11, fontWeight: 900 }}>{cfg.emoji} {goal.domain || 'IOO'}</span>
+                <span style={{ color: 'rgba(248,248,252,0.42)', fontSize: 11, fontWeight: 800 }}>{stateCopy(state)}</span>
+              </div>
+              <h2 style={{ fontSize: 18, lineHeight: 1.22, letterSpacing: -0.35, fontWeight: 950, margin: 0 }}>{goal.title}</h2>
+            </div>
+            <div style={{ width: 48, height: 48, borderRadius: 24, flexShrink: 0, display: 'grid', placeItems: 'center', background: `conic-gradient(${cfg.color} ${Math.round(progress * 360)}deg, rgba(255,255,255,0.08) 0deg)` }}>
+              <div style={{ width: 36, height: 36, borderRadius: 18, display: 'grid', placeItems: 'center', background: '#10101a', color: cfg.color, fontSize: 10, fontWeight: 950 }}>{Math.round(progress * 100)}%</div>
+            </div>
+          </div>
+          {goal.description && <p style={{ color: 'rgba(248,248,252,0.52)', fontSize: 13, lineHeight: 1.55, margin: '11px 0 0', whiteSpace: 'pre-line' }}>{goal.description.split('\n').slice(0, 2).join(' • ')}</p>}
+          <div style={{ height: 5, borderRadius: 999, background: 'rgba(255,255,255,0.07)', overflow: 'hidden', marginTop: 14 }}>
+            <div style={{ width: `${Math.max(progress * 100, goal.steps?.length ? 8 : 0)}%`, height: '100%', background: `linear-gradient(90deg, ${cfg.color}, #00d4aa)`, borderRadius: 999 }} />
+          </div>
+        </button>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center', marginTop: 14 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ color: 'rgba(248,248,252,0.34)', fontSize: 10, fontWeight: 900, letterSpacing: 0.8, textTransform: 'uppercase' }}>Next signal</div>
+            <div style={{ color: step ? 'rgba(248,248,252,0.78)' : 'rgba(248,248,252,0.42)', fontSize: 13, lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{step?.text || 'Needs Ora to map the first path'}</div>
+          </div>
+          <button onClick={step ? askOra : breakdown} disabled={!!busy} style={{ border: '1px solid rgba(0,212,170,0.35)', background: 'rgba(0,212,170,0.12)', color: '#00d4aa', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>{busy ? '◈…' : step ? 'Evolve' : 'Map'}</button>
+        </div>
+
+        {open && (
+          <div className="fade-in" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: 16, paddingTop: 14 }}>
+            {oraReply && <div style={{ border: '1px solid rgba(0,212,170,0.22)', background: 'rgba(0,212,170,0.08)', color: 'rgba(248,248,252,0.78)', borderRadius: 16, padding: 13, fontSize: 13, lineHeight: 1.55, marginBottom: 12 }}><b style={{ color: '#00d4aa' }}>Ora: </b>{oraReply}</div>}
+            {goal.steps?.length ? (
+              <div style={{ display: 'grid', gap: 8 }}>
+                {goal.steps.map((s, i) => (
+                  <button key={s.id || i} onClick={() => toggleStep(i)} style={{ display: 'flex', gap: 11, textAlign: 'left', alignItems: 'flex-start', border: '1px solid rgba(255,255,255,0.065)', background: s.completed ? 'rgba(0,212,170,0.055)' : 'rgba(255,255,255,0.035)', borderRadius: 15, padding: 12, color: '#f8f8fc' }}>
+                    <span style={{ width: 22, height: 22, borderRadius: 11, display: 'grid', placeItems: 'center', flexShrink: 0, background: s.completed ? '#00d4aa' : 'rgba(255,255,255,0.06)', color: s.completed ? '#06110f' : 'rgba(248,248,252,0.38)', fontSize: 12, fontWeight: 950 }}>{s.completed ? '✓' : i + 1}</span>
+                    <span style={{ minWidth: 0 }}>
+                      <span style={{ display: 'block', fontSize: 13, lineHeight: 1.45, color: s.completed ? 'rgba(248,248,252,0.38)' : '#f8f8fc', textDecoration: s.completed ? 'line-through' : 'none' }}>{s.text}</span>
+                      {s.detail && <span style={{ display: 'block', color: 'rgba(248,248,252,0.42)', fontSize: 12, lineHeight: 1.45, marginTop: 3 }}>{s.detail}</span>}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <button onClick={breakdown} disabled={busy === 'breakdown'} style={{ width: '100%', border: '1px solid rgba(0,212,170,0.25)', background: 'rgba(0,212,170,0.09)', color: '#00d4aa', borderRadius: 16, padding: 13, fontWeight: 900 }}>Ask Ora to map this into a path</button>
+            )}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 13 }}>
+              {goal.status !== 'completed' && <button onClick={() => setStatus('completed')} style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.24)', color: '#34d399', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Integrated</button>}
+              {goal.status === 'active' && <button onClick={() => setStatus('paused')} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(248,248,252,0.55)', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Pause</button>}
+              {goal.status !== 'active' && goal.status !== 'completed' && <button onClick={() => setStatus('active')} style={{ background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.24)', color: '#00d4aa', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Reactivate</button>}
+              <button onClick={remove} style={{ marginLeft: 'auto', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 850 }}>Remove</button>
+            </div>
+          </div>
         )}
       </div>
+    </article>
+  );
+}
 
-      {/* Domain selector — shows when focused */}
-      {focused && (
-        <div style={{
-          display: 'flex', gap: 8, padding: '0 16px 14px',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-          paddingTop: 12,
-        }} className="fade-in">
-          <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)', fontWeight: 600, letterSpacing: 0.5, alignSelf: 'center' }}>DOMAIN</span>
-          {Object.entries(DOMAIN_CONFIG).map(([d, cfg]) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => setDomain(domain === d ? '' : d)}
-              style={{
-                padding: '5px 10px',
-                borderRadius: 8,
-                fontSize: 12,
-                fontWeight: 600,
-                background: domain === d ? cfg.color + '22' : 'rgba(255,255,255,0.05)',
-                border: domain === d ? `1px solid ${cfg.color}55` : '1px solid rgba(255,255,255,0.08)',
-                color: domain === d ? cfg.color : 'rgba(248,248,252,0.4)',
-              }}
-            >
-              {cfg.emoji} {d}
-            </button>
-          ))}
-        </div>
-      )}
+function EmptyState({ onClarify }: { onClarify: (title: string) => void }) {
+  return (
+    <div style={{ textAlign: 'center', padding: '42px 18px', borderRadius: 28, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+      <div className="brain-float" style={{ fontSize: 48, color: '#00d4aa', marginBottom: 14 }}>◎</div>
+      <div style={{ fontWeight: 950, fontSize: 20, marginBottom: 8 }}>Start the collection</div>
+      <div style={{ color: 'rgba(248,248,252,0.48)', fontSize: 14, lineHeight: 1.65, maxWidth: 320, margin: '0 auto 18px' }}>Capture anything you may want to become, do, build, feel, repair, or experience. Ora will turn it into evolving user state.</div>
+      <button onClick={() => onClarify('I want to create a clearer direction for my life')} style={{ border: 0, borderRadius: 999, padding: '12px 16px', background: '#00d4aa', color: '#06110f', fontWeight: 950 }}>Clarify with Ora</button>
     </div>
   );
 }
@@ -526,122 +288,86 @@ function QuickAddGoal({ onClarify }: { onClarify: (title: string) => void }) {
 export default function GoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lens, setLens] = useState<Lens>('active');
   const [clarifyingGoal, setClarifyingGoal] = useState<string | null>(null);
   const { show } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    OraClient.listGoals().then(setGoals).catch(console.error).finally(() => setLoading(false));
+    OraClient.listGoals('all').then(setGoals).catch(console.error).finally(() => setLoading(false));
   }, []);
 
-  const handleUpdate = (updated: Goal) => {
-    setGoals((prev) => prev.map((g) => g.id === updated.id ? updated : g));
-  };
+  const counts = useMemo<Record<Lens, number>>(() => ({
+    active: goals.filter((g) => g.status === 'active').length,
+    paths: goals.filter((g) => g.steps?.length && g.status !== 'completed').length,
+    saved: goals.filter((g) => !g.steps?.length && g.status !== 'completed').length,
+    done: goals.filter((g) => g.status === 'completed').length,
+    all: goals.length,
+  }), [goals]);
 
-  const handleDelete = (id: string) => {
-    setGoals((prev) => prev.filter((g) => g.id !== id));
-  };
+  const visibleGoals = useMemo(() => goals.filter((g) => {
+    if (lens === 'active') return g.status === 'active';
+    if (lens === 'paths') return !!g.steps?.length && g.status !== 'completed';
+    if (lens === 'saved') return !g.steps?.length && g.status !== 'completed';
+    if (lens === 'done') return g.status === 'completed';
+    return true;
+  }), [goals, lens]);
+
+  const handleUpdate = (updated: Goal) => setGoals((prev) => prev.map((g) => g.id === updated.id ? updated : g));
+  const handleDelete = (id: string) => setGoals((prev) => prev.filter((g) => g.id !== id));
 
   const handleClarifiedGoal = async (structuredGoal: any, iooPath: any[]) => {
-    const title = structuredGoal?.title || clarifyingGoal || 'New goal';
+    const title = structuredGoal?.title || clarifyingGoal || 'New intention';
     const descriptionParts = [
       structuredGoal?.why ? `Why: ${structuredGoal.why}` : null,
-      structuredGoal?.specifics ? `Specifics: ${structuredGoal.specifics}` : null,
+      structuredGoal?.specifics ? `Shape: ${structuredGoal.specifics}` : null,
       structuredGoal?.timeline ? `Timeline: ${structuredGoal.timeline}` : null,
       structuredGoal?.constraints ? `Constraints: ${structuredGoal.constraints}` : null,
     ].filter(Boolean);
-
-    const steps = iooPath.slice(0, 5).map((node, i) => ({
+    const steps = iooPath.slice(0, 6).map((node, i) => ({
       id: node.id || `${Date.now()}-${i}`,
       text: node.title || `Step ${i + 1}`,
       detail: node.description,
       resources: [],
       completed: false,
       order: i,
-      ora_note: node.domain ? `IOO path • ${node.domain}` : undefined,
+      ora_note: node.domain ? `IOO graph • ${node.domain}` : 'IOO graph',
     }));
-
-    const goal = await OraClient.createGoal(
-      title,
-      descriptionParts.join('\n') || undefined,
-      undefined,
-      steps.length ? steps : undefined,
-    );
+    const goal = await OraClient.createGoal(title, descriptionParts.join('\n') || undefined, undefined, steps.length ? steps : undefined);
     setGoals((prev) => [goal, ...prev]);
     setClarifyingGoal(null);
-    show('✦ Goal created!', 'success');
+    setLens('active');
+    show('Added to your living collection.', 'success');
   };
 
   return (
-    <div className="page-content" style={{ maxWidth: 640, margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingTop: 8 }}>
-        <div>
-          <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: -0.5 }}>◎ What do you want?</h1>
-          <p style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 4 }}>
-            {goals.length} active goal{goals.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-        {/* Domain legend compact */}
-        <div style={{ display: 'flex', gap: 6 }}>
-          {Object.entries(DOMAIN_CONFIG).map(([name, cfg]) => (
-            <span key={name} style={{ fontSize: 16 }} title={name}>{cfg.emoji}</span>
-          ))}
-        </div>
-      </div>
+    <div className="page-content" style={{ maxWidth: 720, margin: '0 auto' }}>
+      <header style={{ paddingTop: 6, marginBottom: 16 }}>
+        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 950, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>User state collection</div>
+        <h1 style={{ fontWeight: 950, fontSize: 'clamp(30px, 8vw, 48px)', letterSpacing: -1.4, lineHeight: 0.98, margin: 0 }}>Intentions that evolve with Ora.</h1>
+        <p style={{ color: 'rgba(248,248,252,0.54)', fontSize: 14, lineHeight: 1.65, marginTop: 12, maxWidth: 560 }}>
+          Goals, plans, saved possibilities, and active paths live here as one evolving collection — not a static checklist. Ora uses this as part of your state when choosing the next IOO node.
+        </p>
+      </header>
 
-      {/* Quick add */}
-      <QuickAddGoal onClarify={setClarifyingGoal} />
+      <UserStateStrip goals={goals} />
+      <CaptureBar onClarify={setClarifyingGoal} />
+      <StarterRail onClarify={setClarifyingGoal} />
+      <LensTabs lens={lens} setLens={setLens} counts={counts} />
 
-      {/* Goal starter cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
-        {GOAL_STARTERS.map((starter) => (
-          <button
-            key={starter.title}
-            onClick={() => setClarifyingGoal(starter.title)}
-            style={{
-              textAlign: 'left', padding: 14, borderRadius: 14,
-              background: 'rgba(255,255,255,0.035)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#f8f8fc',
-            }}
-          >
-            <div style={{ fontSize: 20, marginBottom: 8 }}>{starter.emoji}</div>
-            <div style={{ fontSize: 13, fontWeight: 750 }}>{starter.title}</div>
-            <div style={{ fontSize: 11, color: DOMAIN_CONFIG[starter.domain].color, marginTop: 4 }}>{starter.domain}</div>
-          </button>
-        ))}
-      </div>
-
-      {/* Goals list */}
       {loading ? (
-        <>
-          <GoalSkeleton />
-          <GoalSkeleton />
-          <GoalSkeleton />
-        </>
-      ) : goals.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <div style={{ fontSize: 56, marginBottom: 16, display: 'inline-block' }} className="brain-float">◎</div>
-          <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 18 }}>No goals yet</div>
-          <div style={{ color: 'rgba(248,248,252,0.4)', maxWidth: 260, margin: '0 auto', lineHeight: 1.6 }}>
-            Tap a starter or type your own goal. Ora will clarify it before building your path.
-          </div>
-        </div>
-      ) : (
-        <div>
-          {goals.map((goal) => (
-            <GoalCard key={goal.id} goal={goal} onUpdate={handleUpdate} onDelete={handleDelete} />
-          ))}
-        </div>
-      )}
+        <div style={{ display: 'grid', gap: 12 }}>{[0, 1, 2].map((i) => <div key={i} className="skeleton" style={{ height: 132, borderRadius: 26 }} />)}</div>
+      ) : visibleGoals.length ? (
+        <div>{visibleGoals.map((goal) => <GoalCard key={goal.id} goal={goal} onUpdate={handleUpdate} onDelete={handleDelete} />)}</div>
+      ) : goals.length ? (
+        <div style={{ color: 'rgba(248,248,252,0.46)', textAlign: 'center', padding: 28 }}>Nothing in this lens yet.</div>
+      ) : <EmptyState onClarify={setClarifyingGoal} />}
 
-      {clarifyingGoal && (
-        <GoalClarifyModal
-          goalTitle={clarifyingGoal}
-          onClose={() => setClarifyingGoal(null)}
-          onComplete={handleClarifiedGoal}
-        />
-      )}
+      <button onClick={() => navigate('/app/ido')} style={{ width: '100%', marginTop: 16, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.035)', color: 'rgba(248,248,252,0.64)', borderRadius: 18, padding: 14, fontWeight: 850 }}>
+        Let iDo recommend from this state →
+      </button>
+
+      {clarifyingGoal && <GoalClarifyModal goalTitle={clarifyingGoal} onClose={() => setClarifyingGoal(null)} onComplete={handleClarifiedGoal} />}
     </div>
   );
 }
