@@ -297,6 +297,21 @@ class OraClientClass {
     return res.data;
   }
 
+  async connectGoogleDrive() {
+    const res = await this.client.post('/api/auth/google/drive/connect');
+    return res.data as { ok: boolean; auth_url: string; message?: string };
+  }
+
+  async setDrivePrivacy(level: 'none' | 'goals_only' | 'full') {
+    const res = await this.client.post('/api/users/integrations/drive', { level });
+    return res.data;
+  }
+
+  async syncGoogleDrive() {
+    const res = await this.client.post('/api/users/integrations/drive/sync');
+    return res.data;
+  }
+
   // ── Screens ───────────────────────────────────────────────────────────────
 
   async getNextScreen(context?: string, goalId?: string, domain?: string): Promise<ScreenResponse> {
