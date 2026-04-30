@@ -2,15 +2,13 @@
  * FeedPage — TikTok-style vertical snap-scroll feed.
  *
  * v2: Full-bleed visual design (Airbnb/TikTok quality), collection save,
- * streak-aware header, backend progress signals on interaction.
+ * backend progress signals on interaction.
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuraClient, ScreenResponse } from '../lib/AuraClient';
 import { AuraCard } from '../components/AuraCard';
 import { CollectionPicker } from '../components/CollectionPicker';
-import { StreakBadge } from '../components/StreakBadge';
-import { FEED_SURFACES } from '../runtime/ontology';
 import { useExperiment } from '../lib/useExperiment';
 
 // ─── Domain config ────────────────────────────────────────────────────────────
@@ -753,9 +751,6 @@ export default function FeedPage() {
   const { variant: goalBannerVariant } = useExperiment('feed_goal_banner');
   const { variant: emptyStateVariant, trackEvent: trackEmptyState } = useExperiment('feed_empty_state');
 
-  const iDoFeed = FEED_SURFACES.find((surface) => surface.owner === 'ido_meta_feed');
-  const blendedFeedCount = iDoFeed?.blendsOwners?.length || 0;
-
   const goalId = searchParams.get('goal') || undefined;
   const [goalTitle, setGoalTitle] = useState<string | null>(null);
 
@@ -771,7 +766,6 @@ export default function FeedPage() {
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
   const [toastMsg, setToastMsg] = useState('');
   const [collectionPickerCard, setCollectionPickerCard] = useState<any | null>(null);
-  const [streak, setStreak] = useState<{ current: number; at_risk: boolean } | null>(null);
   const [capabilityReady, setCapabilityReady] = useState(() => !!localStorage.getItem(todayCapabilityKey()));
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
 
@@ -783,13 +777,6 @@ export default function FeedPage() {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 2500);
   };
-
-  // Fetch streak for header
-  useEffect(() => {
-    AuraClient.get<any>('/api/gamification/status')
-      .then((data) => setStreak(data.streak))
-      .catch(() => {});
-  }, []);
 
   // Fetch goal title
   useEffect(() => {
@@ -1184,22 +1171,7 @@ export default function FeedPage() {
             </span>
           </div>
         ) : (
-          <div>
-            <div style={{ fontWeight: 900, fontSize: 16, letterSpacing: -0.3, color: '#f8f8fc' }}>Path Feed</div>
-            <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.42)', fontWeight: 700, marginTop: 2 }}>
-              What should I do next? · {blendedFeedCount} signal streams
-            </div>
-          </div>
-        )}
-
-        {/* Streak indicator */}
-        {streak && (
-          <div
-            style={{ pointerEvents: 'auto' }}
-            onClick={() => navigate('/app/profile')}
-          >
-            <StreakBadge compact />
-          </div>
+          <div aria-hidden="true" />
         )}
       </div>
 
