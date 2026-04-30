@@ -247,7 +247,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   right: 0 !important;
   bottom: var(--shell-bottom-clearance) !important;
   overflow: hidden;
-  z-index: 10;
+  z-index: 100;
 }
 @media (min-width: 1024px) {
   .feed-container {

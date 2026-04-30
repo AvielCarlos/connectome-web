@@ -228,6 +228,7 @@ function DetailSheet({ card, color, onClose }: { card: any; color: string; onClo
         background: 'rgba(0,0,0,0.65)',
         backdropFilter: 'blur(10px)',
         display: 'flex', alignItems: 'flex-end',
+        paddingBottom: 'var(--shell-bottom-clearance)',
         animation: 'fadeIn 0.2s ease-out',
       }}
     >
@@ -235,7 +236,7 @@ function DetailSheet({ card, color, onClose }: { card: any; color: string; onClo
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxHeight: '88vh',
+          maxHeight: 'calc(100dvh - var(--shell-top-clearance) - var(--shell-bottom-clearance) - 18px)',
           background: '#12121e',
           borderRadius: '28px 28px 0 0',
           border: `1px solid ${color}22`,
@@ -349,8 +350,20 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
   const steps = plan?.steps?.length ? plan.steps : fallbackSteps.map((s: string) => ({ title: s, description: '' }));
 
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 260, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'flex-end' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxHeight: '90vh', overflowY: 'auto', background: '#11111c', borderRadius: '28px 28px 0 0', border: '1px solid rgba(0,212,170,0.22)', padding: '18px 22px 34px' }}>
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 260,
+        background: 'rgba(0,0,0,0.72)',
+        backdropFilter: 'blur(12px)',
+        display: 'flex',
+        alignItems: 'flex-end',
+        paddingBottom: 'var(--shell-bottom-clearance)',
+      }}
+    >
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxHeight: 'calc(100dvh - var(--shell-top-clearance) - var(--shell-bottom-clearance) - 18px)', overflowY: 'auto', background: '#11111c', borderRadius: '28px 28px 0 0', border: '1px solid rgba(0,212,170,0.22)', padding: '18px 22px 34px' }}>
         <div style={{ width: 44, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.16)', margin: '0 auto 18px' }} />
         <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Ora pathway</div>
         <h2 style={{ margin: 0, color: '#f8f8fc', fontSize: 24, lineHeight: 1.15 }}>{card.title || 'Your next step'}</h2>
