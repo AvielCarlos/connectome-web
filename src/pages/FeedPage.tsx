@@ -73,6 +73,27 @@ function getDomainConfig(spec: any) {
   return DOMAIN_CONFIG[d] || DEFAULT_DOMAIN;
 }
 
+function fallbackDeepDive(card: any, spec: any, domain: string) {
+  const title = card?.title || 'this next step';
+  const body = card?.body || '';
+  const source = spec?.metadata?.source || '';
+  const isFallback = source === 'static_fallback';
+  return {
+    time_to_start: spec?.metadata?.requires_time_hours ? `~${spec.metadata.requires_time_hours}h` : isFallback ? '2–10 minutes' : 'Start small',
+    difficulty: 'easy',
+    why_it_matters: body
+      ? `This is a ${domain || 'life'} action, not just content. Ora is testing whether this kind of step fits your current capacity and direction: ${body}`
+      : `Ora is testing whether ${title} fits your current capacity and direction.`,
+    stat: 'Your response teaches Ora what to recommend, what to avoid, and what bridge steps you may need first.',
+    steps: [
+      'Check whether your current time, energy, location, and resources make this realistic.',
+      'Choose the smallest version that can be done today.',
+      'Tap Do now when you want Ora to turn it into a concrete pathway.',
+    ],
+    resources: [],
+  };
+}
+
 // ─── Confetti burst ───────────────────────────────────────────────────────────
 function ConfettiBurst({ active }: { active: boolean }) {
   if (!active) return null;
@@ -388,7 +409,7 @@ function FeedCard({
       if (['body', 'body_text'].includes((c as any).type) && !cardData.body) cardData.body = (c as any).text;
     }
   }
-  if (!cardData.deep_dive) cardData.deep_dive = specAny.deep_dive || null;
+  if (!cardData.deep_dive) cardData.deep_dive = specAny.deep_dive || fallbackDeepDive(cardData, specAny, domain);
 
   const handleSave = () => {
     if (!isSaved) {
