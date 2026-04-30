@@ -176,7 +176,7 @@ export default function OraOnboarding() {
       padding: 16,
     }}>
       <div className="ora-onboarding-card" style={{
-        width: '100%', maxWidth: 760, height: 'min(860px, 94vh)',
+        width: '100%', maxWidth: 760, height: 'min(860px, calc(var(--visual-viewport-height, 100dvh) - 24px))',
         background: 'radial-gradient(circle at top, rgba(0,212,170,0.12), transparent 38%), #0a0a0f',
         border: '1px solid rgba(0,212,170,0.24)',
         borderRadius: 28,

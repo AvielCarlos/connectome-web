@@ -792,7 +792,7 @@ export default function SurfacePage() {
   if (loading) {
     return (
       <div style={{
-        minHeight: '100vh',
+        minHeight: 'var(--visual-viewport-height, 100dvh)',
         background: C.bg,
         display: 'flex',
         alignItems: 'center',
@@ -815,7 +815,7 @@ export default function SurfacePage() {
 
   if (error === 'auth' || !token) {
     return (
-      <div style={{ minHeight: '100vh', background: C.bg }}>
+      <div style={{ minHeight: 'var(--visual-viewport-height, 100dvh)', background: C.bg }}>
         <UpgradePrompt />
       </div>
     );
@@ -824,7 +824,7 @@ export default function SurfacePage() {
   if (error) {
     return (
       <div style={{
-        minHeight: '100vh',
+        minHeight: 'var(--visual-viewport-height, 100dvh)',
         background: C.bg,
         display: 'flex',
         alignItems: 'center',
@@ -845,7 +845,7 @@ export default function SurfacePage() {
 
   if (!data) {
     return (
-      <div style={{ minHeight: '100vh', background: C.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: 'var(--visual-viewport-height, 100dvh)', background: C.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <p style={{ color: 'rgba(248,248,252,0.4)', fontSize: 14 }}>Nothing here yet.</p>
       </div>
     );
@@ -854,7 +854,7 @@ export default function SurfacePage() {
   // ── Full render ────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ minHeight: '100vh', background: C.bg, color: C.text }}>
+    <div style={{ minHeight: 'var(--visual-viewport-height, 100dvh)', background: C.bg, color: C.text }}>
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 80px' }}>
         {/* Sections */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

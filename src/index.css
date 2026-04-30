@@ -28,14 +28,22 @@
   /* nav */
   --bottom-nav-height: 80px;
   --top-header-height: 56px;
+  --keyboard-inset: 0px;
+  --visual-viewport-height: 100dvh;
   --shell-top-clearance: calc(var(--top-header-height) + 6px);
-  --shell-bottom-clearance: calc(72px + max(14px, env(safe-area-inset-bottom, 0px)) + 14px);
+  --shell-bottom-clearance: calc(72px + max(14px, env(safe-area-inset-bottom, 0px)) + 14px + var(--keyboard-inset));
 }
 
 /* ─── Base ──────────────────────────────────────────────────────────── */
 html, body {
-  height: 100%;
+  min-height: 100%;
+  min-height: var(--visual-viewport-height, 100dvh);
   overflow-x: hidden;
+}
+
+#root {
+  min-height: 100%;
+  min-height: var(--visual-viewport-height, 100dvh);
 }
 
 body {
@@ -216,7 +224,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ─── Authenticated app shell (offset for sidebar on desktop) ────────── */
 .app-authenticated {
-  min-height: 100vh;
+  min-height: var(--visual-viewport-height, 100dvh);
 }
 @media (min-width: 1024px) {
   .app-authenticated {
@@ -366,7 +374,7 @@ body {
 
 .connectome-shell {
   position: relative;
-  min-height: 100vh;
+  min-height: var(--visual-viewport-height, 100dvh);
   isolation: isolate;
   overflow-x: hidden;
   color: #f8f8fc;
@@ -579,7 +587,7 @@ body {
 
 .connectome-main {
   position: relative;
-  min-height: 100dvh;
+  min-height: var(--visual-viewport-height, 100dvh);
   padding: calc(var(--top-header-height) + 10px) clamp(16px, 4vw, 44px) calc(var(--shell-bottom-clearance) + 18px);
 }
 
@@ -613,7 +621,7 @@ body {
 .connectome-dock {
   position: fixed;
   left: 50%;
-  bottom: max(14px, env(safe-area-inset-bottom));
+  bottom: calc(max(14px, env(safe-area-inset-bottom)) + var(--keyboard-inset));
   z-index: 95;
   transform: translateX(-50%);
   width: min(520px, calc(100vw - 24px));
@@ -659,6 +667,18 @@ body {
   text-shadow: 0 0 18px rgba(0,212,170,0.8);
 }
 
+body.keyboard-open .connectome-dock {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, calc(100% + 24px));
+}
+
+body.keyboard-open .connectome-signout,
+body.keyboard-open .global-feedback-fab {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .connectome-signout {
   position: fixed;
   right: 18px;
@@ -673,7 +693,7 @@ body {
 }
 
 .connectome-loading {
-  min-height: 100vh;
+  min-height: var(--visual-viewport-height, 100dvh);
   display: grid;
   place-items: center;
   color: rgba(248,248,252,0.54);
@@ -851,7 +871,7 @@ body {
   position: relative;
   z-index: 1;
   width: min(760px, 100%);
-  height: min(820px, calc(100vh - 36px));
+  height: min(820px, calc(var(--visual-viewport-height, 100dvh) - 36px));
   border: 1px solid rgba(255,255,255,0.14);
   border-radius: 36px;
   background: linear-gradient(145deg, rgba(14,16,32,0.86), rgba(6,7,18,0.78));
@@ -917,14 +937,14 @@ body {
   .app-launcher__grid { grid-template-columns: 1fr; }
   .connectome-home h1 { font-size: clamp(36px, 14vw, 62px); }
   .ora-overlay { padding: 0; align-items: stretch; }
-  .ora-overlay__panel { width: 100%; height: 100%; border-radius: 0; border-left: none; border-right: none; }
+  .ora-overlay__panel { width: 100%; height: var(--visual-viewport-height, 100dvh); border-radius: 0; border-left: none; border-right: none; }
   .ora-overlay__message > div { max-width: 82%; }
 }
 
 /* Meta-app shells: iVive + Eviva */
 .meta-app-page {
   position: relative;
-  min-height: calc(100vh - 150px);
+  min-height: calc(var(--visual-viewport-height, 100dvh) - 150px);
   padding: clamp(24px, 5vw, 58px);
   overflow: hidden;
   border-radius: 34px;
@@ -1023,7 +1043,7 @@ body {
 .global-feedback-fab {
   position: fixed;
   right: max(18px, env(safe-area-inset-right));
-  bottom: calc(var(--bottom-nav-height, 80px) + env(safe-area-inset-bottom, 0px) + 18px);
+  bottom: calc(var(--bottom-nav-height, 80px) + env(safe-area-inset-bottom, 0px) + 18px + var(--keyboard-inset));
   width: 52px;
   height: 52px;
   border-radius: 999px;
@@ -1057,7 +1077,7 @@ body {
 }
 .global-feedback-modal {
   width: min(540px, 100%);
-  max-height: min(86vh, 720px);
+  max-height: min(calc(var(--visual-viewport-height, 100dvh) - 36px), 720px);
   overflow: auto;
   border-radius: 24px;
   border: 1px solid rgba(255,255,255,0.12);
@@ -1106,7 +1126,7 @@ body {
   backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; padding: 18px;
 }
 .cp-explainer-modal {
-  position: relative; width: min(500px, 100%); border-radius: 24px; border: 1px solid rgba(255,255,255,0.14);
+  position: relative; width: min(500px, 100%); max-height: calc(var(--visual-viewport-height, 100dvh) - 36px); overflow: auto; border-radius: 24px; border: 1px solid rgba(255,255,255,0.14);
   background: linear-gradient(180deg, rgba(24,27,48,0.98), rgba(8,10,20,0.99));
   box-shadow: 0 24px 90px rgba(0,0,0,0.58); padding: 26px; color: #f8f8fc;
 }

@@ -136,7 +136,7 @@ export default function ContributePage() {
   };
 
   return (
-    <main style={{ minHeight: '100vh', background: 'radial-gradient(circle at 50% 0%, rgba(0,212,170,0.12), transparent 36%), #0a0a0f', color: '#f8f8fc', padding: '46px 18px 110px' }}>
+    <main style={{ minHeight: 'var(--visual-viewport-height, 100dvh)', background: 'radial-gradient(circle at 50% 0%, rgba(0,212,170,0.12), transparent 36%), #0a0a0f', color: '#f8f8fc', padding: '46px 18px 110px' }}>
       <style>{`
         .contribute-page input, .contribute-page textarea { width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.1); color: #f8f8fc; border-radius: 14px; padding: 14px 15px; font: inherit; outline: none; }
         .contribute-page input:focus, .contribute-page textarea:focus { border-color: rgba(0,212,170,0.62); box-shadow: 0 0 0 3px rgba(0,212,170,0.10); }

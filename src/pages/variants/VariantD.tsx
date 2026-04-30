@@ -205,7 +205,7 @@ export default function VariantD() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'var(--visual-viewport-height, 100dvh)' }}>
         <div style={{ fontSize: 32, color: '#00d4aa', animation: 'spin 1.5s linear infinite' }}>◈</div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -213,7 +213,7 @@ export default function VariantD() {
   }
 
   return (
-    <div style={{ padding: '16px 12px 80px', background: '#0a0a0f', minHeight: '100vh' }}>
+    <div style={{ padding: '16px 12px 80px', background: '#0a0a0f', minHeight: 'var(--visual-viewport-height, 100dvh)' }}>
       {/* Personalised header */}
       <div
         style={{

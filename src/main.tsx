@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react'
+import React, { Suspense, lazy, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -40,10 +40,49 @@ function ShellRoute({ activeApp, children }: { activeApp: ShellApp; children: Re
   )
 }
 
+
+function useKeyboardViewport() {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const root = document.documentElement
+    const body = document.body
+
+    const update = () => {
+      const viewport = window.visualViewport
+      const layoutHeight = window.innerHeight
+      const visualHeight = viewport?.height ?? layoutHeight
+      const offsetTop = viewport?.offsetTop ?? 0
+      const keyboardInset = Math.max(0, Math.round(layoutHeight - visualHeight - offsetTop))
+
+      root.style.setProperty('--visual-viewport-height', `${Math.round(visualHeight)}px`)
+      root.style.setProperty('--keyboard-inset', `${keyboardInset}px`)
+      body.classList.toggle('keyboard-open', keyboardInset > 80)
+    }
+
+    update()
+    window.addEventListener('resize', update)
+    window.addEventListener('orientationchange', update)
+    window.visualViewport?.addEventListener('resize', update)
+    window.visualViewport?.addEventListener('scroll', update)
+
+    return () => {
+      window.removeEventListener('resize', update)
+      window.removeEventListener('orientationchange', update)
+      window.visualViewport?.removeEventListener('resize', update)
+      window.visualViewport?.removeEventListener('scroll', update)
+      root.style.removeProperty('--visual-viewport-height')
+      root.style.removeProperty('--keyboard-inset')
+      body.classList.remove('keyboard-open')
+    }
+  }, [])
+}
+
 function App() {
+  useKeyboardViewport()
   const { isAuthenticated } = useAuth()
   return (
-    <div style={{ minHeight: '100vh', background: '#060610', color: '#f8f8fc' }}>
+    <div style={{ minHeight: 'var(--visual-viewport-height, 100dvh)', background: '#060610', color: '#f8f8fc' }}>
       <Suspense fallback={<div className="connectome-loading">Loading…</div>}>
         <Routes>
           <Route path="/" element={isAuthenticated ? <ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute> : <AuthPage />} />

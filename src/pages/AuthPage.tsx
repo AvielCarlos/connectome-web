@@ -58,7 +58,7 @@ export default function AuthPage() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: 'var(--visual-viewport-height, 100dvh)',
       background: '#0a0a0f',
       display: 'flex',
       alignItems: 'center',

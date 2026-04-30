@@ -56,7 +56,7 @@ export default function VariantC() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'var(--visual-viewport-height, 100dvh)' }}>
         <div style={{ fontSize: 32, color: '#00d4aa' }}>◈</div>
       </div>
     );
@@ -66,7 +66,7 @@ export default function VariantC() {
     return (
       <div
         style={{
-          minHeight: '100vh',
+          minHeight: 'var(--visual-viewport-height, 100dvh)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -105,7 +105,7 @@ export default function VariantC() {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        minHeight: 'var(--visual-viewport-height, 100dvh)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

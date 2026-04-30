@@ -52,7 +52,7 @@ type HomeView =
 
 const SHARED_STYLES = {
   pageBase: {
-    minHeight: '100vh',
+    minHeight: 'var(--visual-viewport-height, 100dvh)',
     background: '#0a0a0f',
     color: '#f8f8fc',
   } as React.CSSProperties,

@@ -56,7 +56,7 @@ export default function VariantB() {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        minHeight: 'var(--visual-viewport-height, 100dvh)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

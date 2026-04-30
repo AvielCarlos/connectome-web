@@ -14,7 +14,7 @@ export default function GitHubCallbackPage() {
   }, [navigate]);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0a0a0f', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'var(--visual-viewport-height, 100dvh)', background: '#0a0a0f', flexDirection: 'column', gap: 20 }}>
       <div style={{ fontSize: 48 }}>✅</div>
       <div style={{ fontSize: 22, fontWeight: 700, color: '#34d399' }}>GitHub connected!</div>
       <div style={{ fontSize: 15, color: 'rgba(248,248,252,0.5)' }}>Taking you back to contributions…</div>

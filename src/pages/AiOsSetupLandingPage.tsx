@@ -48,7 +48,7 @@ function BulletList({ items }: { items: string[] }) {
 
 export default function AiOsSetupLandingPage() {
   return (
-    <main style={{ minHeight: '100vh', overflow: 'hidden', background: '#060610' }}>
+    <main style={{ minHeight: 'var(--visual-viewport-height, 100dvh)', overflow: 'hidden', background: '#060610' }}>
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
         background: 'radial-gradient(circle at 18% 8%, rgba(0,212,170,0.22), transparent 30%), radial-gradient(circle at 82% 16%, rgba(99,102,241,0.18), transparent 32%), radial-gradient(circle at 50% 88%, rgba(168,85,247,0.14), transparent 34%)',
