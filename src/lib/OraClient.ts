@@ -183,6 +183,20 @@ export interface OnboardingStatus {
   variant_id?: string | null;
 }
 
+export interface DiscoveryAnswerPayload {
+  question_id: string;
+  answer: string | number | string[] | Record<string, any>;
+  profile_field: string;
+}
+
+export interface IOOExecutionResponse {
+  run_id: string;
+  status: string;
+  protocol: Record<string, any>;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface FeedbackPayload {
   screen_spec_id: string;
   rating?: number;
@@ -364,6 +378,16 @@ class OraClientClass {
   async advanceOnboarding(conversation: OnboardingMessage[]): Promise<OnboardingResponse> {
     const res = await this.client.post('/api/discovery/onboarding', { conversation });
     return res.data as OnboardingResponse;
+  }
+
+  async submitDiscoveryAnswer(payload: DiscoveryAnswerPayload): Promise<{ ok: boolean; profile_updated: boolean }> {
+    const res = await this.client.post('/api/discovery/answer', payload);
+    return res.data as { ok: boolean; profile_updated: boolean };
+  }
+
+  async executeIOONode(nodeId: string, intent: 'do_now' | 'do_later' = 'do_now'): Promise<IOOExecutionResponse> {
+    const res = await this.client.post('/api/ioo/execute', { node_id: nodeId, intent });
+    return res.data as IOOExecutionResponse;
   }
 
   async breakdownGoal(goalId: string): Promise<Goal> {

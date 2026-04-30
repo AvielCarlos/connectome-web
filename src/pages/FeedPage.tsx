@@ -22,6 +22,52 @@ const DOMAIN_CONFIG: Record<string, { color: string; gradient: string; emoji: st
 };
 const DEFAULT_DOMAIN = { color: '#00d4aa', gradient: 'linear-gradient(135deg, #042f2e 0%, #0f766e 50%, #0a0a0f 100%)', emoji: '◈' };
 
+const CAPABILITY_PULSE_VERSION = 'v2';
+
+const CAPABILITY_CARDS = [
+  {
+    id: 'today_capacity',
+    field: 'today_capacity',
+    eyebrow: 'Before the feed',
+    title: 'What can you realistically do today?',
+    body: 'Ora needs your actual capacity before recommending the next move.',
+    options: ['5 minutes', '15–30 minutes', '1–2 hours', 'A deeper block'],
+  },
+  {
+    id: 'energy_state',
+    field: 'current_energy_state',
+    eyebrow: 'iVive signal',
+    title: 'Where is your energy right now?',
+    body: 'This changes whether Ora should suggest action, preparation, or restoration.',
+    options: ['Low / need gentleness', 'Steady', 'High / ready to move', 'Scattered / need focus'],
+  },
+  {
+    id: 'available_resources',
+    field: 'available_resources_today',
+    eyebrow: 'Resources',
+    title: 'What do you have access to right now?',
+    body: 'Money, location, tools, people, and time all affect the path.',
+    options: ['Just my phone', 'Home/quiet space', 'Transport / can go out', 'Budget to spend', 'People I can contact'],
+    multi: true,
+  },
+  {
+    id: 'constraint_now',
+    field: 'current_constraint',
+    eyebrow: 'Constraint check',
+    title: 'What would block you from doing something today?',
+    body: 'Ora should bridge the gap instead of pretending the obstacle is not there.',
+    options: ['Time', 'Money', 'Location', 'Energy/health', 'Confidence/skill', 'Nothing major'],
+  },
+  {
+    id: 'desired_mode',
+    field: 'desired_feed_mode',
+    eyebrow: 'Direction',
+    title: 'What kind of next step do you want?',
+    body: 'The feed should connect your current state to a viable next action.',
+    options: ['Improve myself', 'Make progress on work/service', 'Find fun/adventure', 'Recover/rest', 'Surprise me'],
+  },
+];
+
 function getDomainConfig(spec: any) {
   const d = spec?.metadata?.domain || spec?.domain || '';
   return DOMAIN_CONFIG[d] || DEFAULT_DOMAIN;
@@ -54,6 +100,79 @@ function ConfettiBurst({ active }: { active: boolean }) {
           }}
         />
       ))}
+    </div>
+  );
+}
+
+function todayCapabilityKey() {
+  return `ido_capability_pulse_${CAPABILITY_PULSE_VERSION}_${new Date().toISOString().slice(0, 10)}`;
+}
+
+function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
+  const [step, setStep] = useState(0);
+  const [selected, setSelected] = useState<Record<string, string[]>>({});
+  const [saving, setSaving] = useState(false);
+  const card = CAPABILITY_CARDS[step];
+  const chosen = selected[card.id] || [];
+
+  const choose = async (option: string) => {
+    const nextChosen = card.multi
+      ? (chosen.includes(option) ? chosen.filter((x) => x !== option) : [...chosen, option])
+      : [option];
+    setSelected((prev) => ({ ...prev, [card.id]: nextChosen }));
+    if (!card.multi) await advance(nextChosen);
+  };
+
+  const advance = async (answer = chosen) => {
+    if (!answer.length) return;
+    setSaving(true);
+    OraClient.submitDiscoveryAnswer({
+      question_id: `feed_capability_${card.id}`,
+      profile_field: card.field,
+      answer: answer.length === 1 ? answer[0] : answer,
+    }).catch(() => {});
+    OraClient['client'].post('/api/gamification/checkin', { reason: 'capability_pulse', ref_id: card.id }).catch(() => {});
+    setTimeout(() => {
+      if (step >= CAPABILITY_CARDS.length - 1) {
+        localStorage.setItem(todayCapabilityKey(), JSON.stringify({ completed_at: new Date().toISOString(), answers: { ...selected, [card.id]: answer } }));
+        onComplete();
+      } else {
+        setStep((s) => s + 1);
+      }
+      setSaving(false);
+    }, 180);
+  };
+
+  return (
+    <div style={{ minHeight: '100%', background: 'radial-gradient(circle at top, rgba(0,212,170,0.16), #0a0a0f 58%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 22 }}>
+      <div style={{ width: '100%', maxWidth: 460, background: 'rgba(18,18,30,0.88)', border: '1px solid rgba(0,212,170,0.22)', borderRadius: 28, padding: 22, boxShadow: '0 24px 80px rgba(0,0,0,0.45)' }}>
+        <div style={{ fontSize: 12, fontWeight: 800, color: '#00d4aa', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>{card.eyebrow} · {step + 1}/{CAPABILITY_CARDS.length}</div>
+        <h1 style={{ margin: 0, fontSize: 26, lineHeight: 1.12, color: '#f8f8fc', letterSpacing: -0.8 }}>{card.title}</h1>
+        <p style={{ margin: '12px 0 20px', color: 'rgba(248,248,252,0.58)', fontSize: 15, lineHeight: 1.6 }}>{card.body}</p>
+        <div style={{ display: 'grid', gap: 10 }}>
+          {card.options.map((option) => {
+            const active = chosen.includes(option);
+            return (
+              <button key={option} onClick={() => choose(option)} style={{
+                width: '100%', textAlign: 'left', padding: '14px 16px', borderRadius: 18,
+                background: active ? 'rgba(0,212,170,0.18)' : 'rgba(255,255,255,0.045)',
+                border: active ? '1px solid rgba(0,212,170,0.55)' : '1px solid rgba(255,255,255,0.08)',
+                color: active ? '#bfffee' : '#f8f8fc', fontWeight: 750, fontSize: 15,
+              }}>
+                {active ? '✓ ' : ''}{option}
+              </button>
+            );
+          })}
+        </div>
+        {card.multi && (
+          <button disabled={!chosen.length || saving} onClick={() => advance()} style={{ marginTop: 16, width: '100%', padding: '14px 18px', borderRadius: 18, border: 'none', background: chosen.length ? 'linear-gradient(135deg,#00d4aa,#14f1c1)' : 'rgba(255,255,255,0.08)', color: chosen.length ? '#06110f' : 'rgba(248,248,252,0.35)', fontWeight: 900 }}>
+            Continue →
+          </button>
+        )}
+        <div style={{ marginTop: 18, color: 'rgba(248,248,252,0.34)', fontSize: 12, lineHeight: 1.55 }}>
+          Ora updates this regularly so cards match what you can actually do, not a fantasy version of your day.
+        </div>
+      </div>
     </div>
   );
 }
@@ -183,11 +302,59 @@ function DetailSheet({ card, color, onClose }: { card: any; color: string; onClo
   );
 }
 
+function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
+  const card = data?.card || {};
+  const protocol = data?.execution?.protocol || null;
+  const plan = protocol?.execution_plan || null;
+  const questions = protocol?.clarifying_questions || [];
+  const fallbackSteps = card?.deep_dive?.steps || [
+    'Confirm your current capacity, location, budget, and energy.',
+    'Choose the lowest-friction version of this action.',
+    'Take the first concrete step now, or schedule it for a real time.',
+  ];
+  const steps = plan?.steps?.length ? plan.steps : fallbackSteps.map((s: string) => ({ title: s, description: '' }));
+
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 260, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'flex-end' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxHeight: '90vh', overflowY: 'auto', background: '#11111c', borderRadius: '28px 28px 0 0', border: '1px solid rgba(0,212,170,0.22)', padding: '18px 22px 34px' }}>
+        <div style={{ width: 44, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.16)', margin: '0 auto 18px' }} />
+        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Ora pathway</div>
+        <h2 style={{ margin: 0, color: '#f8f8fc', fontSize: 24, lineHeight: 1.15 }}>{card.title || 'Your next step'}</h2>
+        <p style={{ color: 'rgba(248,248,252,0.58)', lineHeight: 1.65, fontSize: 14 }}>{protocol?.summary || 'Before this becomes a card to consume, Ora turns it into a path from your current state to a doable first action.'}</p>
+
+        {questions.length > 0 && (
+          <div style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.28)', borderRadius: 18, padding: 14, marginBottom: 18 }}>
+            <div style={{ color: '#c4b5fd', fontSize: 12, fontWeight: 850, marginBottom: 8 }}>Needed before execution</div>
+            {questions.map((q: string, i: number) => <div key={i} style={{ color: 'rgba(248,248,252,0.78)', fontSize: 14, lineHeight: 1.55 }}>• {q}</div>)}
+          </div>
+        )}
+
+        <div style={{ display: 'grid', gap: 12 }}>
+          {steps.map((step: any, i: number) => (
+            <div key={i} style={{ display: 'flex', gap: 12, padding: 14, background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(0,212,170,0.16)', color: '#00d4aa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, flexShrink: 0 }}>{i + 1}</div>
+              <div>
+                <div style={{ color: '#f8f8fc', fontWeight: 850, fontSize: 14 }}>{step.title || step}</div>
+                {step.description && <div style={{ color: 'rgba(248,248,252,0.52)', fontSize: 13, lineHeight: 1.55, marginTop: 4 }}>{step.description}</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={onClose} style={{ marginTop: 18, width: '100%', border: 'none', borderRadius: 18, padding: '14px 18px', background: 'linear-gradient(135deg,#00d4aa,#14f1c1)', color: '#06110f', fontWeight: 950 }}>
+          Keep going with Ora →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Full-bleed FeedCard ─────────────────────────────────────────────────────
 function FeedCard({
   item,
   active,
   onRate,
+  onDoNow,
   onSaveRequest,
   onSkip,
   ratings,
@@ -196,6 +363,7 @@ function FeedCard({
   item: ScreenResponse;
   active: boolean;
   onRate: (id: string, r: number) => void;
+  onDoNow: (item: ScreenResponse, cardData: any) => void;
   onSaveRequest: (card: any) => void;
   onSkip: () => void;
   ratings: Record<string, number>;
@@ -352,12 +520,7 @@ function FeedCard({
       }}>
         {/* Rating stars — simplified to heart+fire for visual clarity */}
         <button
-          onClick={() => {
-            // TODO(IOO): "Do now" should start the IOO Execution Protocol for
-            // this node/action, then write the completion/result back as graph
-            // refinement. Rating=5 is the temporary MVP signal.
-            onRate(item.screen_spec_db_id, currentRating === 5 ? 1 : 5);
-          }}
+          onClick={() => onDoNow(item, cardData)}
           style={{
             width: 48, height: 48, borderRadius: 24,
             background: currentRating >= 4
@@ -514,6 +677,8 @@ export default function FeedPage() {
   const [toastMsg, setToastMsg] = useState('');
   const [collectionPickerCard, setCollectionPickerCard] = useState<any | null>(null);
   const [streak, setStreak] = useState<{ current: number; at_risk: boolean } | null>(null);
+  const [capabilityReady, setCapabilityReady] = useState(() => !!localStorage.getItem(todayCapabilityKey()));
+  const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
 
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
@@ -574,7 +739,9 @@ export default function FeedPage() {
     }
   }, [goalId]);
 
-  useEffect(() => { loadInitial(); }, [loadInitial]);
+  useEffect(() => {
+    if (capabilityReady) loadInitial();
+  }, [capabilityReady, loadInitial]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore || isLimited) return;
@@ -664,6 +831,24 @@ export default function FeedPage() {
     } catch {}
   };
 
+  const handleDoNow = async (item: ScreenResponse, cardData: any) => {
+    setRatings((prev) => ({ ...prev, [item.screen_spec_db_id]: 5 }));
+    showToast('Opening next steps…');
+    OraClient.submitFeedback({
+      screen_spec_id: item.screen_spec_db_id,
+      rating: 5,
+      time_on_screen_ms: 0,
+      exit_point: 'do_now',
+      completed: true,
+    }).catch(() => {});
+    const nodeId = (item.screen as any)?.metadata?.node_id || (item.screen as any)?.card_data?.node_id;
+    let execution = null;
+    if (nodeId) {
+      execution = await OraClient.executeIOONode(String(nodeId), 'do_now').catch(() => null);
+    }
+    setPathwaySheet({ item, card: cardData, execution });
+  };
+
   const handleSaveRequest = (card: any) => {
     setCollectionPickerCard(card);
   };
@@ -691,6 +876,10 @@ export default function FeedPage() {
   };
 
   // ─── Loading ─────────────────────────────────────────────────────────────
+  if (!capabilityReady) {
+    return <CapabilityIntake onComplete={() => setCapabilityReady(true)} />;
+  }
+
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 16 }}>
@@ -800,6 +989,8 @@ export default function FeedPage() {
     <div className="feed-container" style={{ background: '#0a0a0f' }}>
 
       {/* Collection picker */}
+      {pathwaySheet && <PathwaySheet data={pathwaySheet} onClose={() => setPathwaySheet(null)} />}
+
       {collectionPickerCard && (
         <CollectionPicker
           card={collectionPickerCard}
@@ -837,6 +1028,7 @@ export default function FeedPage() {
               item={item}
               active={i === index}
               onRate={handleRate}
+              onDoNow={handleDoNow}
               onSaveRequest={handleSaveRequest}
               onSkip={handleSkip}
               ratings={ratings}
