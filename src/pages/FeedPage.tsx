@@ -212,7 +212,7 @@ function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
 }
 
 // ─── Detail sheet ─────────────────────────────────────────────────────────────
-function DetailSheet({ card, color, onClose }: { card: any; color: string; onClose: () => void }) {
+function DetailSheet({ card, color, onClose, onDoNow }: { card: any; color: string; onClose: () => void; onDoNow: () => void }) {
   const deepDive = card?.deep_dive || null;
   const title = card?.title || card?.text || '';
   const body = card?.body || card?.body_text || '';
@@ -242,6 +242,7 @@ function DetailSheet({ card, color, onClose }: { card: any; color: string; onClo
           border: `1px solid ${color}22`,
           borderBottom: 'none',
           overflowY: 'auto',
+          paddingBottom: 'calc(92px + env(safe-area-inset-bottom, 0px))',
           animation: 'slideUpSheet 0.32s cubic-bezier(.25,.8,.25,1)',
         }}
       >
@@ -253,7 +254,7 @@ function DetailSheet({ card, color, onClose }: { card: any; color: string; onClo
           <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
-        <div style={{ padding: '8px 24px 48px' }}>
+        <div style={{ padding: '8px 24px 28px' }}>
           <div style={{ fontWeight: 800, fontSize: 22, lineHeight: 1.25, marginBottom: 12, color: '#f8f8fc' }}>{title}</div>
 
           {body && (
@@ -324,6 +325,33 @@ function DetailSheet({ card, color, onClose }: { card: any; color: string; onClo
           ) : (
             <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.25)', textAlign: 'center', padding: '20px 0' }}>Tap to explore deeper…</div>
           )}
+        </div>
+
+        <div style={{
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 4,
+          padding: '14px 20px calc(16px + env(safe-area-inset-bottom, 0px))',
+          background: 'linear-gradient(180deg, rgba(18,18,30,0), rgba(18,18,30,0.96) 22%, #12121e 100%)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          <button
+            onClick={onDoNow}
+            style={{
+              width: '100%',
+              minHeight: 54,
+              borderRadius: 999,
+              border: 'none',
+              background: `linear-gradient(135deg, ${color}, ${color}cc)`,
+              color: '#06070a',
+              fontSize: 16,
+              fontWeight: 900,
+              letterSpacing: -0.2,
+              boxShadow: `0 18px 44px ${color}35`,
+            }}
+          >
+            Do now →
+          </button>
         </div>
       </div>
 
@@ -504,7 +532,15 @@ function FeedCard({
 
       {/* Detail sheet */}
       {showDetail && (
-        <DetailSheet card={cardData} color={color} onClose={() => setShowDetail(false)} />
+        <DetailSheet
+          card={cardData}
+          color={color}
+          onClose={() => setShowDetail(false)}
+          onDoNow={() => {
+            setShowDetail(false);
+            onDoNow(item, cardData);
+          }}
+        />
       )}
 
       {/* Scrollable content */}
