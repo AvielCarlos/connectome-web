@@ -22,6 +22,14 @@ const DOMAIN_CONFIG: Record<string, { color: string; gradient: string; emoji: st
 };
 const DEFAULT_DOMAIN = { color: '#00d4aa', gradient: 'linear-gradient(135deg, #042f2e 0%, #0f766e 50%, #0a0a0f 100%)', emoji: '◈' };
 
+const DOMAIN_IMAGE_FALLBACK: Record<string, string> = {
+  Aventi: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&auto=format&fit=crop',
+  iVive: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&auto=format&fit=crop',
+  Eviva: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&auto=format&fit=crop',
+  Rest: 'https://images.unsplash.com/photo-1495195134817-aeb325a55b65?w=1200&auto=format&fit=crop',
+  default: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop',
+};
+
 const CAPABILITY_PULSE_VERSION = 'v2';
 
 const CAPABILITY_CARDS = [
@@ -92,6 +100,11 @@ function fallbackDeepDive(card: any, spec: any, domain: string) {
     ],
     resources: [],
   };
+}
+
+function getCardImage(spec: any, card: any, domain: string) {
+  const hero = (spec?.components || []).find((c: any) => c?.type === 'hero_image' && c?.source);
+  return card?.image_url || spec?.metadata?.image_url || hero?.source || DOMAIN_IMAGE_FALLBACK[domain] || DOMAIN_IMAGE_FALLBACK.default;
 }
 
 // ─── Confetti burst ───────────────────────────────────────────────────────────
@@ -410,6 +423,7 @@ function FeedCard({
     }
   }
   if (!cardData.deep_dive) cardData.deep_dive = specAny.deep_dive || fallbackDeepDive(cardData, specAny, domain);
+  const cardImage = getCardImage(specAny, cardData, domain);
 
   const handleSave = () => {
     if (!isSaved) {
@@ -433,12 +447,20 @@ function FeedCard({
       background: '#0a0a0f',
       overflow: 'hidden',
     }}>
-      {/* Full-bleed gradient background — the Airbnb effect */}
+      {/* Full-bleed activity image + gradient — the Airbnb effect */}
+      {cardImage && (
+        <img
+          src={cardImage}
+          alt={cardData.title || domain || 'iDo activity'}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.42, zIndex: 0 }}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+        />
+      )}
       <div style={{
         position: 'absolute', inset: 0,
         background: domainCfg.gradient,
-        opacity: 0.6,
-        zIndex: 0,
+        opacity: cardImage ? 0.74 : 0.6,
+        zIndex: 1,
       }} />
 
       {/* Noise texture overlay for depth */}
@@ -446,7 +468,7 @@ function FeedCard({
         position: 'absolute', inset: 0,
         background: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.08\'/%3E%3C/svg%3E")',
         opacity: 0.4,
-        zIndex: 1,
+        zIndex: 2,
         pointerEvents: 'none',
       }} />
 
@@ -454,14 +476,14 @@ function FeedCard({
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: 120,
         background: 'linear-gradient(rgba(10,10,15,0.8), transparent)',
-        zIndex: 2, pointerEvents: 'none',
+        zIndex: 3, pointerEvents: 'none',
       }} />
 
       {/* Bottom gradient for actions legibility */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: 200,
         background: 'linear-gradient(transparent, rgba(10,10,15,0.97))',
-        zIndex: 2, pointerEvents: 'none',
+        zIndex: 3, pointerEvents: 'none',
       }} />
 
       {/* Confetti */}
