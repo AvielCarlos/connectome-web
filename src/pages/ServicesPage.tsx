@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { OraClient } from '../lib/OraClient';
 import { authStorage } from '../lib/OraClient';
+import type { ServiceAttribution } from '../lib/OraClient';
 
 interface Service {
   id: string;
@@ -42,6 +43,18 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 const isAiOsSetup = (service: Service) => service.id.startsWith('ora-ai-os-setup');
+
+function getServiceAttribution(): ServiceAttribution {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    source: params.get('utm_source') || params.get('source') || undefined,
+    campaign: params.get('utm_campaign') || params.get('campaign') || undefined,
+    medium: params.get('utm_medium') || params.get('medium') || undefined,
+    content: params.get('utm_content') || params.get('content') || undefined,
+    term: params.get('utm_term') || params.get('term') || undefined,
+    referrer: document.referrer || undefined,
+  };
+}
 
 function formatDelivery(hours: number | null) {
   if (!hours) return '';
@@ -272,7 +285,7 @@ export default function ServicesPage() {
 
   const handleOrder = async (serviceId: string, description: string) => {
     try {
-      const res = await OraClient.createServiceOrder(serviceId, description);
+      const res = await OraClient.createServiceOrder(serviceId, description, undefined, getServiceAttribution());
       setSelectedService(null);
       if (res.custom) {
         window.location.href = res.checkout_url;

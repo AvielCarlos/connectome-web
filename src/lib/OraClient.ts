@@ -207,6 +207,15 @@ export interface JournalEntry {
   created_at: string;
 }
 
+export interface ServiceAttribution {
+  source?: string;
+  campaign?: string;
+  medium?: string;
+  content?: string;
+  term?: string;
+  referrer?: string;
+}
+
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 
 export const authStorage = {
@@ -498,8 +507,18 @@ class OraClientClass {
     return res.data;
   }
 
-  async createServiceOrder(serviceId: string, description: string, email?: string): Promise<any> {
-    const res = await this.client.post('/api/services/order', { service_id: serviceId, description, email });
+  async createServiceOrder(
+    serviceId: string,
+    description: string,
+    email?: string,
+    attribution?: ServiceAttribution,
+  ): Promise<any> {
+    const res = await this.client.post('/api/services/order', {
+      service_id: serviceId,
+      description,
+      email,
+      ...attribution,
+    });
     return res.data;
   }
 
