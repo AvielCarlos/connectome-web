@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -12,18 +12,16 @@ import AuthPage from './pages/AuthPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
 import GitHubCallbackPage from './pages/GitHubCallbackPage'
 import ConnectomeHome from './pages/ConnectomeHome'
-
-// Lazy-load all app pages for route-level code splitting
-const FeedPage = lazy(() => import('./pages/FeedPage'))
-const GoalsPage = lazy(() => import('./pages/GoalsPage'))
-const RoutinesPage = lazy(() => import('./pages/RoutinesPage'))
-const DAOPage = lazy(() => import('./pages/DAOPage'))
-const ContributePage = lazy(() => import('./pages/ContributePage'))
-const ServicesPage = lazy(() => import('./pages/ServicesPage'))
-const AiOsSetupLandingPage = lazy(() => import('./pages/AiOsSetupLandingPage'))
-const ProfilePage = lazy(() => import('./pages/ProfilePage'))
-const SurfacePage = lazy(() => import('./pages/SurfacePage'))
-const IOOPage = lazy(() => import('./pages/IOOPage'))
+import FeedPage from './pages/FeedPage'
+import GoalsPage from './pages/GoalsPage'
+import RoutinesPage from './pages/RoutinesPage'
+import DAOPage from './pages/DAOPage'
+import ContributePage from './pages/ContributePage'
+import ServicesPage from './pages/ServicesPage'
+import AiOsSetupLandingPage from './pages/AiOsSetupLandingPage'
+import ProfilePage from './pages/ProfilePage'
+import SurfacePage from './pages/SurfacePage'
+import IOOPage from './pages/IOOPage'
 
 type ShellApp = React.ComponentProps<typeof ConnectomeShell>['activeApp']
 
@@ -107,12 +105,41 @@ function useKeyboardViewport() {
   }, [])
 }
 
+class AppErrorBoundary extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null }
+
+  static getDerivedStateFromError(error: Error) {
+    return { error }
+  }
+
+  componentDidCatch(error: Error) {
+    console.error('Connectome render error', error)
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ minHeight: 'var(--visual-viewport-height, 100dvh)', display: 'grid', placeItems: 'center', padding: 24, background: '#060610', color: '#f8f8fc' }}>
+          <div style={{ maxWidth: 420, padding: 22, borderRadius: 18, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)', textAlign: 'center' }}>
+            <div style={{ fontSize: 32, marginBottom: 10 }}>◈</div>
+            <h1 style={{ fontSize: 20, marginBottom: 8 }}>Connectome needs a refresh</h1>
+            <p style={{ color: 'rgba(248,248,252,0.68)', lineHeight: 1.5, marginBottom: 16 }}>A new Aura update just shipped and this page hit a stale app state.</p>
+            <button type="button" onClick={() => window.location.reload()} style={{ border: 0, borderRadius: 999, padding: '11px 18px', fontWeight: 800, background: '#00d4aa', color: '#06110f' }}>Refresh Connectome</button>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 function App() {
   useKeyboardViewport()
   const { isAuthenticated } = useAuth()
   return (
     <div style={{ minHeight: 'var(--visual-viewport-height, 100dvh)', background: '#060610', color: '#f8f8fc' }}>
-      <Suspense fallback={<div className="connectome-loading">Loading…</div>}>
+      <AppErrorBoundary>
+        <Suspense fallback={<div className="connectome-loading">Loading…</div>}>
         <Routes>
           <Route path="/" element={isAuthenticated ? <ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute> : <AuthPage />} />
           <Route path="/auth" element={isAuthenticated ? <Navigate to="/app" replace /> : <AuthPage />} />
@@ -155,7 +182,8 @@ function App() {
           {/* WebSpawn surfaces — auth-gated but accessible via direct link */}
           <Route path="/surfaces/:surfaceId" element={<ShellRoute activeApp="services"><SurfacePage /></ShellRoute>} />
         </Routes>
-      </Suspense>
+        </Suspense>
+      </AppErrorBoundary>
     </div>
   )
 }
