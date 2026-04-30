@@ -1,4 +1,5 @@
 export const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+export const ENABLE_NOTIFICATION_BELL = import.meta.env.VITE_ENABLE_NOTIFICATION_BELL !== 'false';
 
 if (!API_URL && import.meta.env.DEV) {
   // Keep local failures obvious instead of silently calling the wrong backend.
