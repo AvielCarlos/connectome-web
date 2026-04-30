@@ -20,7 +20,19 @@ This means UI work should assume:
 - transitions matter as much as the screen itself — what the screen leads to, requires, clarifies, or executes is part of the product;
 - multiple possible paths can exist from point A to point B, and Ora may rank or reroute them over time.
 
-Apps/domains such as **iVive**, **Eviva**, and **Aventi** are reusable modules/modes used by Ora to guide the user. They should bend around the user's path rather than behave like isolated apps with hard walls.
+Apps/domains such as **iVive**, **Eviva**, and **Aventi** are reusable modules/modes used by Aura to guide the user. They should bend around the user's path rather than behave like isolated apps with hard walls.
+
+## Three-dimensional IOO neural graph principle
+
+The IOO graph is not a flat list of categories. It should behave like a three-dimensional neural graph:
+
+1. **Scale axis** — macro → meso → micro. Macro nodes are high-order states/domains such as enlightenment, fulfilment, vitality, contribution, freedom, love, Aventi/iVive/Eviva-scale life capacities. Micro nodes are the granular real-world actions that make macro states more likely to be experienced.
+2. **Domain/contribution axis** — one action can contribute across domains. Example: reading a physics book may be an iVive learning/mental-fitness micro-node, serving an Eviva purpose of becoming capable enough to contribute, which may later unlock income and therefore Aventi possibilities.
+3. **Unlock/state-transition axis** — nodes do not only “belong to” domains; they unlock new possibility states. A learned skill can unlock contribution; contribution can unlock money; money can unlock travel/adventure/freedom; all of that can feed higher macro nodes like fulfilment/enlightenment.
+
+Edges should therefore express relations like `contributes_to`, `unlocks_possibility`, `prerequisite_for`, `supports_domain`, `feeds_macro_node`, and `reinforces_state`, not just `leads_to`.
+
+A card/micro-node shown to the user should know which macro nodes it contributes to, which domains it crosses, and which future possibilities it may unlock. The user should experience a simple decision/action; Aura should maintain the multi-dimensional graph underneath.
 
 ## Background execution principle
 
