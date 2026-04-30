@@ -22,6 +22,12 @@ This means UI work should assume:
 
 Apps/domains such as **iVive**, **Eviva**, and **Aventi** are reusable modules/modes used by Ora to guide the user. They should bend around the user's path rather than behave like isolated apps with hard walls.
 
+## Background execution principle
+
+Do not send users into other apps or websites unless absolutely necessary. Ora should use external apps, websites, APIs, browser automation, or virtual-machine workers in the background when that is the best way to fulfil the user's desire. The foreground experience should stay focused on the user's path: pull relevant external data/actions back into the current surface and present them as IOO Nodes, pathway sheets, or clear next-step outcomes.
+
+The purpose is not app navigation. The purpose is helping people fulfil their desires in a way that supports growth, integration, and ultimately enlightenment.
+
 ## Screen Pattern Library principle
 
 Reusable screen patterns should behave like living UI memory, not a pile of templates. Ora can create or reuse a pattern, test small variants, reinforce the winners, and trim patterns that are stale, unused, or low-outcome.
@@ -71,7 +77,7 @@ Primary feed responses are graph-learning signals:
 1. Login, OAuth callback, `/`, and `/app` land on the Connectome home/orientation screen.
 2. If the user has intent, Goals opens focused and invites them to clarify with Ora.
 3. If the user lacks intent, iDo opens the one-action feed.
-4. Feed cards support save/rate/skip/detail and route goal-building to `/app/goals`.
+4. Feed cards support save/rate/skip/detail and should embed goal-building or external-app context as IOO Nodes/pathway sheets before routing to another app.
 
 ### 3. User wants feedback → CP explainer → feedback submit
 
