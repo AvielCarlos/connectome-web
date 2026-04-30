@@ -24,6 +24,14 @@ export function OraCard({ component: comp, index, onAction }: OraCardProps) {
   const handleAction = (action: any) => {
     if (!action) return;
     if (action.type === 'open_url' && action.url) {
+      const url = String(action.url);
+      // Internal app protocols such as ido:// and ioo:// are signals for Ora's
+      // pathway/execution layer. Browsers open them as blank pages, so pass
+      // them to the parent instead of window.open.
+      if (!/^https?:\/\//i.test(url) && !/^mailto:/i.test(url) && !/^tel:/i.test(url)) {
+        onAction?.(action);
+        return;
+      }
       window.open(action.url, '_blank', 'noopener');
     } else if (onAction) {
       onAction(action);
@@ -146,7 +154,7 @@ export function OraCard({ component: comp, index, onAction }: OraCardProps) {
             border: isSecondary ? '1px solid rgba(255,255,255,0.12)' : '1px solid transparent',
           }}
         >
-          {comp.label}
+          {comp.label || comp.text || 'Open →'}
         </button>
       );
     }

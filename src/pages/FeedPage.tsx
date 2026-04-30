@@ -494,6 +494,9 @@ function FeedCard({
         {spec.components.map((comp: any, i: number) => (
           <OraCard key={i} component={comp} index={i} onAction={(action: any) => {
             if (action.type === 'navigate' && action.url === '/app/goals') navigate('/app/goals');
+            if (action.type === 'open_url' && /^(ido|ioo):\/\//i.test(String(action.url || ''))) {
+              onDoNow(item, cardData);
+            }
           }} />
         ))}
 
