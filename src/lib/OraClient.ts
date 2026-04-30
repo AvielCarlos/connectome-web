@@ -542,12 +542,14 @@ class OraClientClass {
     description: string,
     email?: string,
     attribution?: ServiceAttribution,
+    quote?: { quoted_price_usd?: number; quote_reason?: string },
   ): Promise<any> {
     const res = await this.client.post('/api/services/order', {
       service_id: serviceId,
       description,
       email,
       ...attribution,
+      ...quote,
     });
     return res.data;
   }

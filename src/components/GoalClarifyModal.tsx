@@ -122,6 +122,7 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
         `Goal: ${structuredGoal?.title || goalTitle}\nNode: ${node.title}\nOra action: ${node.ora_action || node.description || ''}`,
         undefined,
         { source: 'goal_clarify_modal', campaign: 'ioo_paid_ora_node', content: node.node_type || node.step_type },
+        { quoted_price_usd: node.price_usd, quote_reason: node.pricing_note || node.pricing_level || 'dynamic_goal_quote' },
       );
       if (res?.checkout_url) window.location.href = res.checkout_url;
     } finally {
@@ -203,9 +204,12 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
                         {node.user_action && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.56)', lineHeight: 1.45, marginTop: 6 }}><b>You:</b> {node.user_action}</div>}
                         {node.ora_action && <div style={{ fontSize: 12, color: 'rgba(0,212,170,0.78)', lineHeight: 1.45, marginTop: 4 }}><b>Ora:</b> {node.ora_action}</div>}
                         {node.requires_payment && node.service_id && (
+                          <>
+                          {(node.pricing_level || node.pricing_note) && <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.38)', lineHeight: 1.4, marginTop: 7 }}>{node.pricing_level ? `Quote: ${node.pricing_level}. ` : ''}{node.pricing_note || ''}</div>}
                           <button onClick={() => unlockOraNode(node)} disabled={!!checkoutBusy} style={{ marginTop: 9, border: '1px solid rgba(0,212,170,0.36)', background: 'rgba(0,212,170,0.14)', color: '#00d4aa', borderRadius: 999, padding: '8px 10px', fontSize: 12, fontWeight: 850 }}>
                             {checkoutBusy === (node.id || node.service_id) ? 'Opening…' : `Unlock Ora ${node.price_usd ? `$${node.price_usd}` : ''} →`}
                           </button>
+                          </>
                         )}
                       </div>
                     </div>
