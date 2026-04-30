@@ -62,6 +62,7 @@ function App() {
           <Route path="/app/profile" element={<ShellRoute activeApp="profile"><ProfilePage /></ShellRoute>} />
           <Route path="/app/journal" element={<Navigate to="/app/ido" replace />} />
           <Route path="/app/services" element={<ShellRoute activeApp="services"><ServicesPage /></ShellRoute>} />
+          <Route path="/services" element={<ServicesPage />} />
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
           <Route path="/app/ivive" element={<ShellRoute activeApp="ivive"><IVivePage /></ShellRoute>} />
           <Route path="/app/eviva" element={<ShellRoute activeApp="eviva"><EvivaPage /></ShellRoute>} />
@@ -77,7 +78,6 @@ function App() {
           <Route path="/ora" element={<Navigate to="/app" replace />} />
           <Route path="/dao" element={<Navigate to="/app/dao" replace />} />
           <Route path="/contribute" element={<Navigate to="/app/contribute" replace />} />
-          <Route path="/services" element={<Navigate to="/app/services" replace />} />
           <Route path="/profile" element={<Navigate to="/app/profile" replace />} />
           <Route path="/ioo" element={<Navigate to="/app/ioo" replace />} />
 

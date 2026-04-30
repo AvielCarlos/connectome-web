@@ -41,6 +41,14 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+const isAiOsSetup = (service: Service) => service.id.startsWith('ora-ai-os-setup');
+
+function formatDelivery(hours: number | null) {
+  if (!hours) return '';
+  if (hours % 24 === 0) return `${hours / 24} days`;
+  return `${hours}h`;
+}
+
 // ─── Order Modal ────────────────────────────────────────────────────────────
 function OrderModal({
   service,
@@ -130,7 +138,7 @@ function OrderModal({
             flex: 1, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
             borderRadius: 10, padding: '10px 14px', textAlign: 'center' as const,
           }}>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#818cf8' }}>{service.delivery_hours}h</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#818cf8' }}>{formatDelivery(service.delivery_hours)}</div>
             <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.4)' }}>delivery</div>
           </div>
         </div>
@@ -173,13 +181,17 @@ function OrderModal({
 
 // ─── Service Card ───────────────────────────────────────────────────────────
 function ServiceCard({ service, onOrder }: { service: Service; onOrder: (s: Service) => void }) {
+  const featured = isAiOsSetup(service);
   return (
     <div style={{
-      background: '#12121a',
-      border: '1px solid rgba(255,255,255,0.08)',
+      background: featured
+        ? 'linear-gradient(135deg, rgba(0,212,170,0.10), rgba(99,102,241,0.10))'
+        : '#12121a',
+      border: featured ? '1px solid rgba(0,212,170,0.35)' : '1px solid rgba(255,255,255,0.08)',
       borderRadius: 16, padding: 18,
       display: 'flex', flexDirection: 'column' as const, gap: 10,
       transition: 'border-color 0.15s',
+      boxShadow: featured ? '0 12px 40px rgba(0,212,170,0.08)' : 'none',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <span style={{ fontSize: 32 }}>{service.icon}</span>
@@ -196,12 +208,19 @@ function ServiceCard({ service, onOrder }: { service: Service; onOrder: (s: Serv
         )}
       </div>
       <div style={{ fontWeight: 700, fontSize: 16 }}>{service.name}</div>
+      {featured && (
+        <div style={{
+          alignSelf: 'flex-start', background: 'rgba(0,212,170,0.12)', color: '#00d4aa',
+          border: '1px solid rgba(0,212,170,0.25)', borderRadius: 999,
+          padding: '3px 10px', fontSize: 11, fontWeight: 800, letterSpacing: 0.4,
+        }}>FOUNDER-LED SETUP</div>
+      )}
       <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', lineHeight: 1.6, flex: 1 }}>
         {service.description}
       </div>
       {service.delivery_hours && (
         <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.3)' }}>
-          ⏱ Delivery in {service.delivery_hours}h
+          ⏱ Delivery in {formatDelivery(service.delivery_hours)}
         </div>
       )}
       <button
@@ -220,7 +239,7 @@ function ServiceCard({ service, onOrder }: { service: Service; onOrder: (s: Serv
           marginTop: 4,
         }}
       >
-        {service.id === 'custom' ? 'Contact Nea →' : 'Order Now →'}
+        {service.id === 'custom' ? 'Contact Nea →' : featured ? 'Reserve Setup →' : 'Order Now →'}
       </button>
     </div>
   );
@@ -234,6 +253,7 @@ export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [toast, setToast] = useState('');
   const isLoggedIn = authStorage.isAuthenticated();
+  const sortedServices = [...services].sort((a, b) => Number(isAiOsSetup(b)) - Number(isAiOsSetup(a)));
 
   useEffect(() => {
     Promise.all([
@@ -295,9 +315,46 @@ export default function ServicesPage() {
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontWeight: 800, fontSize: 24, letterSpacing: -0.5 }}>⚡ Work with Nea</h1>
         <p style={{ fontSize: 14, color: 'rgba(248,248,252,0.45)', marginTop: 6, lineHeight: 1.6 }}>
-          AI-powered digital services, delivered by autonomous agents.
-          <br />Results in your inbox within 24-48 hours.
+          Founder-led AI OS setup plus AI-powered digital services.
+          <br />Secure Stripe checkout. Delivery to your inbox.
         </p>
+      </div>
+
+      {/* Featured revenue sprint */}
+      <div style={{
+        background: 'radial-gradient(circle at top left, rgba(0,212,170,0.22), transparent 45%), linear-gradient(135deg, rgba(99,102,241,0.16), rgba(0,212,170,0.08))',
+        border: '1px solid rgba(0,212,170,0.28)',
+        borderRadius: 18, padding: 20, marginBottom: 24,
+      }}>
+        <div style={{ fontSize: 12, color: '#00d4aa', fontWeight: 800, letterSpacing: 1, marginBottom: 8 }}>
+          FOUNDER BETA · 3 PRIVATE BUILDS
+        </div>
+        <div style={{ fontWeight: 850, fontSize: 22, letterSpacing: -0.5, marginBottom: 8 }}>
+          Ora Personal AI OS Setup
+        </div>
+        <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.62)', lineHeight: 1.65, marginBottom: 14 }}>
+          Avi turns your goals, knowledge, work, and habits into a practical AI-powered operating system — with a custom Ora persona, workflow map, and 30-day implementation path.
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const, marginBottom: 16 }}>
+          {['Founder-led setup', '7-day beta from $1,500', 'Standard 14-day build'].map((text) => (
+            <span key={text} style={{
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 999, padding: '6px 10px', fontSize: 12, color: 'rgba(248,248,252,0.68)',
+            }}>{text}</span>
+          ))}
+        </div>
+        <button
+          onClick={() => {
+            const beta = services.find((s) => s.id === 'ora-ai-os-setup-beta') || services.find(isAiOsSetup);
+            if (beta) setSelectedService(beta);
+          }}
+          disabled={!services.some(isAiOsSetup)}
+          style={{
+            width: '100%', background: 'linear-gradient(135deg, #00d4aa, #6366f1)',
+            color: '#0a0a0f', fontSize: 15, fontWeight: 800, padding: '13px 0',
+            borderRadius: 12, border: 'none', cursor: services.some(isAiOsSetup) ? 'pointer' : 'not-allowed',
+          }}
+        >Reserve Founder Beta →</button>
       </div>
 
       {/* Trust bar */}
@@ -327,7 +384,7 @@ export default function ServicesPage() {
         <>
           {/* Service cards grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 14, marginBottom: 32 }}>
-            {services.map((service) => (
+            {sortedServices.map((service) => (
               <ServiceCard
                 key={service.id}
                 service={service}
