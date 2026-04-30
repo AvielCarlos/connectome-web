@@ -28,6 +28,8 @@
   /* nav */
   --bottom-nav-height: 80px;
   --top-header-height: 56px;
+  --shell-top-clearance: calc(var(--top-header-height) + 6px);
+  --shell-bottom-clearance: calc(72px + max(14px, env(safe-area-inset-bottom, 0px)) + 14px);
 }
 
 /* ─── Base ──────────────────────────────────────────────────────────── */
@@ -240,10 +242,10 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 /* ─── FeedPage full-screen shell ──────────────────────────────── */
 .feed-container {
   position: fixed !important;
-  top: 0 !important;
+  top: var(--shell-top-clearance) !important;
   left: 0 !important;
   right: 0 !important;
-  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: var(--shell-bottom-clearance) !important;
   overflow: hidden;
   z-index: 10;
 }
@@ -577,8 +579,8 @@ body {
 
 .connectome-main {
   position: relative;
-  min-height: 100vh;
-  padding: calc(var(--top-header-height) + 10px) clamp(16px, 4vw, 44px) calc(var(--bottom-nav-height) + 28px);
+  min-height: 100dvh;
+  padding: calc(var(--top-header-height) + 10px) clamp(16px, 4vw, 44px) calc(var(--shell-bottom-clearance) + 18px);
 }
 
 .connectome-main--ido {
@@ -882,22 +884,22 @@ body {
 
 /* Reframe legacy full-screen pages inside the AIOS chrome. */
 .feed-container {
-  top: 0 !important;
+  top: var(--shell-top-clearance) !important;
   left: 0 !important;
   right: 0 !important;
-  bottom: var(--bottom-nav-height) !important;
+  bottom: var(--shell-bottom-clearance) !important;
 }
 .ora-container {
   top: var(--top-header-height) !important;
   left: 0 !important;
   right: 0 !important;
-  bottom: var(--bottom-nav-height) !important;
+  bottom: var(--shell-bottom-clearance) !important;
 }
 
 @media (min-width: 1024px) {
   .app-authenticated { padding-left: 0; }
   .feed-container,
-  .ora-container { left: 0 !important; bottom: var(--bottom-nav-height) !important; }
+  .ora-container { left: 0 !important; bottom: var(--shell-bottom-clearance) !important; }
 }
 
 @media (max-width: 760px) {

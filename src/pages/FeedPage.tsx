@@ -501,7 +501,7 @@ function FeedCard({
           position: 'relative', zIndex: 5,
           flex: 1, height: '100%',
           overflowY: 'auto',
-          padding: '80px 20px 180px',
+          padding: '22px 20px 158px',
           scrollbarWidth: 'none',
           cursor: 'pointer',
         }}
@@ -559,9 +559,9 @@ function FeedCard({
       {/* Right-side action buttons (TikTok-style) */}
       <div style={{
         position: 'absolute',
-        right: 14, bottom: 110,
+        right: 14, bottom: 86,
         display: 'flex', flexDirection: 'column',
-        gap: 16, alignItems: 'center',
+        gap: 10, alignItems: 'center',
         zIndex: 10,
       }}>
         {/* Rating stars — simplified to heart+fire for visual clarity */}
@@ -588,7 +588,7 @@ function FeedCard({
         </div>
 
         {/* Quick star rating */}
-        {[1, 2, 3, 4, 5].map((star) => (
+        {[3, 5].map((star) => (
           <button
             key={star}
             onClick={() => onRate(item.screen_spec_db_id, star)}
@@ -651,9 +651,9 @@ function FeedCard({
         </div>
       </div>
 
-      {/* Bottom left: card info */}
+        {/* Bottom left: card info */}
       <div style={{
-        position: 'absolute', bottom: 20, left: 16, right: 80,
+        position: 'absolute', bottom: 14, left: 16, right: 80,
         zIndex: 10,
       }}>
         {cardData.title && (
@@ -670,7 +670,7 @@ function FeedCard({
       {/* Swipe hint */}
       {active && (
         <div style={{
-          position: 'absolute', bottom: 8, left: 0, right: 0,
+          position: 'absolute', bottom: 4, left: 0, right: 0,
           textAlign: 'center', fontSize: 10,
           color: 'rgba(248,248,252,0.18)', letterSpacing: 0.5,
           zIndex: 3, pointerEvents: 'none',
