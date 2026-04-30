@@ -14,6 +14,8 @@ const VARIANT_LABELS: Record<string, string> = {
   D: 'D — Discovery Grid',
 };
 
+const LIVE_LOCATION_SYNC_KEY = `connectome_live_location_${new Date().toISOString().slice(0, 10)}`;
+
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -50,6 +52,10 @@ export default function ProfilePage() {
   const [evolutionProposals, setEvolutionProposals] = useState<any[]>([]);
   const [evolutionProposalsLoading, setEvolutionProposalsLoading] = useState(false);
   const [contributionStats, setContributionStats] = useState<any>(null);
+  const [locationSharingStatus, setLocationSharingStatus] = useState<'unknown' | 'synced' | 'syncing' | 'denied' | 'error'>(() => (
+    localStorage.getItem(LIVE_LOCATION_SYNC_KEY) ? 'synced' : 'unknown'
+  ));
+  const [locationCity, setLocationCity] = useState<string>(() => localStorage.getItem(`${LIVE_LOCATION_SYNC_KEY}_city`) || '');
 
   // ── A/B hooks must be BEFORE any conditional returns (Rules of Hooks) ──
   const { variant: upgradeHeadlineVariant, trackEvent: trackUpgradeHeadline } = useExperiment('upgrade_headline');
@@ -255,6 +261,40 @@ export default function ProfilePage() {
     }
   };
 
+  const enableLocationSharing = async () => {
+    if (!('geolocation' in navigator)) {
+      setLocationSharingStatus('error');
+      alert('Location sharing is not available in this browser.');
+      return;
+    }
+    setLocationSharingStatus('syncing');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await AuraClient.syncLiveLocation({
+            location_lat: pos.coords.latitude,
+            location_lng: pos.coords.longitude,
+            accuracy_m: pos.coords.accuracy,
+            event_preferences: ['wellness', 'music', 'arts', 'community', 'sports', 'tech'],
+          });
+          localStorage.setItem(LIVE_LOCATION_SYNC_KEY, new Date().toISOString());
+          localStorage.setItem(`${LIVE_LOCATION_SYNC_KEY}_city`, res.city || 'near you');
+          setLocationCity(res.city || 'near you');
+          setLocationSharingStatus('synced');
+          alert(`Location sharing enabled for ${res.city || 'near you'}.`);
+        } catch (e: any) {
+          setLocationSharingStatus('error');
+          alert(e?.response?.data?.detail || 'Could not sync location with Connectome.');
+        }
+      },
+      () => {
+        setLocationSharingStatus('denied');
+        alert('Location permission was not granted. You can enable it in your browser/site settings, then try again here.');
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 10 * 60 * 1000 },
+    );
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -413,6 +453,12 @@ export default function ProfilePage() {
           <div style={{ background: '#12121e', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>My Account</div>
             <MenuRow icon="🌐" label="My Surfaces" sublabel="Personalized pages Aura built" onClick={() => { setSection('surfaces'); loadSurfaces(); }} />
+            <MenuRow
+              icon="📍"
+              label={locationSharingStatus === 'syncing' ? 'Enabling location…' : 'Enable location sharing'}
+              sublabel={locationSharingStatus === 'synced' ? `On${locationCity ? ` · ${locationCity}` : ''}` : 'Use nearby events, places, classes, and local path recommendations'}
+              onClick={enableLocationSharing}
+            />
             <MenuRow icon="🔗" label="Google Account" sublabel="Drive sync & calendar" onClick={() => setSection('google')} />
             <MenuRow icon="📱" label="Get the App" sublabel="Add Connectome to your home screen" onClick={() => {}} last />
           </div>
