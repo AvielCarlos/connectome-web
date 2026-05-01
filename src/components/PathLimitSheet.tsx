@@ -1,19 +1,56 @@
 /**
  * PathLimitSheet — shown inline (as an IOO node sheet) when the user hits
  * the 4-active-path free-tier limit. Never navigates away; stays in context.
+ *
+ * Three upgrade paths:
+ *   1. Archive a path (free)
+ *   2. Buy 5 credits — $9 one-time, no commitment
+ *   3. Subscribe to Explorer (12 paths) or Sovereign (unlimited)
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuraClient } from '../lib/AuraClient';
 
 interface Props {
   activePaths: number;
   pathLimit: number;
+  pathCredits?: number;
   onClose: () => void;
-  onArchive?: () => void; // opens goal archive picker
+  onArchive?: () => void;
 }
 
-export function PathLimitSheet({ activePaths, pathLimit, onClose, onArchive }: Props) {
+export function PathLimitSheet({ activePaths, pathLimit, pathCredits = 0, onClose, onArchive }: Props) {
   const navigate = useNavigate();
+  const [buying, setBuying] = useState(false);
+  const [subscribing, setSubscribing] = useState<'explorer' | 'sovereign' | null>(null);
+
+  const handleBuyCredits = async () => {
+    setBuying(true);
+    try {
+      const res: any = await AuraClient['client'].post('/api/payments/credits/checkout', {
+        success_url: window.location.origin + '/app/goals?credits=granted',
+        cancel_url: window.location.origin + '/app/goals',
+      }).then((r: any) => r.data);
+      window.location.href = res.checkout_url;
+    } catch {
+      setBuying(false);
+    }
+  };
+
+  const handleSubscribe = async (tier: 'explorer' | 'sovereign') => {
+    setSubscribing(tier);
+    try {
+      const res: any = await AuraClient['client'].post('/api/payments/checkout', {
+        tier,
+        billing: 'monthly',
+        success_url: window.location.origin + '/app/goals?upgrade=' + tier,
+        cancel_url: window.location.origin + '/app/goals',
+      }).then((r: any) => r.data);
+      window.location.href = res.checkout_url;
+    } catch {
+      setSubscribing(null);
+    }
+  };
 
   return (
     <div
@@ -65,51 +102,50 @@ export function PathLimitSheet({ activePaths, pathLimit, onClose, onArchive }: P
 
         {/* Actions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {/* Free option */}
           {onArchive && (
-            <button
-              onClick={onArchive}
-              style={{
-                background: 'rgba(0,212,170,0.12)',
-                border: '1px solid rgba(0,212,170,0.35)',
-                color: '#00d4aa',
-                padding: '14px 20px',
-                borderRadius: 14,
-                fontWeight: 800, fontSize: 15,
-                cursor: 'pointer',
-              }}
-            >
+            <button onClick={onArchive} style={{
+              background: 'rgba(0,212,170,0.10)', border: '1px solid rgba(0,212,170,0.3)',
+              color: '#00d4aa', padding: '14px 20px', borderRadius: 14,
+              fontWeight: 800, fontSize: 15, cursor: 'pointer',
+            }}>
               Archive a path to make room →
             </button>
           )}
 
-          <button
-            onClick={() => navigate('/app/profile?upgrade=paths')}
-            style={{
-              background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-              border: 'none',
-              color: '#fff',
-              padding: '14px 20px',
-              borderRadius: 14,
-              fontWeight: 800, fontSize: 15,
-              cursor: 'pointer',
-              boxShadow: '0 4px 24px rgba(139,92,246,0.25)',
-            }}
-          >
-            Unlock unlimited paths ✦
+          {/* Credits — one-time, no commitment */}
+          <button onClick={handleBuyCredits} disabled={buying} style={{
+            background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.35)',
+            color: '#fbbf24', padding: '14px 20px', borderRadius: 14,
+            fontWeight: 800, fontSize: 15, cursor: buying ? 'wait' : 'pointer', opacity: buying ? 0.7 : 1,
+          }}>
+            {buying ? 'Opening checkout…' : '5 extra paths — $9 one-time ☆'}
           </button>
 
-          <button
-            onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(248,248,252,0.45)',
-              padding: '12px 20px',
-              borderRadius: 14,
-              fontWeight: 600, fontSize: 14,
-              cursor: 'pointer',
-            }}
-          >
+          {/* Subscription tiers */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => handleSubscribe('explorer')} disabled={!!subscribing} style={{
+              flex: 1, background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.35)',
+              color: '#a78bfa', padding: '13px 12px', borderRadius: 14,
+              fontWeight: 800, fontSize: 13, cursor: subscribing ? 'wait' : 'pointer', opacity: subscribing ? 0.7 : 1,
+            }}>
+              {subscribing === 'explorer' ? '…' : 'Explorer\n12 paths — $9/mo'}
+            </button>
+            <button onClick={() => handleSubscribe('sovereign')} disabled={!!subscribing} style={{
+              flex: 1, background: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.2))',
+              border: '1px solid rgba(139,92,246,0.5)',
+              color: '#c4b5fd', padding: '13px 12px', borderRadius: 14,
+              fontWeight: 800, fontSize: 13, cursor: subscribing ? 'wait' : 'pointer', opacity: subscribing ? 0.7 : 1,
+            }}>
+              {subscribing === 'sovereign' ? '…' : 'Sovereign\nUnlimited — $29/mo'}
+            </button>
+          </div>
+
+          <button onClick={onClose} style={{
+            background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
+            color: 'rgba(248,248,252,0.35)', padding: '12px 20px', borderRadius: 14,
+            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+          }}>
             Not now
           </button>
         </div>

@@ -327,7 +327,7 @@ export default function GoalsPage() {
   const [loading, setLoading] = useState(true);
   const [lens, setLens] = useState<Lens>('active');
   const [clarifyingGoal, setClarifyingGoal] = useState<string | null>(null);
-  const [pathLimitInfo, setPathLimitInfo] = useState<{ activePaths: number; pathLimit: number } | null>(null);
+  const [pathLimitInfo, setPathLimitInfo] = useState<{ activePaths: number; pathLimit: number; pathCredits?: number } | null>(null);
   const { show } = useToast();
   const navigate = useNavigate();
 
@@ -382,12 +382,12 @@ export default function GoalsPage() {
       ].filter(Boolean).join(' • '),
     }));
     // Check path limit before creating
-    let pathStatus: { active_paths: number; path_limit: number; at_limit: boolean } | null = null;
+    let pathStatus: { active_paths: number; path_limit: number; path_credits: number; at_limit: boolean } | null = null;
     try {
       pathStatus = await AuraClient['client'].get('/api/goals/path-status').then((r: any) => r.data);
     } catch {}
     if (pathStatus?.at_limit) {
-      setPathLimitInfo({ activePaths: pathStatus.active_paths, pathLimit: pathStatus.path_limit });
+      setPathLimitInfo({ activePaths: pathStatus.active_paths, pathLimit: pathStatus.path_limit, pathCredits: pathStatus.path_credits });
       return;
     }
     const goal = await AuraClient.createGoal(title, descriptionParts.join('\n') || undefined, undefined, steps.length ? steps : undefined, {
@@ -420,6 +420,7 @@ export default function GoalsPage() {
       <PathLimitSheet
         activePaths={pathLimitInfo.activePaths}
         pathLimit={pathLimitInfo.pathLimit}
+        pathCredits={pathLimitInfo.pathCredits}
         onClose={() => setPathLimitInfo(null)}
         onArchive={() => { setPathLimitInfo(null); setLens('active'); }}
       />
