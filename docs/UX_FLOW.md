@@ -234,9 +234,18 @@ Primary feed responses are graph-learning signals:
 - Changed launcher copy to user outcomes.
 - Added CP explainer access from Contribute.
 
-## Path Feed progression graph v1
+## Path Feed progression graph v2 — morphable variants
 
 The integral implementation direction is that the Path Feed is not a passive TikTok clone. It is a neural progression graph that moves people from vague possibility into real-world fulfilment.
+
+The graph should morph into tested versions of the same fulfilment loop:
+
+- **baseline** — canonical feed → micro-node → evidence loop.
+- **trimmed_decision** — trims friction when the card already has a concrete link or booking action.
+- **split_micro_node** — splits the micro-node into clarify → choose concrete option → commit for higher-friction actions.
+- **grown_social** — grows the graph with invite/share/follow-up nodes when belonging, contribution, or community matters.
+
+Each variant keeps the same underlying pattern but can grow, split, or trim nodes. Promote variants when they improve Do Now rate, completion/evidence rate, post-action rating, or saved-node follow-through. Prune variants when they increase skips or add clarification friction.
 
 Baseline progression nodes:
 
@@ -248,4 +257,4 @@ Baseline progression nodes:
 6. **Do + prove** — user does the thing and captures evidence/reflection/completion signal.
 7. **Learn / reroute** — Aura updates graph weights, user state, and the next recommendation.
 
-Every feed card should carry `metadata.path_progression` so responses can eventually update not only card ranking, but also the user-specific pathway graph.
+Every feed card should carry `metadata.path_progression` with `ab_test_id`, `variant`, and `mutation` so responses can eventually update not only card ranking, but also the user-specific pathway graph and the winning morphology per domain/card/source.

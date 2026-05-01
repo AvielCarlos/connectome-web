@@ -183,10 +183,10 @@ export function AuraCard({ component: comp, index, onAction }: AuraCardProps) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
             <div style={{ color: '#f8f8fc', fontSize: 12, fontWeight: 950, letterSpacing: 0.3 }}>
-              Path progression
+              {comp.text || 'Path progression'}
             </div>
             <div style={{ color: '#00d4aa', fontSize: 10, fontWeight: 900, textTransform: 'uppercase' }}>
-              neural graph
+              {comp.mutation ? `${comp.mutation} test` : 'neural graph'}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 5, marginBottom: 10 }}>
@@ -204,6 +204,11 @@ export function AuraCard({ component: comp, index, onAction }: AuraCardProps) {
               }} />
             ))}
           </div>
+          {comp.variant && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgba(248,248,252,0.42)', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', marginBottom: 8 }}>
+              A/B · {String(comp.variant).replace(/_/g, ' ')}
+            </div>
+          )}
           {items[activeIndex] && (
             <div style={{ display: 'grid', gap: 5 }}>
               <div style={{ color: '#f8f8fc', fontSize: 13, fontWeight: 900 }}>
