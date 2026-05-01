@@ -1,17 +1,35 @@
 /**
- * UpgradePanel — full-height scrollable glass panel showing all upgrade options.
- * Triggered by the UPGRADE button on Profile.
- * Never navigates away; closes on backdrop click or X.
+ * UpgradePanel — glass upgrade sheet with Stripe checkout and drag-to-dismiss.
  */
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { AuraClient } from '../lib/AuraClient';
+import { billingCancelUrl, billingSuccessUrl, checkoutReturnUrl } from '../lib/checkoutUrls';
 
 interface Props {
   currentTier: string;
   onClose: () => void;
 }
 
-const PLANS = [
+type PlanId = 'credits' | 'explorer' | 'sovereign';
+type Billing = 'monthly' | 'yearly';
+
+const PLANS: Array<{
+  id: PlanId;
+  name: string;
+  badge: string;
+  badgeColor: string;
+  price: string;
+  priceSub: string;
+  yearlyPrice?: string;
+  yearlySub?: string;
+  color: string;
+  gradient: string;
+  border: string;
+  icon: string;
+  description: string;
+  unlocks: string[];
+  fairUse?: string;
+}> = [
   {
     id: 'credits',
     name: '3 Path Credits',
@@ -20,14 +38,16 @@ const PLANS = [
     price: '$9',
     priceSub: 'one-time · no subscription',
     color: '#fbbf24',
-    gradient: 'linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(10,10,15,0) 100%)',
-    border: 'rgba(251,191,36,0.25)',
+    gradient: 'linear-gradient(135deg, rgba(251,191,36,0.10) 0%, rgba(10,10,15,0) 100%)',
+    border: 'rgba(251,191,36,0.28)',
     icon: '⚡',
-    description: 'Open 3 more paths on your IOO neural graph, whenever you need them.',
-    features: [
-      '3 extra open paths — use any time',
-      'No recurring charge',
-      'Credits never expire',
+    description: 'A simple one-time unlock when you want more active paths without a subscription.',
+    unlocks: [
+      '3 extra active IOO paths',
+      'Use credits whenever you hit the free path limit',
+      'No monthly or annual commitment',
+      'Keeps your current tier unchanged',
+      'Secure Stripe checkout',
     ],
   },
   {
@@ -36,21 +56,24 @@ const PLANS = [
     badge: 'MOST POPULAR',
     badgeColor: '#818cf8',
     price: '$9',
-    priceSub: '/month · cancel any time',
-    priceAlt: '$72/yr (2 months free)',
+    priceSub: '/month · cancel anytime',
+    yearlyPrice: '$72',
+    yearlySub: '/year · 2 months free',
     color: '#818cf8',
-    gradient: 'linear-gradient(135deg, rgba(99,102,241,0.10) 0%, rgba(10,10,15,0) 100%)',
-    border: 'rgba(99,102,241,0.3)',
+    gradient: 'linear-gradient(135deg, rgba(99,102,241,0.13) 0%, rgba(10,10,15,0) 100%)',
+    border: 'rgba(99,102,241,0.34)',
     icon: '◈',
-    description: 'Expand your neural graph and let Aura go deeper on your path.',
-    features: [
-      '12 active paths on your IOO graph',
+    description: 'For people actively building their life graph with Aura.',
+    unlocks: [
+      '12 active IOO paths',
       'Unlimited daily discovery cards',
-      'Full Aura chat — no daily cap',
-      'Google Drive integration',
+      'Full Aura chat with higher daily usage',
+      'Travel Mode for non-local opportunities',
+      'Google Drive connection',
       'Personalised local events feed',
-      'AI step generation for every goal',
-      'Founding member badge (first 1,000)',
+      'AI step generation for goals',
+      'WebSpawn personalised surfaces',
+      'Founding member badge for early users',
     ],
   },
   {
@@ -59,51 +82,59 @@ const PLANS = [
     badge: 'FULL POWER',
     badgeColor: '#a78bfa',
     price: '$29',
-    priceSub: '/month · cancel any time',
-    priceAlt: '$228/yr (2 months free)',
+    priceSub: '/month · cancel anytime',
+    yearlyPrice: '$228',
+    yearlySub: '/year · 2 months free',
     color: '#a78bfa',
-    gradient: 'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(10,10,15,0) 100%)',
-    border: 'rgba(139,92,246,0.35)',
+    gradient: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(10,10,15,0) 100%)',
+    border: 'rgba(139,92,246,0.38)',
     icon: '✦',
-    description: 'Unlimited paths. Aura as your full intelligence layer — proactive, connected, and working on your behalf.',
-    features: [
-      'Unlimited active paths',
+    description: 'Aura as a deeper intelligence layer — proactive, connected, and working on your behalf.',
+    unlocks: [
+      'Unlimited active IOO paths',
       'Everything in Explorer',
+      'Highest Aura usage tier',
       'Full Google Drive indexing',
-      'Aura initiates — proactive nudges & check-ins',
-      'API access (build your own integrations)',
+      'Proactive Aura nudges and check-ins',
+      'Travel Mode and destination discovery',
+      'API access for custom integrations',
       'DAO governance weight ×3',
       'CP multiplier 2×',
-      'Direct input into Aura\'s roadmap',
+      'Direct input into Aura roadmap priorities',
     ],
-    fairUse: 'Fair-use: ~500 Aura chat calls/month included.',
+    fairUse: 'Fair-use: about 500 Aura chat calls/month included while we scale capacity.',
   },
 ];
 
 export function UpgradePanel({ currentTier, onClose }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
+  const [billing, setBilling] = useState<Billing>('monthly');
+  const [dragY, setDragY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartY = useRef(0);
 
-  const handlePlan = async (planId: string) => {
+  const handlePlan = async (planId: PlanId) => {
+    if (loading || planId === currentTier) return;
     setLoading(planId);
     setError(null);
     try {
       if (planId === 'credits') {
         const res: any = await AuraClient['client'].post('/api/payments/credits/checkout', {
-          success_url: window.location.origin + '/app/profile?credits=granted',
-          cancel_url: window.location.origin + '/app/profile',
+          success_url: checkoutReturnUrl('/app/profile?credits=granted'),
+          cancel_url: checkoutReturnUrl('/app/profile?checkout=cancelled'),
         }).then((r: any) => r.data);
         window.location.href = res.checkout_url;
-      } else {
-        const res: any = await AuraClient['client'].post('/api/payments/checkout', {
-          tier: planId,
-          billing,
-          success_url: window.location.origin + '/app/profile?upgrade=' + planId,
-          cancel_url: window.location.origin + '/app/profile',
-        }).then((r: any) => r.data);
-        window.location.href = res.checkout_url;
+        return;
       }
+
+      const res: any = await AuraClient['client'].post('/api/payments/checkout', {
+        tier: planId,
+        billing,
+        success_url: billingSuccessUrl(planId),
+        cancel_url: billingCancelUrl(),
+      }).then((r: any) => r.data);
+      window.location.href = res.checkout_url;
     } catch (e: any) {
       const msg = e?.response?.data?.detail;
       setError(typeof msg === 'string' ? msg : typeof msg === 'object' ? JSON.stringify(msg) : 'Something went wrong — please try again.');
@@ -111,162 +142,194 @@ export function UpgradePanel({ currentTier, onClose }: Props) {
     }
   };
 
+  const startDrag = (e: React.PointerEvent) => {
+    dragStartY.current = e.clientY;
+    setIsDragging(true);
+    setDragY(0);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const moveDrag = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    setDragY(Math.max(0, e.clientY - dragStartY.current));
+  };
+
+  const endDrag = () => {
+    if (!isDragging) return;
+    if (dragY > 90) {
+      onClose();
+      return;
+    }
+    setIsDragging(false);
+    setDragY(0);
+  };
+
   return (
     <div
       style={{
         position: 'fixed', inset: 0, zIndex: 300,
-        background: 'rgba(5,5,10,0.88)', backdropFilter: 'blur(16px)',
+        background: `rgba(5,5,10,${Math.max(0.35, 0.88 - dragY / 600)})`,
+        backdropFilter: 'blur(16px)',
         display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-        padding: '0 0 0',
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div style={{
         width: '100%', maxWidth: 480,
-        maxHeight: '92dvh',
+        maxHeight: '94dvh',
         background: 'linear-gradient(180deg, #111118 0%, #0d0d14 100%)',
-        border: '1px solid rgba(255,255,255,0.07)',
+        border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: '24px 24px 0 0',
+        boxShadow: '0 -20px 80px rgba(0,0,0,0.45)',
         display: 'flex', flexDirection: 'column',
         overflow: 'hidden',
+        transform: `translateY(${dragY}px)`,
+        transition: isDragging ? 'none' : 'transform 220ms cubic-bezier(.2,.8,.2,1)',
       }}>
+        <div
+          onPointerDown={startDrag}
+          onPointerMove={moveDrag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          style={{ padding: '12px 20px 0', flexShrink: 0, touchAction: 'none', cursor: 'grab' }}
+        >
+          <div style={{ width: 44, height: 5, borderRadius: 999, background: 'rgba(255,255,255,0.18)', margin: '0 auto 14px' }} />
+        </div>
 
-        {/* Header */}
-        <div style={{
-          padding: '20px 20px 0',
-          flexShrink: 0,
-        }}>
-          {/* Drag handle */}
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '0 auto 20px' }} />
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-            <div>
-              <div style={{ fontWeight: 900, fontSize: 22, letterSpacing: -0.5, color: '#f8f8fc' }}>Expand your path</div>
-              <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 4 }}>
-                {currentTier === 'free' ? 'You\'re on the free tier · 4 active paths' : `You\'re on ${currentTier}`}
+        <div style={{ padding: '0 20px 0', flexShrink: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 14 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 950, fontSize: 23, letterSpacing: -0.6, color: '#f8f8fc' }}>Expand your path</div>
+              <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.48)', marginTop: 5, lineHeight: 1.45 }}>
+                {currentTier === 'free' ? 'Free tier · 4 active paths' : `Current tier · ${currentTier}`}
               </div>
             </div>
-            <button onClick={onClose} style={{
-              background: 'rgba(255,255,255,0.07)', border: 'none', color: 'rgba(248,248,252,0.5)',
-              width: 32, height: 32, borderRadius: 16, cursor: 'pointer', fontSize: 16,
+            <button type="button" onClick={onClose} aria-label="Close upgrade panel" style={{
+              background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(248,248,252,0.72)',
+              width: 36, height: 36, borderRadius: 18, cursor: 'pointer', fontSize: 16,
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
             }}>✕</button>
           </div>
 
-          {/* Monthly / Yearly toggle — only affects subscription plans */}
           <div style={{
-            display: 'inline-flex',
+            display: 'grid', gridTemplateColumns: '1fr 1fr',
             background: 'rgba(255,255,255,0.06)',
-            borderRadius: 20, padding: 3, marginBottom: 20,
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 18, padding: 3, marginBottom: 14,
           }}>
             {(['monthly', 'yearly'] as const).map((b) => (
-              <button key={b} onClick={() => setBilling(b)} style={{
-                padding: '6px 18px', borderRadius: 18, border: 'none',
-                background: billing === b ? 'rgba(255,255,255,0.12)' : 'transparent',
-                color: billing === b ? '#f8f8fc' : 'rgba(248,248,252,0.4)',
-                fontWeight: 700, fontSize: 13, cursor: 'pointer',
+              <button key={b} type="button" onClick={() => setBilling(b)} style={{
+                padding: '9px 10px', borderRadius: 15, border: 'none',
+                background: billing === b ? 'rgba(255,255,255,0.14)' : 'transparent',
+                color: billing === b ? '#f8f8fc' : 'rgba(248,248,252,0.5)',
+                fontWeight: 850, fontSize: 12, cursor: 'pointer',
               }}>
-                {b === 'monthly' ? 'Monthly' : 'Yearly  🏷 2 months free'}
+                {b === 'monthly' ? 'Monthly' : 'Annual · 2 months free'}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Scrollable plans */}
-        <div style={{ overflowY: 'auto', padding: '0 20px 40px', flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ overflowY: 'auto', padding: '0 20px calc(env(safe-area-inset-bottom, 0px) + 28px)', flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {PLANS.map((plan) => {
             const isCurrentTier = plan.id === currentTier;
             const isLoading = loading === plan.id;
-            const displayPrice = plan.id !== 'credits' && billing === 'yearly' && plan.priceAlt
-              ? plan.priceAlt
-              : `${plan.price}${plan.priceSub}`;
+            const isSubscription = plan.id !== 'credits';
+            const price = isSubscription && billing === 'yearly' && plan.yearlyPrice ? plan.yearlyPrice : plan.price;
+            const sub = isSubscription && billing === 'yearly' && plan.yearlySub ? plan.yearlySub : plan.priceSub;
 
             return (
-              <div key={plan.id} style={{
+              <section key={plan.id} style={{
                 background: plan.gradient,
                 border: `1px solid ${plan.border}`,
-                borderRadius: 18, padding: '20px 18px',
-                position: 'relative', overflow: 'hidden',
+                borderRadius: 18,
+                padding: '18px 16px 16px',
+                position: 'relative',
+                overflow: 'visible',
               }}>
-                {/* Badge */}
                 <div style={{
-                  position: 'absolute', top: 14, right: 14,
-                  background: `${plan.badgeColor}22`,
+                  display: 'inline-flex',
+                  background: `${plan.badgeColor}20`,
                   border: `1px solid ${plan.badgeColor}44`,
                   color: plan.badgeColor,
-                  fontSize: 9, fontWeight: 900, letterSpacing: 1.2,
-                  padding: '3px 8px', borderRadius: 8,
+                  fontSize: 9, fontWeight: 950, letterSpacing: 1.1,
+                  padding: '4px 8px', borderRadius: 999,
+                  marginBottom: 11,
+                  maxWidth: '100%',
                 }}>{plan.badge}</div>
 
-                {/* Title row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <span style={{ fontSize: 24 }}>{plan.icon}</span>
-                  <div>
-                    <div style={{ fontWeight: 900, fontSize: 17, color: '#f8f8fc' }}>{plan.name}</div>
-                    <div style={{ fontSize: 12, color: plan.color, fontWeight: 700 }}>
-                      {plan.id !== 'credits' && billing === 'yearly' && plan.priceAlt
-                        ? plan.priceAlt
-                        : `${plan.price} ${plan.priceSub}`}
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 11, marginBottom: 10 }}>
+                  <span style={{ fontSize: 25, lineHeight: 1.1, flexShrink: 0 }}>{plan.icon}</span>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontWeight: 950, fontSize: 18, color: '#f8f8fc', lineHeight: 1.2 }}>{plan.name}</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+                      <span style={{ fontSize: 20, color: plan.color, fontWeight: 950 }}>{price}</span>
+                      <span style={{ fontSize: 12, color: 'rgba(248,248,252,0.58)', fontWeight: 700 }}>{sub}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Description */}
-                <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.55)', lineHeight: 1.65, marginBottom: 14 }}>
+                <p style={{ fontSize: 13, color: 'rgba(248,248,252,0.62)', lineHeight: 1.6, margin: '0 0 13px' }}>
                   {plan.description}
-                </div>
+                </p>
 
-                {/* Features */}
-                <ul style={{ margin: '0 0 16px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {plan.features.map((f) => (
-                    <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'rgba(248,248,252,0.72)' }}>
-                      <span style={{ color: plan.color, flexShrink: 0, marginTop: 1 }}>✓</span>
-                      {f}
+                <div style={{ fontSize: 11, fontWeight: 950, letterSpacing: 0.9, color: 'rgba(248,248,252,0.42)', textTransform: 'uppercase', marginBottom: 8 }}>
+                  Unlocks
+                </div>
+                <ul style={{ margin: '0 0 15px', padding: 0, listStyle: 'none', display: 'grid', gap: 7 }}>
+                  {plan.unlocks.map((f) => (
+                    <li key={f} style={{ display: 'grid', gridTemplateColumns: '18px 1fr', gap: 8, fontSize: 13, lineHeight: 1.45, color: 'rgba(248,248,252,0.78)' }}>
+                      <span style={{ color: plan.color, fontWeight: 950, marginTop: -1 }}>✓</span>
+                      <span>{f}</span>
                     </li>
                   ))}
                 </ul>
 
-                {/* Fair use note */}
                 {plan.fairUse && (
-                  <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.3)', marginBottom: 12, fontStyle: 'italic' }}>
+                  <div style={{ fontSize: 11.5, color: 'rgba(248,248,252,0.42)', marginBottom: 13, lineHeight: 1.45 }}>
                     {plan.fairUse}
                   </div>
                 )}
 
-                {/* CTA */}
                 <button
-                  onClick={() => handlePlan(plan.id)}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handlePlan(plan.id); }}
                   disabled={!!loading || isCurrentTier}
                   style={{
                     width: '100%',
-                    padding: '13px 20px',
-                    borderRadius: 13,
-                    border: 'none',
+                    padding: '14px 18px',
+                    borderRadius: 14,
+                    border: `1px solid ${isCurrentTier ? 'rgba(255,255,255,0.09)' : plan.color + '55'}`,
                     background: isCurrentTier
                       ? 'rgba(255,255,255,0.06)'
-                      : `linear-gradient(135deg, ${plan.color}cc, ${plan.color}88)`,
-                    color: isCurrentTier ? 'rgba(248,248,252,0.3)' : '#0a0a0f',
-                    fontWeight: 900, fontSize: 14,
+                      : `linear-gradient(135deg, ${plan.color}, ${plan.color}b8)`,
+                    color: isCurrentTier ? 'rgba(248,248,252,0.38)' : '#08080d',
+                    fontWeight: 950,
+                    fontSize: 14,
                     cursor: isCurrentTier ? 'default' : loading ? 'wait' : 'pointer',
-                    opacity: loading && !isLoading ? 0.6 : 1,
-                    transition: 'opacity 0.2s',
+                    opacity: loading && !isLoading ? 0.55 : 1,
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 >
                   {isCurrentTier
                     ? 'Current plan'
                     : isLoading
-                    ? 'Opening checkout…'
+                    ? 'Opening Stripe checkout…'
                     : plan.id === 'credits'
                     ? 'Buy 3 path credits →'
-                    : `Upgrade to ${plan.name} →`}
+                    : `Choose ${plan.name} ${billing === 'yearly' ? 'annual' : 'monthly'} →`}
                 </button>
-              </div>
+              </section>
             );
           })}
 
           {error && (
-            <div style={{ fontSize: 13, color: '#ef4444', textAlign: 'center', padding: '4px 0' }}>{error}</div>
+            <div style={{ fontSize: 13, color: '#ef4444', textAlign: 'center', padding: '4px 0', lineHeight: 1.45 }}>{error}</div>
           )}
+
+          <div style={{ fontSize: 11.5, color: 'rgba(248,248,252,0.36)', textAlign: 'center', lineHeight: 1.45 }}>
+            Secure Stripe checkout · Cancel subscriptions anytime · Swipe the handle down to dismiss
+          </div>
         </div>
       </div>
     </div>
