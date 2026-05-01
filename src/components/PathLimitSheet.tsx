@@ -119,7 +119,7 @@ export function PathLimitSheet({ activePaths, pathLimit, pathCredits = 0, onClos
             color: '#fbbf24', padding: '14px 20px', borderRadius: 14,
             fontWeight: 800, fontSize: 15, cursor: buying ? 'wait' : 'pointer', opacity: buying ? 0.7 : 1,
           }}>
-            {buying ? 'Opening checkout…' : '5 extra paths — $9 one-time ☆'}
+            {buying ? 'Opening checkout…' : '3 extra paths — $9 one-time ☆'}
           </button>
 
           {/* Subscription tiers */}
@@ -129,7 +129,7 @@ export function PathLimitSheet({ activePaths, pathLimit, pathCredits = 0, onClos
               color: '#a78bfa', padding: '13px 12px', borderRadius: 14,
               fontWeight: 800, fontSize: 13, cursor: subscribing ? 'wait' : 'pointer', opacity: subscribing ? 0.7 : 1,
             }}>
-              {subscribing === 'explorer' ? '…' : 'Explorer\n12 paths — $9/mo'}
+              {subscribing === 'explorer' ? '…' : 'Explorer — $9/mo\n12 paths'}
             </button>
             <button onClick={() => handleSubscribe('sovereign')} disabled={!!subscribing} style={{
               flex: 1, background: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.2))',
@@ -137,7 +137,7 @@ export function PathLimitSheet({ activePaths, pathLimit, pathCredits = 0, onClos
               color: '#c4b5fd', padding: '13px 12px', borderRadius: 14,
               fontWeight: 800, fontSize: 13, cursor: subscribing ? 'wait' : 'pointer', opacity: subscribing ? 0.7 : 1,
             }}>
-              {subscribing === 'sovereign' ? '…' : 'Sovereign\nUnlimited — $29/mo'}
+              {subscribing === 'sovereign' ? '…' : 'Sovereign — $29/mo\nUnlimited paths'}
             </button>
           </div>
 
