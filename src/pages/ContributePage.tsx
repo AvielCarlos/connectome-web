@@ -147,10 +147,36 @@ export default function ContributePage() {
 
       <div className="contribute-page" style={{ maxWidth: 980, margin: '0 auto' }}>
         <section style={{ textAlign: 'center', marginBottom: 30 }}>
-          <div style={{ display: 'inline-flex', border: '1px solid rgba(0,212,170,0.28)', background: 'rgba(0,212,170,0.08)', color: ACCENT, borderRadius: 999, padding: '7px 12px', fontSize: 12, fontWeight: 900, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 16 }}>Internal ecosystem workbench</div>
-          <h1 style={{ fontSize: 'clamp(36px, 7vw, 70px)', lineHeight: 0.98, letterSpacing: -2.2, margin: '0 0 16px', fontWeight: 950 }}>Submit work. Earn CP. Move the ecosystem forward.</h1>
-          <p style={{ margin: '0 auto', maxWidth: 690, color: 'rgba(248,248,252,0.62)', fontSize: 17, lineHeight: 1.65 }}>Contribute is the workbench: concrete tasks, evidence, review, and delivery. DAO governs and rewards the work; Eviva handles world-facing missions and opportunities.</p>
+          <div style={{ display: 'inline-flex', border: '1px solid rgba(0,212,170,0.28)', background: 'rgba(0,212,170,0.08)', color: ACCENT, borderRadius: 999, padding: '7px 12px', fontSize: 12, fontWeight: 900, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 16 }}>Aligned developer workbench</div>
+          <h1 style={{ fontSize: 'clamp(36px, 7vw, 70px)', lineHeight: 0.98, letterSpacing: -2.2, margin: '0 0 16px', fontWeight: 950 }}>Build Aura. Earn CP. Help shape AI for human flourishing.</h1>
+          <p style={{ margin: '0 auto', maxWidth: 760, color: 'rgba(248,248,252,0.62)', fontSize: 17, lineHeight: 1.65 }}>Contribute is the workbench for developers, designers, writers, and operators aligned with the mission: concrete tasks, evidence, review, shipping, and transparent CP recognition.</p>
           <button type="button" onClick={() => setCpExplainerOpen(true)} style={{ marginTop: 14, color: ACCENT, fontWeight: 900, textDecoration: 'none' }}>What is CP?</button>
+        </section>
+
+        <section style={{ ...card, padding: 24, marginBottom: 22, border: '1px solid rgba(0,212,170,0.18)' }}>
+          <div style={{ color: ACCENT, fontSize: 12, fontWeight: 900, letterSpacing: 1.1, textTransform: 'uppercase', marginBottom: 8 }}>Who we're looking for now</div>
+          <h2 style={{ margin: '0 0 12px', fontSize: 28, letterSpacing: -0.8 }}>Developers who care about agency, consciousness, and useful AI.</h2>
+          <p style={{ margin: '0 0 16px', color: 'rgba(248,248,252,0.64)', lineHeight: 1.65 }}>
+            Aura needs builders who can turn the IOO graph into real user outcomes: live research, local opportunity intelligence, goal/path infrastructure, graph embeddings, agent reliability, and beautiful React surfaces.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 10, marginBottom: 16 }}>
+            {[
+              ['Agent / search engineers', 'Execution agents, web/provider research, safe action handoffs.'],
+              ['Graph / ML engineers', 'IOO embeddings, prerequisites, ranking, vector search.'],
+              ['Full-stack product builders', 'FastAPI, Postgres, React, Stripe, OAuth, mobile-grade UX.'],
+              ['Local intelligence builders', 'Events, places, services, APIs, structured public data.'],
+            ].map(([title, body]) => (
+              <div key={title} style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.075)', borderRadius: 16, padding: 14 }}>
+                <div style={{ fontWeight: 900, marginBottom: 6 }}>{title}</div>
+                <div style={{ color: 'rgba(248,248,252,0.56)', fontSize: 13, lineHeight: 1.5 }}>{body}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <a href="https://github.com/AvielCarlos/connectome-backend/issues" target="_blank" rel="noreferrer" style={{ background: ACCENT, color: '#06100e', borderRadius: 999, padding: '10px 14px', fontWeight: 950 }}>Browse CP issues →</a>
+            <a href="https://github.com/AvielCarlos/connectome-web" target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', color: '#f8f8fc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '10px 14px', fontWeight: 850 }}>View web repo</a>
+            <a href="https://t.me/ascensiontechai" target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', color: '#f8f8fc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '10px 14px', fontWeight: 850 }}>Join community</a>
+          </div>
         </section>
 
         <section style={{ ...card, padding: 22, marginBottom: 22 }}>
