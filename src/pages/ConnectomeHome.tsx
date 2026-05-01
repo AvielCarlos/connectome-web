@@ -8,6 +8,13 @@ const nextSignals = [
   { label: 'Community', title: 'Contribute to the ecosystem and earn CP', path: '/app/dao' },
 ];
 
+const guidanceSteps = [
+  ['Clarify', 'Tell Aura what you want, what feels off, or what constraint matters. Short answers are enough.'],
+  ['Choose', 'Save what feels alive, skip what is wrong, and use “Do now” only when you would actually act.'],
+  ['Do', 'Take the real-world step: book, visit, message, practice, create, rest, or contribute.'],
+  ['Give evidence', 'After action, add a quick note, rating, link, or photo. Evidence earns small CP and teaches Aura what works.'],
+];
+
 function greetingName(profile: any) {
   const raw = profile?.display_name || profile?.name || profile?.email?.split('@')[0] || 'Avi';
   return String(raw).split(' ')[0];
@@ -41,6 +48,26 @@ export default function ConnectomeHome() {
         <p style={{ maxWidth: 720, margin: '0 auto 10px' }}>
           Good {dayPart()}, {greetingName(profile)}. This is the Connectome home base: choose whether you already know your aim, or want the Path Feed to surface a next action.
         </p>
+      </section>
+
+      <section aria-label="How to guide Aura" style={{ ...panel, padding: 22, marginBottom: 24 }}>
+        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>How to make Aura better</div>
+        <h2 style={{ margin: '0 0 10px', fontSize: 24, letterSpacing: -0.5 }}>Use it like a living path, not a static app</h2>
+        <p style={{ margin: '0 0 16px', color: 'rgba(248,248,252,0.62)', lineHeight: 1.6 }}>
+          Every honest choice teaches the graph. Aura handles scaffolding, search, reminders, pathing, and adaptation; you clarify, decide, and do real things.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
+          {guidanceSteps.map(([title, copy], index) => (
+            <div key={title} style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 14 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(0,212,170,0.14)', color: '#00d4aa', display: 'grid', placeItems: 'center', fontWeight: 900, marginBottom: 9 }}>{index + 1}</div>
+              <strong>{title}</strong>
+              <p style={{ margin: '6px 0 0', color: 'rgba(248,248,252,0.58)', fontSize: 13, lineHeight: 1.45 }}>{copy}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 14, padding: '12px 14px', borderRadius: 16, background: 'rgba(244,194,107,0.09)', color: 'rgba(248,248,252,0.78)', border: '1px solid rgba(244,194,107,0.18)', fontSize: 13, lineHeight: 1.5 }}>
+          Evidence after action earns a small CP reward — currently capped and intentionally modest to reward real proof without making spam profitable.
+        </div>
       </section>
 
       <section aria-label="Choose your next mode" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: 16, marginBottom: 24 }}>
