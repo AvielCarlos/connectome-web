@@ -399,6 +399,7 @@ class AuraClientClass {
       time_on_screen_ms: payload.time_on_screen_ms,
       exit_point: payload.exit_point,
       completed: payload.completed ?? false,
+      metadata: payload.metadata,
     });
     return res.data as { ok: boolean; fulfilment_delta: number; message: string };
   }

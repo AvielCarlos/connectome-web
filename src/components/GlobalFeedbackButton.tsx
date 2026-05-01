@@ -35,10 +35,32 @@ export default function GlobalFeedbackButton() {
     const canvas = await html2canvas(document.body, {
       backgroundColor: '#060610',
       useCORS: true,
-      scale: Math.min(window.devicePixelRatio || 1, 2),
+      allowTaint: false,
+      scale: Math.min(window.devicePixelRatio || 1, 1.4),
       ignoreElements: (element) => element instanceof HTMLElement && element.dataset.feedbackWidget === 'true',
     });
-    return canvas.toDataURL('image/png');
+
+    // Keep feedback reliable on mobile: full-page PNG screenshots can exceed
+    // proxy/body limits or the 15s client timeout. Downscale and JPEG-compress
+    // before sending; if still large, the submit path retries without it.
+    const maxSide = 1100;
+    const ratio = Math.min(1, maxSide / Math.max(canvas.width, canvas.height));
+    const out = document.createElement('canvas');
+    out.width = Math.max(1, Math.round(canvas.width * ratio));
+    out.height = Math.max(1, Math.round(canvas.height * ratio));
+    const ctx = out.getContext('2d');
+    ctx?.drawImage(canvas, 0, 0, out.width, out.height);
+    return out.toDataURL('image/jpeg', 0.68);
+  };
+
+  const errorMessage = (err: any) => {
+    const status = err?.response?.status;
+    const detail = err?.response?.data?.detail;
+    if (status === 401) return 'Please sign in again, then resend this feedback.';
+    if (status === 413) return 'The screenshot was too large. Feedback was not sent yet.';
+    if (detail) return typeof detail === 'string' ? detail : 'Could not send feedback. Please try again.';
+    if (err?.code === 'ECONNABORTED') return 'Feedback timed out. Retrying without screenshot may help.';
+    return 'Could not send feedback. Please try again.';
   };
 
   const resetAndClose = () => {
@@ -59,27 +81,54 @@ export default function GlobalFeedbackButton() {
     setSubmitting(true);
     setError(null);
     try {
-      const screenshot = await captureScreenshot();
-      const res = await AuraClient.submitGlobalFeedback({
+      let screenshot: string | null = null;
+      const metadata: Record<string, any> = {
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString(),
+        title: document.title,
+        report_type: 'bad_or_malfunctional_card_or_node',
+        activeElement: document.activeElement instanceof HTMLElement ? { tag: document.activeElement.tagName, id: document.activeElement.id || null, name: document.activeElement.getAttribute('name'), ariaLabel: document.activeElement.getAttribute('aria-label') } : null,
+      };
+
+      try {
+        screenshot = await captureScreenshot();
+        if (screenshot) metadata.screenshot_client_bytes = Math.round((screenshot.length * 3) / 4);
+      } catch (captureErr: any) {
+        metadata.screenshot_capture_error = captureErr?.message || 'capture failed';
+        screenshot = null;
+      }
+
+      const payload = {
         category,
         message: trimmed,
         route: window.location.pathname + window.location.search + window.location.hash,
         screenshot_data_url: screenshot,
-        metadata: {
-          viewport: { width: window.innerWidth, height: window.innerHeight },
-          userAgent: navigator.userAgent,
-          timestamp: new Date().toISOString(),
-          title: document.title,
-          report_type: 'bad_or_malfunctional_card_or_node',
-          activeElement: document.activeElement instanceof HTMLElement ? { tag: document.activeElement.tagName, id: document.activeElement.id || null, name: document.activeElement.getAttribute('name'), ariaLabel: document.activeElement.getAttribute('aria-label') } : null,
-        },
-      });
+        metadata,
+      };
+
+      let res;
+      try {
+        res = await AuraClient.submitGlobalFeedback(payload);
+      } catch (submitErr: any) {
+        // If a mobile screenshot payload causes timeout/body-limit trouble, keep
+        // the text feedback flowing and retry once without the attachment.
+        if (screenshot && (submitErr?.response?.status === 413 || submitErr?.code === 'ECONNABORTED' || !submitErr?.response)) {
+          res = await AuraClient.submitGlobalFeedback({
+            ...payload,
+            screenshot_data_url: null,
+            metadata: { ...metadata, screenshot_retry_without_attachment: true, first_error: errorMessage(submitErr) },
+          });
+        } else {
+          throw submitErr;
+        }
+      }
 
       if (res.cp_earned) show(`Report sent +${res.cp_earned} CP`, 'success');
       else show(res.message || 'Report sent +10 CP', 'success');
       resetAndClose();
     } catch (err: any) {
-      setError(err?.response?.data?.detail || 'Could not send feedback. Please try again.');
+      setError(errorMessage(err));
     } finally {
       setSubmitting(false);
     }
