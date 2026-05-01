@@ -484,6 +484,7 @@ function CreateOpportunitySheet({ onClose, onCreated }: { onClose: () => void; o
   const [url, setUrl] = useState('');
   const [kind, setKind] = useState('Event / product / service');
   const [domain, setDomain] = useState<'iVive' | 'Aventi' | 'Eviva'>('Aventi');
+  const [city, setCity] = useState<'Victoria, BC' | 'Vancouver, BC'>('Victoria, BC');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -494,10 +495,10 @@ function CreateOpportunitySheet({ onClose, onCreated }: { onClose: () => void; o
     try {
       const created = await AuraClient.createOpportunity({
         title: title.trim(),
-        body: `User/Aura-created local opportunity for Victoria, BC. Verify links, cost, timing, and provider details before acting.`,
+        body: `User/Aura-created local opportunity for ${city}. Verify links, cost, timing, and provider details before acting.`,
         kind,
         domain,
-        city: 'Victoria, BC',
+        city,
         url: url.trim() || undefined,
         source_url: url.trim() || undefined,
       });
@@ -514,19 +515,23 @@ function CreateOpportunitySheet({ onClose, onCreated }: { onClose: () => void; o
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'flex-end', paddingBottom: 'var(--shell-bottom-clearance)' }}>
       <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', background: '#11111c', borderRadius: '28px 28px 0 0', border: '1px solid rgba(0,212,170,0.24)', padding: '20px 22px 34px' }}>
         <div style={{ width: 44, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.16)', margin: '0 auto 18px' }} />
-        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 950, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Create with Aura · Victoria beta</div>
+        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 950, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Create with Aura · BC corridor beta</div>
         <h2 style={{ margin: 0, color: '#f8f8fc', fontSize: 24 }}>Add a real opportunity</h2>
-        <p style={{ color: 'rgba(248,248,252,0.56)', lineHeight: 1.55, fontSize: 13 }}>Add events, products, services, classes, bookings, providers, or local nodes Aura missed. Links are optional but strongly preferred.</p>
+        <p style={{ color: 'rgba(248,248,252,0.56)', lineHeight: 1.55, fontSize: 13 }}>Add events, products, services, classes, bookings, developer channels, providers, or local nodes Aura missed in Victoria or Vancouver. Links are optional but strongly preferred.</p>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title — e.g. Pottery class at..." style={{ width: '100%', boxSizing: 'border-box', marginTop: 10, padding: '13px 14px', borderRadius: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#f8f8fc', fontSize: 15 }} />
         <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Page / booking / provider URL" style={{ width: '100%', boxSizing: 'border-box', marginTop: 10, padding: '13px 14px', borderRadius: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#f8f8fc', fontSize: 15 }} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10 }}>
           <select value={kind} onChange={(e) => setKind(e.target.value)} style={{ padding: '12px 10px', borderRadius: 14, background: '#171725', border: '1px solid rgba(255,255,255,0.12)', color: '#f8f8fc' }}>
-            <option>Event</option><option>Class</option><option>Product</option><option>Service</option><option>Booking</option><option>Volunteer role</option><option>Path node</option>
+            <option>Event</option><option>Class</option><option>Product</option><option>Service</option><option>Booking</option><option>Volunteer role</option><option>Developer channel</option><option>Path node</option>
           </select>
           <select value={domain} onChange={(e) => setDomain(e.target.value as any)} style={{ padding: '12px 10px', borderRadius: 14, background: '#171725', border: '1px solid rgba(255,255,255,0.12)', color: '#f8f8fc' }}>
             <option value="Aventi">Aventi</option><option value="iVive">iVive</option><option value="Eviva">Eviva</option>
           </select>
         </div>
+        <select value={city} onChange={(e) => setCity(e.target.value as any)} style={{ width: '100%', marginTop: 10, padding: '12px 10px', borderRadius: 14, background: '#171725', border: '1px solid rgba(255,255,255,0.12)', color: '#f8f8fc' }}>
+          <option value="Victoria, BC">Victoria, BC</option>
+          <option value="Vancouver, BC">Vancouver, BC</option>
+        </select>
         {error && <div style={{ marginTop: 10, color: '#fca5a5', fontSize: 12 }}>{error}</div>}
         <button disabled={saving} onClick={submit} style={{ marginTop: 14, width: '100%', minHeight: 52, border: 'none', borderRadius: 999, background: 'linear-gradient(135deg,#00d4aa,#14f1c1)', color: '#06110f', fontSize: 15, fontWeight: 950 }}>
           {saving ? 'Creating…' : 'Create opportunity node →'}
