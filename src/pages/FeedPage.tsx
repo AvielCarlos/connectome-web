@@ -132,6 +132,48 @@ function getCardImage(spec: any, card: any, domain: string) {
   return card?.image_url || spec?.metadata?.image_url || hero?.source || DOMAIN_IMAGE_FALLBACK[domain] || DOMAIN_IMAGE_FALLBACK.default;
 }
 
+function componentText(comp: any) {
+  return comp?.text || comp?.body || comp?.label || comp?.title || '';
+}
+
+function importantChips(spec: any) {
+  const chips: { label: string; value: string }[] = [];
+  for (const comp of spec?.components || []) {
+    if (comp?.type === 'context_strip') {
+      for (const item of comp.items || []) {
+        const label = String(item?.label || '').trim();
+        const value = String(item?.value || '').trim();
+        if (!value) continue;
+        if (/^(city|when|where|price|time|money|difficulty|mode|domain)$/i.test(label)) chips.push({ label, value });
+      }
+    }
+    if (comp?.type === 'constraint_panel') {
+      for (const item of (comp.items || []).slice(0, 2)) {
+        const label = String(item?.label || item || '').trim();
+        if (/price|cost|fee|ticket|where|when|transport|booking/i.test(label)) chips.push({ label: 'Need', value: label.replace(/^(Price|Where|When):\s*/i, '') });
+      }
+    }
+  }
+  return chips.slice(0, 5);
+}
+
+function reviewSummary(spec: any) {
+  const review = (spec?.components || []).find((c: any) => c?.type === 'review_rating');
+  if (!review) return null;
+  const rating = typeof review.rating === 'number' ? Math.max(0, Math.min(5, review.rating)) : null;
+  return {
+    rating,
+    label: rating == null ? 'Review rating needed' : `${rating.toFixed(1)} / 5`,
+    stars: rating == null ? '☆☆☆☆☆' : `${'★'.repeat(Math.round(rating))}${'☆'.repeat(5 - Math.round(rating))}`,
+    reviewCount: review.review_count,
+  };
+}
+
+function detailComponents(spec: any) {
+  const hiddenOnSheet = new Set(['hero_image', 'headline', 'body', 'body_text', 'category_badge', 'type_badge', 'pattern_badge', 'meta', 'domain_badge']);
+  return (spec?.components || []).filter((comp: any) => comp && !hiddenOnSheet.has(comp.type));
+}
+
 // ─── Confetti burst ───────────────────────────────────────────────────────────
 function ConfettiBurst({ active }: { active: boolean }) {
   if (!active) return null;
@@ -237,10 +279,13 @@ function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
 }
 
 // ─── Detail sheet ─────────────────────────────────────────────────────────────
-function DetailSheet({ card, color, onClose, onDoNow }: { card: any; color: string; onClose: () => void; onDoNow: () => void }) {
+function DetailSheet({ card, spec, color, onClose, onDoNow, onAction }: { card: any; spec: any; color: string; onClose: () => void; onDoNow: () => void; onAction: (action: any) => void }) {
   const deepDive = card?.deep_dive || null;
   const title = card?.title || card?.text || '';
   const body = card?.body || card?.body_text || '';
+  const extraComponents = detailComponents(spec);
+  const touchStartY = useRef<number | null>(null);
+  const touchDeltaY = useRef(0);
 
   const difficultyColor = (d: string) =>
     d === 'easy' ? '#10b981' : d === 'medium' ? '#f59e0b' : '#ef4444';
@@ -259,9 +304,19 @@ function DetailSheet({ card, color, onClose, onDoNow }: { card: any; color: stri
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => { touchStartY.current = e.touches[0]?.clientY ?? null; touchDeltaY.current = 0; }}
+        onTouchMove={(e) => {
+          if (touchStartY.current == null) return;
+          touchDeltaY.current = (e.touches[0]?.clientY ?? touchStartY.current) - touchStartY.current;
+        }}
+        onTouchEnd={() => {
+          if (touchDeltaY.current > 90) onClose();
+          touchStartY.current = null;
+          touchDeltaY.current = 0;
+        }}
         style={{
           width: '100%',
-          maxHeight: 'calc(100dvh - var(--shell-top-clearance) - var(--shell-bottom-clearance) - 18px)',
+          maxHeight: 'min(86dvh, calc(var(--visual-viewport-height, 100dvh) - var(--shell-top-clearance) - 18px))',
           background: '#12121e',
           borderRadius: '28px 28px 0 0',
           border: `1px solid ${color}22`,
@@ -327,7 +382,7 @@ function DetailSheet({ card, color, onClose, onDoNow }: { card: any; color: stri
               )}
 
               {deepDive.resources?.length > 0 && (
-                <div>
+                <div style={{ marginBottom: 24 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color, marginBottom: 12, textTransform: 'uppercase' }}>Explore more</div>
                   {deepDive.resources.map((r: any, i: number) => (
                     <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" style={{
@@ -344,6 +399,13 @@ function DetailSheet({ card, color, onClose, onDoNow }: { card: any; color: stri
                       <div style={{ marginLeft: 'auto', color: 'rgba(248,248,252,0.3)', fontSize: 18 }}>›</div>
                     </a>
                   ))}
+                </div>
+              )}
+
+              {extraComponents.length > 0 && (
+                <div style={{ marginTop: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color, marginBottom: 12, textTransform: 'uppercase' }}>Details, links, and opportunities</div>
+                  {extraComponents.map((comp: any, i: number) => <AuraCard key={i} component={comp} index={i} onAction={onAction} />)}
                 </div>
               )}
             </>
@@ -629,6 +691,13 @@ function FeedCard({
   }
   if (!cardData.deep_dive) cardData.deep_dive = specAny.deep_dive || fallbackDeepDive(cardData, specAny, domain);
   const cardImage = getCardImage(specAny, cardData, domain);
+  const chips = importantChips(spec);
+  const review = reviewSummary(spec);
+  const openCardAction = (action: any) => {
+    if (action?.type === 'navigate' && action.url === '/app/goals') onDoNow(item, cardData);
+    if (action?.type === 'open_url' && /^(ido|ioo):\/\//i.test(String(action.url || ''))) onDoNow(item, cardData);
+    if (action?.type === 'open_url' && /^https?:\/\//i.test(String(action.url || ''))) window.open(action.url, '_blank', 'noopener');
+  };
 
   const handleSave = () => {
     if (!isSaved) {
@@ -698,8 +767,10 @@ function FeedCard({
       {showDetail && (
         <DetailSheet
           card={cardData}
+          spec={spec}
           color={color}
           onClose={() => setShowDetail(false)}
+          onAction={openCardAction}
           onDoNow={() => {
             setShowDetail(false);
             onDoNow(item, cardData);
@@ -707,67 +778,49 @@ function FeedCard({
         />
       )}
 
-      {/* Scrollable content */}
-      <div
+      {/* Primary card summary: only the essential activity/experience details. */}
+      <button
         onClick={() => setShowDetail(true)}
         style={{
-          position: 'relative', zIndex: 5,
-          flex: 1, height: '100%',
-          overflowY: 'auto',
-          padding: '22px 20px 158px',
-          scrollbarWidth: 'none',
+          position: 'absolute',
+          zIndex: 5,
+          left: 16,
+          right: 86,
+          top: 18,
+          bottom: 96,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          gap: 10,
+          textAlign: 'left',
+          background: 'transparent',
+          border: 'none',
+          padding: 0,
+          color: '#f8f8fc',
           cursor: 'pointer',
+          overflow: 'hidden',
         }}
       >
-        {/* Domain badge */}
-        {domain && (
-          <div style={{ marginBottom: 16 }}>
-            <span style={{
-              background: 'rgba(0,0,0,0.35)',
-              backdropFilter: 'blur(8px)',
-              border: `1px solid ${color}44`,
-              color,
-              fontSize: 12, fontWeight: 700, letterSpacing: 0.5,
-              padding: '5px 12px', borderRadius: 20,
-            }}>
-              {domainCfg.emoji} {domain}
-            </span>
-            {spec.type && spec.type !== 'standard' && (
-              <span style={{
-                marginLeft: 8,
-                background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'rgba(248,248,252,0.4)', fontSize: 10, fontWeight: 700,
-                letterSpacing: 1, textTransform: 'uppercase', padding: '5px 12px', borderRadius: 20,
-              }}>
-                {spec.type.replace(/_/g, ' ')}
-              </span>
-            )}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          {domain && <span style={{ background: 'rgba(0,0,0,0.38)', backdropFilter: 'blur(8px)', border: `1px solid ${color}55`, color, fontSize: 12, fontWeight: 800, letterSpacing: 0.4, padding: '5px 11px', borderRadius: 999 }}>{domainCfg.emoji} {domain}</span>}
+          {spec.type && spec.type !== 'standard' && <span style={{ background: 'rgba(0,0,0,0.30)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(248,248,252,0.55)', fontSize: 10, fontWeight: 800, letterSpacing: 0.8, textTransform: 'uppercase', padding: '5px 10px', borderRadius: 999 }}>{spec.type.replace(/_/g, ' ')}</span>}
+        </div>
+
+        {cardData.title && <h2 style={{ margin: 0, maxWidth: 620, fontSize: 'clamp(27px, 6vw, 46px)', fontWeight: 950, lineHeight: 1.02, letterSpacing: -1.4, textShadow: '0 3px 18px rgba(0,0,0,0.74)' }}>{cardData.title}</h2>}
+        {cardData.body && <p style={{ margin: 0, maxWidth: 620, color: 'rgba(248,248,252,0.78)', fontSize: 'clamp(14px, 2.8vw, 17px)', lineHeight: 1.48, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as any, overflow: 'hidden', textShadow: '0 2px 12px rgba(0,0,0,0.72)' }}>{cardData.body}</p>}
+
+        {chips.length > 0 && (
+          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', maxHeight: 84, overflow: 'hidden' }}>
+            {chips.map((chip, i) => <span key={`${chip.label}-${i}`} style={{ background: 'rgba(0,0,0,0.38)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', borderRadius: 14, padding: '7px 9px', color: '#f8f8fc', fontSize: 12, fontWeight: 800 }}><span style={{ color: 'rgba(248,248,252,0.42)', textTransform: 'uppercase', fontSize: 9, marginRight: 5 }}>{chip.label}</span>{chip.value}</span>)}
           </div>
         )}
 
-        {/* Card content */}
-        {spec.components.map((comp: any, i: number) => (
-          <AuraCard key={i} component={comp} index={i} onAction={(action: any) => {
-            if (action.type === 'navigate' && action.url === '/app/goals') onDoNow(item, cardData);
-            if (action.type === 'open_url' && /^(ido|ioo):\/\//i.test(String(action.url || ''))) {
-              onDoNow(item, cardData);
-            }
-          }} />
-        ))}
+        {review && <div style={{ display: 'inline-flex', width: 'fit-content', gap: 7, alignItems: 'center', background: 'rgba(0,0,0,0.42)', border: '1px solid rgba(244,194,107,0.28)', color: '#f4c26b', borderRadius: 999, padding: '7px 11px', fontSize: 12, fontWeight: 900 }}><span>{review.stars}</span><span>{review.label}</span>{review.reviewCount && <span style={{ color: 'rgba(248,248,252,0.48)' }}>({review.reviewCount})</span>}</div>}
 
-        {/* "Tap for more" hint */}
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          marginTop: 20,
-          background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: 20, padding: '7px 14px',
-          fontSize: 12, color: 'rgba(248,248,252,0.45)', fontWeight: 600,
-        }}>
-          <span>⤴</span> Tap for deep dive
+        <div style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: 7, background: 'rgba(0,0,0,0.42)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 999, padding: '8px 13px', color: 'rgba(248,248,252,0.66)', fontSize: 12, fontWeight: 800 }}>
+          <span>↑</span> Details, links, and how to do it
         </div>
-      </div>
+      </button>
 
       {/* Right-side action buttons (TikTok-style) */}
       <div style={{
@@ -862,22 +915,6 @@ function FeedCard({
         <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.3)', fontWeight: 600 }}>
           Not interested
         </div>
-      </div>
-
-        {/* Bottom left: card info */}
-      <div style={{
-        position: 'absolute', bottom: 18, left: 16, right: 96,
-        zIndex: 10,
-      }}>
-        {cardData.title && (
-          <div style={{
-            fontSize: 16, fontWeight: 800, color: '#f8f8fc',
-            lineHeight: 1.3, marginBottom: 4,
-            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
-          }}>
-            {cardData.title.slice(0, 60)}{cardData.title.length > 60 ? '…' : ''}
-          </div>
-        )}
       </div>
 
       {/* Swipe hint */}
