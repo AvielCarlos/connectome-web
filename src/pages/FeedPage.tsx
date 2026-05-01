@@ -1386,40 +1386,41 @@ export default function FeedPage() {
         </span>
       </label>
 
-      {/* Path domain focus tabs */}
+      {/* IOO domain flow switch — the top glass rail filters the graph/feed by life domain. */}
       <div style={{
         position: 'absolute', top: 'max(env(safe-area-inset-top), 18px)', left: '50%', transform: 'translateX(-50%)',
-        zIndex: 35, display: 'flex', alignItems: 'center', gap: 6,
-        padding: '5px', borderRadius: 999,
-        background: 'rgba(10,10,15,0.48)',
-        border: '1px solid rgba(255,255,255,0.10)',
-        backdropFilter: 'blur(18px)',
-        boxShadow: '0 10px 34px rgba(0,0,0,0.28)',
+        zIndex: 48, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', alignItems: 'center', gap: 5,
+        width: 'min(92vw, 430px)', padding: 5, borderRadius: 999,
+        background: 'linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.045))',
+        border: '1px solid rgba(255,255,255,0.18)',
+        backdropFilter: 'blur(22px) saturate(140%)', WebkitBackdropFilter: 'blur(22px) saturate(140%)',
+        boxShadow: '0 18px 46px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.14)',
       }}>
-        {PATH_DOMAIN_TABS.map((tab) => {
+        {([{ id: null, label: 'All', emoji: '◈' }, ...PATH_DOMAIN_TABS] as Array<{ id: PathDomainFilter; label: string; emoji: string }>).map((tab) => {
           const active = domainFilter === tab.id;
-          const cfg = DOMAIN_CONFIG[tab.id];
+          const cfg = tab.id ? DOMAIN_CONFIG[tab.id] : DEFAULT_DOMAIN;
           return (
             <button
-              key={tab.id}
+              key={tab.id || 'all'}
               type="button"
               aria-pressed={active}
               onClick={() => {
-                setDomainFilter(active ? null : tab.id);
+                setDomainFilter(tab.id);
                 setCards([]);
                 setIndex(0);
               }}
               style={{
-                border: 'none', borderRadius: 999, cursor: 'pointer',
-                padding: active ? '8px 13px' : '8px 10px',
-                color: active ? '#06110f' : 'rgba(248,248,252,0.82)',
-                background: active ? `linear-gradient(135deg, ${cfg.color}, #ffffff)` : 'rgba(255,255,255,0.06)',
-                fontSize: 12, fontWeight: 900, letterSpacing: -0.1,
-                boxShadow: active ? `0 0 22px ${cfg.color}55` : 'none',
-                transition: 'all 0.18s ease',
+                position: 'relative', border: 'none', borderRadius: 999, cursor: 'pointer', overflow: 'hidden',
+                padding: '9px 8px', minHeight: 36,
+                color: active ? '#06110f' : 'rgba(248,248,252,0.86)',
+                background: active ? `linear-gradient(135deg, ${cfg.color}, rgba(255,255,255,0.96))` : 'rgba(255,255,255,0.055)',
+                fontSize: 12, fontWeight: 950, letterSpacing: -0.16,
+                boxShadow: active ? `0 0 28px ${cfg.color}66, inset 0 1px 0 rgba(255,255,255,0.55)` : 'inset 0 1px 0 rgba(255,255,255,0.06)',
+                transform: active ? 'translateY(-1px) scale(1.025)' : 'translateY(0) scale(1)',
+                transition: 'transform 0.22s cubic-bezier(.2,.9,.2,1), background 0.22s ease, box-shadow 0.22s ease, color 0.22s ease',
               }}
             >
-              <span aria-hidden="true">{tab.emoji}</span> {tab.label}
+              <span aria-hidden="true" style={{ marginRight: 4 }}>{tab.emoji}</span>{tab.label}
             </button>
           );
         })}
