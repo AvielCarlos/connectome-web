@@ -4,6 +4,7 @@ import { AuraClient } from '../lib/AuraClient';
 import { useAuth } from '../context/AuthContext';
 import { useExperiment } from '../lib/useExperiment';
 import { StreakBadge } from '../components/StreakBadge';
+import { billingCancelUrl, billingSuccessUrl } from '../lib/checkoutUrls';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
 const VARIANTS = ['A', 'B', 'C', 'D'] as const;
@@ -34,7 +35,7 @@ const DEFAULT_VALUE_SCORES: Record<(typeof TOP_LEVEL_VALUES)[number], number> = 
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, refreshProfile } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -75,6 +76,11 @@ export default function ProfilePage() {
   const [valueScores, setValueScores] = useState<Record<string, number>>(DEFAULT_VALUE_SCORES);
   const [savingValues, setSavingValues] = useState(false);
   const [valueSaveStatus, setValueSaveStatus] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [travelModeEnabled, setTravelModeEnabled] = useState(false);
+  const [savingTravelMode, setSavingTravelMode] = useState(false);
+  const [travelModeStatus, setTravelModeStatus] = useState<string | null>(null);
 
   // ── A/B hooks must be BEFORE any conditional returns (Rules of Hooks) ──
   const { variant: upgradeHeadlineVariant, trackEvent: trackUpgradeHeadline } = useExperiment('upgrade_headline');
@@ -94,6 +100,7 @@ export default function ProfilePage() {
       if (savedValues && typeof savedValues === 'object') {
         setValueScores({ ...DEFAULT_VALUE_SCORES, ...savedValues });
       }
+      setTravelModeEnabled(Boolean(p?.profile?.travel_mode_enabled));
 
       const cached = localStorage.getItem(`ab_variant_${EXPERIMENT_ID}`) || 'A';
       setCurrentVariant(cached);
@@ -221,6 +228,24 @@ export default function ProfilePage() {
     setSavingValues(false);
   };
 
+  const saveTravelMode = async (enabled: boolean) => {
+    setSavingTravelMode(true);
+    setTravelModeStatus(null);
+    try {
+      const updated = await AuraClient.updateProfile({ travel_mode_enabled: enabled });
+      setProfile(updated);
+      setTravelModeEnabled(Boolean(updated?.profile?.travel_mode_enabled));
+      setTravelModeStatus(enabled
+        ? 'Travel mode on — Aura may include worthwhile non-local opportunities.'
+        : 'Travel mode off — local feed cards will stay pinned to your current city.');
+    } catch (e: any) {
+      setTravelModeStatus(e?.response?.status === 402
+        ? 'Travel mode is for Explorer and Sovereign members.'
+        : 'Could not save travel mode. Try again.');
+    }
+    setSavingTravelMode(false);
+  };
+
   const handleRetireSurface = async (id: string) => {
     if (!window.confirm('Remove this surface? This cannot be undone.')) return;
     try {
@@ -339,6 +364,26 @@ export default function ProfilePage() {
     navigate('/');
   };
 
+  const handleProfileUpgrade = async () => {
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+    try {
+      trackUpgradeCTA('click');
+      const session = await AuraClient.createCheckout(
+        'explorer',
+        'monthly',
+        billingSuccessUrl('explorer'),
+        billingCancelUrl(),
+      );
+      window.location.href = session.checkout_url;
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || 'Could not start checkout. Please try again.';
+      setCheckoutError(typeof msg === 'string' ? msg : JSON.stringify(msg));
+      setCheckoutLoading(false);
+      await refreshProfile().catch(() => {});
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -348,7 +393,8 @@ export default function ProfilePage() {
   }
 
   const tier = profile?.subscription_tier || 'free';
-  const tierColor = tier === 'sovereign' ? '#a855f7' : tier === 'explorer' ? '#3b82f6' : '#6b7280';
+  const isPaidTier = ['explorer', 'sovereign', 'premium'].includes(tier);
+  const tierColor = tier === 'sovereign' ? '#a855f7' : tier === 'explorer' || tier === 'premium' ? '#3b82f6' : '#6b7280';
 
   const UPGRADE_HEADLINES: Record<string, string> = {
     A: 'Unlock the full Aura',
@@ -357,13 +403,13 @@ export default function ProfilePage() {
     D: 'Explorer — built for people serious about their goals',
   };
   const UPGRADE_PRICES: Record<string, string> = {
-    A: '$12.99/month',
-    B: '$0.43/day',
+    A: '$9/month',
+    B: '$0.30/day',
     C: 'Less than a coffee/month',
   };
   const UPGRADE_CTAS: Record<string, string> = {
     A: 'Upgrade to Explorer',
-    B: 'Unlock Explorer — $12.99/mo',
+    B: 'Unlock Explorer — $9/mo',
     C: 'Try Explorer Free for 7 Days',
     D: 'Get Explorer',
   };
@@ -500,9 +546,11 @@ export default function ProfilePage() {
               <div style={{ fontWeight: 700, marginBottom: 6 }}>{upgradeHeadlineText}</div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 4 }}>Unlimited cards, Drive sync, local events</div>
               <div style={{ fontSize: 13, color: 'rgba(99,102,241,0.8)', fontWeight: 600, marginBottom: 12 }}>{upgradePriceText}</div>
-              <button onClick={() => { trackUpgradeCTA('click'); navigate('/app/dao'); }} style={{
+              <button onClick={handleProfileUpgrade} disabled={checkoutLoading} style={{
                 background: '#6366f1', color: '#fff', padding: '9px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
-              }}>{upgradeCTAText}</button>
+                opacity: checkoutLoading ? 0.7 : 1, cursor: checkoutLoading ? 'wait' : 'pointer',
+              }}>{checkoutLoading ? 'Opening checkout…' : upgradeCTAText}</button>
+              {checkoutError && <div style={{ marginTop: 10, fontSize: 12, color: '#ef4444' }}>{checkoutError}</div>}
             </div>
           )}
 
@@ -521,6 +569,43 @@ export default function ProfilePage() {
             <button onClick={() => navigate('/app/ido')} style={{ background: 'rgba(0,212,170,0.16)', color: '#00d4aa', border: '1px solid rgba(0,212,170,0.36)', borderRadius: 10, padding: '9px 12px', fontWeight: 850 }}>
               Add or explore BC corridor opportunities →
             </button>
+          </Card>
+
+          <Card title="Travel mode">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
+              <div>
+                <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.66)', lineHeight: 1.6 }}>
+                  Keep your normal feed strictly local, or let Aura include worthwhile opportunities in nearby and destination cities when you are exploring.
+                </div>
+                <div style={{ fontSize: 12, color: isPaidTier ? '#34d399' : '#f4c26b', marginTop: 8, fontWeight: 700 }}>
+                  {isPaidTier ? 'Included with your subscription.' : 'Explorer or Sovereign required.'}
+                </div>
+              </div>
+              <button
+                disabled={!isPaidTier || savingTravelMode}
+                onClick={() => saveTravelMode(!travelModeEnabled)}
+                style={{
+                  minWidth: 76,
+                  border: '1px solid ' + (travelModeEnabled ? 'rgba(0,212,170,0.55)' : 'rgba(255,255,255,0.14)'),
+                  background: travelModeEnabled ? 'rgba(0,212,170,0.18)' : 'rgba(255,255,255,0.06)',
+                  color: travelModeEnabled ? '#00d4aa' : 'rgba(248,248,252,0.64)',
+                  opacity: !isPaidTier ? 0.55 : 1,
+                  borderRadius: 999,
+                  padding: '8px 12px',
+                  fontSize: 12,
+                  fontWeight: 900,
+                  cursor: !isPaidTier || savingTravelMode ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {savingTravelMode ? 'Saving…' : travelModeEnabled ? 'ON' : 'OFF'}
+              </button>
+            </div>
+            {travelModeStatus && <div style={{ marginTop: 10, fontSize: 12, color: travelModeStatus.startsWith('Could') || travelModeStatus.includes('for Explorer') ? '#ef4444' : '#34d399' }}>{travelModeStatus}</div>}
+            {!isPaidTier && (
+              <button onClick={() => navigate('/app/dao')} style={{ marginTop: 12, background: '#6366f1', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 800 }}>
+                Upgrade to unlock travel mode
+              </button>
+            )}
           </Card>
 
           {/* ── Secondary Navigation — iOS Settings style ── */}
@@ -724,7 +809,7 @@ export default function ProfilePage() {
               fontSize: 13,
               color: 'rgba(248,248,252,0.7)',
             }}>
-              ✨ WebSpawn is an Explorer &amp; Sovereign feature. Aura builds personalized pages for any goal — a dashboard, a plan, a tracker, whatever fits. <a href="/connectome-web/#upgrade" style={{ color: '#8b5cf6', fontWeight: 700 }}>Upgrade to unlock it.</a>
+              ✨ WebSpawn is an Explorer &amp; Sovereign feature. Aura builds personalized pages for any goal — a dashboard, a plan, a tracker, whatever fits. <button type="button" onClick={handleProfileUpgrade} disabled={checkoutLoading} style={{ color: '#8b5cf6', fontWeight: 700, background: 'transparent', border: 0, padding: 0, cursor: checkoutLoading ? 'wait' : 'pointer' }}>Upgrade to unlock it.</button>
             </div>
           )}
 
