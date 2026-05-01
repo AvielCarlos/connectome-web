@@ -409,6 +409,7 @@ function isSystemManagedPathStep(step: any) {
 
 function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
   const card = data?.card || {};
+  const [availableTime, setAvailableTime] = useState<TimeHorizonId>('30m');
   const protocol = data?.execution?.protocol || null;
   const plan = protocol?.execution_plan || null;
   const microNode = plan?.micro_node || null;
@@ -457,6 +458,32 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
             {questions.map((q: string, i: number) => <div key={i} style={{ color: 'rgba(248,248,252,0.78)', fontSize: 14, lineHeight: 1.55 }}>• {q}</div>)}
           </div>
         )}
+
+        <div style={{ background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', borderRadius: 18, padding: 14, marginBottom: 18 }}>
+          <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 850, marginBottom: 8 }}>How much time do you have for this now?</div>
+          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+            {TIME_HORIZON_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                aria-pressed={availableTime === option.id}
+                onClick={() => setAvailableTime(option.id)}
+                style={{
+                  border: availableTime === option.id ? '1px solid rgba(0,212,170,0.8)' : '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: 999,
+                  padding: '8px 11px',
+                  background: availableTime === option.id ? 'linear-gradient(135deg,#00d4aa,#ffffff)' : 'rgba(255,255,255,0.055)',
+                  color: availableTime === option.id ? '#06110f' : 'rgba(248,248,252,0.76)',
+                  fontSize: 12,
+                  fontWeight: 900,
+                }}
+              >{option.label}</button>
+            ))}
+          </div>
+          <div style={{ color: 'rgba(248,248,252,0.52)', fontSize: 12, lineHeight: 1.5, marginTop: 9 }}>
+            Aura should adapt the pathway after you decide to act — from a five-minute micro-node to total freedom.
+          </div>
+        </div>
 
         {(decisionLevels.length > 0 || microNode) && (
           <div style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, padding: 14, marginBottom: 18 }}>
@@ -893,7 +920,7 @@ export default function FeedPage() {
   const goalId = searchParams.get('goal') || undefined;
   const requestedMode = searchParams.get('mode') === 'later' ? 'later' : 'now';
   const requestedDomain = searchParams.get('domain') as PathDomainFilter;
-  const savedTimeHorizon = (searchParams.get('time') || localStorage.getItem('aura_feed_time_horizon') || '30m') as TimeHorizonId;
+  const savedTimeHorizon = (searchParams.get('time') || '30m') as TimeHorizonId;
   const initialTimeHorizon = TIME_HORIZON_OPTIONS.some((item) => item.id === savedTimeHorizon) ? savedTimeHorizon : '30m';
   const [goalTitle, setGoalTitle] = useState<string | null>(null);
 
@@ -937,10 +964,9 @@ export default function FeedPage() {
   }, [requestedDomain]);
 
   useEffect(() => {
-    const requestedTime = (searchParams.get('time') || localStorage.getItem('aura_feed_time_horizon') || '30m') as TimeHorizonId;
-    if (TIME_HORIZON_OPTIONS.some((item) => item.id === requestedTime)) {
+    const requestedTime = searchParams.get('time') as TimeHorizonId | null;
+    if (requestedTime && TIME_HORIZON_OPTIONS.some((item) => item.id === requestedTime)) {
       setTimeHorizon(requestedTime);
-      localStorage.setItem('aura_feed_time_horizon', requestedTime);
       setCards([]);
       setIndex(0);
     }
@@ -959,7 +985,6 @@ export default function FeedPage() {
 
   const updateTimeHorizon = (value: TimeHorizonId) => {
     setTimeHorizon(value);
-    localStorage.setItem('aura_feed_time_horizon', value);
     setCards([]);
     setIndex(0);
   };
@@ -1138,6 +1163,13 @@ export default function FeedPage() {
         screen_spec_id: card.screen_spec_db_id,
         rating: 1, time_on_screen_ms: 0,
         exit_point: 'skip', completed: false,
+        metadata: {
+          learning_signal: 'skill_or_fit_mismatch',
+          offered_domain: card.screen?.metadata?.domain,
+          offered_type: card.screen?.type,
+          offered_difficulty: (card.screen as any)?.metadata?.difficulty || (card.screen as any)?.metadata?.difficulty_level,
+          interpretation: 'Skip may mean not interested, too easy, too hard, irrelevant, or wrong current skill level; update user capability model probabilistically rather than only down-ranking content.',
+        },
       }).catch(() => {});
     }
     goNext();

@@ -208,6 +208,7 @@ export interface FeedbackPayload {
   time_on_screen_ms?: number;
   exit_point?: string;
   completed?: boolean;
+  metadata?: Record<string, any>;
 }
 
 export interface GlobalFeedbackPayload {
