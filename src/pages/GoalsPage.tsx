@@ -4,6 +4,7 @@ import { AuraClient, Goal } from '../lib/AuraClient';
 import { useToast } from '../components/Toast';
 import { useExperiment } from '../lib/useExperiment';
 import GoalClarifyModal from '../components/GoalClarifyModal';
+import { PathLimitSheet } from '../components/PathLimitSheet';
 
 type Lens = 'active' | 'paths' | 'saved' | 'done' | 'all';
 
@@ -326,6 +327,7 @@ export default function GoalsPage() {
   const [loading, setLoading] = useState(true);
   const [lens, setLens] = useState<Lens>('active');
   const [clarifyingGoal, setClarifyingGoal] = useState<string | null>(null);
+  const [pathLimitInfo, setPathLimitInfo] = useState<{ activePaths: number; pathLimit: number } | null>(null);
   const { show } = useToast();
   const navigate = useNavigate();
 
@@ -379,6 +381,15 @@ export default function GoalsPage() {
         node.node_type || node.step_type || null,
       ].filter(Boolean).join(' • '),
     }));
+    // Check path limit before creating
+    let pathStatus: { active_paths: number; path_limit: number; at_limit: boolean } | null = null;
+    try {
+      pathStatus = await AuraClient['client'].get('/api/goals/path-status').then((r: any) => r.data);
+    } catch {}
+    if (pathStatus?.at_limit) {
+      setPathLimitInfo({ activePaths: pathStatus.active_paths, pathLimit: pathStatus.path_limit });
+      return;
+    }
     const goal = await AuraClient.createGoal(title, descriptionParts.join('\n') || undefined, undefined, steps.length ? steps : undefined, {
       intention_text: clarifyingGoal || title,
       measurable_outcome: structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
@@ -404,6 +415,15 @@ export default function GoalsPage() {
   };
 
   return (
+    <>
+    {pathLimitInfo && (
+      <PathLimitSheet
+        activePaths={pathLimitInfo.activePaths}
+        pathLimit={pathLimitInfo.pathLimit}
+        onClose={() => setPathLimitInfo(null)}
+        onArchive={() => { setPathLimitInfo(null); setLens('active'); }}
+      />
+    )}
     <div className="page-content" style={{ maxWidth: 720, margin: '0 auto' }}>
       <header style={{ paddingTop: 6, marginBottom: 16 }}>
         <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 950, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>Intentions → goals → steps</div>
@@ -432,5 +452,6 @@ export default function GoalsPage() {
 
       {clarifyingGoal && <GoalClarifyModal goalTitle={clarifyingGoal} onClose={() => setClarifyingGoal(null)} onComplete={handleClarifiedGoal} />}
     </div>
+    </>  
   );
 }
