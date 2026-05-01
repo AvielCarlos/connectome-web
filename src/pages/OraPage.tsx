@@ -107,10 +107,10 @@ export default function AuraPage() {
   const [loading, setLoading] = useState(false);
   const [loadingOpening, setLoadingOpening] = useState(true);
   const [auraInfo, setAuraInfo] = useState<any>(null);
-  const [keyboardUp, setKeyboardUp] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     Promise.all([
@@ -125,24 +125,31 @@ export default function AuraPage() {
     }).finally(() => setLoadingOpening(false));
   }, []);
 
-  // Auto-scroll to bottom
+  const scrollMessagesToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    const el = messagesRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+  };
+
+  // Auto-scroll only the message pane, not the whole screen.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollMessagesToBottom('smooth');
   }, [messages, loading]);
 
-  // Track keyboard (mobile)
+  // Keep latest messages visible when the mobile keyboard opens/resizes.
   useEffect(() => {
-    const onFocus = () => {
-      setKeyboardUp(true);
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 300);
+    const onKeyboardShift = () => {
+      requestAnimationFrame(() => scrollMessagesToBottom('auto'));
+      setTimeout(() => scrollMessagesToBottom('auto'), 180);
     };
-    const onBlur = () => setKeyboardUp(false);
     const input = inputRef.current;
-    input?.addEventListener('focus', onFocus);
-    input?.addEventListener('blur', onBlur);
+    input?.addEventListener('focus', onKeyboardShift);
+    window.visualViewport?.addEventListener('resize', onKeyboardShift);
+    window.visualViewport?.addEventListener('scroll', onKeyboardShift);
     return () => {
-      input?.removeEventListener('focus', onFocus);
-      input?.removeEventListener('blur', onBlur);
+      input?.removeEventListener('focus', onKeyboardShift);
+      window.visualViewport?.removeEventListener('resize', onKeyboardShift);
+      window.visualViewport?.removeEventListener('scroll', onKeyboardShift);
     };
   }, []);
 
@@ -213,6 +220,8 @@ export default function AuraPage() {
         margin: '0 auto',
         display: 'flex',
         flexDirection: 'column',
+        minHeight: 0,
+        overflow: 'hidden',
       }}
     >
       {/* Header */}
@@ -258,12 +267,18 @@ export default function AuraPage() {
       </div>
 
       {/* Messages */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '16px 16px 8px',
-        scrollbarWidth: 'thin',
-      }}>
+      <div
+        ref={messagesRef}
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch',
+          padding: '16px 16px 8px',
+          scrollbarWidth: 'thin',
+        }}
+      >
         {loadingOpening ? (
           <TypingIndicator />
         ) : (

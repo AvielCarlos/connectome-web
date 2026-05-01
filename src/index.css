@@ -913,13 +913,18 @@ body.keyboard-open .global-feedback-fab {
   top: var(--top-header-height) !important;
   left: 0 !important;
   right: 0 !important;
-  bottom: var(--shell-bottom-clearance) !important;
+  bottom: calc(var(--bottom-nav-height, 72px) + max(14px, env(safe-area-inset-bottom, 0px)) + 14px) !important;
+  height: auto !important;
+}
+body.keyboard-open .ora-container {
+  bottom: auto !important;
+  height: calc(var(--visual-viewport-height, 100dvh) - var(--top-header-height, 64px)) !important;
 }
 
 @media (min-width: 1024px) {
   .app-authenticated { padding-left: 0; }
-  .feed-container,
-  .ora-container { left: 0 !important; bottom: var(--shell-bottom-clearance) !important; }
+  .feed-container { left: 0 !important; bottom: var(--shell-bottom-clearance) !important; }
+  .ora-container { left: 0 !important; }
 }
 
 @media (max-width: 760px) {
