@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useExperiment } from '../lib/useExperiment';
 import { StreakBadge } from '../components/StreakBadge';
 import { billingCancelUrl, billingSuccessUrl } from '../lib/checkoutUrls';
+import { UpgradePanel } from '../components/UpgradePanel';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
 const VARIANTS = ['A', 'B', 'C', 'D'] as const;
@@ -78,6 +79,7 @@ export default function ProfilePage() {
   const [valueSaveStatus, setValueSaveStatus] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [showUpgradePanel, setShowUpgradePanel] = useState(false);
   const [travelModeEnabled, setTravelModeEnabled] = useState(false);
   const [savingTravelMode, setSavingTravelMode] = useState(false);
   const [travelModeStatus, setTravelModeStatus] = useState<string | null>(null);
@@ -420,6 +422,10 @@ export default function ProfilePage() {
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '16px 16px', paddingBottom: 'calc(var(--bottom-nav-height, 80px) + env(safe-area-inset-bottom, 0px) + 16px)', overflowY: 'auto' }}>
 
+      {showUpgradePanel && (
+        <UpgradePanel currentTier={tier} onClose={() => setShowUpgradePanel(false)} />
+      )}
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24, paddingTop: 8 }}>
         <div style={{
@@ -437,10 +443,23 @@ export default function ProfilePage() {
             {isAdmin && <span style={{ marginLeft: 8, fontSize: 11, color: '#00d4aa', background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.3)', padding: '2px 8px', borderRadius: 10 }}>ADMIN</span>}
           </div>
           <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)', marginTop: 2 }}>{profile?.email}</div>
-          <div style={{ marginTop: 4 }}>
+          <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 11, color: tierColor, background: tierColor + '15', border: `1px solid ${tierColor}33`, padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>
               {tier.toUpperCase()}
             </span>
+            <button
+              onClick={() => setShowUpgradePanel(true)}
+              style={{
+                fontSize: 11, fontWeight: 900, letterSpacing: 0.5,
+                background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                color: '#fff', border: 'none',
+                padding: '3px 10px', borderRadius: 10,
+                cursor: 'pointer',
+                boxShadow: '0 2px 10px rgba(139,92,246,0.3)',
+              }}
+            >
+              UPGRADE
+            </button>
           </div>
         </div>
       </div>
@@ -537,20 +556,27 @@ export default function ProfilePage() {
             )}
           </Card>
 
-          {/* ── Upgrade prompt for free users ── */}
+          {/* ── Upgrade nudge for free users ── */}
           {tier === 'free' && (
-            <div style={{
-              background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
-              borderRadius: 14, padding: '16px 18px',
-            }}>
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>{upgradeHeadlineText}</div>
-              <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.5)', marginBottom: 4 }}>Unlimited cards, Drive sync, local events</div>
-              <div style={{ fontSize: 13, color: 'rgba(99,102,241,0.8)', fontWeight: 600, marginBottom: 12 }}>{upgradePriceText}</div>
-              <button onClick={handleProfileUpgrade} disabled={checkoutLoading} style={{
-                background: '#6366f1', color: '#fff', padding: '9px 20px', borderRadius: 10, fontWeight: 700, fontSize: 13,
-                opacity: checkoutLoading ? 0.7 : 1, cursor: checkoutLoading ? 'wait' : 'pointer',
-              }}>{checkoutLoading ? 'Opening checkout…' : upgradeCTAText}</button>
-              {checkoutError && <div style={{ marginTop: 10, fontSize: 12, color: '#ef4444' }}>{checkoutError}</div>}
+            <div
+              onClick={() => setShowUpgradePanel(true)}
+              style={{
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.09), rgba(139,92,246,0.06))',
+                border: '1px solid rgba(99,102,241,0.25)',
+                borderRadius: 16, padding: '16px 18px',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 3 }}>Unlock the full Aura</div>
+                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.45)' }}>More paths · unlimited cards · Drive · from $9/mo</div>
+              </div>
+              <div style={{
+                background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                color: '#fff', fontWeight: 900, fontSize: 12,
+                padding: '7px 14px', borderRadius: 10, flexShrink: 0,
+                boxShadow: '0 2px 12px rgba(139,92,246,0.3)',
+              }}>UPGRADE ✦</div>
             </div>
           )}
 
@@ -602,8 +628,8 @@ export default function ProfilePage() {
             </div>
             {travelModeStatus && <div style={{ marginTop: 10, fontSize: 12, color: travelModeStatus.startsWith('Could') || travelModeStatus.includes('for Explorer') ? '#ef4444' : '#34d399' }}>{travelModeStatus}</div>}
             {!isPaidTier && (
-              <button onClick={handleProfileUpgrade} disabled={checkoutLoading} style={{ marginTop: 12, background: '#6366f1', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 800, opacity: checkoutLoading ? 0.7 : 1, cursor: checkoutLoading ? 'wait' : 'pointer' }}>
-                {checkoutLoading ? 'Opening checkout…' : 'Upgrade to unlock travel mode'}
+              <button onClick={() => setShowUpgradePanel(true)} style={{ marginTop: 12, background: '#6366f1', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 800, cursor: 'pointer' }}>
+                Upgrade to unlock travel mode
               </button>
             )}
           </Card>
@@ -809,7 +835,7 @@ export default function ProfilePage() {
               fontSize: 13,
               color: 'rgba(248,248,252,0.7)',
             }}>
-              ✨ WebSpawn is an Explorer &amp; Sovereign feature. Aura builds personalized pages for any goal — a dashboard, a plan, a tracker, whatever fits. <button type="button" onClick={handleProfileUpgrade} disabled={checkoutLoading} style={{ color: '#8b5cf6', fontWeight: 700, background: 'transparent', border: 0, padding: 0, cursor: checkoutLoading ? 'wait' : 'pointer' }}>Upgrade to unlock it.</button>
+              ✨ WebSpawn is an Explorer & Sovereign feature. Aura builds personalized pages for any goal — a dashboard, a plan, a tracker, whatever fits. <button type="button" onClick={() => setShowUpgradePanel(true)} style={{ color: '#8b5cf6', fontWeight: 700, background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}>Upgrade to unlock it.</button>
             </div>
           )}
 
