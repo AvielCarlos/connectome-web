@@ -21,6 +21,15 @@ function appLabel(appId: ShellApp) {
   return appById(appId)?.name || 'Aura';
 }
 
+const FEED_TIME_OPTIONS = ['5m', '30m', '2h', 'Day', 'Weekend', 'Week+', 'Freedom'] as const;
+
+const PATH_DOMAIN_TABS = [
+  { id: '', label: 'All', emoji: '◈', color: '#00d4aa' },
+  { id: 'iVive', label: 'iVive', emoji: '🌱', color: '#10b981' },
+  { id: 'Aventi', label: 'Aventi', emoji: '🚀', color: '#f59e0b' },
+  { id: 'Eviva', label: 'Eviva', emoji: '🌊', color: '#3b82f6' },
+] as const;
+
 type DockItem = {
   id: string;
   label: string;
@@ -269,6 +278,25 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   }, [profile]);
 
   const dockItems = dockMenus[activeApp] || dockMenus.home || [];
+  const feedParams = new URLSearchParams(location.search);
+  const activeDomain = feedParams.get('domain') || '';
+  const activeFeedTime = feedParams.get('time') || localStorage.getItem('aura_feed_time_horizon') || '30m';
+
+  const setFeedDomain = (domain: string) => {
+    const next = new URLSearchParams(location.search);
+    if (domain) next.set('domain', domain);
+    else next.delete('domain');
+    if (!next.get('mode')) next.set('mode', 'now');
+    navigate(`/app/ido?${next.toString()}`, { replace: true });
+  };
+
+  const setFeedTime = (time: string) => {
+    const next = new URLSearchParams(location.search);
+    next.set('time', time);
+    if (!next.get('mode')) next.set('mode', 'now');
+    localStorage.setItem('aura_feed_time_horizon', time);
+    navigate(`/app/ido?${next.toString()}`, { replace: true });
+  };
 
   const handleDock = (item: DockItem) => {
     if (item.action === 'aura') {
@@ -299,9 +327,39 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
           <span className="connectome-launcher-toggle__line" />
         </button>
 
-        <span className="connectome-context-label connectome-context-label--ambient" aria-live="polite">{appLabel(activeApp)}</span>
+        {activeApp === 'ido' ? (
+          <div className="connectome-domain-switch" aria-label="Path domain filter">
+            {PATH_DOMAIN_TABS.map((tab) => {
+              const active = activeDomain === tab.id;
+              return (
+                <button
+                  key={tab.id || 'all'}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setFeedDomain(tab.id)}
+                  style={active ? ({ '--domain-color': tab.color } as React.CSSProperties) : undefined}
+                  className={`connectome-domain-switch__item ${active ? 'connectome-domain-switch__item--active' : ''}`}
+                >
+                  <span aria-hidden="true">{tab.emoji}</span>{tab.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <span className="connectome-context-label connectome-context-label--ambient" aria-live="polite">{appLabel(activeApp)}</span>
+        )}
 
         <div className="connectome-status">
+          {activeApp === 'ido' && (
+            <select
+              className="connectome-time-select"
+              aria-label="Available time"
+              value={activeFeedTime}
+              onChange={(event) => setFeedTime(event.target.value)}
+            >
+              {FEED_TIME_OPTIONS.map((time) => <option key={time} value={time}>{time}</option>)}
+            </select>
+          )}
           {ENABLE_NOTIFICATION_BELL && (
             <button type="button" className="connectome-bell" aria-label="Notifications" onClick={() => setNotificationsOpen(true)}>🔔</button>
           )}

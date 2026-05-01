@@ -91,10 +91,10 @@ const TIME_HORIZON_OPTIONS = [
   { id: '5m', label: '5m', context: 'The user has about 5 minutes. Recommend one tiny action that can begin immediately.' },
   { id: '30m', label: '30m', context: 'The user has about 30 minutes. Recommend a concrete short action or nearby micro-adventure.' },
   { id: '2h', label: '2h', context: 'The user has 1–2 hours. Recommend a meaningful action, outing, class, call, practice, or project block.' },
-  { id: 'day', label: 'Day', context: 'The user has most of a day. Recommend a richer experience, sequence, or mini-adventure.' },
-  { id: 'weekend', label: 'Weekend', context: 'The user has a weekend. Recommend a multi-step adventure, retreat, trip, workshop, or social/service path.' },
-  { id: 'week', label: 'Week+', context: 'The user has a week or more. Recommend future opportunities, programs, travel, or larger life-path moves.' },
-  { id: 'freedom', label: 'Total freedom', context: 'The user has total freedom. Guide them toward the greatest adventure available: expansive, transformational, ambitious, real-world, and still executable through concrete next nodes.' },
+  { id: 'Day', label: 'Day', context: 'The user has most of a day. Recommend a richer experience, sequence, or mini-adventure.' },
+  { id: 'Weekend', label: 'Weekend', context: 'The user has a weekend. Recommend a multi-step adventure, retreat, trip, workshop, or social/service path.' },
+  { id: 'Week+', label: 'Week+', context: 'The user has a week or more. Recommend future opportunities, programs, travel, or larger life-path moves.' },
+  { id: 'Freedom', label: 'Total freedom', context: 'The user has total freedom. Guide them toward the greatest adventure available: expansive, transformational, ambitious, real-world, and still executable through concrete next nodes.' },
 ] as const;
 type TimeHorizonId = typeof TIME_HORIZON_OPTIONS[number]['id'];
 
@@ -745,7 +745,7 @@ function FeedCard({
       {/* Right-side action buttons (TikTok-style) */}
       <div style={{
         position: 'absolute',
-        right: 14, bottom: 86,
+        right: 14, bottom: 112,
         display: 'flex', flexDirection: 'column',
         gap: 10, alignItems: 'center',
         zIndex: 10,
@@ -839,7 +839,7 @@ function FeedCard({
 
         {/* Bottom left: card info */}
       <div style={{
-        position: 'absolute', bottom: 14, left: 16, right: 80,
+        position: 'absolute', bottom: 18, left: 16, right: 96,
         zIndex: 10,
       }}>
         {cardData.title && (
@@ -892,7 +892,8 @@ export default function FeedPage() {
 
   const goalId = searchParams.get('goal') || undefined;
   const requestedMode = searchParams.get('mode') === 'later' ? 'later' : 'now';
-  const savedTimeHorizon = (localStorage.getItem('aura_feed_time_horizon') || '30m') as TimeHorizonId;
+  const requestedDomain = searchParams.get('domain') as PathDomainFilter;
+  const savedTimeHorizon = (searchParams.get('time') || localStorage.getItem('aura_feed_time_horizon') || '30m') as TimeHorizonId;
   const initialTimeHorizon = TIME_HORIZON_OPTIONS.some((item) => item.id === savedTimeHorizon) ? savedTimeHorizon : '30m';
   const [goalTitle, setGoalTitle] = useState<string | null>(null);
 
@@ -910,7 +911,7 @@ export default function FeedPage() {
   const [collectionPickerCard, setCollectionPickerCard] = useState<any | null>(null);
   const [capabilityReady, setCapabilityReady] = useState(() => !!localStorage.getItem(todayCapabilityKey()));
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
-  const [domainFilter, setDomainFilter] = useState<PathDomainFilter>(null);
+  const [domainFilter, setDomainFilter] = useState<PathDomainFilter>(PATH_DOMAIN_TABS.some((tab) => tab.id === requestedDomain) ? requestedDomain : null);
   const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizonId>(initialTimeHorizon);
   const [showCreateOpportunity, setShowCreateOpportunity] = useState(false);
@@ -927,6 +928,23 @@ export default function FeedPage() {
   useEffect(() => {
     setFeedMode(requestedMode);
   }, [requestedMode]);
+
+  useEffect(() => {
+    const nextDomain = PATH_DOMAIN_TABS.some((tab) => tab.id === requestedDomain) ? requestedDomain : null;
+    setDomainFilter(nextDomain);
+    setCards([]);
+    setIndex(0);
+  }, [requestedDomain]);
+
+  useEffect(() => {
+    const requestedTime = (searchParams.get('time') || localStorage.getItem('aura_feed_time_horizon') || '30m') as TimeHorizonId;
+    if (TIME_HORIZON_OPTIONS.some((item) => item.id === requestedTime)) {
+      setTimeHorizon(requestedTime);
+      localStorage.setItem('aura_feed_time_horizon', requestedTime);
+      setCards([]);
+      setIndex(0);
+    }
+  }, [searchParams]);
 
   const feedContext = timeHorizonContext(feedMode, timeHorizon);
 
@@ -1332,98 +1350,6 @@ export default function FeedPage() {
             <div style={{ fontSize: 32, animation: 'brainFloat 3s ease-in-out infinite', color: '#00d4aa' }}>◈</div>
           </div>
         )}
-      </div>
-
-      {/* Now/Later mode switch */}
-      <div style={{
-        position: 'absolute', top: 'max(env(safe-area-inset-top), 68px)', left: 14, zIndex: 36,
-        display: 'flex', gap: 5, padding: 5, borderRadius: 999,
-        background: 'rgba(10,10,15,0.58)', border: '1px solid rgba(255,255,255,0.10)',
-        backdropFilter: 'blur(16px)', boxShadow: '0 10px 34px rgba(0,0,0,0.28)',
-      }}>
-        {(['now', 'later'] as FeedMode[]).map((mode) => {
-          const active = feedMode === mode;
-          return (
-            <button
-              key={mode}
-              type="button"
-              aria-pressed={active}
-              onClick={() => switchFeedMode(mode)}
-              style={{
-                border: 'none', borderRadius: 999, cursor: 'pointer',
-                padding: '8px 12px', fontSize: 12, fontWeight: 900,
-                color: active ? '#06110f' : 'rgba(248,248,252,0.82)',
-                background: active ? 'linear-gradient(135deg, #00d4aa, #ffffff)' : 'rgba(255,255,255,0.06)',
-                boxShadow: active ? '0 0 22px rgba(0,212,170,0.35)' : 'none',
-              }}
-            >
-              {mode === 'now' ? '⚡ Now' : '🧭 Later'}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Time/freedom horizon */}
-      <label style={{
-        position: 'absolute', left: '50%', top: 'max(env(safe-area-inset-top), 116px)', transform: 'translateX(-50%)', zIndex: 36,
-        width: 'min(92vw, 520px)', display: 'flex', alignItems: 'center', gap: 10,
-        padding: '9px 12px', borderRadius: 999, background: 'rgba(10,10,15,0.62)',
-        border: '1px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(18px)',
-        boxShadow: '0 10px 34px rgba(0,0,0,0.30)',
-      }}>
-        <span style={{ color: 'rgba(248,248,252,0.62)', fontSize: 11, fontWeight: 900, whiteSpace: 'nowrap' }}>Time</span>
-        <input
-          type="range"
-          min={0}
-          max={TIME_HORIZON_OPTIONS.length - 1}
-          value={Math.max(0, TIME_HORIZON_OPTIONS.findIndex((item) => item.id === timeHorizon))}
-          onChange={(event) => updateTimeHorizon(TIME_HORIZON_OPTIONS[Number(event.target.value)].id)}
-          style={{ flex: 1, accentColor: '#00d4aa' }}
-          aria-label="Available time"
-        />
-        <span style={{ color: timeHorizon === 'freedom' ? '#f4c26b' : '#f8f8fc', fontSize: 12, fontWeight: 900, minWidth: 82, textAlign: 'right' }}>
-          {TIME_HORIZON_OPTIONS.find((item) => item.id === timeHorizon)?.label || '30m'}
-        </span>
-      </label>
-
-      {/* IOO domain flow switch — the top glass rail filters the graph/feed by life domain. */}
-      <div style={{
-        position: 'absolute', top: 'max(env(safe-area-inset-top), 18px)', left: '50%', transform: 'translateX(-50%)',
-        zIndex: 48, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', alignItems: 'center', gap: 5,
-        width: 'min(92vw, 430px)', padding: 5, borderRadius: 999,
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.045))',
-        border: '1px solid rgba(255,255,255,0.18)',
-        backdropFilter: 'blur(22px) saturate(140%)', WebkitBackdropFilter: 'blur(22px) saturate(140%)',
-        boxShadow: '0 18px 46px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.14)',
-      }}>
-        {([{ id: null, label: 'All', emoji: '◈' }, ...PATH_DOMAIN_TABS] as Array<{ id: PathDomainFilter; label: string; emoji: string }>).map((tab) => {
-          const active = domainFilter === tab.id;
-          const cfg = tab.id ? DOMAIN_CONFIG[tab.id] : DEFAULT_DOMAIN;
-          return (
-            <button
-              key={tab.id || 'all'}
-              type="button"
-              aria-pressed={active}
-              onClick={() => {
-                setDomainFilter(tab.id);
-                setCards([]);
-                setIndex(0);
-              }}
-              style={{
-                position: 'relative', border: 'none', borderRadius: 999, cursor: 'pointer', overflow: 'hidden',
-                padding: '9px 8px', minHeight: 36,
-                color: active ? '#06110f' : 'rgba(248,248,252,0.86)',
-                background: active ? `linear-gradient(135deg, ${cfg.color}, rgba(255,255,255,0.96))` : 'rgba(255,255,255,0.055)',
-                fontSize: 12, fontWeight: 950, letterSpacing: -0.16,
-                boxShadow: active ? `0 0 28px ${cfg.color}66, inset 0 1px 0 rgba(255,255,255,0.55)` : 'inset 0 1px 0 rgba(255,255,255,0.06)',
-                transform: active ? 'translateY(-1px) scale(1.025)' : 'translateY(0) scale(1)',
-                transition: 'transform 0.22s cubic-bezier(.2,.9,.2,1), background 0.22s ease, box-shadow 0.22s ease, color 0.22s ease',
-              }}
-            >
-              <span aria-hidden="true" style={{ marginRight: 4 }}>{tab.emoji}</span>{tab.label}
-            </button>
-          );
-        })}
       </div>
 
       {/* User-created opportunity entrypoint */}

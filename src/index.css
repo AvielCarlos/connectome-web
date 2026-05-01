@@ -528,6 +528,61 @@ body {
   opacity: 0.56;
 }
 
+.connectome-domain-switch {
+  justify-self: center;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  width: min(58vw, 410px);
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.045));
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  box-shadow: 0 14px 38px rgba(0,0,0,0.26), inset 0 1px 0 rgba(255,255,255,0.14);
+}
+
+.connectome-domain-switch__item {
+  min-width: 0;
+  min-height: 34px;
+  border: none;
+  border-radius: 999px;
+  padding: 7px 7px;
+  background: rgba(255,255,255,0.055);
+  color: rgba(248,248,252,0.86);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: -0.16px;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(.2,.9,.2,1), background 0.22s ease, box-shadow 0.22s ease, color 0.22s ease;
+}
+
+.connectome-domain-switch__item span { margin-right: 3px; }
+
+.connectome-domain-switch__item--active {
+  color: #06110f;
+  background: linear-gradient(135deg, var(--domain-color, #00d4aa), rgba(255,255,255,0.96));
+  box-shadow: 0 0 26px color-mix(in srgb, var(--domain-color, #00d4aa) 45%, transparent), inset 0 1px 0 rgba(255,255,255,0.55);
+  transform: translateY(-1px) scale(1.025);
+}
+
+.connectome-time-select {
+  max-width: 96px;
+  min-height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(6,6,16,0.42);
+  color: rgba(248,248,252,0.82);
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 900;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
 .connectome-ora-indicator {
   justify-self: center;
   display: inline-flex;
@@ -936,6 +991,10 @@ body.keyboard-open .ora-container {
   .connectome-app-titlebar small,
   .connectome-signout { display: none; }
   .connectome-brand strong { font-size: 14px; }
+  .connectome-domain-switch { width: min(58vw, 300px); gap: 3px; padding: 3px; }
+  .connectome-domain-switch__item { min-height: 32px; padding: 7px 5px; font-size: 10px; }
+  .connectome-domain-switch__item span { margin-right: 2px; }
+  .connectome-time-select { max-width: 78px; padding: 0 5px; font-size: 10px; }
   .connectome-main { padding-left: 14px; padding-right: 14px; }
   .connectome-home__hero { min-height: 30vh; border-radius: 28px; }
   .connectome-home__highlights,
