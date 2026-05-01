@@ -259,6 +259,27 @@ export function AuraCard({ component: comp, index, onAction }: AuraCardProps) {
       return <div key={index} style={{ background: 'rgba(245,158,11,0.09)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: 14, padding: 12, marginBottom: 14 }}><div style={{ color: '#fbbf24', fontSize: 11, fontWeight: 900, marginBottom: 7 }}>Prerequisites</div>{items.map((it, i) => <div key={i} style={{ color: 'rgba(248,248,252,0.66)', fontSize: 12, lineHeight: 1.5 }}>• {it.label || it}</div>)}</div>;
     }
 
+    case 'opportunity_links': {
+      const items: any[] = comp.items || [];
+      const iconFor = (kind: string) => ({ page: '🔗', source: '◎', booking: '🎟', provider: '🏛', map: '📍', reviews: '★' } as Record<string, string>)[kind] || '🔗';
+      return (
+        <div key={index} style={{ background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.22)', borderRadius: 16, padding: 13, marginBottom: 14 }}>
+          <div style={{ color: '#00d4aa', fontSize: 11, fontWeight: 950, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>{comp.title || 'Useful links'}</div>
+          {items.map((item, i) => (
+            <button key={`${item.url || item.label}-${i}`} onClick={() => handleAction({ type: 'open_url', url: item.url, payload: { kind: item.kind } })} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left', background: 'rgba(0,0,0,0.22)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#f8f8fc', padding: '10px 11px', marginBottom: 7 }}>
+              <span style={{ fontSize: 15 }}>{iconFor(item.kind)}</span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: 13, fontWeight: 850 }}>{item.label || 'Open link'}</span>
+                <span style={{ display: 'block', fontSize: 10, color: 'rgba(248,248,252,0.42)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.url}</span>
+              </span>
+              <span style={{ color: '#00d4aa', fontSize: 16 }}>↗</span>
+            </button>
+          ))}
+          {comp.note && <div style={{ color: 'rgba(248,248,252,0.48)', fontSize: 11, lineHeight: 1.45, marginTop: 5 }}>{comp.note}</div>}
+        </div>
+      );
+    }
+
     case 'domain_badge': {
       const cfg = DOMAIN_CONFIG[comp.domain || ''] || { emoji: '◈', color: '#00d4aa' };
       return (

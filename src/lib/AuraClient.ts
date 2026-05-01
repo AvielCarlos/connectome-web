@@ -361,6 +361,29 @@ class AuraClientClass {
     }
   }
 
+  async createOpportunity(payload: {
+    title: string;
+    body?: string;
+    kind?: string;
+    domain?: 'iVive' | 'Eviva' | 'Aventi';
+    city?: string;
+    url?: string;
+    source_url?: string;
+    booking_url?: string;
+    provider_url?: string;
+    map_url?: string;
+    price?: string;
+    venue?: string;
+  }): Promise<ScreenResponse> {
+    const res = await this.client.post('/api/screens/opportunities', payload);
+    return res.data as ScreenResponse;
+  }
+
+  async getCityUnlock(city = 'Victoria, BC') {
+    const res = await this.client.get('/api/screens/city-unlock', { params: { city } });
+    return res.data;
+  }
+
   // ── Feedback ─────────────────────────────────────────────────────────────
 
   async saveScreen(screenSpecDbId: string): Promise<void> {

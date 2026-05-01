@@ -442,6 +442,23 @@ export default function ProfilePage() {
             </div>
           )}
 
+          <Card title="City unlock · Victoria beta">
+            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.62)', lineHeight: 1.65, marginBottom: 12 }}>
+              Aura is starting with a practical Victoria, BC opportunity graph: events, classes, products, services, bookings, volunteering, and user-created nodes — capped around <strong style={{ color: '#f8f8fc' }}>$500/month</strong> instead of crawling the whole web.
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
+              <StatBox label="City cost" value="$500" color="#00d4aa" />
+              <StatBox label="50 locals" value="~$11.50" color="#f4c26b" />
+              <StatBox label="100 locals" value="~$5.75" color="#34d399" />
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.48)', lineHeight: 1.55, marginBottom: 12 }}>
+              The unlock price reflects real source/search/API/refresh costs. As more people in the same city join, the shared local graph cost can go down per person.
+            </div>
+            <button onClick={() => navigate('/app/ido')} style={{ background: 'rgba(0,212,170,0.16)', color: '#00d4aa', border: '1px solid rgba(0,212,170,0.36)', borderRadius: 10, padding: '9px 12px', fontWeight: 850 }}>
+              Add or explore Victoria opportunities →
+            </button>
+          </Card>
+
           {/* ── Secondary Navigation — iOS Settings style ── */}
           <div style={{ background: '#12121e', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>Community</div>
