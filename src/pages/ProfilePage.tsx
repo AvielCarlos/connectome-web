@@ -496,14 +496,6 @@ export default function ProfilePage() {
           {/* ── Streak + Milestones + Badges ── */}
           <StreakBadge />
 
-          {/* ── Account Info ── */}
-          <Card title="Account">
-            <Row label="Email" value={profile?.email} />
-            <Row label="Member since" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '\u2014'} />
-            <Row label="Fulfilment score" value={`${((profile?.fulfilment_score || 0) * 100).toFixed(0)}%`} />
-            <Row label="Tier" value={tier} valueColor={tierColor} />
-          </Card>
-
           <Card title="Value compass">
             <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.62)', lineHeight: 1.6, marginBottom: 12 }}>
               Tell Aura what matters most right now. These 1–10 weights are editable anytime, and Aura will gently learn from what you swipe, save, choose, and achieve.
