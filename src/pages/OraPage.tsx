@@ -113,6 +113,11 @@ export default function AuraPage() {
   const messagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    document.body.classList.add('aura-chat-active');
+    return () => document.body.classList.remove('aura-chat-active');
+  }, []);
+
+  useEffect(() => {
     Promise.all([
       AuraClient.getOpeningMessage().catch(() => null),
       AuraClient.getOraSelf().catch(() => null),

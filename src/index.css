@@ -954,9 +954,38 @@ body.keyboard-open .global-feedback-fab {
   bottom: calc(var(--bottom-nav-height, 72px) + max(14px, env(safe-area-inset-bottom, 0px)) + 14px) !important;
   height: auto !important;
 }
+body.aura-chat-active {
+  height: var(--visual-viewport-height, 100dvh);
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+body.aura-chat-active.keyboard-open {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+
 body.keyboard-open .ora-container {
   bottom: auto !important;
-  height: calc(var(--visual-viewport-height, 100dvh) - var(--top-header-height, 64px)) !important;
+  height: calc(var(--visual-viewport-height, 100dvh) - var(--top-header-height, 56px)) !important;
+  overflow: hidden !important;
+}
+
+body.aura-chat-active.keyboard-open .connectome-dock {
+  display: none !important;
+}
+
+body.aura-chat-active.keyboard-open .ora-container {
+  bottom: auto !important;
+  height: calc(var(--visual-viewport-height, 100dvh) - var(--top-header-height, 56px)) !important;
+}
+
+@media (max-width: 760px) {
+  body.aura-chat-active.keyboard-open .ora-container {
+    top: 0 !important;
+    height: var(--visual-viewport-height, 100dvh) !important;
+  }
 }
 
 @media (min-width: 1024px) {
