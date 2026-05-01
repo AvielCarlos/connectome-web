@@ -51,6 +51,10 @@ function useKeyboardViewport() {
       const active = document.activeElement
       if (!(active instanceof HTMLElement)) return
       if (!active.matches('input, textarea, select, [contenteditable="true"]')) return
+      // Fixed app surfaces (Aura chat/feed sheets) handle their own keyboard
+      // geometry. Browser scrollIntoView centering makes the composer float too
+      // far above the keyboard on mobile Safari.
+      if (active.closest('.ora-container, .feed-container, .ora-overlay')) return
 
       window.requestAnimationFrame(() => {
         const viewportHeight = window.visualViewport?.height ?? window.innerHeight
