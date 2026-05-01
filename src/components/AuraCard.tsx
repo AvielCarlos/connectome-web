@@ -169,6 +169,58 @@ export function AuraCard({ component: comp, index, onAction }: AuraCardProps) {
       );
     }
 
+    case 'path_progression': {
+      const items: any[] = comp.items || [];
+      const activeIndex = Math.max(0, items.findIndex((item) => item.status === 'active'));
+      return (
+        <div key={index} style={{
+          background: 'rgba(0,0,0,0.30)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          borderRadius: 18,
+          padding: 13,
+          marginBottom: 14,
+          backdropFilter: 'blur(12px)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
+            <div style={{ color: '#f8f8fc', fontSize: 12, fontWeight: 950, letterSpacing: 0.3 }}>
+              Path progression
+            </div>
+            <div style={{ color: '#00d4aa', fontSize: 10, fontWeight: 900, textTransform: 'uppercase' }}>
+              neural graph
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 5, marginBottom: 10 }}>
+            {items.map((item, i) => (
+              <div key={item.id || i} title={item.label} style={{
+                flex: 1,
+                height: 5,
+                borderRadius: 999,
+                background: item.status === 'complete'
+                  ? 'rgba(0,212,170,0.70)'
+                  : item.status === 'active'
+                    ? '#00d4aa'
+                    : 'rgba(255,255,255,0.12)',
+                boxShadow: item.status === 'active' ? '0 0 14px rgba(0,212,170,0.55)' : 'none',
+              }} />
+            ))}
+          </div>
+          {items[activeIndex] && (
+            <div style={{ display: 'grid', gap: 5 }}>
+              <div style={{ color: '#f8f8fc', fontSize: 13, fontWeight: 900 }}>
+                {items[activeIndex].label}
+              </div>
+              <div style={{ color: 'rgba(248,248,252,0.58)', fontSize: 12, lineHeight: 1.45 }}>
+                You: {items[activeIndex].user_role}
+              </div>
+              <div style={{ color: 'rgba(0,212,170,0.78)', fontSize: 12, lineHeight: 1.45 }}>
+                Aura: {items[activeIndex].aura_role}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     case 'kanban_lite': {
       const columns: any[] = comp.columns || [];
       return (

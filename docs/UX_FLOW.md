@@ -233,3 +233,19 @@ Primary feed responses are graph-learning signals:
 - Reworked Home into the two-choice orientation screen.
 - Changed launcher copy to user outcomes.
 - Added CP explainer access from Contribute.
+
+## Path Feed progression graph v1
+
+The integral implementation direction is that the Path Feed is not a passive TikTok clone. It is a neural progression graph that moves people from vague possibility into real-world fulfilment.
+
+Baseline progression nodes:
+
+1. **Discover** — Aura surfaces a candidate opportunity/action from the graph.
+2. **Focus** — user can filter/focus by iVive, Aventi, Eviva, or remain open.
+3. **Choose path** — Aura compares possible routes/options and the user chooses the route worth testing.
+4. **Confirm micro-node** — Aura collapses the path into a concrete action with time, budget, location, energy, prerequisites, and realistic next step.
+5. **Commit** — user schedules, books, invites, opens, or starts; Aura handles scaffolding where possible.
+6. **Do + prove** — user does the thing and captures evidence/reflection/completion signal.
+7. **Learn / reroute** — Aura updates graph weights, user state, and the next recommendation.
+
+Every feed card should carry `metadata.path_progression` so responses can eventually update not only card ranking, but also the user-specific pathway graph.
