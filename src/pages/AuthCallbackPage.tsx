@@ -41,8 +41,12 @@ export default function AuthCallbackPage() {
       if (!userId) throw new Error('No user ID in token');
 
       authStorage.setAuth(token, userId);
-      // Small delay to let state settle, then redirect to the orientation home
-      setTimeout(() => navigate('/app', { replace: true }), 100);
+
+      // AuthContext is already mounted with its previous unauthenticated state on
+      // this callback route. Do a hard same-origin redirect so the app boots from
+      // the freshly stored token instead of briefly bouncing back to login.
+      const base = import.meta.env.BASE_URL || '/';
+      window.location.replace(`${base.replace(/\/$/, '')}/app`);
     } catch (e: any) {
       setError(`Token error: ${e.message}`);
       setTimeout(() => navigate('/', { replace: true }), 3000);

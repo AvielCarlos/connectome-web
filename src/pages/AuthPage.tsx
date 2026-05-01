@@ -52,9 +52,9 @@ export default function AuthPage() {
   };
 
   const handleGoogleSignIn = () => {
-    // Request Drive access during first Google sign-in so users don't have to
-    // complete a second Google consent flow later from Profile → Google.
-    window.location.href = apiUrl('/api/auth/google/login?include_drive=true');
+    // Keep initial sign-in to basic identity scopes only. Google Drive is a
+    // sensitive scope and should be requested explicitly later from Profile → Google.
+    window.location.href = apiUrl('/api/auth/google/login');
   };
 
   return (
