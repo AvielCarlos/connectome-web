@@ -1073,6 +1073,27 @@ export default function FeedPage() {
     if (capabilityReady) loadInitial();
   }, [capabilityReady, loadInitial]);
 
+  useEffect(() => {
+    const active = cards[index];
+    if (!active) return;
+    try {
+      const spec: any = active.screen || {};
+      const cardData = spec.card_data || {};
+      localStorage.setItem('aura_active_feedback_context', JSON.stringify({
+        surface: 'feed',
+        screen_spec_id: active.screen_spec_db_id,
+        screen_id: spec.screen_id,
+        node_id: spec.metadata?.node_id || cardData.node_id || null,
+        source: spec.metadata?.source || null,
+        title: cardData.title || spec.components?.find((c: any) => c?.type === 'headline')?.text || null,
+        domain: spec.metadata?.domain || spec.domain || null,
+        city: spec.metadata?.location_city || spec.metadata?.city || null,
+        card_type: spec.type || null,
+        updated_at: new Date().toISOString(),
+      }));
+    } catch {}
+  }, [cards, index]);
+
   const loadMore = useCallback(async () => {
     if (loadingMore || isLimited) return;
     setLoadingMore(true);

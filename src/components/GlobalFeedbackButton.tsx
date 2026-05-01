@@ -82,12 +82,20 @@ export default function GlobalFeedbackButton() {
     setError(null);
     try {
       let screenshot: string | null = null;
+      let feedbackContext: Record<string, any> | null = null;
+      try {
+        const rawContext = localStorage.getItem('aura_active_feedback_context');
+        feedbackContext = rawContext ? JSON.parse(rawContext) : null;
+      } catch {
+        feedbackContext = null;
+      }
       const metadata: Record<string, any> = {
         viewport: { width: window.innerWidth, height: window.innerHeight },
         userAgent: navigator.userAgent,
         timestamp: new Date().toISOString(),
         title: document.title,
         report_type: 'bad_or_malfunctional_card_or_node',
+        feedback_context: feedbackContext,
         activeElement: document.activeElement instanceof HTMLElement ? { tag: document.activeElement.tagName, id: document.activeElement.id || null, name: document.activeElement.getAttribute('name'), ariaLabel: document.activeElement.getAttribute('aria-label') } : null,
       };
 
