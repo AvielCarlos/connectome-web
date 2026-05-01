@@ -15,6 +15,22 @@ const VARIANT_LABELS: Record<string, string> = {
 };
 
 const LIVE_LOCATION_SYNC_KEY = `connectome_live_location_${new Date().toISOString().slice(0, 10)}`;
+const TOP_LEVEL_VALUES = [
+  'enlightenment', 'peace', 'pleasure', 'love', 'vitality',
+  'freedom', 'mastery', 'contribution', 'abundance', 'adventure',
+] as const;
+const DEFAULT_VALUE_SCORES: Record<(typeof TOP_LEVEL_VALUES)[number], number> = {
+  enlightenment: 7,
+  peace: 7,
+  pleasure: 6,
+  love: 8,
+  vitality: 7,
+  freedom: 8,
+  mastery: 6,
+  contribution: 7,
+  abundance: 6,
+  adventure: 7,
+};
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -56,6 +72,9 @@ export default function ProfilePage() {
     localStorage.getItem(LIVE_LOCATION_SYNC_KEY) ? 'synced' : 'unknown'
   ));
   const [locationCity, setLocationCity] = useState<string>(() => localStorage.getItem(`${LIVE_LOCATION_SYNC_KEY}_city`) || '');
+  const [valueScores, setValueScores] = useState<Record<string, number>>(DEFAULT_VALUE_SCORES);
+  const [savingValues, setSavingValues] = useState(false);
+  const [valueSaveStatus, setValueSaveStatus] = useState<string | null>(null);
 
   // ── A/B hooks must be BEFORE any conditional returns (Rules of Hooks) ──
   const { variant: upgradeHeadlineVariant, trackEvent: trackUpgradeHeadline } = useExperiment('upgrade_headline');
@@ -71,6 +90,10 @@ export default function ProfilePage() {
       const adminFlag = p?.profile?.is_admin || localStorage.getItem('ab_admin') === 'true';
       setIsAdmin(adminFlag);
       if (adminFlag) localStorage.setItem('ab_admin', 'true');
+      const savedValues = p?.profile?.value_weights || p?.profile?.valueWeights;
+      if (savedValues && typeof savedValues === 'object') {
+        setValueScores({ ...DEFAULT_VALUE_SCORES, ...savedValues });
+      }
 
       const cached = localStorage.getItem(`ab_variant_${EXPERIMENT_ID}`) || 'A';
       setCurrentVariant(cached);
@@ -180,6 +203,22 @@ export default function ProfilePage() {
       }
     }
     setSpawning(false);
+  };
+
+  const saveValueCompass = async () => {
+    setSavingValues(true);
+    setValueSaveStatus(null);
+    try {
+      const cleaned = Object.fromEntries(
+        Object.entries(valueScores).map(([key, value]) => [key, Math.max(1, Math.min(10, Number(value) || 5))])
+      );
+      const updated = await AuraClient.updateProfile({ value_weights: cleaned });
+      setProfile(updated);
+      setValueSaveStatus('Saved — Aura will use this compass and keep learning from your choices.');
+    } catch {
+      setValueSaveStatus('Could not save values. Try again.');
+    }
+    setSavingValues(false);
   };
 
   const handleRetireSurface = async (id: string) => {
@@ -398,6 +437,31 @@ export default function ProfilePage() {
             <Row label="Member since" value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '\u2014'} />
             <Row label="Fulfilment score" value={`${((profile?.fulfilment_score || 0) * 100).toFixed(0)}%`} />
             <Row label="Tier" value={tier} valueColor={tierColor} />
+          </Card>
+
+          <Card title="Value compass">
+            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.62)', lineHeight: 1.6, marginBottom: 12 }}>
+              Tell Aura what matters most right now. These 1–10 weights are editable anytime, and Aura will gently learn from what you swipe, save, choose, and achieve.
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px 14px' }}>
+              {TOP_LEVEL_VALUES.map(valueName => (
+                <label key={valueName} style={{ display: 'grid', gridTemplateColumns: '96px 1fr 42px', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                  <span style={{ fontWeight: 850, textTransform: 'capitalize', color: 'rgba(248,248,252,0.82)' }}>{valueName}</span>
+                  <input
+                    type="range"
+                    min={1}
+                    max={10}
+                    value={valueScores[valueName] ?? 5}
+                    onChange={(e) => setValueScores(prev => ({ ...prev, [valueName]: Number(e.target.value) }))}
+                  />
+                  <span style={{ color: '#f4c26b', fontWeight: 950 }}>{valueScores[valueName] ?? 5}/10</span>
+                </label>
+              ))}
+            </div>
+            <button onClick={saveValueCompass} disabled={savingValues} style={{ marginTop: 14, background: '#f4c26b', color: '#0a0a0f', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 900 }}>
+              {savingValues ? 'Saving…' : 'Save value compass'}
+            </button>
+            {valueSaveStatus && <div style={{ marginTop: 10, fontSize: 12, color: valueSaveStatus.startsWith('Saved') ? '#34d399' : '#ef4444' }}>{valueSaveStatus}</div>}
           </Card>
 
           <Card title="Contributions">

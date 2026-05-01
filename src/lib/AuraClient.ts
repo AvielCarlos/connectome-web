@@ -309,6 +309,11 @@ class AuraClientClass {
     return res.data;
   }
 
+  async updateProfile(payload: Record<string, unknown>) {
+    const res = await this.client.patch('/api/users/me', payload);
+    return res.data;
+  }
+
   async connectGoogleDrive() {
     const res = await this.client.post('/api/auth/google/drive/connect');
     return res.data as { ok: boolean; auth_url: string; already_connected?: boolean; message?: string };

@@ -59,6 +59,18 @@ export default function AuraOnboarding() {
   const [variantId, setVariantId] = useState<string | null>(null);
   const [renderHint, setRenderHint] = useState<string | null>(null);
   const [energyScores, setEnergyScores] = useState({ iVive: 5, Eviva: 5, Aventi: 5 });
+  const [valueScores, setValueScores] = useState({
+    enlightenment: 7,
+    peace: 7,
+    pleasure: 6,
+    love: 8,
+    vitality: 7,
+    freedom: 8,
+    mastery: 6,
+    contribution: 7,
+    abundance: 6,
+    adventure: 7,
+  });
   const [checked, setChecked] = useState(false);
   const navigate = useNavigate();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -157,6 +169,13 @@ export default function AuraOnboarding() {
     sendMessage(text);
   };
 
+  const submitValueScores = () => {
+    const text = Object.entries(valueScores)
+      .map(([key, value]) => `${key}: ${value}/10`)
+      .join('\n');
+    sendMessage(text);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') sendMessage();
   };
@@ -167,6 +186,7 @@ export default function AuraOnboarding() {
   const progressPct = complete ? 100 : (progressStep / totalQuestions) * 100;
   const showDomainCards = variantId === 'A' && renderHint === 'domain_cards' && questionIndex === 1 && !loading;
   const showEnergySliders = variantId === 'D' && renderHint === 'energy_sliders' && questionIndex === 1 && !loading;
+  const showValueSliders = renderHint === 'value_sliders' && !loading;
 
   return (
     <div style={{
@@ -263,6 +283,29 @@ export default function AuraOnboarding() {
                   </label>
                 ))}
                 <button onClick={submitEnergyScores} disabled={loading} style={{ width: '100%', minHeight: 40, borderRadius: 20, background: '#00d4aa', color: '#0a0a0f', fontWeight: 950, border: 0 }}>Send scores</button>
+              </div>
+            )}
+            {showValueSliders && (
+              <div style={{ marginBottom: 12, padding: 14, borderRadius: 18, background: 'rgba(244,194,107,0.08)', border: '1px solid rgba(244,194,107,0.22)' }}>
+                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.62)', lineHeight: 1.45, marginBottom: 12 }}>
+                  These are starting weights, not a permanent identity. Aura will refine them from what you skip, save, choose, and complete.
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '8px 12px' }}>
+                  {(Object.keys(valueScores) as Array<keyof typeof valueScores>).map(valueName => (
+                    <label key={valueName} style={{ display: 'grid', gridTemplateColumns: '92px 1fr 44px', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                      <span style={{ fontWeight: 850, textTransform: 'capitalize' }}>{valueName}</span>
+                      <input
+                        type="range"
+                        min={1}
+                        max={10}
+                        value={valueScores[valueName]}
+                        onChange={(e) => setValueScores(prev => ({ ...prev, [valueName]: Number(e.target.value) }))}
+                      />
+                      <span style={{ color: '#f4c26b', fontWeight: 950 }}>{valueScores[valueName]}/10</span>
+                    </label>
+                  ))}
+                </div>
+                <button onClick={submitValueScores} disabled={loading} style={{ width: '100%', minHeight: 40, borderRadius: 20, background: '#f4c26b', color: '#0a0a0f', fontWeight: 950, border: 0, marginTop: 12 }}>Save value compass</button>
               </div>
             )}
             <div style={{ display: 'flex', gap: 10 }}>
