@@ -74,8 +74,12 @@ function useKeyboardViewport() {
       const layoutHeight = window.innerHeight
       const visualHeight = viewport?.height ?? layoutHeight
       const offsetTop = viewport?.offsetTop ?? 0
-      const keyboardInset = Math.max(0, Math.round(layoutHeight - visualHeight - offsetTop))
-      const keyboardOpen = keyboardInset > 80
+      const visualDelta = Math.max(0, layoutHeight - visualHeight)
+      // Mobile Safari can report a non-zero visualViewport.offsetTop while the
+      // keyboard is open. Subtracting it can hide the keyboard-open state, which
+      // leaves bottom-nav clearance below fixed composers as a scrollable gap.
+      const keyboardInset = Math.max(0, Math.round(visualDelta - offsetTop), Math.round(visualDelta))
+      const keyboardOpen = visualDelta > 80 || keyboardInset > 80
 
       root.style.setProperty('--visual-viewport-height', `${Math.round(visualHeight)}px`)
       root.style.setProperty('--keyboard-inset', `${keyboardInset}px`)
