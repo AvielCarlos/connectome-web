@@ -602,8 +602,8 @@ export default function ProfilePage() {
             </div>
             {travelModeStatus && <div style={{ marginTop: 10, fontSize: 12, color: travelModeStatus.startsWith('Could') || travelModeStatus.includes('for Explorer') ? '#ef4444' : '#34d399' }}>{travelModeStatus}</div>}
             {!isPaidTier && (
-              <button onClick={() => navigate('/app/dao')} style={{ marginTop: 12, background: '#6366f1', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 800 }}>
-                Upgrade to unlock travel mode
+              <button onClick={handleProfileUpgrade} disabled={checkoutLoading} style={{ marginTop: 12, background: '#6366f1', color: '#fff', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 800, opacity: checkoutLoading ? 0.7 : 1, cursor: checkoutLoading ? 'wait' : 'pointer' }}>
+                {checkoutLoading ? 'Opening checkout…' : 'Upgrade to unlock travel mode'}
               </button>
             )}
           </Card>
