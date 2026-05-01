@@ -297,7 +297,6 @@ function DetailSheet({ card, spec, color, onClose, onDoNow, onAction }: { card: 
         background: 'rgba(0,0,0,0.65)',
         backdropFilter: 'blur(10px)',
         display: 'flex', alignItems: 'flex-end',
-        paddingBottom: 'var(--shell-bottom-clearance)',
         animation: 'fadeIn 0.2s ease-out',
       }}
     >
@@ -315,13 +314,15 @@ function DetailSheet({ card, spec, color, onClose, onDoNow, onAction }: { card: 
         }}
         style={{
           width: '100%',
+          height: 'min(86dvh, calc(var(--visual-viewport-height, 100dvh) - var(--shell-top-clearance) - 18px))',
           maxHeight: 'min(86dvh, calc(var(--visual-viewport-height, 100dvh) - var(--shell-top-clearance) - 18px))',
           background: '#12121e',
           borderRadius: '28px 28px 0 0',
           border: `1px solid ${color}22`,
           borderBottom: 'none',
           overflowY: 'auto',
-          paddingBottom: 'calc(92px + env(safe-area-inset-bottom, 0px))',
+          display: 'flex',
+          flexDirection: 'column',
           animation: 'slideUpSheet 0.32s cubic-bezier(.25,.8,.25,1)',
         }}
       >
@@ -333,7 +334,7 @@ function DetailSheet({ card, spec, color, onClose, onDoNow, onAction }: { card: 
           <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
-        <div style={{ padding: '8px 24px 28px' }}>
+        <div style={{ padding: '8px 24px 28px', flex: 1 }}>
           <div style={{ fontWeight: 800, fontSize: 22, lineHeight: 1.25, marginBottom: 12, color: '#f8f8fc' }}>{title}</div>
 
           {body && (
