@@ -340,10 +340,11 @@ class AuraClientClass {
     return res.data as ScreenResponse;
   }
 
-  async getNextScreenBatch(count: number, goalId?: string): Promise<ScreenResponse[]> {
+  async getNextScreenBatch(count: number, goalId?: string, domain?: string): Promise<ScreenResponse[]> {
     try {
       const body: Record<string, any> = { count: Math.min(count, 5) };
       if (goalId) body.goal_id = goalId;
+      if (domain) body.domain = domain;
       const res = await this.client.post('/api/screens/batch', body);
       return res.data as ScreenResponse[];
     } catch (e: any) {
@@ -351,7 +352,7 @@ class AuraClientClass {
         const results: ScreenResponse[] = [];
         for (let i = 0; i < count; i++) {
           try {
-            results.push(await this.getNextScreen(undefined, goalId));
+            results.push(await this.getNextScreen(undefined, goalId, domain));
           } catch { break; }
         }
         return results;

@@ -447,7 +447,6 @@ export default function ProfilePage() {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(248,248,252,0.3)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>Community</div>
             <MenuRow icon="🏛" label="DAO & Contributions" sublabel="Earn CP, vote on proposals" onClick={() => navigate('/app/dao')} />
             <MenuRow icon="✍" label="Journal" sublabel="Your personal log" onClick={() => navigate('/app/ido')} />
-            <MenuRow icon="⚡" label="Services" sublabel="Aura-powered tools" onClick={() => navigate('/app/services')} last />
           </div>
 
           <div style={{ background: '#12121e', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>

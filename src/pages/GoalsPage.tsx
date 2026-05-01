@@ -11,7 +11,6 @@ const DOMAIN_CONFIG: Record<string, { emoji: string; color: string; label: strin
   iVive: { emoji: '🌱', color: '#10b981', label: 'Self / capacity' },
   Eviva: { emoji: '🌊', color: '#6366f1', label: 'Contribution' },
   Aventi: { emoji: '🚀', color: '#f59e0b', label: 'Experience' },
-  Rest: { emoji: '🌙', color: '#8b5cf6', label: 'Recovery' },
 };
 
 const STARTERS = [
@@ -22,7 +21,8 @@ const STARTERS = [
 ];
 
 function domainConfig(domain?: string) {
-  return DOMAIN_CONFIG[domain || ''] || { emoji: '◈', color: '#00d4aa', label: 'IOO path' };
+  const normalized = domain === 'Rest' ? 'iVive' : domain;
+  return DOMAIN_CONFIG[normalized || ''] || { emoji: '◈', color: '#00d4aa', label: 'Path' };
 }
 
 function progressFor(goal: Goal) {
@@ -94,7 +94,7 @@ function UserStateStrip({ goals }: { goals: Goal[] }) {
       ))}
       <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: 9, color: 'rgba(248,248,252,0.52)', fontSize: 12, padding: '0 2px' }}>
         <span style={{ color: cfg.color }}>{cfg.emoji}</span>
-        Intentions are the spark and fuel. Aura turns them into specific, measurable, attainable goals — then breaks those into steps the IOO graph can execute.
+        Intentions are the spark and fuel. Aura turns them into specific, measurable, attainable goals — then maps the system work in the background and shows the steps you can actually do.
       </div>
     </div>
   );
@@ -374,7 +374,7 @@ export default function GoalsPage() {
       completed: false,
       order: i,
       ora_note: [
-        node.domain ? `IOO graph • ${node.domain}` : 'IOO graph',
+        node.domain ? `Path map • ${node.domain}` : 'Path map',
         node.owner ? `Owner: ${node.owner}` : null,
         node.node_type || node.step_type || null,
       ].filter(Boolean).join(' • '),
@@ -409,7 +409,7 @@ export default function GoalsPage() {
         <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 950, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>Intentions → goals → steps</div>
         <h1 style={{ fontWeight: 950, fontSize: 'clamp(30px, 8vw, 48px)', letterSpacing: -1.4, lineHeight: 0.98, margin: 0 }}>Sparks become achievable goals.</h1>
         <p style={{ color: 'rgba(248,248,252,0.54)', fontSize: 14, lineHeight: 1.65, marginTop: 12, maxWidth: 560 }}>
-          Intentions are the spark and fuel. Aura refines them into specific, measurable, attainable goals, then breaks them into IOO steps you can actually complete.
+          Intentions are the spark and fuel. Aura refines them into specific, measurable, attainable goals, then turns them into real steps you can complete.
         </p>
       </header>
 

@@ -16,16 +16,15 @@ interface AppLauncherProps {
   onLaunch?: () => void;
 }
 
-const DEFAULT_FEATURED_APPS = ['Path Feed', 'IOO Graph', 'Goals', 'Contribute'];
+const DEFAULT_FEATURED_APPS = ['Path Feed', 'Path Map', 'Goals', 'Contribute'];
 
 const OUTCOME_LABELS: Partial<Record<ConnectomeApp['id'], { title: string; description: string; badge?: string }>> = {
-  ido: { title: 'Begin your path', description: 'The Connectome action feed: one concrete next step from Aura and the IOO graph.', badge: 'Path' },
+  ido: { title: 'Begin your path', description: 'iDo / Path Feed: a snap-style life-path feed for concrete choices, micro-nodes, and real-world progress.', badge: 'Path' },
   goals: { title: 'Clarify a goal with Aura', description: 'Turn an intention into steps, constraints, and a path you can act on.', badge: 'Plan' },
   routines: { title: 'Build a repeatable rhythm', description: 'Make the helpful action automatic with small routines.', badge: 'Habits' },
   dao: { title: 'Understand the DAO', description: 'See governance, CP, proposals, and the contribution economy.', badge: 'DAO' },
   contribute: { title: 'Submit work and earn CP', description: 'Share code, design, research, ideas, or feedback for review.', badge: 'Build' },
-  services: { title: 'Use Aura-powered tools', description: 'Open integrations and generated surfaces around your current path.', badge: 'Tools' },
-  ioo: { title: 'Explore the IOO neural graph', description: 'See how Aura maps goals into nodes, prerequisites, actions, tools, and outcomes.', badge: 'Core' },
+  ioo: { title: 'Open your Path Map', description: 'See user-friendly routes from your current state to your desired goals and experiences.', badge: 'Map' },
   profile: { title: 'Manage identity and settings', description: 'Control profile, accounts, permissions, experiments, and system tools.', badge: 'You' },
 };
 
@@ -71,7 +70,7 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
   return (
     <section className="app-launcher" aria-label="App launcher">
       <div className="app-launcher__intro">
-        <span>Connectome</span>
+        <span>Aura</span>
         <h2>What are you trying to do?</h2>
         {aiosState.ora_mission_statement && (
           <p className="app-launcher__mission">{aiosState.ora_mission_statement}</p>

@@ -1,11 +1,12 @@
-# Connectome / iDo UX Flow
+# Aura / iDo / Connectome UX Flow
 
 ## Product hierarchy
 
 - **Ascension** = the DAO and mission ecosystem. It explains why the work matters, hosts contribution culture, and points people toward governance/community.
-- **Connectome** = the AIOS. It connects the user's life context, apps, DAO identity, and semantic graph into one operating system.
-- **Ora** = the brain/interface. Ora clarifies intent, answers questions, routes users, and sits contextually in the shell.
-- **iDo** = the daily app. It gives the user one useful next action when they do not know what to do.
+- **Aura** = the main user-facing intelligence brand: the shared AI personality, personalized per user. Aura clarifies, decides with the user, and guides real-world action.
+- **Connectome** = the orchestration AIOS underneath Aura. It can be visible, but not overtly; ordinary users should not feel like they are operating infrastructure.
+- **iDo / Path Feed** = the current path-building feed. It may remain the feed name, become a set of fulfilment interfaces, or evolve into the full life AIOS if testing/system coherence supports that.
+- **IOO** = internal graph language. Users see Path Maps / Life Maps / tested front-end language, not raw IOO by default.
 
 Public site (`web/atdao`) is the Ascension/DAO front door. GitHub Pages `connectome-web` remains the app surface until the domain strategy changes.
 
@@ -35,8 +36,10 @@ Edges should therefore express relations like `contributes_to`, `unlocks_possibi
 The core life domains should be reciprocal, not siloed:
 
 - **iVive → Aventi + Eviva**: vitality, health, learning, nervous-system capacity, and mental/physical fitness increase the person’s ability to adventure, explore, relate, create, and contribute.
+- **Aventi → iVive + Eviva**: experience, travel, relationships, novelty, and real-world exploration can restore vitality and open contribution/service pathways.
 - **Eviva → iVive + Aventi**: meaningful contribution, service, income creation, and purpose can unlock better vitality resources and greater freedom/adventure possibilities.
-- **Aventi → iVive + Eviva**: experience, travel, relationships, novelty, and real-world exploration can restore vitality and open new contribution/service pathways.
+
+In the Path experience, users should be able to filter/focus the feed through three beautiful top tabs: **iVive** center-left, **Aventi** center, **Eviva** center-right.
 
 A card/micro-node shown to the user should know which macro nodes it contributes to, which domains it crosses, and which future possibilities it may unlock. The user should experience a simple decision/action; Aura should maintain the multi-dimensional graph underneath.
 
@@ -56,7 +59,7 @@ The product should therefore prefer: **decision → clarification → IRL action
 
 ## Card-as-mini-app / micro-node principle
 
-A card should usually behave like a mini-app for actually achieving the outcome or experience, not like a static content tile. The card should resolve the user downward through levels of agency:
+A card should usually behave like a mini-app for actually achieving the outcome or experience, not like a static content tile. The Path Feed itself should become a neural graph of progression, where feed nodes can move the user through choices, path-building, micro-node confirmation, scheduling/booking/starting, completion, and learning. A card should resolve the user downward through levels of agency:
 
 1. **High-level decision** — what kind of outcome/experience/path does the user want?
 2. **Mid-level decision** — which concrete option, provider, class, event, route, tutorial, person, or service is best?
@@ -141,13 +144,13 @@ Primary feed responses are graph-learning signals:
 3. `/app/contribute` explains what contribution evidence is needed and links the CP explainer.
 4. Code contributions require GitHub connection; GitHub callback returns to `/app/contribute?github=connected`.
 
-### 5. User wants to understand CP/DAO/Ascension/Connectome/Ora/iDo
+### 5. User wants to understand CP/DAO/Ascension/Connectome/Aura/iDo
 
 1. Public site = Ascension/DAO mission.
 2. App home = short product hierarchy in the first screen.
 3. DAO page = governance and contribution economy.
 4. CP explainer = reward/reputation mechanism.
-5. Ora overlay = contextual guide, not primary navigation.
+5. Aura overlay = contextual guide, not primary navigation.
 
 ## Route map
 
@@ -167,8 +170,8 @@ Primary feed responses are graph-learning signals:
 - `/app/dao` — DAO, CP, proposals, governance, contribution overview.
 - `/app/contribute` — submit contributions and sync GitHub.
 - `/app/profile` — personal profile, settings, admin/system tools when available.
-- `/app/services` — Ora-powered tools and generated surfaces.
-- `/app/ioo` — IOO semantic graph/map.
+- `/app/services` — Ascension Technologies offerings/admin route, separate from ordinary Aura/iDo consumer flow.
+- `/app/ioo` — Path Map user-facing view over the internal IOO graph.
 - `/app/ivive` — vitality domain.
 - `/app/eviva` — mission/service domain.
 - `/surfaces/:surfaceId` — auth-gated generated surface.

@@ -12,11 +12,12 @@ import { CollectionPicker } from '../components/CollectionPicker';
 import { useExperiment } from '../lib/useExperiment';
 
 // ─── Domain config ────────────────────────────────────────────────────────────
+function normalizeDomain(domain?: string) { return domain === 'Rest' ? 'iVive' : domain; }
+
 const DOMAIN_CONFIG: Record<string, { color: string; gradient: string; emoji: string }> = {
   iVive:   { color: '#10b981', gradient: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #0a0a0f 100%)', emoji: '🌱' },
   Eviva:   { color: '#3b82f6', gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #0a0a0f 100%)', emoji: '🌊' },
   Aventi:  { color: '#f59e0b', gradient: 'linear-gradient(135deg, #451a03 0%, #92400e 50%, #0a0a0f 100%)', emoji: '🚀' },
-  Rest:    { color: '#8b5cf6', gradient: 'linear-gradient(135deg, #2e1065 0%, #5b21b6 50%, #0a0a0f 100%)', emoji: '🌙' },
 };
 const DEFAULT_DOMAIN = { color: '#00d4aa', gradient: 'linear-gradient(135deg, #042f2e 0%, #0f766e 50%, #0a0a0f 100%)', emoji: '◈' };
 
@@ -24,7 +25,6 @@ const DOMAIN_IMAGE_FALLBACK: Record<string, string> = {
   Aventi: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&auto=format&fit=crop',
   iVive: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&auto=format&fit=crop',
   Eviva: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&auto=format&fit=crop',
-  Rest: 'https://images.unsplash.com/photo-1495195134817-aeb325a55b65?w=1200&auto=format&fit=crop',
   default: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop',
 };
 
@@ -75,9 +75,16 @@ const CAPABILITY_CARDS = [
 ];
 
 function getDomainConfig(spec: any) {
-  const d = spec?.metadata?.domain || spec?.domain || '';
-  return DOMAIN_CONFIG[d] || DEFAULT_DOMAIN;
+  const d = normalizeDomain(spec?.metadata?.domain || spec?.domain || '');
+  return DOMAIN_CONFIG[d || ''] || DEFAULT_DOMAIN;
 }
+
+const PATH_DOMAIN_TABS = [
+  { id: 'iVive', label: 'iVive', emoji: '🌱' },
+  { id: 'Aventi', label: 'Aventi', emoji: '🚀' },
+  { id: 'Eviva', label: 'Eviva', emoji: '🌊' },
+] as const;
+type PathDomainFilter = typeof PATH_DOMAIN_TABS[number]['id'] | null;
 
 function fallbackDeepDive(card: any, spec: any, domain: string) {
   const title = card?.title || 'this next step';
@@ -496,7 +503,7 @@ function FeedCard({
   const navigate = useNavigate();
   const domainCfg = getDomainConfig(spec);
   const color = domainCfg.color;
-  const domain = spec?.metadata?.domain || spec?.domain || '';
+  const domain = normalizeDomain(spec?.metadata?.domain || spec?.domain || '') || '';
   const currentRating = ratings[item.screen_spec_db_id] ?? 0;
   const [showDetail, setShowDetail] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -818,6 +825,7 @@ export default function FeedPage() {
   const [collectionPickerCard, setCollectionPickerCard] = useState<any | null>(null);
   const [capabilityReady, setCapabilityReady] = useState(() => !!localStorage.getItem(todayCapabilityKey()));
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
+  const [domainFilter, setDomainFilter] = useState<PathDomainFilter>(null);
 
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
@@ -845,10 +853,10 @@ export default function FeedPage() {
     try {
       const goals = await AuraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
-      const batch = await AuraClient.getNextScreenBatch(5, goalId);
+      const batch = await AuraClient.getNextScreenBatch(5, goalId, domainFilter || undefined);
       let nextCards = batch;
       if (!nextCards.length) {
-        const single = await AuraClient.getNextScreen(undefined, goalId).catch(() => null);
+        const single = await AuraClient.getNextScreen(undefined, goalId, domainFilter || undefined).catch(() => null);
         nextCards = single ? [single] : [];
       }
       setCards(nextCards);
@@ -869,7 +877,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [goalId]);
+  }, [goalId, domainFilter]);
 
   useEffect(() => {
     if (capabilityReady) loadInitial();
@@ -879,10 +887,10 @@ export default function FeedPage() {
     if (loadingMore || isLimited) return;
     setLoadingMore(true);
     try {
-      const batch = await AuraClient.getNextScreenBatch(3, goalId);
+      const batch = await AuraClient.getNextScreenBatch(3, goalId, domainFilter || undefined);
       let nextCards = batch;
       if (!nextCards.length) {
-        const single = await AuraClient.getNextScreen(undefined, goalId).catch(() => null);
+        const single = await AuraClient.getNextScreen(undefined, goalId, domainFilter || undefined).catch(() => null);
         nextCards = single ? [single] : [];
       }
       if (nextCards.length > 0) {
@@ -895,7 +903,7 @@ export default function FeedPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, isLimited, goalId]);
+  }, [loadingMore, isLimited, goalId, domainFilter]);
 
   const scrollToIndex = useCallback((i: number) => {
     const s = scrollerRef.current;
@@ -1202,6 +1210,45 @@ export default function FeedPage() {
             <div style={{ fontSize: 32, animation: 'brainFloat 3s ease-in-out infinite', color: '#00d4aa' }}>◈</div>
           </div>
         )}
+      </div>
+
+      {/* Path domain focus tabs */}
+      <div style={{
+        position: 'absolute', top: 'max(env(safe-area-inset-top), 18px)', left: '50%', transform: 'translateX(-50%)',
+        zIndex: 35, display: 'flex', alignItems: 'center', gap: 6,
+        padding: '5px', borderRadius: 999,
+        background: 'rgba(10,10,15,0.48)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        backdropFilter: 'blur(18px)',
+        boxShadow: '0 10px 34px rgba(0,0,0,0.28)',
+      }}>
+        {PATH_DOMAIN_TABS.map((tab) => {
+          const active = domainFilter === tab.id;
+          const cfg = DOMAIN_CONFIG[tab.id];
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => {
+                setDomainFilter(active ? null : tab.id);
+                setCards([]);
+                setIndex(0);
+              }}
+              style={{
+                border: 'none', borderRadius: 999, cursor: 'pointer',
+                padding: active ? '8px 13px' : '8px 10px',
+                color: active ? '#06110f' : 'rgba(248,248,252,0.82)',
+                background: active ? `linear-gradient(135deg, ${cfg.color}, #ffffff)` : 'rgba(255,255,255,0.06)',
+                fontSize: 12, fontWeight: 900, letterSpacing: -0.1,
+                boxShadow: active ? `0 0 22px ${cfg.color}55` : 'none',
+                transition: 'all 0.18s ease',
+              }}
+            >
+              <span aria-hidden="true">{tab.emoji}</span> {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Top header */}

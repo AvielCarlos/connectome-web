@@ -256,3 +256,15 @@ Model individual people first. Future linking supports partners, family, friends
 - Open questions get **decisions**, not silent implementations.
 - New entities: add a section in §2 plus relationships in §3 plus permission mapping in §6.
 - Code references: any change here is mirrored in `src/runtime/ontology.ts` and backend schema notes.
+
+
+## 2026-04-30 Alignment Update
+
+- Public/user-facing intelligence brand: **Aura**. Legacy `Ora` can remain in code/API/storage compatibility surfaces until intentionally migrated.
+- Main ordinary-user brand: **Aura**. **Connectome** may be visible, but should not dominate ordinary app chrome; it is primarily the orchestration AIOS underneath.
+- **iDo** currently names the Path Feed, but can evolve into a broader fulfilment interface set or full life AIOS if that tests/systematizes best.
+- **IOO** is internal language. Users see Path Maps / Life Maps / tested front-end language.
+- **Rest** folds under **iVive** as substrate/mode, never a fourth top-level domain.
+- **Nea services** are separate Ascension Technologies offerings, not part of ordinary Aura/Connectome/iDo consumer UX.
+- Path top-domain filter direction: iVive center-left, Aventi center, Eviva center-right.
+- Bottom nav baseline direction: Path, Goals, AURA, Routines, Profile; continuously test variants and retain only what drives return/use or is required for system functionality.

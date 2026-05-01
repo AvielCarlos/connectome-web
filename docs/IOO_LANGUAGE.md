@@ -72,3 +72,16 @@ Examples:
 - `Y:Core:macro:integrated-fulfilment`
 
 Again: this is internal/debug/admin language. User copy should translate it into simple choices and real-world next steps.
+
+
+## Explicit dimensions vs embeddings
+
+The graph should not try to hand-design every latent dimension inside the embedding vector. Keep embeddings high-dimensional for semantic similarity, and keep a smaller set of explicit structured axes for reasoning, filtering, ranking, and debugging.
+
+Recommended architecture:
+
+- Semantic embedding: currently 1536 dimensions (`text-embedding-3-small`), used for fuzzy meaning/similarity.
+- Explicit IOO axes: roughly 12-30 structured dimensions at first, allowed to grow carefully when a new axis clearly improves recommendations or learning.
+- Canonical explicit scale: `macro_micro_score`; derived shorthand: `macro_micro_grade`.
+
+Good explicit axes include: macro/micro scale, iVive/Aventi/Eviva contribution strengths, unlock domains, user energy, time, cost, location dependence, social/solo, risk/safety, prerequisite difficulty, novelty, recurrence, and evidence/completion confidence.

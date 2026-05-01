@@ -13,7 +13,7 @@ export default function AuthPage() {
     A: 'Create your account',
     B: 'Meet Aura',
     C: 'Start your journey',
-    D: 'Join Connectome',
+    D: 'Begin with Aura',
   };
   const registerHeadlineText = REGISTER_HEADLINES[registerHeadlineVariant] || REGISTER_HEADLINES['A'];
 
@@ -102,7 +102,7 @@ export default function AuthPage() {
             ◈
           </div>
           <h1 style={{ fontSize: 30, fontWeight: 800, letterSpacing: -0.5, marginBottom: 8 }}>
-            Connectome
+            Aura
           </h1>
           <p style={{ color: 'rgba(248,248,252,0.45)', fontSize: 15 }}>
             Begin your path, guided by Aura

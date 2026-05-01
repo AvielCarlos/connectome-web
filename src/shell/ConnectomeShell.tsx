@@ -17,7 +17,7 @@ interface ConnectomeShellProps {
 
 function appLabel(appId: ShellApp) {
   if (appId === 'home') return 'Aura';
-  if (appId === 'ido') return 'Path Feed';
+  if (appId === 'ido') return 'iDo / Path Feed';
   return appById(appId)?.name || 'Aura';
 }
 
@@ -32,31 +32,31 @@ type DockItem = {
 const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   home: [
     { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
-    { id: 'ioo', label: 'Graph', icon: '🧬', path: '/app/ioo' },
-    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
+    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
+    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   ido: [
-    { id: 'feed', label: 'Feed', icon: '✦', path: '/app/ido' },
-    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'aura' },
-    { id: 'plan', label: 'Plan', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
-    { id: 'ditch', label: 'Ditch', icon: '🗑️', path: '/app/routines' },
+    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
+    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   goals: [
     { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
-    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'aura' },
-    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
     { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
-    { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   routines: [
+    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
+    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
     { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
-    { id: 'delegate', label: 'Delegate', icon: '🤝', action: 'aura' },
-    { id: 'plan', label: 'Plan', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
-    { id: 'feed', label: 'Feed', icon: '✦', path: '/app/ido' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   dao: [
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
@@ -69,12 +69,12 @@ const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
     { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
     { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
-    { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
-    { id: 'ioo', label: 'Graph', icon: '🧬', path: '/app/ioo' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
+    { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
   ],
   services: [
     { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
-    { id: 'services', label: 'Tools', icon: '🛠️', path: '/app/services' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
     { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
@@ -82,16 +82,16 @@ const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   ioo: [
     { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
-    { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
-    { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
+    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
+    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   profile: [
     { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
+    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
     { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
-    { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
+    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
 };
 
