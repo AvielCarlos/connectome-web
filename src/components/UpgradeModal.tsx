@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { AuraClient, AurasTier, TiersResponse } from '../lib/AuraClient';
+import { billingCancelUrl, billingSuccessUrl } from '../lib/checkoutUrls';
 
 const aura = AuraClient;
 
@@ -89,8 +90,8 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
       const session = await aura.createCheckout(
         tier,
         billing,
-        `${window.location.origin}/upgrade/success`,
-        `${window.location.origin}/upgrade`,
+        billingSuccessUrl(tier),
+        billingCancelUrl(),
       );
       window.location.href = session.checkout_url;
     } catch (err: any) {
@@ -109,7 +110,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
 
   const defaultMessage =
     "You've reached your plan limit ✦\n\nExplorer unlocks the full Aura experience — " +
-    'unlimited discovery, goals, and coaching. $12.99/mo.';
+    'unlimited discovery, goals, and coaching. $9/mo.';
 
   return (
     // Backdrop

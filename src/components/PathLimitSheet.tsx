@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuraClient } from '../lib/AuraClient';
+import { checkoutReturnUrl } from '../lib/checkoutUrls';
 
 interface Props {
   activePaths: number;
@@ -28,8 +29,8 @@ export function PathLimitSheet({ activePaths, pathLimit, pathCredits = 0, onClos
     setBuying(true);
     try {
       const res: any = await AuraClient['client'].post('/api/payments/credits/checkout', {
-        success_url: window.location.origin + '/app/goals?credits=granted',
-        cancel_url: window.location.origin + '/app/goals',
+        success_url: checkoutReturnUrl('/app/goals?credits=granted'),
+        cancel_url: checkoutReturnUrl('/app/goals'),
       }).then((r: any) => r.data);
       window.location.href = res.checkout_url;
     } catch {
@@ -43,8 +44,8 @@ export function PathLimitSheet({ activePaths, pathLimit, pathCredits = 0, onClos
       const res: any = await AuraClient['client'].post('/api/payments/checkout', {
         tier,
         billing: 'monthly',
-        success_url: window.location.origin + '/app/goals?upgrade=' + tier,
-        cancel_url: window.location.origin + '/app/goals',
+        success_url: checkoutReturnUrl('/app/goals?upgrade=' + tier),
+        cancel_url: checkoutReturnUrl('/app/goals'),
       }).then((r: any) => r.data);
       window.location.href = res.checkout_url;
     } catch {

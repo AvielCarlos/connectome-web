@@ -22,6 +22,7 @@ import AiOsSetupLandingPage from './pages/AiOsSetupLandingPage'
 import ProfilePage from './pages/ProfilePage'
 import SurfacePage from './pages/SurfacePage'
 import IOOPage from './pages/IOOPage'
+import PaymentSuccessPage from './pages/PaymentSuccessPage'
 
 type ShellApp = React.ComponentProps<typeof ConnectomeShell>['activeApp']
 
@@ -163,6 +164,7 @@ function App() {
           <Route path="/app/dao" element={<ShellRoute activeApp="dao"><DAOPage /></ShellRoute>} />
           <Route path="/app/contribute" element={<ShellRoute activeApp="contribute"><ContributePage /></ShellRoute>} />
           <Route path="/app/profile" element={<ShellRoute activeApp="profile"><ProfilePage /></ShellRoute>} />
+          <Route path="/app/billing/success" element={<ShellRoute activeApp="profile"><PaymentSuccessPage /></ShellRoute>} />
           <Route path="/app/journal" element={<Navigate to="/app/ido" replace />} />
           <Route path="/app/services" element={<ShellRoute activeApp="services"><ServicesPage /></ShellRoute>} />
           <Route path="/services" element={<ServicesPage />} />
