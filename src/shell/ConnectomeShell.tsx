@@ -17,7 +17,7 @@ interface ConnectomeShellProps {
 
 function appLabel(appId: ShellApp) {
   if (appId === 'home') return 'Aura';
-  if (appId === 'ido') return 'iDo / Path Feed';
+  if (appId === 'ido') return 'Now / Later Feed';
   return appById(appId)?.name || 'Aura';
 }
 
@@ -31,31 +31,31 @@ type DockItem = {
 
 const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   home: [
-    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
+    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
     { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   ido: [
-    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
+    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
     { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   goals: [
-    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
+    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
     { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   routines: [
-    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
+    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
     { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   dao: [
@@ -73,24 +73,24 @@ const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
     { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
   ],
   services: [
-    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
+    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
     { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
     { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
   ],
   ioo: [
-    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
+    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
     { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
   profile: [
-    { id: 'ido', label: 'Path', icon: '🚀', path: '/app/ido' },
+    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
     { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
     { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'routines', label: 'Routines', icon: '⚙️', path: '/app/routines' },
+    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
     { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
   ],
 };
@@ -317,7 +317,8 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
 
       <nav className={`connectome-dock connectome-dock--${dockItems.length}`} aria-label={`${appLabel(activeApp)} navigation`}>
         {dockItems.map((item) => {
-          const active = item.id === activeApp || (item.path && location.pathname === item.path) || (activeApp === 'ido' && item.id === 'feed');
+          const currentRoute = `${location.pathname}${location.search}`;
+          const active = item.id === activeApp || (item.path && (currentRoute === item.path || location.pathname === item.path)) || (activeApp === 'ido' && item.id === 'now' && !location.search.includes('mode=later')) || (activeApp === 'ido' && item.id === 'later' && location.search.includes('mode=later'));
           return (
             <button
               key={item.id}

@@ -85,6 +85,26 @@ const PATH_DOMAIN_TABS = [
   { id: 'Eviva', label: 'Eviva', emoji: '🌊' },
 ] as const;
 type PathDomainFilter = typeof PATH_DOMAIN_TABS[number]['id'] | null;
+type FeedMode = 'now' | 'later';
+
+const TIME_HORIZON_OPTIONS = [
+  { id: '5m', label: '5m', context: 'The user has about 5 minutes. Recommend one tiny action that can begin immediately.' },
+  { id: '30m', label: '30m', context: 'The user has about 30 minutes. Recommend a concrete short action or nearby micro-adventure.' },
+  { id: '2h', label: '2h', context: 'The user has 1–2 hours. Recommend a meaningful action, outing, class, call, practice, or project block.' },
+  { id: 'day', label: 'Day', context: 'The user has most of a day. Recommend a richer experience, sequence, or mini-adventure.' },
+  { id: 'weekend', label: 'Weekend', context: 'The user has a weekend. Recommend a multi-step adventure, retreat, trip, workshop, or social/service path.' },
+  { id: 'week', label: 'Week+', context: 'The user has a week or more. Recommend future opportunities, programs, travel, or larger life-path moves.' },
+  { id: 'freedom', label: 'Total freedom', context: 'The user has total freedom. Guide them toward the greatest adventure available: expansive, transformational, ambitious, real-world, and still executable through concrete next nodes.' },
+] as const;
+type TimeHorizonId = typeof TIME_HORIZON_OPTIONS[number]['id'];
+
+function timeHorizonContext(mode: FeedMode, horizonId: TimeHorizonId) {
+  const horizon = TIME_HORIZON_OPTIONS.find((item) => item.id === horizonId) || TIME_HORIZON_OPTIONS[1];
+  const modeContext = mode === 'now'
+    ? 'Feed mode is NOW: prioritize things the user can start immediately, today, or with minimal setup.'
+    : 'Feed mode is LATER: prioritize future opportunities, scheduled experiences, paths, prerequisites, trips, classes, programs, and saved/schedulable nodes.';
+  return `${modeContext} Time availability: ${horizon.label}. ${horizon.context}`;
+}
 
 function fallbackDeepDive(card: any, spec: any, domain: string) {
   const title = card?.title || 'this next step';
@@ -859,7 +879,7 @@ function FeedCard({
 // ─── Main feed ────────────────────────────────────────────────────────────────
 export default function FeedPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   React.useEffect(() => {
     if (!localStorage.getItem('connectome_token')) {
@@ -871,6 +891,9 @@ export default function FeedPage() {
   const { variant: emptyStateVariant, trackEvent: trackEmptyState } = useExperiment('feed_empty_state');
 
   const goalId = searchParams.get('goal') || undefined;
+  const requestedMode = searchParams.get('mode') === 'later' ? 'later' : 'now';
+  const savedTimeHorizon = (localStorage.getItem('aura_feed_time_horizon') || '30m') as TimeHorizonId;
+  const initialTimeHorizon = TIME_HORIZON_OPTIONS.some((item) => item.id === savedTimeHorizon) ? savedTimeHorizon : '30m';
   const [goalTitle, setGoalTitle] = useState<string | null>(null);
 
   const [cards, setCards] = useState<ScreenResponse[]>([]);
@@ -888,6 +911,8 @@ export default function FeedPage() {
   const [capabilityReady, setCapabilityReady] = useState(() => !!localStorage.getItem(todayCapabilityKey()));
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
   const [domainFilter, setDomainFilter] = useState<PathDomainFilter>(null);
+  const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
+  const [timeHorizon, setTimeHorizon] = useState<TimeHorizonId>(initialTimeHorizon);
   const [showCreateOpportunity, setShowCreateOpportunity] = useState(false);
 
   const touchStartY = useRef<number | null>(null);
@@ -897,6 +922,28 @@ export default function FeedPage() {
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 2500);
+  };
+
+  useEffect(() => {
+    setFeedMode(requestedMode);
+  }, [requestedMode]);
+
+  const feedContext = timeHorizonContext(feedMode, timeHorizon);
+
+  const switchFeedMode = (mode: FeedMode) => {
+    setFeedMode(mode);
+    const next = new URLSearchParams(searchParams);
+    next.set('mode', mode);
+    setSearchParams(next, { replace: true });
+    setCards([]);
+    setIndex(0);
+  };
+
+  const updateTimeHorizon = (value: TimeHorizonId) => {
+    setTimeHorizon(value);
+    localStorage.setItem('aura_feed_time_horizon', value);
+    setCards([]);
+    setIndex(0);
   };
 
   // Fetch goal title
@@ -916,10 +963,10 @@ export default function FeedPage() {
     try {
       const goals = await AuraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
-      const batch = await AuraClient.getNextScreenBatch(5, goalId, domainFilter || undefined);
+      const batch = await AuraClient.getNextScreenBatch(5, goalId, domainFilter || undefined, feedContext);
       let nextCards = batch;
       if (!nextCards.length) {
-        const single = await AuraClient.getNextScreen(undefined, goalId, domainFilter || undefined).catch(() => null);
+        const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined).catch(() => null);
         nextCards = single ? [single] : [];
       }
       setCards(nextCards);
@@ -940,7 +987,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [goalId, domainFilter]);
+  }, [goalId, domainFilter, feedContext]);
 
   useEffect(() => {
     if (capabilityReady) loadInitial();
@@ -950,10 +997,10 @@ export default function FeedPage() {
     if (loadingMore || isLimited) return;
     setLoadingMore(true);
     try {
-      const batch = await AuraClient.getNextScreenBatch(3, goalId, domainFilter || undefined);
+      const batch = await AuraClient.getNextScreenBatch(3, goalId, domainFilter || undefined, feedContext);
       let nextCards = batch;
       if (!nextCards.length) {
-        const single = await AuraClient.getNextScreen(undefined, goalId, domainFilter || undefined).catch(() => null);
+        const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined).catch(() => null);
         nextCards = single ? [single] : [];
       }
       if (nextCards.length > 0) {
@@ -966,7 +1013,7 @@ export default function FeedPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, isLimited, goalId, domainFilter]);
+  }, [loadingMore, isLimited, goalId, domainFilter, feedContext]);
 
   const scrollToIndex = useCallback((i: number) => {
     const s = scrollerRef.current;
@@ -1286,6 +1333,58 @@ export default function FeedPage() {
           </div>
         )}
       </div>
+
+      {/* Now/Later mode switch */}
+      <div style={{
+        position: 'absolute', top: 'max(env(safe-area-inset-top), 68px)', left: 14, zIndex: 36,
+        display: 'flex', gap: 5, padding: 5, borderRadius: 999,
+        background: 'rgba(10,10,15,0.58)', border: '1px solid rgba(255,255,255,0.10)',
+        backdropFilter: 'blur(16px)', boxShadow: '0 10px 34px rgba(0,0,0,0.28)',
+      }}>
+        {(['now', 'later'] as FeedMode[]).map((mode) => {
+          const active = feedMode === mode;
+          return (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={active}
+              onClick={() => switchFeedMode(mode)}
+              style={{
+                border: 'none', borderRadius: 999, cursor: 'pointer',
+                padding: '8px 12px', fontSize: 12, fontWeight: 900,
+                color: active ? '#06110f' : 'rgba(248,248,252,0.82)',
+                background: active ? 'linear-gradient(135deg, #00d4aa, #ffffff)' : 'rgba(255,255,255,0.06)',
+                boxShadow: active ? '0 0 22px rgba(0,212,170,0.35)' : 'none',
+              }}
+            >
+              {mode === 'now' ? '⚡ Now' : '🧭 Later'}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Time/freedom horizon */}
+      <label style={{
+        position: 'absolute', left: '50%', top: 'max(env(safe-area-inset-top), 116px)', transform: 'translateX(-50%)', zIndex: 36,
+        width: 'min(92vw, 520px)', display: 'flex', alignItems: 'center', gap: 10,
+        padding: '9px 12px', borderRadius: 999, background: 'rgba(10,10,15,0.62)',
+        border: '1px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(18px)',
+        boxShadow: '0 10px 34px rgba(0,0,0,0.30)',
+      }}>
+        <span style={{ color: 'rgba(248,248,252,0.62)', fontSize: 11, fontWeight: 900, whiteSpace: 'nowrap' }}>Time</span>
+        <input
+          type="range"
+          min={0}
+          max={TIME_HORIZON_OPTIONS.length - 1}
+          value={Math.max(0, TIME_HORIZON_OPTIONS.findIndex((item) => item.id === timeHorizon))}
+          onChange={(event) => updateTimeHorizon(TIME_HORIZON_OPTIONS[Number(event.target.value)].id)}
+          style={{ flex: 1, accentColor: '#00d4aa' }}
+          aria-label="Available time"
+        />
+        <span style={{ color: timeHorizon === 'freedom' ? '#f4c26b' : '#f8f8fc', fontSize: 12, fontWeight: 900, minWidth: 82, textAlign: 'right' }}>
+          {TIME_HORIZON_OPTIONS.find((item) => item.id === timeHorizon)?.label || '30m'}
+        </span>
+      </label>
 
       {/* Path domain focus tabs */}
       <div style={{
