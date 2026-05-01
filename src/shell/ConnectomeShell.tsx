@@ -16,7 +16,7 @@ interface ConnectomeShellProps {
 
 function appLabel(appId: ShellApp) {
   if (appId === 'home') return 'Aura';
-  if (appId === 'ido') return 'Now / Later Feed';
+  if (appId === 'ido') return 'Now Feed';
   return appById(appId)?.name || 'Aura';
 }
 
@@ -35,70 +35,23 @@ type DockItem = {
   action?: 'aura' | 'launcher';
 };
 
+const CORE_DOCK: DockItem[] = [
+  { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido' },
+  { id: 'ora', label: 'Ora', icon: '◈', path: '/app' },
+  { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
+  { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
+];
+
 const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
-  home: [
-    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-  ],
-  ido: [
-    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-  ],
-  goals: [
-    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-  ],
-  routines: [
-    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-  ],
-  dao: [
-    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
-    { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
-    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
-    { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
-    { id: 'apps', label: 'Apps', icon: '▦', action: 'launcher' },
-  ],
-  contribute: [
-    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
-    { id: 'contribute', label: 'Build', icon: '🤝', path: '/app/contribute' },
-    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-    { id: 'ioo', label: 'Map', icon: '🧬', path: '/app/ioo' },
-  ],
-  services: [
-    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-    { id: 'aura', label: 'Aura', icon: '◈', action: 'aura' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'dao', label: 'DAO', icon: '🏛️', path: '/app/dao' },
-  ],
-  ioo: [
-    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-  ],
-  profile: [
-    { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido?mode=now' },
-    { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
-    { id: 'aura', label: 'AURA', icon: '◈', action: 'aura' },
-    { id: 'later', label: 'Later', icon: '🧭', path: '/app/ido?mode=later' },
-    { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
-  ],
+  home: CORE_DOCK,
+  ido: CORE_DOCK,
+  goals: CORE_DOCK,
+  routines: CORE_DOCK,
+  dao: CORE_DOCK,
+  contribute: CORE_DOCK,
+  services: CORE_DOCK,
+  ioo: CORE_DOCK,
+  profile: CORE_DOCK,
 };
 
 function initials(profile: any) {
@@ -209,8 +162,9 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
     const next = new URLSearchParams(location.search);
     if (domain) next.set('domain', domain);
     else next.delete('domain');
-    if (!next.get('mode')) next.set('mode', 'now');
-    navigate(`/app/ido?${next.toString()}`, { replace: true });
+    next.delete('mode');
+    const query = next.toString();
+    navigate(query ? `/app/ido?${query}` : '/app/ido', { replace: true });
   };
 
   const handleDock = (item: DockItem) => {
@@ -283,7 +237,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
             <button
               key={item.id}
               type="button"
-              className={`connectome-dock__item ${active ? 'connectome-dock__item--active' : ''} ${item.action === 'aura' ? 'connectome-dock__item--aura' : ''}`}
+              className={`connectome-dock__item ${active ? 'connectome-dock__item--active' : ''} ${item.id === 'ora' ? 'connectome-dock__item--ora' : ''}`}
               onClick={() => handleDock(item)}
               aria-label={item.label}
             >

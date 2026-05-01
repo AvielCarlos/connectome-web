@@ -100,9 +100,8 @@ type TimeHorizonId = typeof TIME_HORIZON_OPTIONS[number]['id'];
 
 function timeHorizonContext(mode: FeedMode, horizonId: TimeHorizonId) {
   const horizon = TIME_HORIZON_OPTIONS.find((item) => item.id === horizonId) || TIME_HORIZON_OPTIONS[1];
-  const modeContext = mode === 'now'
-    ? 'Feed mode is NOW: prioritize things the user can start immediately, today, or with minimal setup.'
-    : 'Feed mode is LATER: prioritize future opportunities, scheduled experiences, paths, prerequisites, trips, classes, programs, and saved/schedulable nodes.';
+  void mode;
+  const modeContext = 'Unified NOW feed: blend things the user can start immediately with worthwhile future/schedulable opportunities when they are relevant.';
   return `${modeContext} Time availability: ${horizon.label}. ${horizon.context}`;
 }
 
@@ -955,7 +954,7 @@ export default function FeedPage() {
   const { variant: emptyStateVariant, trackEvent: trackEmptyState } = useExperiment('feed_empty_state');
 
   const goalId = searchParams.get('goal') || undefined;
-  const requestedMode = searchParams.get('mode') === 'later' ? 'later' : 'now';
+  const requestedMode: FeedMode = 'now';
   const requestedDomain = searchParams.get('domain') as PathDomainFilter;
   const savedTimeHorizon = (searchParams.get('time') || '30m') as TimeHorizonId;
   const initialTimeHorizon = TIME_HORIZON_OPTIONS.some((item) => item.id === savedTimeHorizon) ? savedTimeHorizon : '30m';
