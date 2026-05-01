@@ -6,7 +6,6 @@ import AuraOverlay from './AuraOverlay';
 import GlobalFeedbackButton from '../components/GlobalFeedbackButton';
 import { appById, type AppId } from '../runtime/ontology';
 import { AuraClient } from '../lib/AuraClient';
-import { ENABLE_NOTIFICATION_BELL } from '../lib/config';
 
 type ShellApp = Exclude<AppId, 'aventi' | 'ivive' | 'eviva'>;
 
@@ -110,78 +109,6 @@ function initials(profile: any) {
 const LIVE_LOCATION_SYNC_KEY = `connectome_live_location_${new Date().toISOString().slice(0, 10)}`;
 const LIVE_LOCATION_DISMISSED_KEY = 'connectome_live_location_dismissed_session';
 
-type NotificationItem = {
-  id: string;
-  message: string;
-  scheduled_for?: string | null;
-  created_at?: string | null;
-  opened: boolean;
-  unread: boolean;
-  type?: string;
-};
-
-function NotificationDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [items, setItems] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    setError('');
-    AuraClient.get<{ items: NotificationItem[] }>('/api/notifications')
-      .then((data) => setItems(data.items || []))
-      .catch(() => setError('Could not load notifications yet.'))
-      .finally(() => setLoading(false));
-  }, [open]);
-
-  if (!open) return null;
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 78, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(12px)' }} onClick={onClose}>
-      <aside
-        onClick={(event) => event.stopPropagation()}
-        style={{ position: 'absolute', top: 72, right: 14, width: 'min(380px, calc(100vw - 28px))', maxHeight: 'min(620px, calc(100vh - 96px))', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, background: 'linear-gradient(180deg, rgba(18,18,30,0.98), rgba(8,10,15,0.98))', boxShadow: '0 24px 70px rgba(0,0,0,0.42)', padding: 18 }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
-          <div>
-            <div style={{ color: '#f8f8fc', fontSize: 18, fontWeight: 900 }}>Notifications</div>
-            <div style={{ color: '#f59e0b', fontSize: 11, fontWeight: 800, marginTop: 2 }}>Experimental · on the chopping block</div>
-          </div>
-          <button type="button" onClick={onClose} style={{ border: 0, borderRadius: 12, background: 'rgba(255,255,255,0.06)', color: 'rgba(248,248,252,0.7)', width: 36, height: 36, fontSize: 18 }}>×</button>
-        </div>
-        <div style={{ color: 'rgba(248,248,252,0.5)', fontSize: 12, lineHeight: 1.55, marginBottom: 14 }}>
-          This stays only if it creates real return visits/path completions without noisy model spend. Otherwise we cut it.
-        </div>
-        {loading && <div style={{ color: 'rgba(248,248,252,0.45)', padding: '18px 0' }}>Loading…</div>}
-        {error && <div style={{ color: '#f87171', padding: '10px 0', fontSize: 13 }}>{error}</div>}
-        {!loading && !error && items.length === 0 && (
-          <div style={{ border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 16, padding: 16, color: 'rgba(248,248,252,0.52)', fontSize: 13, lineHeight: 1.55 }}>
-            No notifications yet. Best use: rare, high-value nudges — local opportunities, goal follow-through, DAO actions, and time-sensitive Aura updates.
-          </div>
-        )}
-        <div style={{ display: 'grid', gap: 10 }}>
-          {items.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => {
-                AuraClient.post(`/api/notifications/${item.id}/opened`).catch(() => {});
-                setItems((prev) => prev.map((n) => n.id === item.id ? { ...n, opened: true, unread: false } : n));
-              }}
-              style={{ textAlign: 'left', border: `1px solid ${item.unread ? 'rgba(0,212,170,0.35)' : 'rgba(255,255,255,0.08)'}`, background: item.unread ? 'rgba(0,212,170,0.08)' : 'rgba(255,255,255,0.035)', color: '#f8f8fc', borderRadius: 16, padding: 13 }}
-            >
-              <div style={{ fontSize: 13, lineHeight: 1.45, fontWeight: item.unread ? 800 : 600 }}>{item.message}</div>
-              <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.35)', marginTop: 7 }}>
-                {item.scheduled_for ? new Date(item.scheduled_for).toLocaleString() : 'Aura update'}
-              </div>
-            </button>
-          ))}
-        </div>
-      </aside>
-    </div>
-  );
-}
-
 function LocationEntryPrompt({ onAllow, onSkip, syncing }: { onAllow: () => void; onSkip: () => void; syncing: boolean }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 80, display: 'grid', placeItems: 'center', padding: 22, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(18px)' }}>
@@ -210,7 +137,6 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   const location = useLocation();
   const [auraOpen, setAuraOpen] = useState(false);
   const [launcherOpen, setLauncherOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [locationPromptOpen, setLocationPromptOpen] = useState(false);
   const [locationSyncing, setLocationSyncing] = useState(false);
 
@@ -339,9 +265,6 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
         )}
 
         <div className="connectome-status">
-          {ENABLE_NOTIFICATION_BELL && (
-            <button type="button" className="connectome-bell" aria-label="Notifications" onClick={() => setNotificationsOpen(true)}>🔔</button>
-          )}
           <button type="button" className="connectome-avatar" onClick={() => navigate('/app/profile')} aria-label="Open profile">
             {initials(profile)}
           </button>
@@ -386,7 +309,6 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       <button className="connectome-signout" type="button" onClick={() => { logout(); navigate('/'); }}>Sign out</button>
       <GlobalFeedbackButton />
       <AuraOverlay open={auraOpen} onClose={() => setAuraOpen(false)} />
-      <NotificationDrawer open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
       {locationPromptOpen && (
         <LocationEntryPrompt
           syncing={locationSyncing}

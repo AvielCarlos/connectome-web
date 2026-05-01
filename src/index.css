@@ -611,21 +611,17 @@ body {
   gap: 8px;
 }
 
-.connectome-bell,
 .connectome-avatar {
   min-height: 38px;
+  width: 38px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,0.09);
   background: rgba(255,255,255,0.04) !important;
-}
-
-.connectome-bell,
-.connectome-avatar {
-  width: 38px;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  color: #f8f8fc;
+  font-weight: 900;
 }
-.connectome-avatar { color: #f8f8fc; font-weight: 900; }
 
 .connectome-main {
   position: relative;
