@@ -139,6 +139,35 @@ export function AuraCard({ component: comp, index, onAction }: AuraCardProps) {
       );
     }
 
+    case 'review_rating': {
+      const rating = typeof comp.rating === 'number' ? Math.max(0, Math.min(5, comp.rating)) : null;
+      const rounded = rating == null ? null : Math.round(rating);
+      return (
+        <div key={index} style={{
+          marginBottom: 14,
+          border: '1px solid rgba(244,194,107,0.24)',
+          background: 'rgba(244,194,107,0.08)',
+          borderRadius: 18,
+          padding: '12px 13px',
+        }}>
+          <div style={{ color: '#f4c26b', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 5 }}>
+            {comp.label || 'Review rating'} · cost check
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ color: '#f4c26b', fontSize: 16, letterSpacing: 1 }}>
+              {rounded == null ? '☆☆☆☆☆' : `${'★'.repeat(rounded)}${'☆'.repeat(5 - rounded)}`}
+            </span>
+            <strong style={{ color: '#f8f8fc', fontSize: 14 }}>{rating == null ? 'Review rating needed' : `${rating.toFixed(1)} / 5`}</strong>
+            {comp.review_count && <span style={{ color: 'rgba(248,248,252,0.48)', fontSize: 12 }}>({comp.review_count} reviews)</span>}
+          </div>
+          <div style={{ color: 'rgba(248,248,252,0.52)', fontSize: 12, lineHeight: 1.5, marginTop: 6 }}>
+            {comp.note || 'Check reviews before spending money.'}
+            {comp.source_url && <a href={comp.source_url} target="_blank" rel="noreferrer" style={{ color: '#f4c26b', marginLeft: 6 }}>Open review source →</a>}
+          </div>
+        </div>
+      );
+    }
+
     case 'choice_grid': {
       const items: any[] = comp.items || [];
       return (
