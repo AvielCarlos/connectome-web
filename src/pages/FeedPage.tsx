@@ -102,7 +102,7 @@ function timeHorizonContext(mode: FeedMode, horizonId: TimeHorizonId) {
   const horizon = TIME_HORIZON_OPTIONS.find((item) => item.id === horizonId) || TIME_HORIZON_OPTIONS[1];
   const modeContext = mode === 'future'
     ? 'FUTURE feed vector branch: prioritize scheduled future events, classes, programs, trips, bookings, and time-bound opportunities. Do not show generic immediate micro-actions unless they are preparation for a future event.'
-    : 'NOW feed vector branch: prioritize things the user can begin or complete right now/today. Avoid scheduled future events unless the immediate action is only to prepare or decide.';
+    : 'NOW feed vector branch: prioritize things the user can begin or complete right now/today. Do NOT show scheduled future events, upcoming classes, trips, or time-bound opportunities — those belong in the Future tab only. Only show actions that are immediately actionable today.';
   return `${modeContext} Time availability: ${horizon.label}. ${horizon.context}`;
 }
 

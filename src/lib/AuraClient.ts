@@ -342,7 +342,7 @@ class AuraClientClass {
   // ── Screens ───────────────────────────────────────────────────────────────
 
   async getNextScreen(context?: string, goalId?: string, domain?: string, feedMode?: 'now' | 'future'): Promise<ScreenResponse> {
-    const res = await this.client.post('/api/screens/next', { context, goal_id: goalId, domain, feed_mode: feedMode });
+    const res = await this.client.post('/api/screens/next', { context, goal_id: goalId, domain, feed_mode: feedMode, exclude_future_events: feedMode !== 'future' });
     return res.data as ScreenResponse;
   }
 
@@ -353,6 +353,7 @@ class AuraClientClass {
       if (domain) body.domain = domain;
       if (context) body.context = context;
       if (feedMode) body.feed_mode = feedMode;
+      body.exclude_future_events = feedMode !== 'future';
       const res = await this.client.post('/api/screens/batch', body);
       return res.data as ScreenResponse[];
     } catch (e: any) {
