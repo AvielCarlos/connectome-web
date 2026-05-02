@@ -106,6 +106,58 @@ function timeHorizonContext(mode: FeedMode, horizonId: TimeHorizonId) {
   return `${modeContext} Time availability: ${horizon.label}. ${horizon.context}`;
 }
 
+
+function screenText(card: ScreenResponse | null | undefined) {
+  const spec: any = card?.screen || {};
+  const parts: string[] = [];
+  const metadata = spec.metadata || {};
+  const cardData = spec.card_data || {};
+  for (const val of [
+    spec.type, spec.layout, spec.domain, cardData.title, cardData.body, cardData.url,
+    metadata.source, metadata.feed_mode, metadata.temporal_branch, metadata.opportunity_kind,
+    metadata.node_type, metadata.domain, metadata.city, metadata.location_city, metadata.url,
+    ...(Array.isArray(metadata.tags) ? metadata.tags : []),
+  ]) {
+    if (val) parts.push(String(val));
+  }
+  for (const component of spec.components || []) {
+    if (!component || typeof component !== 'object') continue;
+    for (const key of ['text', 'title', 'body', 'description', 'label', 'caption', 'subtitle', 'value']) {
+      if ((component as any)[key]) parts.push(String((component as any)[key]));
+    }
+    const items = (component as any).items || [];
+    if (Array.isArray(items)) {
+      for (const item of items) {
+        if (!item || typeof item !== 'object') continue;
+        for (const key of ['text', 'title', 'body', 'description', 'label', 'value', 'url']) {
+          if ((item as any)[key]) parts.push(String((item as any)[key]));
+        }
+      }
+    }
+  }
+  return parts.join(' ').toLowerCase();
+}
+
+function isScheduledOpportunityCard(card: ScreenResponse | null | undefined) {
+  const metadata: any = card?.screen?.metadata || {};
+  if (metadata.starts_at || metadata.event_starts_at) return true;
+  if (metadata.feed_mode === 'future' || metadata.temporal_branch === 'future_event') return true;
+  const text = screenText(card);
+  const markers = [
+    'event', 'events', 'workshop', 'workshops', 'class', 'classes', 'retreat', 'festival', 'concert',
+    'ticket', 'tickets', 'rsvp', 'register', 'registration', 'booking', 'book / register', 'reserve',
+    'reservation', 'calendar', 'conference', 'venue', 'starts at', 'start time', 'doors open',
+    'this weekend', 'this week', 'next week', 'next month', 'tomorrow',
+    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+  ];
+  return markers.some((marker) => text.includes(marker));
+}
+
+function enforceFeedMode(cards: ScreenResponse[], mode: FeedMode) {
+  if (mode === 'future') return cards;
+  return cards.filter((card) => !isScheduledOpportunityCard(card));
+}
+
 function fallbackDeepDive(card: any, spec: any, domain: string) {
   const title = card?.title || 'this next step';
   const body = card?.body || '';
@@ -1148,10 +1200,10 @@ export default function FeedPage() {
       const goals = await AuraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
       const batch = await AuraClient.getNextScreenBatch(5, goalId, domainFilter || undefined, feedContext, feedMode);
-      let nextCards = batch;
+      let nextCards = enforceFeedMode(batch, feedMode);
       if (!nextCards.length) {
         const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined, feedMode).catch(() => null);
-        nextCards = single ? [single] : [];
+        nextCards = enforceFeedMode(single ? [single] : [], feedMode);
       }
       // Prepend context intake card for Now feed if not answered this session
       if (!isFutureFeed && !sessionStorage.getItem(SESSION_CAPABILITY_KEY) && !localStorage.getItem(todayCapabilityKey())) {
@@ -1208,10 +1260,10 @@ export default function FeedPage() {
     setLoadingMore(true);
     try {
       const batch = await AuraClient.getNextScreenBatch(3, goalId, domainFilter || undefined, feedContext, feedMode);
-      let nextCards = batch;
+      let nextCards = enforceFeedMode(batch, feedMode);
       if (!nextCards.length) {
         const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined, feedMode).catch(() => null);
-        nextCards = single ? [single] : [];
+        nextCards = enforceFeedMode(single ? [single] : [], feedMode);
       }
       if (nextCards.length > 0) {
         setCards((prev) => [...prev, ...nextCards]);
