@@ -983,7 +983,11 @@ body.aura-chat-active.keyboard-open .connectome-dock {
   opacity: 1 !important;
   pointer-events: auto !important;
   transform: translateX(-50%) !important;
-  z-index: 2301;
+  z-index: 95;
+}
+
+body.aura-chat-active.keyboard-open .connectome-dock {
+  bottom: max(14px, env(safe-area-inset-bottom, 0px)) !important;
 }
 
 body.aura-chat-active.keyboard-open .ora-container {
