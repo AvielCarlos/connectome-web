@@ -22,7 +22,7 @@ function appLabel(appId: ShellApp) {
 
 const FEED_MODE_TABS = [
   { id: 'now', label: 'Now', emoji: '⚡', color: '#00d4aa', path: '/app/ido' },
-  { id: 'future', label: 'Later', emoji: '🔭', color: '#8b5cf6', path: '/app/future' },
+  { id: 'future', label: 'Future', emoji: '🔭', color: '#8b5cf6', path: '/app/future' },
 ] as const;
 
 type DockItem = {
@@ -195,7 +195,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
         </button>
 
         {activeApp === 'ido' ? (
-          <div className="connectome-domain-switch connectome-feed-mode-switch" aria-label="Now or Later feed">
+          <div className="connectome-domain-switch connectome-feed-mode-switch" aria-label="Now or Future feed">
             {FEED_MODE_TABS.map((tab) => {
               const active = activeFeedMode === tab.id;
               return (
