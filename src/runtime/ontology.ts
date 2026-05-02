@@ -37,6 +37,7 @@ export interface PermissionGrant {
 export type AppId =
   | 'home'
   | 'ido'
+  | 'ora'
   | 'goals'
   | 'routines'
   | 'ivive'
@@ -368,6 +369,17 @@ export const FEED_SURFACES: FeedSurface[] = [
 
 // ─── App manifest (visible/invisible boundaries) ──────────────────────────────
 export const APP_MANIFEST: AppManifestEntry[] = [
+  {
+    id: 'ora',
+    name: 'Aura',
+    icon: '◈',
+    path: '/app/ora',
+    category: 'daily',
+    visibleToUser: true,
+    permissions: ['memory', 'notifications', 'files', 'calendar', 'location'],
+    description: 'Aura AI OS: the conversational guide and intelligence layer for Connectome.',
+    purpose: 'Lets users talk with Aura as a first-class tab while the bottom menu remains available for navigation.',
+  },
   {
     id: 'ido',
     name: 'Path Feed',
