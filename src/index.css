@@ -1129,11 +1129,11 @@ body.aura-chat-active.keyboard-open .ora-container {
 }
 
 /* Global in-app feedback loop */
-.global-feedback-fab { display: none; } /* FAB replaced by header button */
+.global-feedback-fab { display: none; } /* ConnectomeShell owns the universal floating trigger. */
 
 .connectome-feedback-btn {
-  width: 34px;
-  height: 34px;
+  width: 46px;
+  height: 46px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,0.18);
   background: linear-gradient(135deg, #2563eb, #38bdf8);
@@ -1149,7 +1149,15 @@ body.aura-chat-active.keyboard-open .ora-container {
   transition: transform 150ms ease, box-shadow 150ms ease;
   flex-shrink: 0;
 }
+.connectome-feedback-btn--floating {
+  position: fixed;
+  top: calc(max(14px, env(safe-area-inset-top, 0px)) + 12px);
+  right: calc(max(14px, env(safe-area-inset-right, 0px)) + 12px);
+  z-index: 2300;
+  box-shadow: 0 14px 44px rgba(37,99,235,0.46), 0 0 0 6px rgba(5,10,24,0.38);
+}
 .connectome-feedback-btn:hover { transform: scale(1.06); box-shadow: 0 6px 18px rgba(37,99,235,0.5); }
+.connectome-feedback-btn--floating:hover { transform: scale(1.06); box-shadow: 0 16px 52px rgba(37,99,235,0.56), 0 0 0 6px rgba(5,10,24,0.44); }
 .connectome-feedback-btn:focus-visible { outline: 3px solid rgba(125,211,252,0.8); outline-offset: 3px; }
 
 .global-feedback-modal-backdrop {
