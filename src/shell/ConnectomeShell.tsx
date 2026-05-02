@@ -17,14 +17,9 @@ interface ConnectomeShellProps {
 
 function appLabel(appId: ShellApp) {
   if (appId === 'home') return 'Aura';
-  if (appId === 'ido') return 'Now Feed';
+  if (appId === 'ido') return 'Path';
   return appById(appId)?.name || 'Aura';
 }
-
-const FEED_MODE_TABS = [
-  { id: 'now', label: 'Now', emoji: '⚡', color: '#00d4aa', path: '/app/ido' },
-  { id: 'future', label: 'Future', emoji: '🔭', color: '#8b5cf6', path: '/app/future' },
-] as const;
 
 type DockItem = {
   id: string;
@@ -35,7 +30,7 @@ type DockItem = {
 };
 
 const CORE_DOCK: DockItem[] = [
-  { id: 'ido', label: 'iDo', icon: '⚡', path: '/app/ido' },
+  { id: 'ido', label: 'Path', icon: '⚡', path: '/app/ido' },
   { id: 'ora', label: 'Aura', icon: '◈', path: '/app/ora' },
   { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
   { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
@@ -156,16 +151,6 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   }, [profile]);
 
   const dockItems = dockMenus[activeApp] || dockMenus.home || [];
-  const activeFeedMode = location.pathname === '/app/future' ? 'future' : 'now';
-
-  const setFeedMode = (mode: 'now' | 'future') => {
-    const next = new URLSearchParams(location.search);
-    next.delete('domain');
-    next.delete('mode');
-    const query = next.toString();
-    const basePath = mode === 'future' ? '/app/future' : '/app/ido';
-    navigate(`${basePath}${query ? `?${query}` : ''}`, { replace: true });
-  };
 
   const handleDock = (item: DockItem) => {
     if (item.action === 'aura') {
@@ -196,27 +181,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
           <span className="connectome-launcher-toggle__line" />
         </button>
 
-        {activeApp === 'ido' ? (
-          <div className="connectome-domain-switch connectome-feed-mode-switch" aria-label="Now or Future feed">
-            {FEED_MODE_TABS.map((tab) => {
-              const active = activeFeedMode === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => setFeedMode(tab.id)}
-                  style={active ? ({ '--domain-color': tab.color } as React.CSSProperties) : undefined}
-                  className={`connectome-domain-switch__item ${active ? 'connectome-domain-switch__item--active' : ''}`}
-                >
-                  <span aria-hidden="true">{tab.emoji}</span>{tab.label}
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <span className="connectome-context-label connectome-context-label--ambient" aria-live="polite">{appLabel(activeApp)}</span>
-        )}
+        <span className="connectome-context-label connectome-context-label--ambient" aria-live="polite">{appLabel(activeApp)}</span>
 
         <div className="connectome-status" />
       </header>
@@ -228,7 +193,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       <nav className={`connectome-dock connectome-dock--${dockItems.length}`} aria-label={`${appLabel(activeApp)} navigation`}>
         {dockItems.map((item) => {
           const currentRoute = `${location.pathname}${location.search}`;
-          const active = item.id === activeApp || (item.path && (currentRoute === item.path || location.pathname === item.path)) || (activeApp === 'ido' && item.id === 'ido' && (location.pathname === '/app/ido' || location.pathname === '/app/future'));
+          const active = item.id === activeApp || (item.path && (currentRoute === item.path || location.pathname === item.path));
           return (
             <button
               key={item.id}

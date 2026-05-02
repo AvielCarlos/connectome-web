@@ -333,7 +333,7 @@ function GoalCard({ goal, onUpdate, onDelete, onOpenFeed }: { goal: Goal; onUpda
             <div style={{ color: step ? 'rgba(248,248,252,0.78)' : 'rgba(248,248,252,0.42)', fontSize: 13, lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{step?.text || 'Needs Aura to turn the spark into a measurable goal'}</div>
           </div>
           <button onClick={step ? askAura : breakdown} disabled={!!busy} style={{ border: '1px solid rgba(0,212,170,0.35)', background: 'rgba(0,212,170,0.12)', color: '#00d4aa', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>{busy ? '◈…' : step ? 'Refine' : 'Make measurable'}</button>
-          <button onClick={() => onOpenFeed(goal)} style={{ border: '1px solid rgba(139,92,246,0.35)', background: 'rgba(139,92,246,0.12)', color: '#c4b5fd', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>Goal feed</button>
+          <button onClick={() => onOpenFeed(goal)} style={{ border: '1px solid rgba(139,92,246,0.35)', background: 'rgba(139,92,246,0.12)', color: '#c4b5fd', borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>Goal path</button>
         </div>
 
         {open && (
