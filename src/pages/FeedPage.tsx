@@ -208,6 +208,8 @@ function ConfettiBurst({ active }: { active: boolean }) {
 function todayCapabilityKey() {
   return `ido_capability_pulse_${CAPABILITY_PULSE_VERSION}_${new Date().toISOString().slice(0, 10)}`;
 }
+// Session key — cleared on window refresh, persists across tab switches
+const SESSION_CAPABILITY_KEY = 'ido_capability_session_done';
 
 function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(0);
@@ -236,6 +238,7 @@ function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
     setTimeout(() => {
       if (step >= CAPABILITY_CARDS.length - 1) {
         localStorage.setItem(todayCapabilityKey(), JSON.stringify({ completed_at: new Date().toISOString(), answers: { ...selected, [card.id]: answer } }));
+        sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1');
         onComplete();
       } else {
         setStep((s) => s + 1);
@@ -270,8 +273,13 @@ function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
             Continue →
           </button>
         )}
-        <div style={{ marginTop: 18, color: 'rgba(248,248,252,0.34)', fontSize: 12, lineHeight: 1.55 }}>
-          Aura updates this regularly so cards match what you can actually do, not a fantasy version of your day.
+        <div style={{ marginTop: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ color: 'rgba(248,248,252,0.34)', fontSize: 12, lineHeight: 1.55 }}>
+            Aura updates this regularly so cards match what you can actually do.
+          </div>
+          <button onClick={() => { sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1'); onComplete(); }} style={{ background: 'transparent', border: 'none', color: 'rgba(248,248,252,0.3)', fontSize: 12, cursor: 'pointer', flexShrink: 0, marginLeft: 12 }}>
+            Skip
+          </button>
         </div>
       </div>
     </div>
@@ -975,9 +983,14 @@ export default function FeedPage() {
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
   const [toastMsg, setToastMsg] = useState('');
   const [collectionPickerCard, setCollectionPickerCard] = useState<any | null>(null);
-  // Future tab bypasses the capability intake — it goes straight to the vector/event feed
+  // Future tab bypasses the capability intake entirely
+  // Now tab: skip if already done this session (sessionStorage) or today (localStorage)
   const isFutureFeed = requestedMode === 'future';
-  const [capabilityReady, setCapabilityReady] = useState(() => isFutureFeed || !!localStorage.getItem(todayCapabilityKey()));
+  const [capabilityReady, setCapabilityReady] = useState(() =>
+    isFutureFeed ||
+    !!sessionStorage.getItem(SESSION_CAPABILITY_KEY) ||
+    !!localStorage.getItem(todayCapabilityKey())
+  );
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
   const [domainFilter, setDomainFilter] = useState<PathDomainFilter>(PATH_DOMAIN_TABS.some((tab) => tab.id === requestedDomain) ? requestedDomain : null);
   const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
