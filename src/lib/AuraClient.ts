@@ -341,17 +341,18 @@ class AuraClientClass {
 
   // ── Screens ───────────────────────────────────────────────────────────────
 
-  async getNextScreen(context?: string, goalId?: string, domain?: string): Promise<ScreenResponse> {
-    const res = await this.client.post('/api/screens/next', { context, goal_id: goalId, domain });
+  async getNextScreen(context?: string, goalId?: string, domain?: string, feedMode?: 'now' | 'future'): Promise<ScreenResponse> {
+    const res = await this.client.post('/api/screens/next', { context, goal_id: goalId, domain, feed_mode: feedMode });
     return res.data as ScreenResponse;
   }
 
-  async getNextScreenBatch(count: number, goalId?: string, domain?: string, context?: string): Promise<ScreenResponse[]> {
+  async getNextScreenBatch(count: number, goalId?: string, domain?: string, context?: string, feedMode?: 'now' | 'future'): Promise<ScreenResponse[]> {
     try {
       const body: Record<string, any> = { count: Math.min(count, 5) };
       if (goalId) body.goal_id = goalId;
       if (domain) body.domain = domain;
       if (context) body.context = context;
+      if (feedMode) body.feed_mode = feedMode;
       const res = await this.client.post('/api/screens/batch', body);
       return res.data as ScreenResponse[];
     } catch (e: any) {
@@ -359,7 +360,7 @@ class AuraClientClass {
         const results: ScreenResponse[] = [];
         for (let i = 0; i < count; i++) {
           try {
-            results.push(await this.getNextScreen(context, goalId, domain));
+            results.push(await this.getNextScreen(context, goalId, domain, feedMode));
           } catch { break; }
         }
         return results;

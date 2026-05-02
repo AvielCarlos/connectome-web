@@ -159,6 +159,7 @@ function App() {
           {/* AIOS app routes */}
           <Route path="/app" element={<ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute>} />
           <Route path="/app/ido" element={<ShellRoute activeApp="ido"><FeedPage /></ShellRoute>} />
+          <Route path="/app/future" element={<ShellRoute activeApp="ido"><FeedPage /></ShellRoute>} />
           <Route path="/app/goals" element={<ShellRoute activeApp="goals"><GoalsPage /></ShellRoute>} />
           <Route path="/app/routines" element={<ShellRoute activeApp="routines"><RoutinesPage /></ShellRoute>} />
           <Route path="/app/dao" element={<ShellRoute activeApp="dao"><DAOPage /></ShellRoute>} />

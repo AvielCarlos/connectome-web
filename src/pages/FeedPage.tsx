@@ -5,7 +5,7 @@
  * backend progress signals on interaction.
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuraClient, ScreenResponse } from '../lib/AuraClient';
 import { AuraCard } from '../components/AuraCard';
 import { CollectionPicker } from '../components/CollectionPicker';
@@ -85,7 +85,7 @@ const PATH_DOMAIN_TABS = [
   { id: 'Eviva', label: 'Eviva', emoji: '🌊' },
 ] as const;
 type PathDomainFilter = typeof PATH_DOMAIN_TABS[number]['id'] | null;
-type FeedMode = 'now' | 'later';
+type FeedMode = 'now' | 'future';
 
 const TIME_HORIZON_OPTIONS = [
   { id: '5m', label: '5m', context: 'The user has about 5 minutes. Recommend one tiny action that can begin immediately.' },
@@ -100,8 +100,9 @@ type TimeHorizonId = typeof TIME_HORIZON_OPTIONS[number]['id'];
 
 function timeHorizonContext(mode: FeedMode, horizonId: TimeHorizonId) {
   const horizon = TIME_HORIZON_OPTIONS.find((item) => item.id === horizonId) || TIME_HORIZON_OPTIONS[1];
-  void mode;
-  const modeContext = 'Unified NOW feed: blend things the user can start immediately with worthwhile future/schedulable opportunities when they are relevant.';
+  const modeContext = mode === 'future'
+    ? 'FUTURE feed vector branch: prioritize scheduled future events, classes, programs, trips, bookings, and time-bound opportunities. Do not show generic immediate micro-actions unless they are preparation for a future event.'
+    : 'NOW feed vector branch: prioritize things the user can begin or complete right now/today. Avoid scheduled future events unless the immediate action is only to prepare or decide.';
   return `${modeContext} Time availability: ${horizon.label}. ${horizon.context}`;
 }
 
@@ -943,6 +944,7 @@ function FeedCard({
 // ─── Main feed ────────────────────────────────────────────────────────────────
 export default function FeedPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   React.useEffect(() => {
@@ -955,7 +957,7 @@ export default function FeedPage() {
   const { variant: emptyStateVariant, trackEvent: trackEmptyState } = useExperiment('feed_empty_state');
 
   const goalId = searchParams.get('goal') || undefined;
-  const requestedMode: FeedMode = 'now';
+  const requestedMode: FeedMode = location.pathname === '/app/future' ? 'future' : 'now';
   const requestedDomain = searchParams.get('domain') as PathDomainFilter;
   const savedTimeHorizon = (searchParams.get('time') || '30m') as TimeHorizonId;
   const initialTimeHorizon = TIME_HORIZON_OPTIONS.some((item) => item.id === savedTimeHorizon) ? savedTimeHorizon : '30m';
@@ -1043,10 +1045,10 @@ export default function FeedPage() {
     try {
       const goals = await AuraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
-      const batch = await AuraClient.getNextScreenBatch(5, goalId, domainFilter || undefined, feedContext);
+      const batch = await AuraClient.getNextScreenBatch(5, goalId, domainFilter || undefined, feedContext, feedMode);
       let nextCards = batch;
       if (!nextCards.length) {
-        const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined).catch(() => null);
+        const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined, feedMode).catch(() => null);
         nextCards = single ? [single] : [];
       }
       setCards(nextCards);
@@ -1067,7 +1069,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [goalId, domainFilter, feedContext]);
+  }, [goalId, domainFilter, feedContext, feedMode]);
 
   useEffect(() => {
     if (capabilityReady) loadInitial();
@@ -1098,10 +1100,10 @@ export default function FeedPage() {
     if (loadingMore || isLimited) return;
     setLoadingMore(true);
     try {
-      const batch = await AuraClient.getNextScreenBatch(3, goalId, domainFilter || undefined, feedContext);
+      const batch = await AuraClient.getNextScreenBatch(3, goalId, domainFilter || undefined, feedContext, feedMode);
       let nextCards = batch;
       if (!nextCards.length) {
-        const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined).catch(() => null);
+        const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined, feedMode).catch(() => null);
         nextCards = single ? [single] : [];
       }
       if (nextCards.length > 0) {
@@ -1114,7 +1116,7 @@ export default function FeedPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, isLimited, goalId, domainFilter, feedContext]);
+  }, [loadingMore, isLimited, goalId, domainFilter, feedContext, feedMode]);
 
   const scrollToIndex = useCallback((i: number) => {
     const s = scrollerRef.current;
