@@ -977,8 +977,13 @@ body.keyboard-open .ora-container {
   overflow: hidden !important;
 }
 
+body.aura-chat-active .connectome-dock,
 body.aura-chat-active.keyboard-open .connectome-dock {
-  display: none !important;
+  display: grid !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateX(-50%) !important;
+  z-index: 2301;
 }
 
 body.aura-chat-active.keyboard-open .ora-container {
