@@ -460,12 +460,12 @@ export default function ProfilePage() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 24,
         }}>
-          {isAdmin ? '⚡' : '◉'}
+          ◉
         </div>
         <div>
           <div style={{ fontWeight: 800, fontSize: 17 }}>
             {profile?.email?.split('@')[0] || 'You'}
-            {isAdmin && <span style={{ marginLeft: 8, fontSize: 11, color: '#00d4aa', background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.3)', padding: '2px 8px', borderRadius: 10 }}>ADMIN</span>}
+
           </div>
           <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)', marginTop: 2 }}>{profile?.email}</div>
           <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -738,42 +738,9 @@ export default function ProfilePage() {
             <MenuRow icon="📱" label="Get the App" sublabel="Add Connectome to your home screen" onClick={() => {}} last />
           </div>
 
-          {/* ── Admin shortcut ── */}
-          {isAdmin && (
-            <div style={{ background: '#12121e', border: '1px solid rgba(0,212,170,0.15)', borderRadius: 16, overflow: 'hidden' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: '#00d4aa', textTransform: 'uppercase', padding: '14px 18px 6px', opacity: 0.7 }}>Admin</div>
-              <MenuRow icon="📊" label="Dashboard" sublabel="User & revenue metrics" onClick={() => {
-                setSection('dashboard');
-                setDashboardLoading(true);
-                AuraClient['client'].get('/api/admin/dashboard', { headers: { 'X-Admin-Token': localStorage.getItem('admin_token') || 'connectome-admin-secret' } })
-                  .then(r => setDashboard(r.data)).catch(() => {}).finally(() => setDashboardLoading(false));
-              }} />
-              <MenuRow icon="🧪" label="A/B Tests" sublabel="Experiment results" onClick={() => { setSection('ab'); loadAbResults(); }} />
-              <MenuRow icon="⚗️" label="Experiments" sublabel="All active experiments" onClick={() => { setSection('experiments'); loadAllExperiments(); }} />
-              <MenuRow icon="⚡" label="System" sublabel="Autonomy engine & agents" onClick={() => { setSection('system'); loadAgentPopulation(); loadEvolutionProposals(); }} />
-              <MenuRow icon="◈" label="Council" sublabel="Executive agent council" onClick={() => { setSection('council'); loadCouncilData(); }} last />
-            </div>
-          )}
-
-          {/* ── Current A/B Variant (admin debug) ── */}
-          {isAdmin && (
-            <Card title="Current A/B Variant">
-              <Row label="Landing variant" value={VARIANT_LABELS[currentVariant] || currentVariant} />
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.4)', marginBottom: 8 }}>Switch variant:</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {VARIANTS.map((v) => (
-                    <button key={v} onClick={() => setVariant(v)} style={{
-                      padding: '6px 14px', borderRadius: 10, fontSize: 12, fontWeight: 700,
-                      background: currentVariant === v ? '#00d4aa' : 'rgba(255,255,255,0.07)',
-                      color: currentVariant === v ? '#0a0a0f' : 'rgba(248,248,252,0.6)',
-                      border: `1px solid ${currentVariant === v ? '#00d4aa' : 'rgba(255,255,255,0.12)'}`,
-                    }}>{v}</button>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          )}
+          {/* Admin/debug controls intentionally stay out of the user-facing profile.
+              Aura/Nea should surface operational/admin intelligence proactively instead of
+              asking Avi to babysit dashboard panels from inside Connectome. */}
 
           {/* ── Sign Out ── */}
           <button onClick={handleLogout} style={{
@@ -1034,11 +1001,7 @@ export default function ProfilePage() {
               </svg>
               Connect Google Drive
             </button>
-            {isAdmin && (
-              <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(0,212,170,0.06)', border: '1px solid rgba(0,212,170,0.15)', borderRadius: 10 }}>
-                <div style={{ fontSize: 12, color: '#00d4aa', fontWeight: 600 }}>⚡ Admin: Your Google account grants full modulation privileges</div>
-              </div>
-            )}
+
           </Card>
 
           <Card title="Drive Sync">
