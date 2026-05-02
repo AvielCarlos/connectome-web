@@ -5,7 +5,7 @@
  * backend progress signals on interaction.
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AuraClient, ScreenResponse } from '../lib/AuraClient';
 import { AuraCard } from '../components/AuraCard';
 import { CollectionPicker } from '../components/CollectionPicker';
@@ -55,7 +55,7 @@ const CAPABILITY_CARDS = [
     field: 'today_capacity',
     eyebrow: 'Capacity',
     title: 'What can you realistically do today?',
-    body: 'Now cards should fit your actual day, not an idealised version of you.',
+    body: 'Path cards should fit your actual day and future direction, not an idealised version of you.',
     options: ['5 minutes', '15–30 minutes', '1–2 hours', 'A deeper block'],
   },
   {
@@ -88,7 +88,7 @@ const CAPABILITY_CARDS = [
     field: 'desired_next_step_style',
     eyebrow: 'Next move',
     title: 'What kind of next step would help most?',
-    body: 'Aura will use this to route the Now feed across your goals, values, and nearby possibilities.',
+    body: 'Aura will use this to route your Path across your goals, values, timing, and nearby possibilities.',
     options: ['Tiny win', 'Practical progress', 'Learning/practice', 'Restore/regulate', 'Adventure/novelty', 'Service/connection'],
   },
 ];
@@ -98,7 +98,7 @@ function getDomainConfig(spec: any) {
   return DOMAIN_CONFIG[d || ''] || DEFAULT_DOMAIN;
 }
 
-type FeedMode = 'now' | 'future';
+type FeedMode = 'path';
 
 const TIME_HORIZON_OPTIONS = [
   { id: '5m', label: '5m', context: 'The user has about 5 minutes. Recommend one tiny action that can begin immediately.' },
@@ -111,12 +111,10 @@ const TIME_HORIZON_OPTIONS = [
 ] as const;
 type TimeHorizonId = typeof TIME_HORIZON_OPTIONS[number]['id'];
 
-function timeHorizonContext(mode: FeedMode, horizonId: TimeHorizonId) {
+function timeHorizonContext(_mode: FeedMode, horizonId: TimeHorizonId) {
   const horizon = TIME_HORIZON_OPTIONS.find((item) => item.id === horizonId) || TIME_HORIZON_OPTIONS[1];
-  const modeContext = mode === 'future'
-    ? 'FUTURE feed vector branch: prioritize scheduled future events, classes, programs, trips, bookings, and time-bound opportunities. Do not show generic immediate micro-actions unless they are preparation for a future event.'
-    : 'NOW feed vector branch: prioritize things the user can begin or complete right now/today. Do NOT show scheduled future events, upcoming classes, trips, or time-bound opportunities — those belong in the Future tab only. Only show actions that are immediately actionable today.';
-  return `${modeContext} Time availability: ${horizon.label}. ${horizon.context}`;
+  const pathContext = 'PATH feed vector: recommend across immediate actions, near-term steps, scheduled opportunities, future plans, goals, values, current capacity, and aligned possibilities the user has not explicitly stated as goals. Preserve temporal intelligence as metadata such as temporal_branch, urgency, and scheduled_at; do not split the experience into separate Now/Future modes.';
+  return `${pathContext} Time availability: ${horizon.label}. ${horizon.context}`;
 }
 
 
@@ -182,9 +180,8 @@ function isScheduledOpportunityCard(card: ScreenResponse | null | undefined) {
   return markers.some((marker) => text.includes(marker));
 }
 
-function enforceFeedMode(cards: ScreenResponse[], mode: FeedMode, preferredCity?: string | null) {
-  if (mode === 'future') return cards;
-  return cards.filter((card) => !isScheduledOpportunityCard(card) && !isNonLocalCard(card, preferredCity));
+function enforceFeedMode(cards: ScreenResponse[], _mode: FeedMode, preferredCity?: string | null) {
+  return cards.filter((card) => !isNonLocalCard(card, preferredCity));
 }
 
 function fallbackDeepDive(card: any, spec: any, domain: string) {
@@ -324,7 +321,7 @@ function CapabilityIntake({ goalTitle, goalId, onComplete }: { goalTitle?: strin
         CAPABILITY_CARDS.map((c) => [c.field, (nextSelected[c.id] || [])]).filter(([, value]) => Array.isArray(value) && value.length)
       );
       try {
-        await AuraClient.submitNowCheckin({ answers, goal_id: goalId, feed_mode: 'now' });
+        await AuraClient.submitNowCheckin({ answers, goal_id: goalId, feed_mode: 'path' });
       } catch {
         await Promise.allSettled(CAPABILITY_CARDS.map((c) => {
           const value = nextSelected[c.id];
@@ -374,7 +371,7 @@ function CapabilityIntake({ goalTitle, goalId, onComplete }: { goalTitle?: strin
         )}
         <div style={{ marginTop: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ color: 'rgba(248,248,252,0.34)', fontSize: 12, lineHeight: 1.55 }}>
-            Aura will refresh Now around your goals, values, energy, constraints, and resources.
+            Aura will refresh your Path around your goals, values, energy, constraints, timing, and resources.
           </div>
           <button onClick={() => { sessionStorage.setItem(sessionCapabilityKey(goalId), '1'); onComplete(selected); }} style={{ background: 'transparent', border: 'none', color: 'rgba(248,248,252,0.3)', fontSize: 12, cursor: 'pointer', flexShrink: 0, marginLeft: 12 }}>
             Skip
@@ -1114,7 +1111,7 @@ function FeedCard({
 
 function _buildIntakeCard(goalTitle?: string | null, goalId?: string): any | null {
   // Build a synthetic ScreenResponse for the first capability question.
-  // This appears as card[0] in the Now feed — never blocks the feed.
+  // This appears as card[0] in the Path feed — never blocks the feed.
   const card = CAPABILITY_CARDS[0];
   if (!card) return null;
   return {
@@ -1139,7 +1136,6 @@ function _buildIntakeCard(goalTitle?: string | null, goalId?: string): any | nul
 // ─── Main feed ────────────────────────────────────────────────────────────────
 export default function FeedPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   React.useEffect(() => {
@@ -1152,7 +1148,7 @@ export default function FeedPage() {
   const { variant: emptyStateVariant, trackEvent: trackEmptyState } = useExperiment('feed_empty_state');
 
   const goalId = searchParams.get('goal') || undefined;
-  const requestedMode: FeedMode = location.pathname === '/app/future' ? 'future' : 'now';
+  const requestedMode: FeedMode = 'path';
   const savedTimeHorizon = (searchParams.get('time') || '30m') as TimeHorizonId;
   const initialTimeHorizon = TIME_HORIZON_OPTIONS.some((item) => item.id === savedTimeHorizon) ? savedTimeHorizon : '30m';
   const [goalTitle, setGoalTitle] = useState<string | null>(null);
@@ -1169,7 +1165,6 @@ export default function FeedPage() {
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
   const [toastMsg, setToastMsg] = useState('');
   const [collectionPickerCard, setCollectionPickerCard] = useState<any | null>(null);
-  const isFutureFeed = requestedMode === 'future';
   // Capability intake never blocks the feed — it shows as the first card inline.
   // Always start ready so the feed loads immediately.
   const [capabilityReady] = useState(true);
@@ -1202,7 +1197,7 @@ export default function FeedPage() {
     }
   }, [searchParams]);
 
-  const feedContext = `${timeHorizonContext(feedMode, timeHorizon)} ${goalId ? 'GOAL-SPECIFIC feed: optimize recommendations for the selected goal only.' : 'GENERAL NOW feed: diversify node recommendations across all active goals plus value-aligned possibilities the user has not explicitly stated as goals. Do not imply the whole Now feed is only completing one goal.'}`;
+  const feedContext = `${timeHorizonContext(feedMode, timeHorizon)} ${goalId ? 'GOAL-SPECIFIC PATH: optimize recommendations for the selected goal only while still mixing immediate, scheduled, and future-facing steps when useful.' : 'GENERAL PATH: diversify node recommendations across all active goals plus value-aligned possibilities the user has not explicitly stated as goals. Do not imply the feed is only completing one goal or only about what can happen immediately.'}`;
 
   const updateTimeHorizon = (value: TimeHorizonId) => {
     setTimeHorizon(value);
@@ -1237,9 +1232,9 @@ export default function FeedPage() {
         const single = await AuraClient.getNextScreen(feedContext, focusedGoalId, undefined, feedMode).catch(() => null);
         nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
-      // Prepend context intake card for Now feed if not answered this session.
-      // The default Now feed is general; only a selected goal route passes goal context.
-      if (!isFutureFeed && !sessionStorage.getItem(sessionCapabilityKey(focusedGoalId)) && !localStorage.getItem(todayCapabilityKey(focusedGoalId))) {
+      // Prepend context intake card for Path if not answered this session.
+      // The default Path feed is general; only a selected goal route passes goal context.
+      if (!sessionStorage.getItem(sessionCapabilityKey(focusedGoalId)) && !localStorage.getItem(todayCapabilityKey(focusedGoalId))) {
         const intakeCard = _buildIntakeCard(focusedGoal?.title || goalTitle, focusedGoalId);
         if (intakeCard) nextCards = [intakeCard, ...nextCards];
       }
@@ -1268,7 +1263,7 @@ export default function FeedPage() {
   }, [capabilityReady, loadInitial]);
 
   const handleIntakeComplete = useCallback(() => {
-    showToast('Aura updated your Now vector. Refreshing cards…');
+    showToast('Aura updated your Path vector. Refreshing cards…');
     setCards([]);
     setIndex(0);
     setTimeout(() => { loadInitial(); }, 250);
