@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -88,6 +88,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [locationPromptOpen, setLocationPromptOpen] = useState(false);
   const [locationSyncing, setLocationSyncing] = useState(false);
+  const chromeRef = useRef<HTMLElement | null>(null);
 
   const closeApps = () => setLauncherOpen(false);
   const toggleApps = () => setLauncherOpen((open) => !open);
@@ -96,6 +97,32 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
     const openAura = () => setAuraOpen(true);
     window.addEventListener('connectome:open-aura', openAura);
     return () => window.removeEventListener('connectome:open-aura', openAura);
+  }, []);
+
+  useEffect(() => {
+    const chrome = chromeRef.current;
+    if (!chrome) return undefined;
+
+    const updateChromeHeight = () => {
+      const height = Math.ceil(Math.max(chrome.getBoundingClientRect().height, chrome.scrollHeight));
+      document.documentElement.style.setProperty('--connectome-chrome-height', `${height}px`);
+    };
+
+    updateChromeHeight();
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(updateChromeHeight)
+      : null;
+    resizeObserver?.observe(chrome);
+    window.addEventListener('resize', updateChromeHeight);
+    window.visualViewport?.addEventListener('resize', updateChromeHeight);
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', updateChromeHeight);
+      window.visualViewport?.removeEventListener('resize', updateChromeHeight);
+      document.documentElement.style.removeProperty('--connectome-chrome-height');
+    };
   }, []);
 
   const syncLiveLocation = async () => {
@@ -167,7 +194,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   return (
     <div className="connectome-shell">
       <div className="connectome-stars" aria-hidden="true" />
-      <header className={`connectome-ambient-chrome ${launcherOpen ? 'connectome-topbar--launcher-open' : ''}`}>
+      <header ref={chromeRef} className={`connectome-ambient-chrome ${launcherOpen ? 'connectome-topbar--launcher-open' : ''}`}>
         <button
           className={`connectome-launcher-toggle ${launcherOpen ? 'connectome-launcher-toggle--open' : ''}`}
           type="button"
