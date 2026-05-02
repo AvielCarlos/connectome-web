@@ -320,8 +320,18 @@ class AuraClientClass {
     return res.data as { ok: boolean; auth_url: string; already_connected?: boolean; message?: string };
   }
 
+  async getIntegrations() {
+    const res = await this.client.get('/api/users/integrations');
+    return res.data as { ok: boolean; integrations: { google_drive: { connected: boolean; privacy_level: 'none' | 'goals_only' | 'full'; scopes?: string[]; token_expiry?: string | null } } };
+  }
+
   async setDrivePrivacy(level: 'none' | 'goals_only' | 'full') {
     const res = await this.client.post('/api/users/integrations/drive', { level });
+    return res.data;
+  }
+
+  async disconnectGoogleDrive() {
+    const res = await this.client.delete('/api/users/integrations/drive');
     return res.data;
   }
 
