@@ -35,17 +35,19 @@ const CAPABILITY_CARDS = [
   {
     id: 'goal_current_stage',
     field: 'goal_current_stage',
-    eyebrow: 'Goal state',
-    title: 'For {goal}, where are you right now?',
-    body: 'Goals describe the future. Aura needs the present-state gap before choosing the next IOO node.',
+    eyebrow: 'Present state',
+    title: 'What kind of node would help you right now?',
+    goalTitle: 'For {goal}, where are you right now?',
+    body: 'Aura uses your goals, values, energy, constraints, and resources before choosing the next IOO node.',
     options: ['Just starting', 'Preparing', 'Actively doing', 'Blocked/stuck', 'Recovering / low capacity'],
   },
   {
     id: 'goal_biggest_gap',
     field: 'goal_biggest_gap',
     eyebrow: 'Bridge signal',
-    title: 'What is the biggest gap between now and {goal}?',
-    body: 'This tells Aura whether to recommend a tiny action, a bridge step, support, practice, or a resource.',
+    title: 'What is the biggest gap between now and what matters?',
+    goalTitle: 'What is the biggest gap between now and {goal}?',
+    body: 'This tells Aura whether to recommend a tiny action, a bridge step, support, practice, connection, or a resource.',
     options: ['Time', 'Energy/health', 'Money/resources', 'Skill/confidence', 'People/support', 'Clarity/focus'],
   },
   {
@@ -86,7 +88,7 @@ const CAPABILITY_CARDS = [
     field: 'desired_next_step_style',
     eyebrow: 'Next move',
     title: 'What kind of next step would help most?',
-    body: 'Aura will use this to route the Now feed through the IOO graph.',
+    body: 'Aura will use this to route the Now feed across your goals, values, and nearby possibilities.',
     options: ['Tiny win', 'Practical progress', 'Learning/practice', 'Restore/regulate', 'Adventure/novelty', 'Service/connection'],
   },
 ];
@@ -291,7 +293,7 @@ function capabilityGoalToken(goalId?: string | null) {
 function todayCapabilityKey(goalId?: string | null) {
   return `ido_capability_pulse_${CAPABILITY_PULSE_VERSION}_${new Date().toISOString().slice(0, 10)}_${capabilityGoalToken(goalId)}`;
 }
-// Session key — cleared on window refresh, persists across tab switches, goal-aware
+// Session key — cleared on window refresh, persists across tab switches, context-aware
 function sessionCapabilityKey(goalId?: string | null) {
   return `ido_capability_pulse_session_${CAPABILITY_PULSE_VERSION}_${capabilityGoalToken(goalId)}`;
 }
@@ -302,8 +304,7 @@ function CapabilityIntake({ goalTitle, goalId, onComplete }: { goalTitle?: strin
   const [saving, setSaving] = useState(false);
   const card = CAPABILITY_CARDS[step];
   const chosen = selected[card.id] || [];
-  const goalLabel = goalTitle || 'your active goal';
-  const title = card.title.replace('{goal}', goalLabel);
+  const title = goalTitle && card.goalTitle ? card.goalTitle.replace('{goal}', goalTitle) : card.title;
 
   const choose = async (option: string) => {
     const nextChosen = card.multi
@@ -373,7 +374,7 @@ function CapabilityIntake({ goalTitle, goalId, onComplete }: { goalTitle?: strin
         )}
         <div style={{ marginTop: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ color: 'rgba(248,248,252,0.34)', fontSize: 12, lineHeight: 1.55 }}>
-            Aura will refresh the Now feed around your goal, energy, constraints, and resources.
+            Aura will refresh Now around your goals, values, energy, constraints, and resources.
           </div>
           <button onClick={() => { sessionStorage.setItem(sessionCapabilityKey(goalId), '1'); onComplete(selected); }} style={{ background: 'transparent', border: 'none', color: 'rgba(248,248,252,0.3)', fontSize: 12, cursor: 'pointer', flexShrink: 0, marginLeft: 12 }}>
             Skip
@@ -1201,7 +1202,7 @@ export default function FeedPage() {
     }
   }, [searchParams]);
 
-  const feedContext = timeHorizonContext(feedMode, timeHorizon);
+  const feedContext = `${timeHorizonContext(feedMode, timeHorizon)} ${goalId ? 'GOAL-SPECIFIC feed: optimize recommendations for the selected goal only.' : 'GENERAL NOW feed: diversify node recommendations across all active goals plus value-aligned possibilities the user has not explicitly stated as goals. Do not imply the whole Now feed is only completing one goal.'}`;
 
   const updateTimeHorizon = (value: TimeHorizonId) => {
     setTimeHorizon(value);
@@ -1226,16 +1227,18 @@ export default function FeedPage() {
     try {
       const goals = await AuraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
-      const focusedGoal = goalId ? goals.find((g: any) => g.id === goalId) : goals.find((g: any) => g.status === 'active') || goals[0];
+      const focusedGoal = goalId ? goals.find((g: any) => g.id === goalId) : null;
       if (focusedGoal?.title) setGoalTitle(focusedGoal.title);
-      const focusedGoalId = goalId || focusedGoal?.id;
+      else if (!goalId) setGoalTitle(null);
+      const focusedGoalId = goalId ? focusedGoal?.id : undefined;
       const batch = await AuraClient.getNextScreenBatch(5, focusedGoalId, undefined, feedContext, feedMode);
       let nextCards = enforceFeedMode(batch, feedMode, preferredCity);
       if (!nextCards.length) {
         const single = await AuraClient.getNextScreen(feedContext, focusedGoalId, undefined, feedMode).catch(() => null);
         nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
-      // Prepend context intake card for Now feed if not answered this session
+      // Prepend context intake card for Now feed if not answered this session.
+      // The default Now feed is general; only a selected goal route passes goal context.
       if (!isFutureFeed && !sessionStorage.getItem(sessionCapabilityKey(focusedGoalId)) && !localStorage.getItem(todayCapabilityKey(focusedGoalId))) {
         const intakeCard = _buildIntakeCard(focusedGoal?.title || goalTitle, focusedGoalId);
         if (intakeCard) nextCards = [intakeCard, ...nextCards];
