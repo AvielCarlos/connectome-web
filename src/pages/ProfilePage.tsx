@@ -496,30 +496,84 @@ export default function ProfilePage() {
           {/* ── Streak + Milestones + Badges ── */}
           <StreakBadge />
 
-          <Card title="Value compass">
-            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.62)', lineHeight: 1.6, marginBottom: 12 }}>
-              Tell Aura what matters most right now. These 1–10 weights are editable anytime, and Aura will gently learn from what you swipe, save, choose, and achieve.
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px 14px' }}>
-              {TOP_LEVEL_VALUES.map(valueName => (
-                <label key={valueName} style={{ display: 'grid', gridTemplateColumns: '96px 1fr 42px', alignItems: 'center', gap: 8, fontSize: 12 }}>
-                  <span style={{ fontWeight: 850, textTransform: 'capitalize', color: 'rgba(248,248,252,0.82)' }}>{valueName}</span>
-                  <input
-                    type="range"
-                    min={1}
-                    max={10}
-                    value={valueScores[valueName] ?? 5}
-                    onChange={(e) => setValueScores(prev => ({ ...prev, [valueName]: Number(e.target.value) }))}
-                  />
-                  <span style={{ color: '#f4c26b', fontWeight: 950 }}>{valueScores[valueName] ?? 5}/10</span>
-                </label>
-              ))}
-            </div>
-            <button onClick={saveValueCompass} disabled={savingValues} style={{ marginTop: 14, background: '#f4c26b', color: '#0a0a0f', border: 'none', borderRadius: 10, padding: '9px 12px', fontWeight: 900 }}>
-              {savingValues ? 'Saving…' : 'Save value compass'}
-            </button>
-            {valueSaveStatus && <div style={{ marginTop: 10, fontSize: 12, color: valueSaveStatus.startsWith('Saved') ? '#34d399' : '#ef4444' }}>{valueSaveStatus}</div>}
-          </Card>
+          {/* Value compass — collapsible */}
+          {(() => {
+            const [compassOpen, setCompassOpen] = React.useState(false);
+            const handleSave = async () => {
+              await saveValueCompass();
+              setCompassOpen(false);
+            };
+            return (
+              <div style={{
+                background: '#12121a',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 14,
+                overflow: 'hidden',
+              }}>
+                {/* Header row — always visible */}
+                <button
+                  onClick={() => setCompassOpen(o => !o)}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '14px 16px', background: 'transparent', border: 'none',
+                    cursor: 'pointer', textAlign: 'left',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 16 }}>🧭</span>
+                    <span style={{ fontWeight: 800, fontSize: 14, color: '#f8f8fc' }}>Value compass</span>
+                    {!compassOpen && (
+                      <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)', fontWeight: 500 }}>
+                        {Object.entries(valueScores).sort((a,b) => b[1]-a[1]).slice(0,2).map(([k]) => k).join(' · ')}
+                      </span>
+                    )}
+                  </div>
+                  <span style={{ fontSize: 14, color: 'rgba(248,248,252,0.35)', transition: 'transform 0.2s', transform: compassOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
+                </button>
+
+                {/* Expandable body */}
+                {compassOpen && (
+                  <div style={{ padding: '0 16px 16px' }}>
+                    <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.45)', lineHeight: 1.55, marginBottom: 12 }}>
+                      Set what matters most right now. Aura will also learn from your choices.
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {TOP_LEVEL_VALUES.map(valueName => (
+                        <label key={valueName} style={{ display: 'grid', gridTemplateColumns: '88px 1fr 36px', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                          <span style={{ fontWeight: 700, textTransform: 'capitalize', color: 'rgba(248,248,252,0.78)' }}>{valueName}</span>
+                          <input
+                            type="range" min={1} max={10}
+                            value={valueScores[valueName] ?? 5}
+                            onChange={(e) => setValueScores(prev => ({ ...prev, [valueName]: Number(e.target.value) }))}
+                          />
+                          <span style={{ color: '#f4c26b', fontWeight: 900, fontSize: 13 }}>{valueScores[valueName] ?? 5}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <button
+                      onClick={handleSave}
+                      disabled={savingValues}
+                      style={{
+                        marginTop: 14, width: '100%',
+                        background: savingValues ? 'rgba(244,194,107,0.4)' : '#f4c26b',
+                        color: '#0a0a0f', border: 'none', borderRadius: 10,
+                        padding: '10px 12px', fontWeight: 900, fontSize: 14,
+                        cursor: savingValues ? 'wait' : 'pointer',
+                      }}
+                    >
+                      {savingValues ? 'Saving…' : 'Save ✓'}
+                    </button>
+                    {valueSaveStatus && (
+                      <div style={{ marginTop: 8, fontSize: 12, color: valueSaveStatus.startsWith('Saved') ? '#34d399' : '#ef4444', textAlign: 'center' }}>
+                        {valueSaveStatus}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           <Card title="Contributions">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 12 }}>
