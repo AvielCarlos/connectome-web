@@ -89,6 +89,11 @@ export default function ProfilePage() {
   const [travelModeEnabled, setTravelModeEnabled] = useState(false);
   const [savingTravelMode, setSavingTravelMode] = useState(false);
   const [travelModeStatus, setTravelModeStatus] = useState<string | null>(null);
+  const [driveOpen, setDriveOpen] = useState(false);
+  const [driveStatus, setDriveStatus] = useState<any>(null);
+  const [driveLoading, setDriveLoading] = useState(false);
+  const [driveAction, setDriveAction] = useState<string | null>(null);
+  const [driveMessage, setDriveMessage] = useState<string | null>(null);
 
   // ── A/B hooks must be BEFORE any conditional returns (Rules of Hooks) ──
   const { variant: upgradeHeadlineVariant, trackEvent: trackUpgradeHeadline } = useExperiment('upgrade_headline');
@@ -114,6 +119,9 @@ export default function ProfilePage() {
 
       const cached = localStorage.getItem(`ab_variant_${EXPERIMENT_ID}`) || 'A';
       setCurrentVariant(cached);
+      AuraClient.getIntegrations().then((res) => {
+        setDriveStatus(res?.integrations?.google_drive || null);
+      }).catch(() => {});
     } catch {}
     setLoading(false);
   }, []);
@@ -341,15 +349,66 @@ export default function ProfilePage() {
     try {
       const res = await AuraClient.connectGoogleDrive();
       if (res.already_connected) {
-        alert('Google Drive is already connected.');
+        setDriveMessage('Google Drive is already connected.');
+        await refreshDriveStatus();
         return;
       }
       if (res.auth_url) window.location.href = res.auth_url;
-      else alert('Google Drive connection did not return a sign-in URL.');
+      else setDriveMessage('Google Drive connection did not return a sign-in URL.');
     } catch (e: any) {
       const detail = e?.response?.data?.detail || 'Could not start Google Drive connection.';
-      alert(detail);
+      setDriveMessage(detail);
     }
+  };
+
+  const refreshDriveStatus = async () => {
+    setDriveLoading(true);
+    try {
+      const res = await AuraClient.getIntegrations();
+      setDriveStatus(res?.integrations?.google_drive || null);
+    } catch {
+      setDriveMessage('Could not load Drive status.');
+    }
+    setDriveLoading(false);
+  };
+
+  const changeDrivePrivacy = async (level: 'none' | 'goals_only' | 'full') => {
+    setDriveAction(level);
+    setDriveMessage(null);
+    try {
+      await AuraClient.setDrivePrivacy(level);
+      setDriveStatus((prev: any) => ({ ...(prev || {}), privacy_level: level }));
+      setDriveMessage(level === 'none' ? 'Drive connected, but Aura will not use documents.' : 'Drive use updated. Aura will use this level for goal context.');
+    } catch (e: any) {
+      setDriveMessage(e?.response?.data?.detail || 'Could not update Drive settings.');
+    }
+    setDriveAction(null);
+  };
+
+  const syncDriveFromProfile = async () => {
+    setDriveAction('sync');
+    setDriveMessage(null);
+    try {
+      await AuraClient.syncGoogleDrive();
+      setDriveMessage('Drive sync started — Aura is indexing approved docs.');
+    } catch (e: any) {
+      setDriveMessage(e?.response?.data?.detail || 'Could not sync Drive.');
+    }
+    setDriveAction(null);
+  };
+
+  const disconnectDriveFromProfile = async () => {
+    if (!confirm('Disconnect Google Drive and remove indexed Drive documents from Aura?')) return;
+    setDriveAction('disconnect');
+    setDriveMessage(null);
+    try {
+      await AuraClient.disconnectGoogleDrive();
+      setDriveStatus({ connected: false, privacy_level: 'none', scopes: [] });
+      setDriveMessage('Google Drive disconnected.');
+    } catch (e: any) {
+      setDriveMessage(e?.response?.data?.detail || 'Could not disconnect Drive.');
+    }
+    setDriveAction(null);
   };
 
   const enableLocationSharing = async () => {
@@ -520,6 +579,55 @@ export default function ProfilePage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* ── Streak + Milestones + Badges ── */}
           <StreakBadge />
+
+          {/* Google Drive — compact folded control */}
+          <div style={{ background: '#12121a', border: `1px solid ${driveStatus?.connected ? 'rgba(52,211,153,0.26)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, overflow: 'hidden' }}>
+            <button onClick={() => { setDriveOpen(o => !o); if (!driveStatus) refreshDriveStatus(); }} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 17 }}>▣</span>
+                <span style={{ fontWeight: 800, fontSize: 14, color: '#f8f8fc' }}>Google Drive</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: driveStatus?.connected ? '#34d399' : 'rgba(248,248,252,0.38)', fontWeight: 800 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: 999, background: driveStatus?.connected ? '#34d399' : 'rgba(248,248,252,0.28)', boxShadow: driveStatus?.connected ? '0 0 12px rgba(52,211,153,0.65)' : 'none' }} />
+                  {driveLoading ? 'Checking…' : driveStatus?.connected ? 'Active' : 'Inactive'}
+                </span>
+                {!driveOpen && driveStatus?.connected && (
+                  <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)' }}>{driveStatus.privacy_level === 'full' ? 'Full context' : driveStatus.privacy_level === 'goals_only' ? 'Goals only' : 'No doc use'}</span>
+                )}
+              </div>
+              <span style={{ fontSize: 14, color: 'rgba(248,248,252,0.35)', transform: driveOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
+            </button>
+            {driveOpen && (
+              <div style={{ padding: '0 16px 16px', display: 'grid', gap: 12 }}>
+                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.48)', lineHeight: 1.55 }}>
+                  Aura uses approved Drive notes to ground goal recommendations, path nodes, and personal context. You control the level here.
+                </div>
+                {!driveStatus?.connected ? (
+                  <button onClick={connectGoogle} disabled={driveAction === 'connect'} style={{ background: '#00d4aa', color: '#06110f', border: 'none', borderRadius: 10, padding: '10px 12px', fontWeight: 900, cursor: 'pointer' }}>
+                    Connect Drive
+                  </button>
+                ) : (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                      {(['none', 'goals_only', 'full'] as const).map(level => (
+                        <button key={level} onClick={() => changeDrivePrivacy(level)} disabled={Boolean(driveAction)} style={{ background: driveStatus?.privacy_level === level ? '#00d4aa' : 'rgba(255,255,255,0.05)', color: driveStatus?.privacy_level === level ? '#06110f' : '#f8f8fc', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '9px 8px', fontWeight: 900, fontSize: 11, cursor: driveAction ? 'wait' : 'pointer' }}>
+                          {level === 'none' ? 'Off' : level === 'goals_only' ? 'Goals' : 'Full'}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                      <button onClick={syncDriveFromProfile} disabled={Boolean(driveAction) || driveStatus?.privacy_level === 'none'} style={{ background: 'rgba(0,212,170,0.14)', color: '#00d4aa', border: '1px solid rgba(0,212,170,0.25)', borderRadius: 10, padding: '10px 12px', fontWeight: 900, cursor: driveAction ? 'wait' : 'pointer', opacity: driveStatus?.privacy_level === 'none' ? 0.45 : 1 }}>
+                        {driveAction === 'sync' ? 'Syncing…' : 'Sync'}
+                      </button>
+                      <button onClick={disconnectDriveFromProfile} disabled={Boolean(driveAction)} style={{ background: 'rgba(239,68,68,0.09)', color: '#f87171', border: '1px solid rgba(239,68,68,0.22)', borderRadius: 10, padding: '10px 12px', fontWeight: 900, cursor: driveAction ? 'wait' : 'pointer' }}>
+                        Disconnect
+                      </button>
+                    </div>
+                  </>
+                )}
+                {driveMessage && <div style={{ fontSize: 12, color: driveMessage.toLowerCase().includes('could not') ? '#f87171' : '#34d399', textAlign: 'center' }}>{driveMessage}</div>}
+              </div>
+            )}
+          </div>
 
           {/* Now/Later recommendation vectors — user-modable */}
           <div style={{ background: '#12121a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, overflow: 'hidden' }}>
