@@ -36,8 +36,7 @@ type DockItem = {
 };
 
 const CORE_DOCK: DockItem[] = [
-  { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido' },
-  { id: 'future', label: 'Future', icon: '🔭', path: '/app/future' },
+  { id: 'ido', label: 'iDo', icon: '⚡', path: '/app/ido' },
   { id: 'ora', label: 'Aura', icon: '◈', action: 'aura' },
   { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
   { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
@@ -240,7 +239,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       <nav className={`connectome-dock connectome-dock--${dockItems.length}`} aria-label={`${appLabel(activeApp)} navigation`}>
         {dockItems.map((item) => {
           const currentRoute = `${location.pathname}${location.search}`;
-          const active = item.id === activeApp || (item.path && (currentRoute === item.path || location.pathname === item.path)) || (activeApp === 'ido' && item.id === 'now' && location.pathname === '/app/ido') || (activeApp === 'ido' && item.id === 'future' && location.pathname === '/app/future');
+          const active = item.id === activeApp || (item.path && (currentRoute === item.path || location.pathname === item.path)) || (activeApp === 'ido' && item.id === 'ido' && (location.pathname === '/app/ido' || location.pathname === '/app/future'));
           return (
             <button
               key={item.id}

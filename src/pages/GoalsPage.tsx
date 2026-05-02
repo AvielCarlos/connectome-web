@@ -50,6 +50,43 @@ function stateCopy(state: string) {
   return 'Achieved';
 }
 
+function goalCurrentState(goal: Goal) {
+  return goal.graph_metadata?.current_state || goal.graph_metadata?.current_state_text || 'Where you are now';
+}
+
+function goalDesiredState(goal: Goal) {
+  return goal.graph_metadata?.desired_state || goal.graph_metadata?.desired_state_text || goal.measurable_outcome || goal.title;
+}
+
+function DesiredStateCompass({ goals }: { goals: Goal[] }) {
+  const active = goals.filter((g) => g.status === 'active');
+  const primary = active[0];
+  const mapped = active.filter((g) => g.measurable_outcome || g.graph_metadata?.desired_state).length;
+  const moving = active.filter((g) => progressFor(g) > 0).length;
+  const cfg = domainConfig(primary?.domain);
+  return (
+    <div style={{ border: '1px solid rgba(0,212,170,0.18)', background: 'linear-gradient(135deg, rgba(0,212,170,0.08), rgba(99,102,241,0.06))', borderRadius: 26, padding: 16, margin: '0 0 16px' }}>
+      <div style={{ color: '#00d4aa', fontSize: 11, fontWeight: 950, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>Desired-state vector</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 10, alignItems: 'center' }}>
+        <div style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.18)', borderRadius: 18, padding: 12 }}>
+          <div style={{ color: 'rgba(248,248,252,0.38)', fontSize: 10, fontWeight: 900, textTransform: 'uppercase' }}>Current state</div>
+          <div style={{ color: '#f8f8fc', fontSize: 13, lineHeight: 1.45, marginTop: 5 }}>{primary ? goalCurrentState(primary) : 'No active state captured yet'}</div>
+        </div>
+        <div style={{ color: cfg.color, fontSize: 22, fontWeight: 950 }}>→</div>
+        <div style={{ border: `1px solid ${cfg.color}28`, background: `${cfg.color}10`, borderRadius: 18, padding: 12 }}>
+          <div style={{ color: cfg.color, fontSize: 10, fontWeight: 900, textTransform: 'uppercase' }}>Desired state</div>
+          <div style={{ color: '#f8f8fc', fontSize: 13, lineHeight: 1.45, marginTop: 5 }}>{primary ? goalDesiredState(primary) : 'Capture a spark to define the destination'}</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+        <span style={{ color: 'rgba(248,248,252,0.48)', fontSize: 11, fontWeight: 800 }}>{active.length} active intention{active.length === 1 ? '' : 's'}</span>
+        <span style={{ color: 'rgba(248,248,252,0.48)', fontSize: 11, fontWeight: 800 }}>{mapped} desired-state vector{mapped === 1 ? '' : 's'} mapped</span>
+        <span style={{ color: 'rgba(248,248,252,0.48)', fontSize: 11, fontWeight: 800 }}>{moving} already moving</span>
+      </div>
+    </div>
+  );
+}
+
 function isAuraManagedNode(node: any) {
   const haystack = [node.owner, node.node_type, node.step_type, node.title, node.description]
     .filter(Boolean)
@@ -181,6 +218,8 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [auraReply, setAuraReply] = useState('');
+  const [currentState, setCurrentState] = useState(goalCurrentState(goal));
+  const [desiredState, setDesiredState] = useState(goalDesiredState(goal));
   const { show } = useToast();
   const cfg = domainConfig(goal.domain);
   const progress = progressFor(goal);
@@ -237,6 +276,22 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
     onDelete(goal.id);
   };
 
+  const saveStateVector = async () => {
+    setBusy('state-vector');
+    try {
+      const nextMetadata = {
+        ...(goal.graph_metadata || {}),
+        current_state: currentState.trim() || 'current state unclear',
+        desired_state: desiredState.trim() || goal.measurable_outcome || goal.title,
+        gap_summary: `Move from ${currentState.trim() || 'current state unclear'} toward ${desiredState.trim() || goal.measurable_outcome || goal.title}`,
+        vector_source: 'goals_state_gap_editor',
+      };
+      const updated = await AuraClient.updateGoal(goal.id, { graph_metadata: nextMetadata });
+      onUpdate(updated);
+      show('Goal vector updated for Aura and iDo.', 'success');
+    } finally { setBusy(null); }
+  };
+
   return (
     <article className="fade-in" style={{ position: 'relative', overflow: 'hidden', borderRadius: 26, border: `1px solid ${cfg.color}22`, background: 'linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025))', marginBottom: 12 }}>
       <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 12% 0%, ${cfg.color}24, transparent 38%)`, pointerEvents: 'none' }} />
@@ -283,6 +338,18 @@ function GoalCard({ goal, onUpdate, onDelete }: { goal: Goal; onUpdate: (g: Goal
         {open && (
           <div className="fade-in" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: 16, paddingTop: 14 }}>
             {auraReply && <div style={{ border: '1px solid rgba(0,212,170,0.22)', background: 'rgba(0,212,170,0.08)', color: 'rgba(248,248,252,0.78)', borderRadius: 16, padding: 13, fontSize: 13, lineHeight: 1.55, marginBottom: 12 }}><b style={{ color: '#00d4aa' }}>Aura: </b>{auraReply}</div>}
+            <div style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(0,0,0,0.18)', borderRadius: 18, padding: 13, marginBottom: 12 }}>
+              <div style={{ color: cfg.color, fontSize: 11, fontWeight: 950, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 9 }}>Current → desired state</div>
+              <label style={{ display: 'grid', gap: 5, marginBottom: 9 }}>
+                <span style={{ color: 'rgba(248,248,252,0.44)', fontSize: 11, fontWeight: 850 }}>Where are you now?</span>
+                <textarea value={currentState} onChange={(e) => setCurrentState(e.target.value)} rows={2} style={{ resize: 'vertical', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 13, background: 'rgba(255,255,255,0.04)', color: '#f8f8fc', padding: 10, fontSize: 13, lineHeight: 1.4 }} />
+              </label>
+              <label style={{ display: 'grid', gap: 5 }}>
+                <span style={{ color: 'rgba(248,248,252,0.44)', fontSize: 11, fontWeight: 850 }}>What state are you moving toward?</span>
+                <textarea value={desiredState} onChange={(e) => setDesiredState(e.target.value)} rows={2} style={{ resize: 'vertical', border: `1px solid ${cfg.color}22`, borderRadius: 13, background: `${cfg.color}08`, color: '#f8f8fc', padding: 10, fontSize: 13, lineHeight: 1.4 }} />
+              </label>
+              <button onClick={saveStateVector} disabled={busy === 'state-vector'} style={{ marginTop: 10, width: '100%', border: '1px solid rgba(0,212,170,0.3)', background: 'rgba(0,212,170,0.12)', color: '#00d4aa', borderRadius: 999, padding: '10px 12px', fontSize: 12, fontWeight: 900 }}>{busy === 'state-vector' ? 'Updating vector…' : 'Update Aura/iDo vector'}</button>
+            </div>
             {goal.steps?.length ? (
               <div style={{ display: 'grid', gap: 8 }}>
                 {goal.steps.map((s, i) => (
@@ -398,6 +465,9 @@ export default function GoalsPage() {
       target_date: structuredGoal?.timeline || undefined,
       graph_metadata: {
         state_model: 'intention_to_measurable_goal_to_steps',
+        current_state: structuredGoal?.current_state || structuredGoal?.starting_point || 'current state unclear',
+        desired_state: structuredGoal?.desired_state || structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
+        gap_summary: `Move from ${structuredGoal?.current_state || structuredGoal?.starting_point || 'current state unclear'} toward ${structuredGoal?.desired_state || structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title}`,
         intention_text: clarifyingGoal || title,
         measurable_outcome: structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
         suggested_ioo_path: iooPath,
@@ -435,6 +505,7 @@ export default function GoalsPage() {
       </header>
 
       <UserStateStrip goals={goals} />
+      <DesiredStateCompass goals={goals} />
       <CaptureBar onClarify={setClarifyingGoal} />
       <StarterRail onClarify={setClarifyingGoal} />
       <LensTabs lens={lens} setLens={setLens} counts={counts} />

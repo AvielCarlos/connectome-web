@@ -287,7 +287,7 @@ function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
 }
 
 // ─── Detail sheet ─────────────────────────────────────────────────────────────
-function DetailSheet({ card, spec, color, onClose, onDoNow, onAction }: { card: any; spec: any; color: string; onClose: () => void; onDoNow: () => void; onAction: (action: any) => void }) {
+function DetailSheet({ card, spec, color, onClose, onDoNow, onInvite, onAction }: { card: any; spec: any; color: string; onClose: () => void; onDoNow: () => void; onInvite: () => void; onAction: (action: any) => void }) {
   const deepDive = card?.deep_dive || null;
   const title = card?.title || card?.text || '';
   const body = card?.body || card?.body_text || '';
@@ -431,23 +431,41 @@ function DetailSheet({ card, spec, color, onClose, onDoNow, onAction }: { card: 
           background: 'linear-gradient(180deg, rgba(18,18,30,0), rgba(18,18,30,0.96) 22%, #12121e 100%)',
           borderTop: '1px solid rgba(255,255,255,0.08)',
         }}>
-          <button
-            onClick={onDoNow}
-            style={{
-              width: '100%',
-              minHeight: 54,
-              borderRadius: 999,
-              border: 'none',
-              background: `linear-gradient(135deg, ${color}, ${color}cc)`,
-              color: '#06070a',
-              fontSize: 16,
-              fontWeight: 900,
-              letterSpacing: -0.2,
-              boxShadow: `0 18px 44px ${color}35`,
-            }}
-          >
-            Do now →
-          </button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10 }}>
+            <button
+              onClick={onDoNow}
+              style={{
+                width: '100%',
+                minHeight: 54,
+                borderRadius: 999,
+                border: 'none',
+                background: `linear-gradient(135deg, ${color}, ${color}cc)`,
+                color: '#06070a',
+                fontSize: 16,
+                fontWeight: 900,
+                letterSpacing: -0.2,
+                boxShadow: `0 18px 44px ${color}35`,
+              }}
+            >
+              Do now →
+            </button>
+            <button
+              onClick={onInvite}
+              aria-label="Invite friends"
+              style={{
+                width: 58,
+                minHeight: 54,
+                borderRadius: 999,
+                border: '1px solid rgba(255,255,255,0.16)',
+                background: 'rgba(255,255,255,0.06)',
+                color: '#f8f8fc',
+                fontSize: 22,
+                fontWeight: 900,
+              }}
+            >
+              ↗
+            </button>
+          </div>
         </div>
       </div>
 
@@ -478,8 +496,10 @@ function isSystemManagedPathStep(step: any) {
     || text.includes('ora should');
 }
 
-function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
+function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => void; onInvite: () => void }) {
   const card = data?.card || {};
+  const item = data?.item as ScreenResponse | undefined;
+  const metadata: any = item?.screen?.metadata || {};
   const [availableTime, setAvailableTime] = useState<TimeHorizonId>('30m');
   const protocol = data?.execution?.protocol || null;
   const plan = protocol?.execution_plan || null;
@@ -495,6 +515,48 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
   const systemManagedSteps = rawSteps.filter(isSystemManagedPathStep);
   const userSteps = rawSteps.filter((step: any) => !isSystemManagedPathStep(step));
   const steps = userSteps.length ? userSteps : fallbackSteps.map((s: string) => ({ title: s, description: '' }));
+  const links = Array.isArray(metadata.links) ? metadata.links : [];
+  const primaryUrl = card?.url || metadata.url || links.find((link: any) => link?.url)?.url;
+  const bookingUrl = links.find((link: any) => /book|register|ticket/i.test(String(link?.label || link?.kind || '')))?.url || metadata.booking_url;
+  const mapUrl = links.find((link: any) => /map|direction/i.test(String(link?.label || link?.kind || '')))?.url || metadata.map_url;
+  const requirements = [
+    metadata.starts_at ? `Timing: ${metadata.starts_at}` : null,
+    metadata.location_city || metadata.city ? `Location: ${metadata.location_city || metadata.city}` : null,
+    metadata.opportunity_kind ? `Mode: ${metadata.opportunity_kind}` : null,
+    card?.deep_dive?.time_to_start ? `Time: ${card.deep_dive.time_to_start}` : null,
+  ].filter(Boolean);
+  const askAura = () => {
+    window.dispatchEvent(new CustomEvent('connectome:open-aura'));
+    AuraClient.submitFeedback({
+      screen_spec_id: item?.screen_spec_db_id || '',
+      rating: 5,
+      exit_point: 'execute_ask_aura',
+      completed: false,
+      metadata: { learning_signal: 'execute_clarification_requested', title: card.title, feed_mode: metadata.feed_mode, temporal_branch: metadata.temporal_branch },
+    }).catch(() => {});
+  };
+  const remember = async () => {
+    const text = `Reminder: ${card.title || 'Connectome action'}${metadata.starts_at ? ` (${metadata.starts_at})` : ''}`;
+    try { await navigator.clipboard.writeText(text); } catch {}
+    AuraClient.submitFeedback({
+      screen_spec_id: item?.screen_spec_db_id || '',
+      rating: 5,
+      exit_point: 'execute_create_reminder_intent',
+      completed: false,
+      metadata: { learning_signal: 'reminder_intent', reminder_text: text },
+    }).catch(() => {});
+  };
+  const openUrl = (url?: string, exitPoint = 'execute_open_link') => {
+    if (!url) return;
+    window.open(url, '_blank', 'noopener');
+    AuraClient.submitFeedback({
+      screen_spec_id: item?.screen_spec_db_id || '',
+      rating: 5,
+      exit_point: exitPoint,
+      completed: false,
+      metadata: { learning_signal: 'execute_safe_action', url, feed_mode: metadata.feed_mode, temporal_branch: metadata.temporal_branch },
+    }).catch(() => {});
+  };
 
   return (
     <div
@@ -512,9 +574,27 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
     >
       <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxHeight: 'calc(100dvh - var(--shell-top-clearance) - var(--shell-bottom-clearance) - 18px)', overflowY: 'auto', background: '#11111c', borderRadius: '28px 28px 0 0', border: '1px solid rgba(0,212,170,0.22)', padding: '18px 22px 34px' }}>
         <div style={{ width: 44, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.16)', margin: '0 auto 18px' }} />
-        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Aura pathway</div>
+        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>iDo Execute</div>
         <h2 style={{ margin: 0, color: '#f8f8fc', fontSize: 24, lineHeight: 1.15 }}>{card.title || 'Your next step'}</h2>
-        <p style={{ color: 'rgba(248,248,252,0.58)', lineHeight: 1.65, fontSize: 14 }}>{protocol?.summary || 'Aura handles the connective tissue. You clarify, decide, and then do the real-world action.'}</p>
+        <p style={{ color: 'rgba(248,248,252,0.58)', lineHeight: 1.65, fontSize: 14 }}>{protocol?.summary || 'Aura explains and clarifies; iDo turns the node into structured choices, safe actions, and the next real-world step.'}</p>
+
+        <div style={{ display: 'grid', gap: 10, marginBottom: 16 }}>
+          <div style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, padding: 14 }}>
+            <div style={{ color: '#f8f8fc', fontSize: 13, fontWeight: 900, marginBottom: 8 }}>What this action requires</div>
+            {requirements.length ? requirements.map((req: any) => <div key={req} style={{ color: 'rgba(248,248,252,0.66)', fontSize: 13, lineHeight: 1.55 }}>• {req}</div>) : <div style={{ color: 'rgba(248,248,252,0.48)', fontSize: 13 }}>A clear choice, a small commitment, and one next action.</div>}
+          </div>
+          {(primaryUrl || bookingUrl || mapUrl || links.length) && (
+            <div style={{ background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', borderRadius: 18, padding: 14 }}>
+              <div style={{ color: '#00d4aa', fontSize: 13, fontWeight: 900, marginBottom: 10 }}>I found these options</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 8 }}>
+                {primaryUrl && <button onClick={() => openUrl(primaryUrl, 'execute_open_primary')} style={{ border: '1px solid rgba(0,212,170,0.28)', background: 'rgba(0,212,170,0.12)', color: '#bfffee', borderRadius: 14, padding: 11, fontWeight: 900 }}>Open link</button>}
+                {bookingUrl && <button onClick={() => openUrl(bookingUrl, 'execute_open_booking')} style={{ border: '1px solid rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.12)', color: '#facc15', borderRadius: 14, padding: 11, fontWeight: 900 }}>Register/book</button>}
+                {mapUrl && <button onClick={() => openUrl(mapUrl, 'execute_get_directions')} style={{ border: '1px solid rgba(59,130,246,0.28)', background: 'rgba(59,130,246,0.12)', color: '#93c5fd', borderRadius: 14, padding: 11, fontWeight: 900 }}>Directions</button>}
+                <button onClick={onInvite} style={{ border: '1px solid rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.06)', color: '#f8f8fc', borderRadius: 14, padding: 11, fontWeight: 900 }}>Invite</button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {systemManagedSteps.length > 0 && (
           <div style={{ background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', borderRadius: 18, padding: 14, marginBottom: 14 }}>
@@ -589,9 +669,17 @@ function PathwaySheet({ data, onClose }: { data: any; onClose: () => void }) {
           ))}
         </div>
 
-        <button onClick={onClose} style={{ marginTop: 18, width: '100%', border: 'none', borderRadius: 18, padding: '14px 18px', background: 'linear-gradient(135deg,#00d4aa,#14f1c1)', color: '#06110f', fontWeight: 950 }}>
-          Keep going with Aura →
-        </button>
+        <div style={{ display: 'grid', gap: 9, marginTop: 18 }}>
+          <button onClick={askAura} style={{ width: '100%', border: '1px solid rgba(139,92,246,0.28)', borderRadius: 18, padding: '14px 18px', background: 'rgba(139,92,246,0.13)', color: '#ddd6fe', fontWeight: 950 }}>
+            Ask Aura to clarify →
+          </button>
+          <button onClick={remember} style={{ width: '100%', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: '13px 18px', background: 'rgba(255,255,255,0.055)', color: 'rgba(248,248,252,0.72)', fontWeight: 900 }}>
+            Copy reminder text
+          </button>
+          <button onClick={onClose} style={{ width: '100%', border: 'none', borderRadius: 18, padding: '14px 18px', background: 'linear-gradient(135deg,#00d4aa,#14f1c1)', color: '#06110f', fontWeight: 950 }}>
+            Keep going with iDo →
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -665,6 +753,7 @@ function FeedCard({
   active,
   onRate,
   onDoNow,
+  onInvite,
   onSaveRequest,
   onSkip,
   ratings,
@@ -674,6 +763,7 @@ function FeedCard({
   active: boolean;
   onRate: (id: string, r: number) => void;
   onDoNow: (item: ScreenResponse, cardData: any) => void;
+  onInvite: (item: ScreenResponse, cardData: any) => void;
   onSaveRequest: (card: any) => void;
   onSkip: () => void;
   ratings: Record<string, number>;
@@ -794,6 +884,7 @@ function FeedCard({
           color={color}
           onClose={() => setShowDetail(false)}
           onAction={openCardAction}
+          onInvite={() => onInvite(item, cardData)}
           onDoNow={() => {
             setShowDetail(false);
             onDoNow(item, cardData);
@@ -894,6 +985,24 @@ function FeedCard({
         ))}
 
         <div style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.1)' }} />
+
+        {/* Invite friends */}
+        <button
+          onClick={() => onInvite(item, cardData)}
+          style={{
+            width: 48, height: 48, borderRadius: 24,
+            background: 'rgba(0,0,0,0.45)',
+            border: '1.5px solid rgba(255,255,255,0.2)',
+            color: 'rgba(248,248,252,0.68)',
+            fontSize: 21, backdropFilter: 'blur(12px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+          aria-label="Invite friends"
+        >↗</button>
+        <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.3)', fontWeight: 600 }}>
+          Invite
+        </div>
 
         {/* Save to collection */}
         <button
@@ -1075,6 +1184,15 @@ export default function FeedPage() {
     setIndex(0);
   };
 
+  const switchBranch = (mode: FeedMode) => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('mode');
+    const query = next.toString();
+    navigate(`${mode === 'future' ? '/app/future' : '/app/ido'}${query ? `?${query}` : ''}`, { replace: true });
+    setCards([]);
+    setIndex(0);
+  };
+
   // Fetch goal title
   useEffect(() => {
     if (!goalId) return;
@@ -1245,6 +1363,11 @@ export default function FeedPage() {
       time_on_screen_ms: 0,
       exit_point: 'do_now',
       completed: true,
+      metadata: {
+        learning_signal: 'execute_sheet_opened',
+        feed_mode: (item.screen as any)?.metadata?.feed_mode,
+        temporal_branch: (item.screen as any)?.metadata?.temporal_branch,
+      },
     }).catch(() => {});
     const nodeId = (item.screen as any)?.metadata?.node_id || (item.screen as any)?.card_data?.node_id;
     let execution = null;
@@ -1285,6 +1408,35 @@ export default function FeedPage() {
       }).catch(() => {});
     }
     goNext();
+  };
+
+  const handleInvite = async (item: ScreenResponse, cardData: any) => {
+    const spec: any = item.screen || {};
+    const metadata = spec.metadata || {};
+    const links = Array.isArray(metadata.links) ? metadata.links : [];
+    const primaryUrl = cardData?.url || metadata.url || links.find((link: any) => link?.url)?.url || `${window.location.origin}/connectome-web/app`;
+    const title = cardData?.title || 'this Connectome path node';
+    const when = metadata.starts_at ? `\nWhen: ${metadata.starts_at}` : '';
+    const city = metadata.location_city || metadata.city ? `\nWhere: ${metadata.location_city || metadata.city}` : '';
+    const text = `Want to do this with me?\n\n${title}${when}${city}\n\n${primaryUrl}\n\nI found it through Connectome.`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `Join me: ${title}`, text, url: primaryUrl });
+        showToast('Invite opened');
+      } else {
+        await navigator.clipboard.writeText(text);
+        showToast('Invite copied');
+      }
+      AuraClient.submitFeedback({
+        screen_spec_id: item.screen_spec_db_id,
+        rating: 5,
+        exit_point: 'invite_friends',
+        completed: false,
+        metadata: { learning_signal: 'social_execution_intent', feed_mode: metadata.feed_mode, temporal_branch: metadata.temporal_branch, invite_url: primaryUrl },
+      }).catch(() => {});
+    } catch {
+      showToast('Invite cancelled');
+    }
   };
 
   // ─── Loading ─────────────────────────────────────────────────────────────
@@ -1401,7 +1553,7 @@ export default function FeedPage() {
     <div className="feed-container" style={{ background: '#0a0a0f' }}>
 
       {/* Collection picker */}
-      {pathwaySheet && <PathwaySheet data={pathwaySheet} onClose={() => setPathwaySheet(null)} />}
+      {pathwaySheet && <PathwaySheet data={pathwaySheet} onClose={() => setPathwaySheet(null)} onInvite={() => handleInvite(pathwaySheet.item, pathwaySheet.card)} />}
 
       {showCreateOpportunity && (
         <CreateOpportunitySheet
@@ -1422,6 +1574,42 @@ export default function FeedPage() {
           onSaved={handleCollectionSaved}
         />
       )}
+
+      {/* iDo vector branches */}
+      <div style={{
+        position: 'absolute', top: 'max(env(safe-area-inset-top), 58px)', left: 14, right: 66, zIndex: 36,
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
+        padding: 5, borderRadius: 999, border: '1px solid rgba(255,255,255,0.12)',
+        background: 'rgba(10,10,15,0.56)', backdropFilter: 'blur(18px)',
+        boxShadow: '0 10px 34px rgba(0,0,0,0.26)',
+      }}>
+        {([
+          { id: 'now' as FeedMode, label: 'Now', icon: '⚡' },
+          { id: 'future' as FeedMode, label: 'Future', icon: '🔭' },
+        ]).map((branch) => {
+          const active = feedMode === branch.id;
+          return (
+            <button
+              key={branch.id}
+              type="button"
+              onClick={() => switchBranch(branch.id)}
+              style={{
+                border: 0,
+                borderRadius: 999,
+                minHeight: 34,
+                background: active ? 'rgba(0,212,170,0.2)' : 'transparent',
+                color: active ? '#bfffee' : 'rgba(248,248,252,0.58)',
+                fontSize: 12,
+                fontWeight: 900,
+                letterSpacing: 0.2,
+              }}
+              aria-pressed={active}
+            >
+              {branch.icon} {branch.label}
+            </button>
+          );
+        })}
+      </div>
 
       {/* Snap scroll container */}
       <div
@@ -1453,6 +1641,7 @@ export default function FeedPage() {
               active={i === index}
               onRate={handleRate}
               onDoNow={handleDoNow}
+              onInvite={handleInvite}
               onSaveRequest={handleSaveRequest}
               onSkip={handleSkip}
               ratings={ratings}
