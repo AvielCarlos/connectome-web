@@ -422,7 +422,7 @@ export default function HomePage() {
               What area of life feels most alive right now?
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {['Career', 'Health', 'Relationships', 'Learning', 'Creative', 'Financial'].map((area) => (
+              {['Career', 'Health', 'Relationships', 'Learning', 'Creative', 'Fun', 'Entertainment', 'Adventure', 'Financial'].map((area) => (
                 <button key={area} onClick={() => setLifeArea(area)} style={{
                   padding: '9px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
                   background: lifeArea === area ? 'rgba(0,212,170,0.12)' : 'rgba(255,255,255,0.04)',
