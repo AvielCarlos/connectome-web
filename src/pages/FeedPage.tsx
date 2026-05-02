@@ -975,7 +975,9 @@ export default function FeedPage() {
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
   const [toastMsg, setToastMsg] = useState('');
   const [collectionPickerCard, setCollectionPickerCard] = useState<any | null>(null);
-  const [capabilityReady, setCapabilityReady] = useState(() => !!localStorage.getItem(todayCapabilityKey()));
+  // Future tab bypasses the capability intake — it goes straight to the vector/event feed
+  const isFutureFeed = requestedMode === 'future';
+  const [capabilityReady, setCapabilityReady] = useState(() => isFutureFeed || !!localStorage.getItem(todayCapabilityKey()));
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
   const [domainFilter, setDomainFilter] = useState<PathDomainFilter>(PATH_DOMAIN_TABS.some((tab) => tab.id === requestedDomain) ? requestedDomain : null);
   const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
