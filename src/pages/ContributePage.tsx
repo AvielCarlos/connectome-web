@@ -153,6 +153,33 @@ export default function ContributePage() {
           <button type="button" onClick={() => setCpExplainerOpen(true)} style={{ marginTop: 14, color: ACCENT, fontWeight: 900, textDecoration: 'none' }}>What is CP?</button>
         </section>
 
+        {/* GitHub connect banner — shown near top if not connected */}
+        {isAuthed && !githubStatus.connected && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap',
+            background: 'rgba(36,41,46,0.7)', border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 16, padding: '14px 18px', marginBottom: 20,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 22 }}>🔗</span>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 14, color: '#f8f8fc' }}>Connect GitHub to earn CP faster</div>
+                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.45)', marginTop: 2 }}>Required for code contributions. Also enables auto-sync of merged PRs.</div>
+              </div>
+            </div>
+            <a
+              href={AuraClient.getGitHubLoginUrl()}
+              style={{
+                background: '#24292e', color: '#fff', padding: '9px 18px',
+                borderRadius: 12, textDecoration: 'none', fontWeight: 800, fontSize: 13,
+                whiteSpace: 'nowrap', flexShrink: 0,
+              }}
+            >
+              Connect GitHub →
+            </a>
+          </div>
+        )}
+
         <section style={{ ...card, padding: 24, marginBottom: 22, border: '1px solid rgba(0,212,170,0.18)' }}>
           <div style={{ color: ACCENT, fontSize: 12, fontWeight: 900, letterSpacing: 1.1, textTransform: 'uppercase', marginBottom: 8 }}>Who we're looking for now</div>
           <h2 style={{ margin: '0 0 12px', fontSize: 28, letterSpacing: -0.8 }}>Developers who care about agency, consciousness, and useful AI.</h2>
@@ -177,29 +204,6 @@ export default function ContributePage() {
             <a href="https://github.com/AvielCarlos/connectome-web" target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', color: '#f8f8fc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '10px 14px', fontWeight: 850 }}>View web repo</a>
             <a href="https://t.me/ascensiontechai" target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', color: '#f8f8fc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '10px 14px', fontWeight: 850 }}>Join community</a>
           </div>
-        </section>
-
-        <section style={{ ...card, padding: 22, marginBottom: 22 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
-            <div><div style={{ color: ACCENT, fontSize: 12, fontWeight: 900, letterSpacing: 1.1, textTransform: 'uppercase' }}>My Contributions</div><h2 style={{ margin: '5px 0 0', fontSize: 26, letterSpacing: -0.6 }}>Your submitted work</h2></div>
-            {githubStatus.connected ? <button type="button" onClick={syncGitHub} disabled={syncing} style={{ border: 'none', background: syncing ? 'rgba(255,255,255,0.12)' : `linear-gradient(135deg, ${ACCENT}, #00b896)`, color: syncing ? 'rgba(248,248,252,0.55)' : '#06100e', borderRadius: 12, padding: '10px 13px', fontWeight: 900, cursor: syncing ? 'not-allowed' : 'pointer' }}>{syncing ? 'Syncing…' : 'Sync GitHub PRs'}</button> : loadingMine && <span style={{ color: 'rgba(248,248,252,0.52)' }}>Loading…</span>}
-          </div>
-
-          {!isAuthed ? <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)' }}>Sign in to submit contributions and track CP awards.</p> : contributions.length === 0 ? <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)' }}>No submissions yet. Your next contribution can start below.</p> : (
-            <div style={{ display: 'grid', gap: 10 }}>
-              {contributions.map((item) => {
-                const status = statusStyles[item.status] || statusStyles.pending;
-                const typeMeta = contributionTypes.find((t) => t.value === item.contribution_type);
-                const cp = Number(item.cp_awarded || 0);
-                return (
-                  <article key={item.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'center', background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '14px 15px', flexWrap: 'wrap' }}>
-                    <div><div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 6, flexWrap: 'wrap' }}><span style={{ color: ACCENT, fontSize: 12, fontWeight: 900, textTransform: 'uppercase' }}>{typeMeta?.icon} {typeMeta?.label || item.contribution_type}</span><span style={{ background: status.bg, color: status.color, border: `1px solid ${status.border}`, borderRadius: 999, padding: '4px 9px', fontSize: 12, fontWeight: 900 }}>{item.status}</span></div><strong style={{ fontSize: 16 }}>{item.title}</strong></div>
-                    {cp > 0 && <div style={{ color: '#f4c26b', fontWeight: 950 }}>{cp} CP</div>}
-                  </article>
-                );
-              })}
-            </div>
-          )}
         </section>
 
         <section style={{ ...card, padding: 24, marginBottom: 22 }}>
@@ -240,6 +244,29 @@ export default function ContributePage() {
             {error && <div style={{ color: '#ff8d8d', background: 'rgba(255,102,102,0.1)', border: '1px solid rgba(255,102,102,0.25)', borderRadius: 14, padding: 12 }}>{error}</div>}
             <button type="submit" disabled={submitting || !isAuthed || (type === 'code' && !githubStatus.connected)} style={{ justifySelf: 'start', minWidth: 210, padding: '14px 18px', borderRadius: 14, border: 'none', background: isAuthed && !(type === 'code' && !githubStatus.connected) ? `linear-gradient(135deg, ${ACCENT}, #00b896)` : 'rgba(255,255,255,0.12)', color: isAuthed && !(type === 'code' && !githubStatus.connected) ? '#06100e' : 'rgba(248,248,252,0.55)', fontWeight: 950, cursor: isAuthed && !(type === 'code' && !githubStatus.connected) ? 'pointer' : 'not-allowed', boxShadow: isAuthed && !(type === 'code' && !githubStatus.connected) ? '0 12px 34px rgba(0,212,170,0.20)' : 'none' }}>{submitting ? 'Submitting…' : isAuthed ? 'Submit Contribution' : 'Sign in to submit'}</button>
           </form>
+        </section>
+
+        <section style={{ ...card, padding: 22, marginBottom: 22 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
+            <div><div style={{ color: ACCENT, fontSize: 12, fontWeight: 900, letterSpacing: 1.1, textTransform: 'uppercase' }}>My Contributions</div><h2 style={{ margin: '5px 0 0', fontSize: 26, letterSpacing: -0.6 }}>Your submitted work</h2></div>
+            {githubStatus.connected ? <button type="button" onClick={syncGitHub} disabled={syncing} style={{ border: 'none', background: syncing ? 'rgba(255,255,255,0.12)' : `linear-gradient(135deg, ${ACCENT}, #00b896)`, color: syncing ? 'rgba(248,248,252,0.55)' : '#06100e', borderRadius: 12, padding: '10px 13px', fontWeight: 900, cursor: syncing ? 'not-allowed' : 'pointer' }}>{syncing ? 'Syncing…' : 'Sync GitHub PRs'}</button> : loadingMine && <span style={{ color: 'rgba(248,248,252,0.52)' }}>Loading…</span>}
+          </div>
+
+          {!isAuthed ? <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)' }}>Sign in to submit contributions and track CP awards.</p> : contributions.length === 0 ? <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)' }}>No submissions yet. Your next contribution can start below.</p> : (
+            <div style={{ display: 'grid', gap: 10 }}>
+              {contributions.map((item) => {
+                const status = statusStyles[item.status] || statusStyles.pending;
+                const typeMeta = contributionTypes.find((t) => t.value === item.contribution_type);
+                const cp = Number(item.cp_awarded || 0);
+                return (
+                  <article key={item.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'center', background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '14px 15px', flexWrap: 'wrap' }}>
+                    <div><div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 6, flexWrap: 'wrap' }}><span style={{ color: ACCENT, fontSize: 12, fontWeight: 900, textTransform: 'uppercase' }}>{typeMeta?.icon} {typeMeta?.label || item.contribution_type}</span><span style={{ background: status.bg, color: status.color, border: `1px solid ${status.border}`, borderRadius: 999, padding: '4px 9px', fontSize: 12, fontWeight: 900 }}>{item.status}</span></div><strong style={{ fontSize: 16 }}>{item.title}</strong></div>
+                    {cp > 0 && <div style={{ color: '#f4c26b', fontWeight: 950 }}>{cp} CP</div>}
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         <details style={{ ...card, padding: 20 }}>
