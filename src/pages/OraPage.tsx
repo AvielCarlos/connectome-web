@@ -240,21 +240,11 @@ export default function AuraPage() {
         alignItems: 'center',
         justifyContent: 'space-between',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 12,
-            background: 'linear-gradient(135deg, rgba(0,212,170,0.15), rgba(0,212,170,0.35))',
-            border: '1px solid rgba(0,212,170,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20,
-            boxShadow: '0 0 16px rgba(0,212,170,0.15)',
-          }}>◈</div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 16 }}>Aura</div>
-            <div style={{ fontSize: 11, color: '#00d4aa', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 6, height: 6, borderRadius: 3, background: '#00d4aa', display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
-              Online
-            </div>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 16 }}>Aura</div>
+          <div style={{ fontSize: 11, color: '#00d4aa', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 3, background: '#00d4aa', display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
+            Online
           </div>
         </div>
         <button

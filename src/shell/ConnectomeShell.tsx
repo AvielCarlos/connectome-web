@@ -35,7 +35,7 @@ type DockItem = {
 
 const CORE_DOCK: DockItem[] = [
   { id: 'ido', label: 'iDo', icon: '⚡', path: '/app/ido' },
-  { id: 'ora', label: 'Aura', icon: '◈', action: 'aura' },
+  { id: 'ora', label: 'Aura', icon: '◈', path: '/app/ora' },
   { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
   { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
 ];
@@ -43,6 +43,7 @@ const CORE_DOCK: DockItem[] = [
 const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   home: CORE_DOCK,
   ido: CORE_DOCK,
+  ora: CORE_DOCK,
   goals: CORE_DOCK,
   routines: CORE_DOCK,
   dao: CORE_DOCK,
