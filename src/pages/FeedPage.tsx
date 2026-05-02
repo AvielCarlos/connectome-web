@@ -679,6 +679,20 @@ function FeedCard({
   ratings: Record<string, number>;
   savedIds: Set<string>;
 }) {
+  // Inline capability intake card
+  if ((item as any)._isIntakeCard) {
+    const card = (item as any)._intakeCard;
+    return (
+      <CapabilityIntake
+        onComplete={() => {
+          localStorage.setItem(todayCapabilityKey(), JSON.stringify({ completed_at: new Date().toISOString() }));
+          sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1');
+          onSkip(); // advance to next card
+        }}
+      />
+    );
+  }
+
   const spec = item.screen;
   const navigate = useNavigate();
   const domainCfg = getDomainConfig(spec);
@@ -949,6 +963,28 @@ function FeedCard({
   );
 }
 
+function _buildIntakeCard(): any | null {
+  // Build a synthetic ScreenResponse for the first capability question.
+  // This appears as card[0] in the Now feed — never blocks the feed.
+  const card = CAPABILITY_CARDS[0];
+  if (!card) return null;
+  return {
+    screen_spec_db_id: `intake_${card.id}`,
+    screens_today: 0,
+    daily_limit: 10,
+    is_limited: false,
+    _isIntakeCard: true,
+    _intakeCard: card,
+    screen: {
+      screen_id: `intake_${card.id}`,
+      type: 'intake',
+      layout: 'scroll',
+      components: [{ type: 'headline', text: card.title }, { type: 'body', text: card.body }],
+      metadata: { agent: 'CapabilityIntake', domain: null },
+    },
+  };
+}
+
 // ─── Main feed ────────────────────────────────────────────────────────────────
 export default function FeedPage() {
   const navigate = useNavigate();
@@ -983,14 +1019,10 @@ export default function FeedPage() {
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
   const [toastMsg, setToastMsg] = useState('');
   const [collectionPickerCard, setCollectionPickerCard] = useState<any | null>(null);
-  // Future tab bypasses the capability intake entirely
-  // Now tab: skip if already done this session (sessionStorage) or today (localStorage)
   const isFutureFeed = requestedMode === 'future';
-  const [capabilityReady, setCapabilityReady] = useState(() =>
-    isFutureFeed ||
-    !!sessionStorage.getItem(SESSION_CAPABILITY_KEY) ||
-    !!localStorage.getItem(todayCapabilityKey())
-  );
+  // Capability intake never blocks the feed — it shows as the first card inline.
+  // Always start ready so the feed loads immediately.
+  const [capabilityReady] = useState(true);
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
   const [domainFilter, setDomainFilter] = useState<PathDomainFilter>(PATH_DOMAIN_TABS.some((tab) => tab.id === requestedDomain) ? requestedDomain : null);
   const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
@@ -1065,6 +1097,11 @@ export default function FeedPage() {
       if (!nextCards.length) {
         const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined, feedMode).catch(() => null);
         nextCards = single ? [single] : [];
+      }
+      // Prepend context intake card for Now feed if not answered this session
+      if (!isFutureFeed && !sessionStorage.getItem(SESSION_CAPABILITY_KEY) && !localStorage.getItem(todayCapabilityKey())) {
+        const intakeCard = _buildIntakeCard();
+        if (intakeCard) nextCards = [intakeCard, ...nextCards];
       }
       setCards(nextCards);
       setIndex(0);
@@ -1252,7 +1289,7 @@ export default function FeedPage() {
 
   // ─── Loading ─────────────────────────────────────────────────────────────
   if (!capabilityReady) {
-    return <CapabilityIntake onComplete={() => setCapabilityReady(true)} />;
+    return null; // never gate — intake is now inline in the feed
   }
 
   if (loading) {
