@@ -38,7 +38,7 @@ type DockItem = {
 const CORE_DOCK: DockItem[] = [
   { id: 'now', label: 'Now', icon: '⚡', path: '/app/ido' },
   { id: 'future', label: 'Future', icon: '🔭', path: '/app/future' },
-  { id: 'ora', label: 'Ora', icon: '◈', action: 'aura' },
+  { id: 'ora', label: 'Aura', icon: '◈', action: 'aura' },
   { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
   { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
 ];
