@@ -33,19 +33,35 @@ const CAPABILITY_PULSE_VERSION = 'v2';
 
 const CAPABILITY_CARDS = [
   {
+    id: 'goal_current_stage',
+    field: 'goal_current_stage',
+    eyebrow: 'Goal state',
+    title: 'For {goal}, where are you right now?',
+    body: 'Goals describe the future. Aura needs the present-state gap before choosing the next IOO node.',
+    options: ['Just starting', 'Preparing', 'Actively doing', 'Blocked/stuck', 'Recovering / low capacity'],
+  },
+  {
+    id: 'goal_biggest_gap',
+    field: 'goal_biggest_gap',
+    eyebrow: 'Bridge signal',
+    title: 'What is the biggest gap between now and {goal}?',
+    body: 'This tells Aura whether to recommend a tiny action, a bridge step, support, practice, or a resource.',
+    options: ['Time', 'Energy/health', 'Money/resources', 'Skill/confidence', 'People/support', 'Clarity/focus'],
+  },
+  {
     id: 'today_capacity',
     field: 'today_capacity',
-    eyebrow: 'Before the feed',
+    eyebrow: 'Capacity',
     title: 'What can you realistically do today?',
-    body: 'Aura needs your actual capacity before recommending the next move.',
+    body: 'Now cards should fit your actual day, not an idealised version of you.',
     options: ['5 minutes', '15–30 minutes', '1–2 hours', 'A deeper block'],
   },
   {
     id: 'energy_state',
     field: 'current_energy_state',
-    eyebrow: 'iVive signal',
+    eyebrow: 'Energy',
     title: 'Where is your energy right now?',
-    body: 'This changes whether Aura should suggest action, preparation, or restoration.',
+    body: 'This changes whether Aura should suggest action, preparation, connection, or restoration.',
     options: ['Low / need gentleness', 'Steady', 'High / ready to move', 'Scattered / need focus'],
   },
   {
@@ -58,20 +74,20 @@ const CAPABILITY_CARDS = [
     multi: true,
   },
   {
-    id: 'constraint_now',
-    field: 'current_constraint',
-    eyebrow: 'Constraint check',
-    title: 'What would block you from doing something today?',
-    body: 'Aura should bridge the gap instead of pretending the obstacle is not there.',
-    options: ['Time', 'Money', 'Location', 'Energy/health', 'Confidence/skill', 'Nothing major'],
+    id: 'social_bandwidth',
+    field: 'social_bandwidth',
+    eyebrow: 'Social bandwidth',
+    title: 'Do you want this next step to involve people?',
+    body: 'Some goals need connection; some days need solitude.',
+    options: ['Solo only', 'Open to messaging someone', 'Open to meeting people', 'Prefer accountability/support', 'Surprise me'],
   },
   {
-    id: 'desired_mode',
-    field: 'desired_feed_mode',
-    eyebrow: 'Direction',
-    title: 'What kind of next step do you want?',
-    body: 'The feed should connect your current state to a viable next action.',
-    options: ['Improve myself', 'Make progress on work/service', 'Find fun/adventure', 'Recover/rest', 'Surprise me'],
+    id: 'desired_next_step_style',
+    field: 'desired_next_step_style',
+    eyebrow: 'Next move',
+    title: 'What kind of next step would help most?',
+    body: 'Aura will use this to route the Now feed through the IOO graph.',
+    options: ['Tiny win', 'Practical progress', 'Learning/practice', 'Restore/regulate', 'Adventure/novelty', 'Service/connection'],
   },
 ];
 
@@ -274,12 +290,14 @@ function todayCapabilityKey() {
 // Session key — cleared on window refresh, persists across tab switches
 const SESSION_CAPABILITY_KEY = 'ido_capability_session_done';
 
-function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
+function CapabilityIntake({ goalTitle, goalId, onComplete }: { goalTitle?: string | null; goalId?: string; onComplete: (answers: Record<string, string[]>) => void }) {
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState<Record<string, string[]>>({});
   const [saving, setSaving] = useState(false);
   const card = CAPABILITY_CARDS[step];
   const chosen = selected[card.id] || [];
+  const goalLabel = goalTitle || 'your active goal';
+  const title = card.title.replace('{goal}', goalLabel);
 
   const choose = async (option: string) => {
     const nextChosen = card.multi
@@ -292,29 +310,40 @@ function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
   const advance = async (answer = chosen) => {
     if (!answer.length) return;
     setSaving(true);
-    AuraClient.submitDiscoveryAnswer({
-      question_id: `feed_capability_${card.id}`,
-      profile_field: card.field,
-      answer: answer.length === 1 ? answer[0] : answer,
-    }).catch(() => {});
+    const nextSelected = { ...selected, [card.id]: answer };
     AuraClient['client'].post('/api/gamification/checkin', { reason: 'capability_pulse', ref_id: card.id }).catch(() => {});
-    setTimeout(() => {
-      if (step >= CAPABILITY_CARDS.length - 1) {
-        localStorage.setItem(todayCapabilityKey(), JSON.stringify({ completed_at: new Date().toISOString(), answers: { ...selected, [card.id]: answer } }));
-        sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1');
-        onComplete();
-      } else {
-        setStep((s) => s + 1);
+    if (step >= CAPABILITY_CARDS.length - 1) {
+      const answers = Object.fromEntries(
+        CAPABILITY_CARDS.map((c) => [c.field, (nextSelected[c.id] || [])]).filter(([, value]) => Array.isArray(value) && value.length)
+      );
+      try {
+        await AuraClient.submitNowCheckin({ answers, goal_id: goalId, feed_mode: 'now' });
+      } catch {
+        await Promise.allSettled(CAPABILITY_CARDS.map((c) => {
+          const value = nextSelected[c.id];
+          if (!value?.length) return Promise.resolve();
+          return AuraClient.submitDiscoveryAnswer({
+            question_id: `feed_capability_${c.id}`,
+            profile_field: c.field,
+            answer: value.length === 1 ? value[0] : value,
+            goal_id: goalId,
+          });
+        }));
       }
+      localStorage.setItem(todayCapabilityKey(), JSON.stringify({ completed_at: new Date().toISOString(), goal_id: goalId || null, answers: nextSelected }));
+      sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1');
+      onComplete(nextSelected);
       setSaving(false);
-    }, 180);
+    } else {
+      setTimeout(() => { setStep((s) => s + 1); setSaving(false); }, 120);
+    }
   };
 
   return (
     <div style={{ minHeight: '100%', background: 'radial-gradient(circle at top, rgba(0,212,170,0.16), #0a0a0f 58%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 22 }}>
       <div style={{ width: '100%', maxWidth: 460, background: 'rgba(18,18,30,0.88)', border: '1px solid rgba(0,212,170,0.22)', borderRadius: 28, padding: 22, boxShadow: '0 24px 80px rgba(0,0,0,0.45)' }}>
         <div style={{ fontSize: 12, fontWeight: 800, color: '#00d4aa', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>{card.eyebrow} · {step + 1}/{CAPABILITY_CARDS.length}</div>
-        <h1 style={{ margin: 0, fontSize: 26, lineHeight: 1.12, color: '#f8f8fc', letterSpacing: -0.8 }}>{card.title}</h1>
+        <h1 style={{ margin: 0, fontSize: 26, lineHeight: 1.12, color: '#f8f8fc', letterSpacing: -0.8 }}>{title}</h1>
         <p style={{ margin: '12px 0 20px', color: 'rgba(248,248,252,0.58)', fontSize: 15, lineHeight: 1.6 }}>{card.body}</p>
         <div style={{ display: 'grid', gap: 10 }}>
           {card.options.map((option) => {
@@ -338,9 +367,9 @@ function CapabilityIntake({ onComplete }: { onComplete: () => void }) {
         )}
         <div style={{ marginTop: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ color: 'rgba(248,248,252,0.34)', fontSize: 12, lineHeight: 1.55 }}>
-            Aura updates this regularly so cards match what you can actually do.
+            Aura will refresh the Now feed around your goal, energy, constraints, and resources.
           </div>
-          <button onClick={() => { sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1'); onComplete(); }} style={{ background: 'transparent', border: 'none', color: 'rgba(248,248,252,0.3)', fontSize: 12, cursor: 'pointer', flexShrink: 0, marginLeft: 12 }}>
+          <button onClick={() => { sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1'); onComplete(selected); }} style={{ background: 'transparent', border: 'none', color: 'rgba(248,248,252,0.3)', fontSize: 12, cursor: 'pointer', flexShrink: 0, marginLeft: 12 }}>
             Skip
           </button>
         </div>
@@ -757,6 +786,7 @@ function FeedCard({
   onInvite,
   onSaveRequest,
   onSkip,
+  onIntakeComplete,
   ratings,
   savedIds,
 }: {
@@ -767,6 +797,7 @@ function FeedCard({
   onInvite: (item: ScreenResponse, cardData: any) => void;
   onSaveRequest: (card: any) => void;
   onSkip: () => void;
+  onIntakeComplete: () => void;
   ratings: Record<string, number>;
   savedIds: Set<string>;
 }) {
@@ -775,10 +806,11 @@ function FeedCard({
     const card = (item as any)._intakeCard;
     return (
       <CapabilityIntake
+        goalTitle={(item as any)._goalTitle}
+        goalId={(item as any)._goalId}
         onComplete={() => {
-          localStorage.setItem(todayCapabilityKey(), JSON.stringify({ completed_at: new Date().toISOString() }));
           sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1');
-          onSkip(); // advance to next card
+          onIntakeComplete();
         }}
       />
     );
@@ -1073,7 +1105,7 @@ function FeedCard({
   );
 }
 
-function _buildIntakeCard(): any | null {
+function _buildIntakeCard(goalTitle?: string | null, goalId?: string): any | null {
   // Build a synthetic ScreenResponse for the first capability question.
   // This appears as card[0] in the Now feed — never blocks the feed.
   const card = CAPABILITY_CARDS[0];
@@ -1085,12 +1117,14 @@ function _buildIntakeCard(): any | null {
     is_limited: false,
     _isIntakeCard: true,
     _intakeCard: card,
+    _goalTitle: goalTitle || null,
+    _goalId: goalId || undefined,
     screen: {
       screen_id: `intake_${card.id}`,
       type: 'intake',
       layout: 'scroll',
       components: [{ type: 'headline', text: card.title }, { type: 'body', text: card.body }],
-      metadata: { agent: 'CapabilityIntake', domain: null },
+      metadata: { agent: 'CapabilityIntake', domain: null, goal_id: goalId || null, goal_title: goalTitle || null },
     },
   };
 }
@@ -1186,15 +1220,18 @@ export default function FeedPage() {
     try {
       const goals = await AuraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
-      const batch = await AuraClient.getNextScreenBatch(5, goalId, undefined, feedContext, feedMode);
+      const focusedGoal = goalId ? goals.find((g: any) => g.id === goalId) : goals.find((g: any) => g.status === 'active') || goals[0];
+      if (focusedGoal?.title) setGoalTitle(focusedGoal.title);
+      const focusedGoalId = goalId || focusedGoal?.id;
+      const batch = await AuraClient.getNextScreenBatch(5, focusedGoalId, undefined, feedContext, feedMode);
       let nextCards = enforceFeedMode(batch, feedMode, preferredCity);
       if (!nextCards.length) {
-        const single = await AuraClient.getNextScreen(feedContext, goalId, undefined, feedMode).catch(() => null);
+        const single = await AuraClient.getNextScreen(feedContext, focusedGoalId, undefined, feedMode).catch(() => null);
         nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
       // Prepend context intake card for Now feed if not answered this session
       if (!isFutureFeed && !sessionStorage.getItem(SESSION_CAPABILITY_KEY) && !localStorage.getItem(todayCapabilityKey())) {
-        const intakeCard = _buildIntakeCard();
+        const intakeCard = _buildIntakeCard(focusedGoal?.title || goalTitle, focusedGoalId);
         if (intakeCard) nextCards = [intakeCard, ...nextCards];
       }
       setCards(nextCards);
@@ -1220,6 +1257,13 @@ export default function FeedPage() {
   useEffect(() => {
     if (capabilityReady) loadInitial();
   }, [capabilityReady, loadInitial]);
+
+  const handleIntakeComplete = useCallback(() => {
+    showToast('Aura updated your Now vector. Refreshing cards…');
+    setCards([]);
+    setIndex(0);
+    setTimeout(() => { loadInitial(); }, 250);
+  }, [loadInitial]);
 
   useEffect(() => {
     const active = cards[index];
@@ -1574,6 +1618,7 @@ export default function FeedPage() {
               onInvite={handleInvite}
               onSaveRequest={handleSaveRequest}
               onSkip={handleSkip}
+              onIntakeComplete={handleIntakeComplete}
               ratings={ratings}
               savedIds={savedIds}
             />

@@ -192,6 +192,7 @@ export interface DiscoveryAnswerPayload {
   question_id: string;
   answer: string | number | string[] | Record<string, any>;
   profile_field: string;
+  goal_id?: string;
 }
 
 export interface IOOExecutionResponse {
@@ -441,6 +442,11 @@ class AuraClientClass {
   async submitDiscoveryAnswer(payload: DiscoveryAnswerPayload): Promise<{ ok: boolean; profile_updated: boolean }> {
     const res = await this.client.post('/api/discovery/answer', payload);
     return res.data as { ok: boolean; profile_updated: boolean };
+  }
+
+  async submitNowCheckin(payload: { answers: Record<string, any>; goal_id?: string; feed_mode?: 'now' | 'future' }): Promise<{ ok: boolean; profile_updated: boolean; vector_mode: string }> {
+    const res = await this.client.post('/api/discovery/now-checkin', payload);
+    return res.data as { ok: boolean; profile_updated: boolean; vector_mode: string };
   }
 
   async executeIOONode(nodeId: string, intent: 'do_now' | 'do_later' = 'do_now'): Promise<IOOExecutionResponse> {
