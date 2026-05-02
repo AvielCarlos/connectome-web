@@ -9,6 +9,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuraClient, ScreenResponse } from '../lib/AuraClient';
 import { AuraCard } from '../components/AuraCard';
 import { CollectionPicker } from '../components/CollectionPicker';
+import { useAuth } from '../context/AuthContext';
 import { useExperiment } from '../lib/useExperiment';
 
 // ─── Domain config ────────────────────────────────────────────────────────────
@@ -138,6 +139,22 @@ function screenText(card: ScreenResponse | null | undefined) {
   return parts.join(' ').toLowerCase();
 }
 
+function cityToken(value?: string | null) {
+  return String(value || '').toLowerCase().split(',')[0].replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function cardCity(card: ScreenResponse | null | undefined) {
+  const metadata: any = card?.screen?.metadata || {};
+  return metadata.city || metadata.location_city || metadata.venue_city || '';
+}
+
+function isNonLocalCard(card: ScreenResponse | null | undefined, preferredCity?: string | null) {
+  const preferred = cityToken(preferredCity);
+  const city = cityToken(cardCity(card));
+  if (!preferred || !city) return false;
+  return preferred !== city && !preferred.includes(city) && !city.includes(preferred);
+}
+
 function isScheduledOpportunityCard(card: ScreenResponse | null | undefined) {
   const metadata: any = card?.screen?.metadata || {};
   if (metadata.starts_at || metadata.event_starts_at) return true;
@@ -153,9 +170,9 @@ function isScheduledOpportunityCard(card: ScreenResponse | null | undefined) {
   return markers.some((marker) => text.includes(marker));
 }
 
-function enforceFeedMode(cards: ScreenResponse[], mode: FeedMode) {
+function enforceFeedMode(cards: ScreenResponse[], mode: FeedMode, preferredCity?: string | null) {
   if (mode === 'future') return cards;
-  return cards.filter((card) => !isScheduledOpportunityCard(card));
+  return cards.filter((card) => !isScheduledOpportunityCard(card) && !isNonLocalCard(card, preferredCity));
 }
 
 function fallbackDeepDive(card: any, spec: any, domain: string) {
@@ -1126,6 +1143,8 @@ export default function FeedPage() {
   const [domainFilter, setDomainFilter] = useState<PathDomainFilter>(PATH_DOMAIN_TABS.some((tab) => tab.id === requestedDomain) ? requestedDomain : null);
   const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizonId>(initialTimeHorizon);
+  const { profile } = useAuth();
+  const preferredCity = profile?.city || profile?.location_city || profile?.profile?.city || profile?.profile?.location_city || localStorage.getItem('connectome_live_location_city') || localStorage.getItem('aura_live_location_city');
 
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
@@ -1200,10 +1219,10 @@ export default function FeedPage() {
       const goals = await AuraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
       const batch = await AuraClient.getNextScreenBatch(5, goalId, domainFilter || undefined, feedContext, feedMode);
-      let nextCards = enforceFeedMode(batch, feedMode);
+      let nextCards = enforceFeedMode(batch, feedMode, preferredCity);
       if (!nextCards.length) {
         const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined, feedMode).catch(() => null);
-        nextCards = enforceFeedMode(single ? [single] : [], feedMode);
+        nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
       // Prepend context intake card for Now feed if not answered this session
       if (!isFutureFeed && !sessionStorage.getItem(SESSION_CAPABILITY_KEY) && !localStorage.getItem(todayCapabilityKey())) {
@@ -1228,7 +1247,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [goalId, domainFilter, feedContext, feedMode]);
+  }, [goalId, domainFilter, feedContext, feedMode, preferredCity]);
 
   useEffect(() => {
     if (capabilityReady) loadInitial();
@@ -1260,10 +1279,10 @@ export default function FeedPage() {
     setLoadingMore(true);
     try {
       const batch = await AuraClient.getNextScreenBatch(3, goalId, domainFilter || undefined, feedContext, feedMode);
-      let nextCards = enforceFeedMode(batch, feedMode);
+      let nextCards = enforceFeedMode(batch, feedMode, preferredCity);
       if (!nextCards.length) {
         const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined, feedMode).catch(() => null);
-        nextCards = enforceFeedMode(single ? [single] : [], feedMode);
+        nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
       if (nextCards.length > 0) {
         setCards((prev) => [...prev, ...nextCards]);
@@ -1275,7 +1294,7 @@ export default function FeedPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, isLimited, goalId, domainFilter, feedContext, feedMode]);
+  }, [loadingMore, isLimited, goalId, domainFilter, feedContext, feedMode, preferredCity]);
 
   const scrollToIndex = useCallback((i: number) => {
     const s = scrollerRef.current;
