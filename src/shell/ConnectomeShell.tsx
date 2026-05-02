@@ -20,11 +20,9 @@ function appLabel(appId: ShellApp) {
   return appById(appId)?.name || 'Aura';
 }
 
-const PATH_DOMAIN_TABS = [
-  { id: '', label: 'All', emoji: '◈', color: '#00d4aa' },
-  { id: 'iVive', label: 'iVive', emoji: '🌱', color: '#10b981' },
-  { id: 'Aventi', label: 'Aventi', emoji: '🚀', color: '#f59e0b' },
-  { id: 'Eviva', label: 'Eviva', emoji: '🌊', color: '#3b82f6' },
+const FEED_MODE_TABS = [
+  { id: 'now', label: 'Now', emoji: '⚡', color: '#00d4aa', path: '/app/ido' },
+  { id: 'future', label: 'Later', emoji: '🔭', color: '#8b5cf6', path: '/app/future' },
 ] as const;
 
 type DockItem = {
@@ -156,16 +154,15 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   }, [profile]);
 
   const dockItems = dockMenus[activeApp] || dockMenus.home || [];
-  const feedParams = new URLSearchParams(location.search);
-  const activeDomain = feedParams.get('domain') || '';
+  const activeFeedMode = location.pathname === '/app/future' ? 'future' : 'now';
 
-  const setFeedDomain = (domain: string) => {
+  const setFeedMode = (mode: 'now' | 'future') => {
     const next = new URLSearchParams(location.search);
-    if (domain) next.set('domain', domain);
-    else next.delete('domain');
+    next.delete('domain');
     next.delete('mode');
     const query = next.toString();
-    navigate(query ? `/app/ido?${query}` : '/app/ido', { replace: true });
+    const basePath = mode === 'future' ? '/app/future' : '/app/ido';
+    navigate(`${basePath}${query ? `?${query}` : ''}`, { replace: true });
   };
 
   const handleDock = (item: DockItem) => {
@@ -198,15 +195,15 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
         </button>
 
         {activeApp === 'ido' ? (
-          <div className="connectome-domain-switch" aria-label="Path domain filter">
-            {PATH_DOMAIN_TABS.map((tab) => {
-              const active = activeDomain === tab.id;
+          <div className="connectome-domain-switch connectome-feed-mode-switch" aria-label="Now or Later feed">
+            {FEED_MODE_TABS.map((tab) => {
+              const active = activeFeedMode === tab.id;
               return (
                 <button
-                  key={tab.id || 'all'}
+                  key={tab.id}
                   type="button"
                   aria-pressed={active}
-                  onClick={() => setFeedDomain(tab.id)}
+                  onClick={() => setFeedMode(tab.id)}
                   style={active ? ({ '--domain-color': tab.color } as React.CSSProperties) : undefined}
                   className={`connectome-domain-switch__item ${active ? 'connectome-domain-switch__item--active' : ''}`}
                 >
