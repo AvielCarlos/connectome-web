@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AppLauncher from './AppLauncher';
@@ -256,17 +257,23 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       )}
 
       <button className="connectome-signout" type="button" onClick={() => { logout(); navigate('/'); }}>Sign out</button>
-      <button
-        type="button"
-        className="connectome-feedback-btn connectome-feedback-btn--floating"
-        data-feedback-widget="true"
-        aria-label="Report a bug or make a suggestion"
-        title="Report a bug or make a suggestion"
-        onClick={() => setFeedbackOpen(true)}
-      >
-        !
-      </button>
-      <GlobalFeedbackButton inlineMode inlineTrigger={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
+      {createPortal(
+        <button
+          type="button"
+          className="connectome-feedback-btn connectome-feedback-btn--floating"
+          data-feedback-widget="true"
+          aria-label="Report a bug or make a suggestion"
+          title="Report a bug or make a suggestion"
+          onClick={() => setFeedbackOpen(true)}
+        >
+          !
+        </button>,
+        document.body,
+      )}
+      {createPortal(
+        <GlobalFeedbackButton inlineMode inlineTrigger={feedbackOpen} onClose={() => setFeedbackOpen(false)} />,
+        document.body,
+      )}
       <AuraOverlay open={auraOpen} onClose={() => setAuraOpen(false)} />
       {locationPromptOpen && (
         <LocationEntryPrompt
