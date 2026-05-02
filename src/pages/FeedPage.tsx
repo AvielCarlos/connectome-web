@@ -80,12 +80,6 @@ function getDomainConfig(spec: any) {
   return DOMAIN_CONFIG[d || ''] || DEFAULT_DOMAIN;
 }
 
-const PATH_DOMAIN_TABS = [
-  { id: 'iVive', label: 'iVive', emoji: '🌱' },
-  { id: 'Aventi', label: 'Aventi', emoji: '🚀' },
-  { id: 'Eviva', label: 'Eviva', emoji: '🌊' },
-] as const;
-type PathDomainFilter = typeof PATH_DOMAIN_TABS[number]['id'] | null;
 type FeedMode = 'now' | 'future';
 
 const TIME_HORIZON_OPTIONS = [
@@ -1118,7 +1112,6 @@ export default function FeedPage() {
 
   const goalId = searchParams.get('goal') || undefined;
   const requestedMode: FeedMode = location.pathname === '/app/future' ? 'future' : 'now';
-  const requestedDomain = searchParams.get('domain') as PathDomainFilter;
   const savedTimeHorizon = (searchParams.get('time') || '30m') as TimeHorizonId;
   const initialTimeHorizon = TIME_HORIZON_OPTIONS.some((item) => item.id === savedTimeHorizon) ? savedTimeHorizon : '30m';
   const [goalTitle, setGoalTitle] = useState<string | null>(null);
@@ -1140,7 +1133,6 @@ export default function FeedPage() {
   // Always start ready so the feed loads immediately.
   const [capabilityReady] = useState(true);
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
-  const [domainFilter, setDomainFilter] = useState<PathDomainFilter>(PATH_DOMAIN_TABS.some((tab) => tab.id === requestedDomain) ? requestedDomain : null);
   const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizonId>(initialTimeHorizon);
   const { profile } = useAuth();
@@ -1159,12 +1151,6 @@ export default function FeedPage() {
     setFeedMode(requestedMode);
   }, [requestedMode]);
 
-  useEffect(() => {
-    const nextDomain = PATH_DOMAIN_TABS.some((tab) => tab.id === requestedDomain) ? requestedDomain : null;
-    setDomainFilter(nextDomain);
-    setCards([]);
-    setIndex(0);
-  }, [requestedDomain]);
 
   useEffect(() => {
     const requestedTime = searchParams.get('time') as TimeHorizonId | null;
@@ -1177,26 +1163,8 @@ export default function FeedPage() {
 
   const feedContext = timeHorizonContext(feedMode, timeHorizon);
 
-  const switchFeedMode = (mode: FeedMode) => {
-    setFeedMode(mode);
-    const next = new URLSearchParams(searchParams);
-    next.set('mode', mode);
-    setSearchParams(next, { replace: true });
-    setCards([]);
-    setIndex(0);
-  };
-
   const updateTimeHorizon = (value: TimeHorizonId) => {
     setTimeHorizon(value);
-    setCards([]);
-    setIndex(0);
-  };
-
-  const switchBranch = (mode: FeedMode) => {
-    const next = new URLSearchParams(searchParams);
-    next.delete('mode');
-    const query = next.toString();
-    navigate(`${mode === 'future' ? '/app/future' : '/app/ido'}${query ? `?${query}` : ''}`, { replace: true });
     setCards([]);
     setIndex(0);
   };
@@ -1218,10 +1186,10 @@ export default function FeedPage() {
     try {
       const goals = await AuraClient.listGoals().catch(() => []);
       setHasGoals(goals.length > 0);
-      const batch = await AuraClient.getNextScreenBatch(5, goalId, domainFilter || undefined, feedContext, feedMode);
+      const batch = await AuraClient.getNextScreenBatch(5, goalId, undefined, feedContext, feedMode);
       let nextCards = enforceFeedMode(batch, feedMode, preferredCity);
       if (!nextCards.length) {
-        const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined, feedMode).catch(() => null);
+        const single = await AuraClient.getNextScreen(feedContext, goalId, undefined, feedMode).catch(() => null);
         nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
       // Prepend context intake card for Now feed if not answered this session
@@ -1247,7 +1215,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [goalId, domainFilter, feedContext, feedMode, preferredCity]);
+  }, [goalId, feedContext, feedMode, preferredCity]);
 
   useEffect(() => {
     if (capabilityReady) loadInitial();
@@ -1278,10 +1246,10 @@ export default function FeedPage() {
     if (loadingMore || isLimited) return;
     setLoadingMore(true);
     try {
-      const batch = await AuraClient.getNextScreenBatch(3, goalId, domainFilter || undefined, feedContext, feedMode);
+      const batch = await AuraClient.getNextScreenBatch(3, goalId, undefined, feedContext, feedMode);
       let nextCards = enforceFeedMode(batch, feedMode, preferredCity);
       if (!nextCards.length) {
-        const single = await AuraClient.getNextScreen(feedContext, goalId, domainFilter || undefined, feedMode).catch(() => null);
+        const single = await AuraClient.getNextScreen(feedContext, goalId, undefined, feedMode).catch(() => null);
         nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
       if (nextCards.length > 0) {
@@ -1294,7 +1262,7 @@ export default function FeedPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, isLimited, goalId, domainFilter, feedContext, feedMode, preferredCity]);
+  }, [loadingMore, isLimited, goalId, feedContext, feedMode, preferredCity]);
 
   const scrollToIndex = useCallback((i: number) => {
     const s = scrollerRef.current;
@@ -1572,41 +1540,6 @@ export default function FeedPage() {
         />
       )}
 
-      {/* iDo vector branches */}
-      <div style={{
-        position: 'absolute', top: 'max(env(safe-area-inset-top), 58px)', left: 14, right: 66, zIndex: 36,
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
-        padding: 5, borderRadius: 999, border: '1px solid rgba(255,255,255,0.12)',
-        background: 'rgba(10,10,15,0.56)', backdropFilter: 'blur(18px)',
-        boxShadow: '0 10px 34px rgba(0,0,0,0.26)',
-      }}>
-        {([
-          { id: 'now' as FeedMode, label: 'Now', icon: '⚡' },
-          { id: 'future' as FeedMode, label: 'Future', icon: '🔭' },
-        ]).map((branch) => {
-          const active = feedMode === branch.id;
-          return (
-            <button
-              key={branch.id}
-              type="button"
-              onClick={() => switchBranch(branch.id)}
-              style={{
-                border: 0,
-                borderRadius: 999,
-                minHeight: 34,
-                background: active ? 'rgba(0,212,170,0.2)' : 'transparent',
-                color: active ? '#bfffee' : 'rgba(248,248,252,0.58)',
-                fontSize: 12,
-                fontWeight: 900,
-                letterSpacing: 0.2,
-              }}
-              aria-pressed={active}
-            >
-              {branch.icon} {branch.label}
-            </button>
-          );
-        })}
-      </div>
 
       {/* Snap scroll container */}
       <div
