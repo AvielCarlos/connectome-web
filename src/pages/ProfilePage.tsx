@@ -78,6 +78,11 @@ export default function ProfilePage() {
   const [savingValues, setSavingValues] = useState(false);
   const [valueSaveStatus, setValueSaveStatus] = useState<string | null>(null);
   const [compassOpen, setCompassOpen] = useState(false);
+  const [vectorsOpen, setVectorsOpen] = useState(false);
+  const [nowVectorPrompt, setNowVectorPrompt] = useState('');
+  const [laterVectorPrompt, setLaterVectorPrompt] = useState('');
+  const [savingVectors, setSavingVectors] = useState(false);
+  const [vectorSaveStatus, setVectorSaveStatus] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [showUpgradePanel, setShowUpgradePanel] = useState(false);
@@ -104,6 +109,8 @@ export default function ProfilePage() {
         setValueScores({ ...DEFAULT_VALUE_SCORES, ...savedValues });
       }
       setTravelModeEnabled(Boolean(p?.profile?.travel_mode_enabled));
+      setNowVectorPrompt(p?.profile?.now_vector_prompt || '');
+      setLaterVectorPrompt(p?.profile?.later_vector_prompt || '');
 
       const cached = localStorage.getItem(`ab_variant_${EXPERIMENT_ID}`) || 'A';
       setCurrentVariant(cached);
@@ -213,6 +220,23 @@ export default function ProfilePage() {
       }
     }
     setSpawning(false);
+  };
+
+  const saveVectorPrompts = async () => {
+    setSavingVectors(true);
+    setVectorSaveStatus(null);
+    try {
+      const updated = await AuraClient.updateProfile({
+        now_vector_prompt: nowVectorPrompt.trim(),
+        later_vector_prompt: laterVectorPrompt.trim(),
+      });
+      setProfile(updated);
+      setVectorSaveStatus('Saved — Aura is rebuilding both vectors.');
+      setVectorsOpen(false);
+    } catch {
+      setVectorSaveStatus('Could not save vectors yet.');
+    }
+    setSavingVectors(false);
   };
 
   const saveValueCompass = async () => {
@@ -496,6 +520,37 @@ export default function ProfilePage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* ── Streak + Milestones + Badges ── */}
           <StreakBadge />
+
+          {/* Now/Later recommendation vectors — user-modable */}
+          <div style={{ background: '#12121a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, overflow: 'hidden' }}>
+            <button onClick={() => setVectorsOpen(o => !o)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 16 }}>◎</span>
+                <span style={{ fontWeight: 800, fontSize: 14, color: '#f8f8fc' }}>Recommendation vectors</span>
+                {!vectorsOpen && <span style={{ fontSize: 11, color: 'rgba(248,248,252,0.35)' }}>Now + Later</span>}
+              </div>
+              <span style={{ fontSize: 14, color: 'rgba(248,248,252,0.35)', transform: vectorsOpen ? 'rotate(180deg)' : 'none' }}>▾</span>
+            </button>
+            {vectorsOpen && (
+              <div style={{ padding: '0 16px 16px', display: 'grid', gap: 12 }}>
+                <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.45)', lineHeight: 1.55 }}>
+                  Now and Later share your values/goals, but use separate vectors. Edit these to steer what Aura recommends.
+                </div>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#00d4aa' }}>Now vector</span>
+                  <textarea value={nowVectorPrompt} onChange={(e) => setNowVectorPrompt(e.target.value)} rows={3} placeholder="What should Aura prioritise when helping me find something to do right now? Energy, time, mood, capabilities…" style={{ width: '100%', resize: 'vertical', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#f8f8fc', padding: 12 }} />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#a78bfa' }}>Later vector</span>
+                  <textarea value={laterVectorPrompt} onChange={(e) => setLaterVectorPrompt(e.target.value)} rows={3} placeholder="What should Aura prioritise for future/later opportunities? Events, courses, travel, big goals, aspirations…" style={{ width: '100%', resize: 'vertical', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#f8f8fc', padding: 12 }} />
+                </label>
+                <button onClick={saveVectorPrompts} disabled={savingVectors} style={{ background: '#8b5cf6', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 12px', fontWeight: 900, cursor: savingVectors ? 'wait' : 'pointer' }}>
+                  {savingVectors ? 'Saving…' : 'Save vectors ✓'}
+                </button>
+                {vectorSaveStatus && <div style={{ fontSize: 12, color: vectorSaveStatus.startsWith('Saved') ? '#34d399' : '#ef4444', textAlign: 'center' }}>{vectorSaveStatus}</div>}
+              </div>
+            )}
+          </div>
 
           {/* Value compass — collapsible */}
           {(() => {
