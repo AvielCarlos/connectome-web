@@ -284,11 +284,17 @@ function ConfettiBurst({ active }: { active: boolean }) {
   );
 }
 
-function todayCapabilityKey() {
-  return `ido_capability_pulse_${CAPABILITY_PULSE_VERSION}_${new Date().toISOString().slice(0, 10)}`;
+function capabilityGoalToken(goalId?: string | null) {
+  return goalId ? `goal_${goalId}` : 'global';
 }
-// Session key — cleared on window refresh, persists across tab switches
-const SESSION_CAPABILITY_KEY = 'ido_capability_session_done';
+
+function todayCapabilityKey(goalId?: string | null) {
+  return `ido_capability_pulse_${CAPABILITY_PULSE_VERSION}_${new Date().toISOString().slice(0, 10)}_${capabilityGoalToken(goalId)}`;
+}
+// Session key — cleared on window refresh, persists across tab switches, goal-aware
+function sessionCapabilityKey(goalId?: string | null) {
+  return `ido_capability_pulse_session_${CAPABILITY_PULSE_VERSION}_${capabilityGoalToken(goalId)}`;
+}
 
 function CapabilityIntake({ goalTitle, goalId, onComplete }: { goalTitle?: string | null; goalId?: string; onComplete: (answers: Record<string, string[]>) => void }) {
   const [step, setStep] = useState(0);
@@ -330,8 +336,8 @@ function CapabilityIntake({ goalTitle, goalId, onComplete }: { goalTitle?: strin
           });
         }));
       }
-      localStorage.setItem(todayCapabilityKey(), JSON.stringify({ completed_at: new Date().toISOString(), goal_id: goalId || null, answers: nextSelected }));
-      sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1');
+      localStorage.setItem(todayCapabilityKey(goalId), JSON.stringify({ completed_at: new Date().toISOString(), goal_id: goalId || null, answers: nextSelected }));
+      sessionStorage.setItem(sessionCapabilityKey(goalId), '1');
       onComplete(nextSelected);
       setSaving(false);
     } else {
@@ -369,7 +375,7 @@ function CapabilityIntake({ goalTitle, goalId, onComplete }: { goalTitle?: strin
           <div style={{ color: 'rgba(248,248,252,0.34)', fontSize: 12, lineHeight: 1.55 }}>
             Aura will refresh the Now feed around your goal, energy, constraints, and resources.
           </div>
-          <button onClick={() => { sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1'); onComplete(selected); }} style={{ background: 'transparent', border: 'none', color: 'rgba(248,248,252,0.3)', fontSize: 12, cursor: 'pointer', flexShrink: 0, marginLeft: 12 }}>
+          <button onClick={() => { sessionStorage.setItem(sessionCapabilityKey(goalId), '1'); onComplete(selected); }} style={{ background: 'transparent', border: 'none', color: 'rgba(248,248,252,0.3)', fontSize: 12, cursor: 'pointer', flexShrink: 0, marginLeft: 12 }}>
             Skip
           </button>
         </div>
@@ -809,7 +815,7 @@ function FeedCard({
         goalTitle={(item as any)._goalTitle}
         goalId={(item as any)._goalId}
         onComplete={() => {
-          sessionStorage.setItem(SESSION_CAPABILITY_KEY, '1');
+          sessionStorage.setItem(sessionCapabilityKey((item as any)._goalId), '1');
           onIntakeComplete();
         }}
       />
@@ -1230,7 +1236,7 @@ export default function FeedPage() {
         nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
       // Prepend context intake card for Now feed if not answered this session
-      if (!isFutureFeed && !sessionStorage.getItem(SESSION_CAPABILITY_KEY) && !localStorage.getItem(todayCapabilityKey())) {
+      if (!isFutureFeed && !sessionStorage.getItem(sessionCapabilityKey(focusedGoalId)) && !localStorage.getItem(todayCapabilityKey(focusedGoalId))) {
         const intakeCard = _buildIntakeCard(focusedGoal?.title || goalTitle, focusedGoalId);
         if (intakeCard) nextCards = [intakeCard, ...nextCards];
       }
