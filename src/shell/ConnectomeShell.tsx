@@ -216,17 +216,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
           <span className="connectome-context-label connectome-context-label--ambient" aria-live="polite">{appLabel(activeApp)}</span>
         )}
 
-        <div className="connectome-status">
-          <button
-            type="button"
-            className="connectome-feedback-btn"
-            data-feedback-widget="true"
-            aria-label="Send feedback"
-            onClick={() => setFeedbackOpen(true)}
-          >
-            !
-          </button>
-        </div>
+        <div className="connectome-status" />
       </header>
 
       <main className={`connectome-main connectome-main--${activeApp}`}>
@@ -265,6 +255,16 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       )}
 
       <button className="connectome-signout" type="button" onClick={() => { logout(); navigate('/'); }}>Sign out</button>
+      <button
+        type="button"
+        className="connectome-feedback-btn connectome-feedback-btn--floating"
+        data-feedback-widget="true"
+        aria-label="Report a bug or make a suggestion"
+        title="Report a bug or make a suggestion"
+        onClick={() => setFeedbackOpen(true)}
+      >
+        !
+      </button>
       <GlobalFeedbackButton inlineMode inlineTrigger={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
       <AuraOverlay open={auraOpen} onClose={() => setAuraOpen(false)} />
       {locationPromptOpen && (
