@@ -434,7 +434,7 @@ body {
 .connectome-brand,
 .connectome-ora-indicator,
 .connectome-launcher-toggle,
-.connectome-status button,
+.connectome-status button:not(.connectome-feedback-btn),
 .connectome-dock__item {
   background: transparent;
   color: inherit;
