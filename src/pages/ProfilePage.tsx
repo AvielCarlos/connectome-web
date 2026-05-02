@@ -77,6 +77,7 @@ export default function ProfilePage() {
   const [valueScores, setValueScores] = useState<Record<string, number>>(DEFAULT_VALUE_SCORES);
   const [savingValues, setSavingValues] = useState(false);
   const [valueSaveStatus, setValueSaveStatus] = useState<string | null>(null);
+  const [compassOpen, setCompassOpen] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [showUpgradePanel, setShowUpgradePanel] = useState(false);
@@ -498,7 +499,6 @@ export default function ProfilePage() {
 
           {/* Value compass — collapsible */}
           {(() => {
-            const [compassOpen, setCompassOpen] = React.useState(false);
             const handleSave = async () => {
               await saveValueCompass();
               setCompassOpen(false);
