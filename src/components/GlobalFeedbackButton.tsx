@@ -6,7 +6,7 @@ import { useToast } from './Toast';
 
 const CATEGORIES: GlobalFeedbackPayload['category'][] = ['Bad Card/Node', 'Malfunction', 'Bug', 'Confusing', 'Idea', 'Design', 'Praise', 'Other'];
 
-export default function GlobalFeedbackButton() {
+export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger, onClose }: { inlineMode?: boolean; inlineTrigger?: boolean; onClose?: () => void } = {}) {
   const { show } = useToast();
   const [open, setOpen] = useState(false);
   const [cpExplainerOpen, setCpExplainerOpen] = useState(false);
@@ -142,21 +142,33 @@ export default function GlobalFeedbackButton() {
     }
   };
 
+  // Trigger from external inlineTrigger prop
+  React.useEffect(() => {
+    if (inlineTrigger) setOpen(true);
+  }, [inlineTrigger]);
+
+  const handleClose = () => {
+    resetAndClose();
+    onClose?.();
+  };
+
   return (
     <>
-      <button
-        type="button"
-        className="global-feedback-fab"
-        data-feedback-widget="true"
-        aria-label="Report bad card or node"
-        title="Report bad card/node or give feedback"
-        onClick={() => setOpen(true)}
-      >
-        !
-      </button>
+      {!inlineMode && (
+        <button
+          type="button"
+          className="global-feedback-fab"
+          data-feedback-widget="true"
+          aria-label="Report bad card or node"
+          title="Report bad card/node or give feedback"
+          onClick={() => setOpen(true)}
+        >
+          !
+        </button>
+      )}
 
       {open && (
-        <div className="global-feedback-modal-backdrop" data-feedback-widget="true" onClick={() => !submitting && resetAndClose()}>
+        <div className="global-feedback-modal-backdrop" data-feedback-widget="true" onClick={() => !submitting && handleClose()}>
           <section
             className="global-feedback-modal"
             role="dialog"
@@ -173,7 +185,7 @@ export default function GlobalFeedbackButton() {
                   <button type="button" onClick={() => setCpExplainerOpen(true)}>What is CP?</button>
                 </p>
               </div>
-              <button type="button" aria-label="Close feedback" onClick={resetAndClose} disabled={submitting}>×</button>
+              <button type="button" aria-label="Close feedback" onClick={handleClose} disabled={submitting}>×</button>
             </div>
 
             <label className="global-feedback-label" htmlFor="global-feedback-message">

@@ -1115,29 +1115,28 @@ body.aura-chat-active.keyboard-open .ora-container {
 }
 
 /* Global in-app feedback loop */
-.global-feedback-fab {
-  position: fixed;
-  right: max(18px, env(safe-area-inset-right));
-  bottom: calc(var(--bottom-nav-height, 80px) + env(safe-area-inset-bottom, 0px) + 18px + var(--keyboard-inset));
-  width: 52px;
-  height: 52px;
+.global-feedback-fab { display: none; } /* FAB replaced by header button */
+
+.connectome-feedback-btn {
+  width: 34px;
+  height: 34px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.18);
   background: linear-gradient(135deg, #2563eb, #38bdf8);
   color: #fff;
-  font-size: 25px;
+  font-size: 18px;
   font-weight: 900;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 14px 36px rgba(37,99,235,0.38), 0 0 0 1px rgba(255,255,255,0.08) inset;
-  z-index: 850;
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  flex-shrink: 0;
 }
-.global-feedback-fab:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 18px 42px rgba(37,99,235,0.48); }
-.global-feedback-fab:focus-visible { outline: 3px solid rgba(125,211,252,0.8); outline-offset: 3px; }
+.connectome-feedback-btn:hover { transform: scale(1.06); box-shadow: 0 6px 18px rgba(37,99,235,0.5); }
+.connectome-feedback-btn:focus-visible { outline: 3px solid rgba(125,211,252,0.8); outline-offset: 3px; }
 
 .global-feedback-modal-backdrop {
   position: fixed;

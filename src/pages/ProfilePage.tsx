@@ -626,23 +626,6 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <Card title="City unlock · Victoria + Vancouver beta">
-            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.62)', lineHeight: 1.65, marginBottom: 12 }}>
-              Aura is expanding the local graph into a BC corridor: Victoria + Vancouver events, classes, products, services, bookings, volunteering, developer channels, and user-created nodes — capped around <strong style={{ color: '#f8f8fc' }}>$1,000/month</strong> instead of crawling the whole web.
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
-              <StatBox label="Corridor cost" value="$1k" color="#00d4aa" />
-              <StatBox label="100 locals" value="~$11.50" color="#f4c26b" />
-              <StatBox label="250 locals" value="~$4.60" color="#34d399" />
-            </div>
-            <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.48)', lineHeight: 1.55, marginBottom: 12 }}>
-              Budget split: ~$600 local opportunity intelligence, ~$250 Victoria/Vancouver developer-programmer outreach, ~$100 community experiments, ~$50 buffer. The shared price can go down as more locals join.
-            </div>
-            <button onClick={() => navigate('/app/ido')} style={{ background: 'rgba(0,212,170,0.16)', color: '#00d4aa', border: '1px solid rgba(0,212,170,0.36)', borderRadius: 10, padding: '9px 12px', fontWeight: 850 }}>
-              Add or explore BC corridor opportunities →
-            </button>
-          </Card>
-
           <Card title="Travel mode">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
               <div>

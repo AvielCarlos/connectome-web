@@ -91,6 +91,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
   const location = useLocation();
   const [auraOpen, setAuraOpen] = useState(false);
   const [launcherOpen, setLauncherOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [locationPromptOpen, setLocationPromptOpen] = useState(false);
   const [locationSyncing, setLocationSyncing] = useState(false);
 
@@ -220,8 +221,14 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
         )}
 
         <div className="connectome-status">
-          <button type="button" className="connectome-avatar" onClick={() => navigate('/app/profile')} aria-label="Open profile">
-            {initials(profile)}
+          <button
+            type="button"
+            className="connectome-feedback-btn"
+            data-feedback-widget="true"
+            aria-label="Send feedback"
+            onClick={() => setFeedbackOpen(true)}
+          >
+            !
           </button>
         </div>
       </header>
@@ -262,7 +269,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       )}
 
       <button className="connectome-signout" type="button" onClick={() => { logout(); navigate('/'); }}>Sign out</button>
-      <GlobalFeedbackButton />
+      <GlobalFeedbackButton inlineMode inlineTrigger={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
       <AuraOverlay open={auraOpen} onClose={() => setAuraOpen(false)} />
       {locationPromptOpen && (
         <LocationEntryPrompt
