@@ -167,6 +167,55 @@ function WeeklyLeaderboard({ items }: { items: any[] }) {
   );
 }
 
+function CPSystemExplainer() {
+  const pillars = [
+    {
+      title: 'What CP means',
+      text: 'Contribution Points recognise useful work: bugs found, ideas clarified, code shipped, design improved, research shared, and mission-building support.',
+    },
+    {
+      title: 'How CP is awarded',
+      text: 'Small in-app feedback earns instant CP. Larger tasks and pull requests get an initial review award, then fuller CP when the work is verified and merged.',
+    },
+    {
+      title: 'Why CP matters',
+      text: 'CP builds contributor reputation, unlocks higher DAO tiers, and helps determine governance weight and future reward participation as the ecosystem matures.',
+    },
+  ];
+
+  return (
+    <section aria-labelledby="dao-cp-system-title" style={{
+      background: 'linear-gradient(135deg, rgba(244,194,107,0.10), rgba(0,212,170,0.07))',
+      border: '1px solid rgba(244,194,107,0.22)',
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 20,
+    }}>
+      <div style={{ color: '#f4c26b', fontSize: 11, fontWeight: 850, letterSpacing: 1, textTransform: 'uppercase' as const, marginBottom: 6 }}>Contribution Points</div>
+      <h2 id="dao-cp-system-title" style={{ fontSize: 18, lineHeight: 1.2, margin: '0 0 8px', letterSpacing: -0.3 }}>How the DAO CP system works</h2>
+      <p style={{ fontSize: 13, lineHeight: 1.55, color: 'rgba(248,248,252,0.68)', margin: '0 0 14px' }}>
+        CP is Connectome’s contribution memory. It makes invisible help visible, routes trust toward people who keep showing up, and keeps ownership tied to verified value created.
+      </p>
+      <div style={{ display: 'grid', gap: 10 }}>
+        {pillars.map((pillar) => (
+          <div key={pillar.title} style={{
+            background: 'rgba(10,10,15,0.38)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 12,
+            padding: 12,
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4 }}>{pillar.title}</div>
+            <div style={{ fontSize: 12, lineHeight: 1.5, color: 'rgba(248,248,252,0.6)' }}>{pillar.text}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: 12, fontSize: 12, lineHeight: 1.5, color: 'rgba(248,248,252,0.52)' }}>
+        CP is not a cash balance or guaranteed payout. It is a transparent reputation and governance signal designed to evolve with member review.
+      </div>
+    </section>
+  );
+}
+
 function HowItWorks() {
   return (
     <div style={{
@@ -526,6 +575,7 @@ export default function DAOPage() {
       </div>
 
       <DAOStatusCard cp={cpBalance} tier={daoTier} rank={currentRank} />
+      <CPSystemExplainer />
       <WeeklyLeaderboard items={weeklyLeaderboard} />
       <HowItWorks />
       <ActiveProposals proposals={proposals} />
