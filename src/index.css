@@ -943,7 +943,8 @@ body.keyboard-open .global-feedback-fab {
 .ora-overlay__typing span { width: 7px; height: 7px; border-radius: 999px; background: #00d4aa; animation: bounce 1.2s ease-in-out infinite; }
 .ora-overlay__typing span:nth-child(2) { animation-delay: 0.15s; }
 .ora-overlay__typing span:nth-child(3) { animation-delay: 0.3s; }
-.ora-overlay__quick-actions { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 14px; }
+.ora-overlay__quick-actions { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 0 20px 14px; }
+.ora-overlay__quick-context { flex: 0 0 auto; min-height: 28px; display: inline-flex; align-items: center; padding: 0 10px; border-radius: 999px; background: rgba(0,212,170,0.12); color: rgba(0,212,170,0.92); border: 1px solid rgba(0,212,170,0.18); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 .ora-overlay__quick-actions button { flex: 0 0 auto; min-height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.07); color: rgba(248,248,252,0.78); border: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
 .ora-overlay__composer { display: flex; gap: 10px; padding: 16px 20px max(18px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,0.08); }
 .ora-overlay__composer input { border-radius: 999px; background: rgba(255,255,255,0.07); }
