@@ -828,7 +828,21 @@ function FeedCard({
   const currentRating = ratings[item.screen_spec_db_id] ?? 0;
   const [showDetail, setShowDetail] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [engagementSeconds, setEngagementSeconds] = useState(0);
   const isSaved = savedIds.has(item.screen_spec_db_id);
+
+  useEffect(() => {
+    if (!active) {
+      setEngagementSeconds(0);
+      return;
+    }
+    const startedAtMs = monotonicNowMs();
+    setEngagementSeconds(0);
+    const intervalId = window.setInterval(() => {
+      setEngagementSeconds(Math.floor((monotonicNowMs() - startedAtMs) / 1000));
+    }, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [active, item.screen_spec_db_id]);
 
   // Extract card data
   const specAny = spec as any;
@@ -967,6 +981,12 @@ function FeedCard({
         )}
 
         {review && <div style={{ display: 'inline-flex', width: 'fit-content', gap: 7, alignItems: 'center', background: 'rgba(0,0,0,0.42)', border: '1px solid rgba(244,194,107,0.28)', color: '#f4c26b', borderRadius: 999, padding: '7px 11px', fontSize: 12, fontWeight: 900 }}><span>{review.stars}</span><span>{review.label}</span>{review.reviewCount && <span style={{ color: 'rgba(248,248,252,0.48)' }}>({review.reviewCount})</span>}</div>}
+
+        {active && engagementSeconds >= 10 && (
+          <div aria-label={`Exploring this card for ${engagementSeconds} seconds`} style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: 7, background: 'rgba(0,212,170,0.12)', backdropFilter: 'blur(8px)', border: `1px solid ${color}55`, borderRadius: 999, padding: '7px 11px', color, fontSize: 12, fontWeight: 900 }}>
+            <span>◷</span><span>Exploring · {engagementSeconds}s</span>
+          </div>
+        )}
 
         <div style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: 7, background: 'rgba(0,0,0,0.42)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 999, padding: '8px 13px', color: 'rgba(248,248,252,0.66)', fontSize: 12, fontWeight: 800 }}>
           <span>↑</span> Details, links, and how to do it
@@ -1136,6 +1156,11 @@ function _buildIntakeCard(goalTitle?: string | null, goalId?: string): any | nul
 const FEED_INITIAL_PREFETCH_COUNT = 12;
 const FEED_LOAD_MORE_COUNT = 8;
 const FEED_PREFETCH_THRESHOLD = 5;
+const MAX_TIME_ON_SCREEN_MS = 30 * 60 * 1000;
+
+function monotonicNowMs() {
+  return typeof performance !== 'undefined' ? performance.now() : Date.now();
+}
 
 // ─── Main feed ────────────────────────────────────────────────────────────────
 export default function FeedPage() {
@@ -1181,6 +1206,7 @@ export default function FeedPage() {
   const touchStartY = useRef<number | null>(null);
   const touchStartX = useRef<number | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const activeCardViewRef = useRef<{ id: string; startedAtMs: number } | null>(null);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -1276,6 +1302,7 @@ export default function FeedPage() {
   useEffect(() => {
     const active = cards[index];
     if (!active) return;
+    activeCardViewRef.current = { id: active.screen_spec_db_id, startedAtMs: monotonicNowMs() };
     try {
       const spec: any = active.screen || {};
       const cardData = spec.card_data || {};
@@ -1363,6 +1390,12 @@ export default function FeedPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [goNext, goPrev]);
 
+  const timeOnActiveCardMs = useCallback((screenId?: string) => {
+    const activeView = activeCardViewRef.current;
+    if (!activeView || (screenId && activeView.id !== screenId)) return 0;
+    return Math.max(0, Math.min(MAX_TIME_ON_SCREEN_MS, Math.round(monotonicNowMs() - activeView.startedAtMs)));
+  }, []);
+
   const handleRate = async (screenId: string, rating: number) => {
     setRatings((prev) => ({ ...prev, [screenId]: rating }));
     const card = cards[index];
@@ -1371,7 +1404,7 @@ export default function FeedPage() {
       await AuraClient.submitFeedback({
         screen_spec_id: screenId,
         rating,
-        time_on_screen_ms: 0,
+        time_on_screen_ms: timeOnActiveCardMs(screenId),
         exit_point: 'rate',
         completed: true,
       });
@@ -1388,7 +1421,7 @@ export default function FeedPage() {
     AuraClient.submitFeedback({
       screen_spec_id: item.screen_spec_db_id,
       rating: 5,
-      time_on_screen_ms: 0,
+      time_on_screen_ms: timeOnActiveCardMs(item.screen_spec_db_id),
       exit_point: 'do_now',
       completed: true,
       metadata: {
@@ -1424,7 +1457,7 @@ export default function FeedPage() {
     if (card) {
       AuraClient.submitFeedback({
         screen_spec_id: card.screen_spec_db_id,
-        rating: 1, time_on_screen_ms: 0,
+        rating: 1, time_on_screen_ms: timeOnActiveCardMs(card.screen_spec_db_id),
         exit_point: 'skip', completed: false,
         metadata: {
           learning_signal: 'skill_or_fit_mismatch',
