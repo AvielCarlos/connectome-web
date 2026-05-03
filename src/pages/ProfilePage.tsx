@@ -47,7 +47,7 @@ export default function ProfilePage() {
   const [runningAutonomy, setRunningAutonomy] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsLoading, setProposalsLoading] = useState(false);
-  const [section, setSection] = useState<'profile' | 'ab' | 'experiments' | 'system' | 'google' | 'surfaces' | 'council' | 'dashboard'>('profile');
+  const [section, setSection] = useState<'profile' | 'ab' | 'experiments' | 'system' | 'google' | 'surfaces' | 'council' | 'dashboard' | 'admin'>('profile');
   const [dashboard, setDashboard] = useState<any>(null);
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [allExperiments, setAllExperiments] = useState<any>(null);
@@ -94,6 +94,9 @@ export default function ProfilePage() {
   const [driveLoading, setDriveLoading] = useState(false);
   const [driveAction, setDriveAction] = useState<string | null>(null);
   const [driveMessage, setDriveMessage] = useState<string | null>(null);
+  const [adminTier, setAdminTier] = useState<'free' | 'explorer' | 'sovereign'>('sovereign');
+  const [adminTierSaving, setAdminTierSaving] = useState(false);
+  const [adminTierMessage, setAdminTierMessage] = useState<string | null>(null);
 
   // ── A/B hooks must be BEFORE any conditional returns (Rules of Hooks) ──
   const { variant: upgradeHeadlineVariant, trackEvent: trackUpgradeHeadline } = useExperiment('upgrade_headline');
@@ -161,6 +164,28 @@ export default function ProfilePage() {
       }, 3000);
     } catch {
       setRunningAgent(null);
+    }
+  };
+
+  const switchAdminTierAndResetFeed = async () => {
+    if (!isAdmin || profile?.email?.toLowerCase() !== 'carlosandromeda8@gmail.com') return;
+    setAdminTierSaving(true);
+    setAdminTierMessage(null);
+    try {
+      const adminToken = localStorage.getItem('admin_token') || 'connectome-admin-secret';
+      const res = await AuraClient['client'].post('/api/admin/users/tier-reset', {
+        email: 'carlosandromeda8@gmail.com',
+        tier: adminTier,
+        reset_feed: true,
+      }, { headers: { 'X-Admin-Token': adminToken } });
+      localStorage.removeItem('aura_active_feedback_context');
+      setAdminTierMessage(`Switched to ${res.data?.tier || adminTier}; feed counter reset.`);
+      await refreshProfile().catch(() => null);
+      await load();
+    } catch (err: any) {
+      setAdminTierMessage(err?.response?.data?.detail || 'Could not switch tier/reset feed.');
+    } finally {
+      setAdminTierSaving(false);
     }
   };
 
@@ -569,6 +594,7 @@ export default function ProfilePage() {
               : section === 'system' ? 'System'
               : section === 'council' ? 'Executive Council'
               : section === 'dashboard' ? 'Dashboard'
+              : section === 'admin' ? 'Admin Controls'
               : section}
           </span>
         </div>
@@ -846,9 +872,12 @@ export default function ProfilePage() {
             <MenuRow icon="📱" label="Get the App" sublabel="Add Connectome to your home screen" onClick={() => {}} last />
           </div>
 
-          {/* Admin/debug controls intentionally stay out of the user-facing profile.
-              Aura/Nea should surface operational/admin intelligence proactively instead of
-              asking Avi to babysit dashboard panels from inside Connectome. */}
+          {isAdmin && profile?.email?.toLowerCase() === 'carlosandromeda8@gmail.com' && (
+            <div style={{ background: '#12121e', border: '1px solid rgba(168,85,247,0.18)', borderRadius: 16, overflow: 'hidden' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(168,85,247,0.8)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>Admin</div>
+              <MenuRow icon="⚙️" label="Tier testing & feed reset" sublabel="Switch free / Explorer / Sovereign and reset Path Feed count" onClick={() => setSection('admin')} last />
+            </div>
+          )}
 
           {/* ── Sign Out ── */}
           <button onClick={handleLogout} style={{
@@ -1419,6 +1448,43 @@ export default function ProfilePage() {
               >↺ Refresh Council Data</button>
             </>
           )}
+        </div>
+      )}
+
+      {/* ── Admin tier testing section ── */}
+      {section === 'admin' && isAdmin && profile?.email?.toLowerCase() === 'carlosandromeda8@gmail.com' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Card title="Tier testing & feed reset">
+            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.55)', lineHeight: 1.6, marginBottom: 14 }}>
+              Switch your account between tiers to test upgrade gates, then reset the Path Feed counter so the next feed load starts fresh.
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
+              {(['free', 'explorer', 'sovereign'] as const).map((tierOption) => (
+                <button
+                  key={tierOption}
+                  onClick={() => setAdminTier(tierOption)}
+                  disabled={adminTierSaving}
+                  style={{
+                    padding: '10px 8px', borderRadius: 10,
+                    border: `1px solid ${adminTier === tierOption ? 'rgba(0,212,170,0.65)' : 'rgba(255,255,255,0.1)'}`,
+                    background: adminTier === tierOption ? 'rgba(0,212,170,0.18)' : 'rgba(255,255,255,0.05)',
+                    color: adminTier === tierOption ? '#00d4aa' : 'rgba(248,248,252,0.74)',
+                    fontWeight: 900, fontSize: 12, textTransform: 'uppercase', cursor: adminTierSaving ? 'wait' : 'pointer',
+                  }}
+                >
+                  {tierOption}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={switchAdminTierAndResetFeed}
+              disabled={adminTierSaving}
+              style={{ width: '100%', padding: '12px', borderRadius: 12, background: '#00d4aa', border: 'none', color: '#06110f', fontWeight: 900, cursor: adminTierSaving ? 'wait' : 'pointer' }}
+            >
+              {adminTierSaving ? 'Switching…' : `Switch to ${adminTier} + reset feed`}
+            </button>
+            {adminTierMessage && <div style={{ marginTop: 10, fontSize: 12, color: adminTierMessage.startsWith('Could') ? '#f87171' : '#34d399', textAlign: 'center' }}>{adminTierMessage}</div>}
+          </Card>
         </div>
       )}
 

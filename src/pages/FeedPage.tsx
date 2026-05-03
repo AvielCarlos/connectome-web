@@ -1245,7 +1245,7 @@ export default function FeedPage() {
       setCards(nextCards);
       setIndex(0);
       if (nextCards.length > 0) {
-        setIsLimited(nextCards[nextCards.length - 1].is_limited);
+        setIsLimited(false);
         setDailyLimit(nextCards[nextCards.length - 1].daily_limit);
       } else {
         setError('Aura could not prepare cards yet. Try again in a moment.');
@@ -1295,7 +1295,7 @@ export default function FeedPage() {
   }, [cards, index]);
 
   const loadMore = useCallback(async () => {
-    if (loadingMore || isLimited) return;
+    if (loadingMore) return;
     setLoadingMore(true);
     try {
       const batch = await AuraClient.getNextScreenBatch(FEED_LOAD_MORE_COUNT, goalId, undefined, feedContext, feedMode);
@@ -1306,7 +1306,7 @@ export default function FeedPage() {
       }
       if (nextCards.length > 0) {
         setCards((prev) => [...prev, ...nextCards]);
-        setIsLimited(nextCards[nextCards.length - 1].is_limited);
+        setIsLimited(false);
         setDailyLimit(nextCards[nextCards.length - 1].daily_limit);
       }
     } catch (e: any) {
@@ -1314,7 +1314,7 @@ export default function FeedPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, isLimited, goalId, feedContext, feedMode, preferredCity]);
+  }, [loadingMore, goalId, feedContext, feedMode, preferredCity]);
 
   const scrollToIndex = useCallback((i: number) => {
     const s = scrollerRef.current;
