@@ -13,7 +13,7 @@ import { useAuth } from '../context/AuthContext';
 import { useExperiment } from '../lib/useExperiment';
 
 // ─── Domain config ────────────────────────────────────────────────────────────
-function normalizeDomain(domain?: string) { return domain === 'Rest' ? 'iVive' : domain; }
+function normalizeDomain(domain?: string) { return domain === 'Rest' ? 'iVive' : domain; } // legacy Rest cards render as iVive; Rest is an iVive aspect.
 
 const DOMAIN_CONFIG: Record<string, { color: string; gradient: string; emoji: string }> = {
   iVive:   { color: '#10b981', gradient: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #0a0a0f 100%)', emoji: '🌱' },

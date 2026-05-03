@@ -401,7 +401,7 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     visibleToUser: false,
     soon: true,
     permissions: ['health', 'memory', 'notifications'],
-    description: 'Ontology domain inside the IOO neural graph: body, mind, soul, creativity, finances, habits, sleep, rest, and recovery.',
+    description: 'Ontology domain inside the IOO neural graph: body, mind, soul, creativity, finances, habits, and the rest/recovery aspect of iVive.',
     purpose: 'Not a standalone app for now. Used as graph metadata for readiness, bridge nodes, and pathway reasoning.',
   },
   {

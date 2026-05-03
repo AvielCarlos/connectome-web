@@ -125,7 +125,7 @@ Examples (canonical predicates):
 - **Eviva 🌊** — Contributing to and receiving from the collective: work, missions, services, products, civic life.
 - **Aventi 🚀** — What makes life feel alive: adventures, events, dating, friendships, spontaneity.
 
-Rest is **substrate**, not a domain. It can surface inside iVive as recovery/sleep optimization, biometrics-driven rest nudges, and practical tools like a Pomodoro/rest timer — but not as a fourth fulfilment domain.
+Rest is an **aspect of iVive**, not a separate domain. It surfaces through recovery/sleep optimization, biometrics-driven rest nudges, nervous-system regulation, and practical tools like Pomodoro/rest timers — all inside iVive.
 
 iVive ↔ Eviva gating: Eviva opportunities can require iVive readiness; Ora spawns the bridge nodes.
 
@@ -139,7 +139,7 @@ iVive ↔ Eviva gating: Eviva opportunities can require iVive readiness; Ora spa
 - **Journal is scrapped as a primary app/surface.** Reflection may still exist as background memory capture or an Ora conversation mode, but the product mentality is action-oriented: delegate it, plan it, or ditch it.
 
 ### Domain apps
-- **iVive** — vitality OS, including sleep/recovery/rest optimization as a surfaced lens.
+- **iVive** — vitality OS, including sleep, recovery, and rest as first-class aspects.
 - **Eviva** — civilization-serving (Serve + Discover).
 - **Aventi** — a domain of human activity and an external app we are developing. It lives at `aventi.app` now and eventually merges into the AIOS.
 
@@ -237,8 +237,8 @@ Single Profile app/tab opened from the top-right corner across every app. It con
 ### F. Connectome visibility — DECIDED
 Keep Connectome silent for the most part. Use it only when required to make the architecture make sense (architecture docs, investor/partner language, deep product explanation, API/infrastructure contexts). Avoid it in ordinary app chrome/auth/user flows.
 
-### G. Rest as substrate — DECIDED
-Rest remains substrate, not a fourth domain. It can surface in iVive UI through sleep/recovery optimization, biometric nudges, Pomodoro/rest timers, and readiness checks.
+### G. Rest as an iVive aspect — DECIDED
+Rest belongs inside iVive as a first-class aspect, not as a fourth domain. It surfaces through sleep/recovery optimization, biometric nudges, Pomodoro/rest timers, nervous-system regulation, and readiness checks.
 
 ### H. Memory framing — DECIDED AS EXPERIMENT
 A/B test memory framing:
@@ -264,7 +264,7 @@ Model individual people first. Future linking supports partners, family, friends
 - Main ordinary-user brand: **Aura**. **Connectome** may be visible, but should not dominate ordinary app chrome; it is primarily the orchestration AIOS underneath.
 - **iDo** currently names the Path Feed, but can evolve into a broader fulfilment interface set or full life AIOS if that tests/systematizes best.
 - **IOO** is internal language. Users see Path Maps / Life Maps / tested front-end language.
-- **Rest** folds under **iVive** as substrate/mode, never a fourth top-level domain.
+- **Rest** folds under **iVive** as a first-class aspect/mode, never a fourth top-level domain.
 - **Nea services** are separate Ascension Technologies offerings, not part of ordinary Aura/Connectome/iDo consumer UX.
 - Path top-domain filter direction: iVive center-left, Aventi center, Eviva center-right.
 - Bottom nav baseline direction: Path, Goals, AURA, Routines, Profile; continuously test variants and retain only what drives return/use or is required for system functionality.

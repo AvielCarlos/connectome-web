@@ -22,7 +22,7 @@ const STARTERS = [
 ];
 
 function domainConfig(domain?: string) {
-  const normalized = domain === 'Rest' ? 'iVive' : domain;
+  const normalized = domain === 'Rest' ? 'iVive' : domain; // legacy Rest maps into iVive; Rest is an iVive aspect.
   return DOMAIN_CONFIG[normalized || ''] || { emoji: '◈', color: '#00d4aa', label: 'Path' };
 }
 
