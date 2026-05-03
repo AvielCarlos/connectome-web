@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AuraClient } from '../lib/AuraClient';
+import { useLocation } from 'react-router-dom';
+import { AuraClient, type AuraChatAction } from '../lib/AuraClient';
 
-type Message = { id: string; role: 'user' | 'ora'; content: string };
+type Message = { id: string; role: 'user' | 'ora'; content: string; actions?: AuraChatAction[] };
 
 interface AuraOverlayProps {
   open: boolean;
@@ -11,6 +12,8 @@ interface AuraOverlayProps {
 const quickActions = ['Navigate my path', "What's my IOO next step?", 'Show my life map'];
 
 export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
+  const location = useLocation();
+  const quickActionContext = location.pathname.startsWith('/app/goals') ? 'Goals page' : location.pathname.startsWith('/app/ido') ? 'Path Feed page' : 'Aura overlay';
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'opening',
@@ -48,8 +51,11 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
         role: m.role === 'ora' ? 'assistant' : 'user',
         content: m.content,
       }));
-      const res = await AuraClient.chat(text, history);
-      setMessages((prev) => [...prev, { id: `${Date.now()}-ora`, role: 'ora', content: res.reply }]);
+      const res = await AuraClient.chat(text, history, {
+        route: `${location.pathname}${location.search}${location.hash}`,
+        app_context: { app: quickActionContext, page: location.pathname },
+      });
+      setMessages((prev) => [...prev, { id: `${Date.now()}-ora`, role: 'ora', content: res.reply, actions: res.suggested_actions || [] }]);
     } catch {
       setMessages((prev) => [...prev, {
         id: `${Date.now()}-fallback`,
@@ -59,6 +65,44 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChatAction = async (action: AuraChatAction) => {
+    if (loading) return;
+    if (action.action === 'create_goal' && action.payload?.title) {
+      setLoading(true);
+      try {
+        const goal = await AuraClient.createGoal(
+          String(action.payload.title),
+          action.payload.description ? String(action.payload.description) : undefined,
+          action.payload.domain ? String(action.payload.domain) : undefined,
+        );
+        setMessages((prev) => [...prev, {
+          id: `${Date.now()}-goal-created`,
+          role: 'ora',
+          content: `Done — I created the goal “${goal.title}”. I can break it down into a path next.`,
+          actions: [{ label: 'Break it into steps', action: 'chat_prompt', prompt: `Break my new goal “${goal.title}” into a practical path with the smallest next action first.` }],
+        }]);
+      } catch {
+        setMessages((prev) => [...prev, { id: `${Date.now()}-goal-error`, role: 'ora', content: 'I could not create that goal just now. Try again, or ask me to revise it first.' }]);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+    if (action.action === 'sync_drive') {
+      setLoading(true);
+      try {
+        await AuraClient.syncGoogleDrive();
+        setMessages((prev) => [...prev, { id: `${Date.now()}-drive-sync`, role: 'ora', content: 'Drive sync started. Ask me again in a moment and I’ll use the refreshed context.' }]);
+      } catch {
+        setMessages((prev) => [...prev, { id: `${Date.now()}-drive-sync-error`, role: 'ora', content: 'I could not sync Drive from here. Check Profile → Google Drive permissions/privacy, then try again.' }]);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+    if (action.prompt) sendMessage(action.prompt);
   };
 
   const handlePointerDown = (event: React.PointerEvent) => {
@@ -92,7 +136,23 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
           {messages.map((message) => (
             <div key={message.id} className={`ora-overlay__message ora-overlay__message--${message.role}`}>
               {message.role === 'ora' && <span className="ora-orb ora-orb--small" />}
-              <div>{message.content}</div>
+              <div>
+                <div>{message.content}</div>
+                {message.role === 'ora' && Boolean(message.actions?.length) && (
+                  <div className="ora-overlay__message-actions" aria-label="Aura suggested actions">
+                    {message.actions!.map((action, index) => (
+                      <button
+                        key={`${message.id}:${index}:${action.label}`}
+                        type="button"
+                        onClick={() => handleChatAction(action)}
+                        disabled={loading}
+                      >
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
           {loading && (
