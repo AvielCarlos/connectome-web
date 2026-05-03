@@ -21,7 +21,7 @@ export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger
     if (!open) return;
     const id = window.setTimeout(() => textareaRef.current?.focus(), 80);
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !submitting) setOpen(false);
+      if (event.key === 'Escape' && !submitting) closeFeedback();
     };
     document.addEventListener('keydown', onKeyDown);
     return () => {
@@ -29,6 +29,15 @@ export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [open, submitting]);
+
+  const closeFeedback = (notifyParent = true) => {
+    setOpen(false);
+    setMessage('');
+    setCategory('Bad Card/Node');
+    setIncludeScreenshot(true);
+    setError(null);
+    if (notifyParent) onClose?.();
+  };
 
   const captureScreenshot = async () => {
     if (!includeScreenshot) return null;
@@ -61,14 +70,6 @@ export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger
     if (detail) return typeof detail === 'string' ? detail : 'Could not send feedback. Please try again.';
     if (err?.code === 'ECONNABORTED') return 'Feedback timed out. Retrying without screenshot may help.';
     return 'Could not send feedback. Please try again.';
-  };
-
-  const resetAndClose = () => {
-    setOpen(false);
-    setMessage('');
-    setCategory('Bad Card/Node');
-    setIncludeScreenshot(true);
-    setError(null);
   };
 
   const handleSubmit = async () => {
@@ -134,7 +135,7 @@ export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger
 
       if (res.cp_earned) show(`Report sent +${res.cp_earned} CP`, 'success');
       else show(res.message || 'Report sent +10 CP', 'success');
-      resetAndClose();
+      closeFeedback();
     } catch (err: any) {
       setError(errorMessage(err));
     } finally {
@@ -148,8 +149,7 @@ export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger
   }, [inlineTrigger]);
 
   const handleClose = () => {
-    resetAndClose();
-    onClose?.();
+    closeFeedback();
   };
 
   return (
