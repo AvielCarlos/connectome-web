@@ -3,7 +3,7 @@ import { FEED_SURFACES } from '../runtime/ontology';
 
 const domains = [
   { title: 'Biometrics', body: 'HRV, sleep, recovery, energy, mood, focus, and biomarker signals in one readiness layer.' },
-  { title: 'Sleep & Recovery', body: 'Rest is treated as substrate — nudges, protocols, and recovery windows that make action sustainable.' },
+  { title: 'Sleep & Recovery', body: 'Rest is a first-class iVive aspect — nudges, protocols, and recovery windows that make action sustainable.' },
   { title: 'Pomodoro Rest Loops', body: 'Work/rest cycles that protect nervous-system capacity instead of pushing endless output.' },
   { title: 'Vitality Path', body: 'Physical health, mental resilience, inner world, creativity, finances, and longevity as one growth path.' },
 ];
@@ -19,7 +19,7 @@ export default function iVivePage() {
     <section className="meta-app-page meta-app-page--ivive">
       <div className="meta-app-page__glow" aria-hidden="true" />
       <header className="meta-app-page__hero">
-        <span className="meta-app-page__eyebrow">Domain feed · readiness substrate</span>
+        <span className="meta-app-page__eyebrow">Domain feed · rest & readiness</span>
         <h1>iVive 🌱</h1>
         <p>Your vitality OS — sleep, recovery, biometrics, rest loops, and human readiness.</p>
       </header>
