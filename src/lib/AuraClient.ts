@@ -366,7 +366,7 @@ class AuraClientClass {
 
   async getNextScreenBatch(count: number, goalId?: string, domain?: string, context?: string, feedMode?: 'now' | 'future' | 'path'): Promise<ScreenResponse[]> {
     try {
-      const body: Record<string, any> = { count: Math.min(count, 5) };
+      const body: Record<string, any> = { count: Math.min(Math.max(count, 1), 20) };
       if (goalId) body.goal_id = goalId;
       if (domain) body.domain = domain;
       if (context) body.context = context;
