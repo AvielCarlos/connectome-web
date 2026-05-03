@@ -486,7 +486,14 @@ export default function DAOPage() {
   const [toast, setToast] = useState('');
   const isLoggedIn = authStorage.isAuthenticated();
 
-  const cpBalance = profile?.total_dao_cp ?? profile?.contributor?.cp_balance ?? 0;
+  const cpBalance = Number(
+    profile?.total_dao_cp
+    ?? profile?.profile?.total_dao_cp
+    ?? profile?.cp_balance
+    ?? profile?.profile?.cp_balance
+    ?? profile?.contributor?.cp_balance
+    ?? 0
+  );
 
   useEffect(() => {
     Promise.all([
