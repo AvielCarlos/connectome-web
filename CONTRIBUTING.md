@@ -1,6 +1,6 @@
 # Contributing to Connectome Web
 
-Connectome Web is the interface for Ora, iDo, and the Ascension Technologies contribution economy. Contributions should make the AI OS clearer, calmer, more useful, or easier to build on.
+Connectome Web is the interface for Aura, Connectome, and the Ascension Technologies contribution economy. Contributions should make the AI OS clearer, calmer, more useful, or easier to build on.
 
 ## Local setup
 
@@ -17,6 +17,10 @@ Before opening a PR, run:
 npm run build
 ```
 
+## No-spam growth principle
+
+Growth work should improve inbound/public/owned surfaces: onboarding, SEO pages, contribution paths, shareable product proof, analytics, and referral loops. Do not add cold DM/email scraping or bulk outreach mechanics. The current growth target is 10 new users/day through trustworthy channels.
+
 ## How to pick work
 
 1. Browse open issues.
@@ -28,7 +32,7 @@ npm run build
 
 - **Frontend/product** — React surfaces, routes, state, user flows, responsive polish.
 - **Design systems** — shared components, layout primitives, visual consistency, accessibility.
-- **Agent UX** — Ora overlays, contextual actions, IOO progress states, agent handoffs.
+- **Agent UX** — Aura overlays, contextual actions, IOO progress states, agent handoffs.
 - **Growth engineering** — onboarding analytics, contribution funnel, referral loops, activation metrics.
 - **DAO/contribution UX** — CP visibility, leaderboards, steward pathways, contribution submission.
 - **Docs/devex** — setup guides, architecture notes, examples, issue quality.
@@ -59,6 +63,6 @@ CP is awarded after review based on impact, quality, maintainability, and missio
 
 - Make powerful AI feel calm and understandable.
 - Prefer composable components over one-off screens.
-- Show users what Ora is doing and why.
+- Show users what Aura is doing and why.
 - Keep contribution and CP pathways visible without turning the product into a casino.
 - Build surfaces that a real person would trust with their daily life.

@@ -1,15 +1,15 @@
-# Connectome Web — iDo/Ora AI OS Interface
+# Connectome Web — Aura AI OS Interface
 
-Connectome Web is the user-facing surface for an AI OS for human flourishing. It is where Ora, iDo, the Connectome nervous system, and the Ascension Technologies DAO become understandable and usable for real people.
+Connectome Web is the user-facing surface for an AI OS for human flourishing. It is where Aura, the Connectome nervous system, and the Ascension Technologies DAO become understandable and usable for real people.
 
-The app combines daily action, goals, routines, discovery, contribution, DAO visibility, and agentic assistance into a WeChat-like life OS experience.
+The app combines daily action, goals, routines, discovery, contribution, DAO visibility, and agentic assistance into a calm life OS experience.
 
 ## Why builders should care
 
 This is a rare chance to shape the interface layer for an agentic AI ecosystem:
 
 - **Frontend/design engineers** can turn complex AI systems into calm, practical product surfaces.
-- **Agent developers** can expose Ora capabilities through contextual quick actions, overlays, and workflows.
+- **Agent developers** can expose Aura capabilities through contextual quick actions, overlays, and workflows.
 - **Growth engineers** can improve onboarding, contribution loops, analytics, referrals, and activation.
 - **Product engineers** can connect mission, CP rewards, DAO participation, and daily utility in one coherent experience.
 
@@ -21,10 +21,10 @@ Contributors earn Contribution Points (CP), leaderboard recognition, and a path 
 Connectome Web
 ├── React + Vite + TypeScript app
 ├── ConnectomeShell / AppLauncher      AI OS shell
-├── OraOverlay                         contextual assistant layer
+├── AuraOverlay                         contextual assistant layer
 ├── Pages                              goals, routines, feed, DAO, IOO, profile, contribution
 ├── Components                         reusable product surfaces
-└── OraClient                          API client for Connectome backend
+└── AuraClient                          API client for Connectome backend
 ```
 
 Ecosystem map:
@@ -33,6 +33,18 @@ Ecosystem map:
 - **Connectome** — the AI OS / nervous system.
 - **iDo** — the daily app experience.
 - **Ascension Technologies** — DAO, CP, governance, and contributor ownership layer.
+
+
+## Try / share / contribute
+
+We are currently aiming for **10 new users per day** through no-spam inbound growth: useful public assets, clear GitHub issues, SEO/owned pages, and product proof — not cold DMs or blasts.
+
+Useful first actions:
+
+- Try the app: https://avielcarlos.github.io/connectome-web/
+- Open the Path Feed and give feedback on confusing or useful cards.
+- Share one concrete critique or screenshot with context.
+- Builders: pick one narrow issue and comment with your approach before opening a PR.
 
 ## Contribute and earn CP
 
@@ -50,11 +62,11 @@ CP can support reputation, leaderboard placement, steward invitations, governanc
 ## Good first areas
 
 - Build a shared design component kit: `PageHero`, `SectionCard`, `PrimaryCTA`.
-- Add contextual Ora quick actions per page.
+- Add contextual Aura quick actions per page.
 - Split Profile vs Admin/System routes for clearer information architecture.
 - Improve IOO execution UX and agent progress states.
 - Add developer onboarding analytics and contribution funnel tracking.
-- Improve responsive polish for iDo-style daily surfaces.
+- Improve responsive polish for Path Feed-style daily surfaces.
 
 ## Local setup
 
