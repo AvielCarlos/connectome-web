@@ -1261,3 +1261,26 @@ body.aura-chat-active.keyboard-open .ora-container {
   .global-feedback-fab { bottom: 28px; right: 28px; }
   .global-feedback-modal-backdrop { align-items: center; }
 }
+
+.ora-overlay__message-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ora-overlay__message-actions button {
+  border: 1px solid rgba(0, 212, 170, 0.34);
+  background: rgba(0, 212, 170, 0.12);
+  color: #b7fff0;
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.ora-overlay__message-actions button:disabled {
+  opacity: 0.52;
+  cursor: wait;
+}

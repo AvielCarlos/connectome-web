@@ -60,6 +60,13 @@ export interface CheckoutSession {
   billing: string;
 }
 
+export interface AuraChatAction {
+  label: string;
+  prompt?: string | null;
+  action?: 'create_goal' | 'update_goal' | 'sync_drive' | 'chat_prompt' | string | null;
+  payload?: Record<string, any> | null;
+}
+
 export interface TierLimitError {
   error: string;
   resource: string;
@@ -502,12 +509,18 @@ class AuraClientClass {
 
   // ── Aura Chat ──────────────────────────────────────────────────────────────
 
-  async chat(message: string, history: { role: string; content: string }[]): Promise<{ reply: string; ora_state: any }> {
+  async chat(
+    message: string,
+    history: { role: string; content: string }[],
+    context: { route?: string; app_context?: Record<string, any> } = {},
+  ): Promise<{ reply: string; ora_state: any; aura_state?: any; suggested_actions?: AuraChatAction[] }> {
     const res = await this.client.post('/api/ora/chat', {
       message,
       conversation_history: history.map(h => ({ role: h.role, content: h.content })),
+      route: context.route,
+      app_context: context.app_context,
     });
-    return res.data as { reply: string; ora_state: any };
+    return res.data as { reply: string; ora_state: any; aura_state?: any; suggested_actions?: AuraChatAction[] };
   }
 
   async getOraSelf(): Promise<any> {
