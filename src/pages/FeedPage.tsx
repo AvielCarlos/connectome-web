@@ -1133,6 +1133,10 @@ function _buildIntakeCard(goalTitle?: string | null, goalId?: string): any | nul
   };
 }
 
+const FEED_INITIAL_PREFETCH_COUNT = 12;
+const FEED_LOAD_MORE_COUNT = 8;
+const FEED_PREFETCH_THRESHOLD = 5;
+
 // ─── Main feed ────────────────────────────────────────────────────────────────
 export default function FeedPage() {
   const navigate = useNavigate();
@@ -1226,7 +1230,7 @@ export default function FeedPage() {
       if (focusedGoal?.title) setGoalTitle(focusedGoal.title);
       else if (!goalId) setGoalTitle(null);
       const focusedGoalId = goalId ? focusedGoal?.id : undefined;
-      const batch = await AuraClient.getNextScreenBatch(5, focusedGoalId, undefined, feedContext, feedMode);
+      const batch = await AuraClient.getNextScreenBatch(FEED_INITIAL_PREFETCH_COUNT, focusedGoalId, undefined, feedContext, feedMode);
       let nextCards = enforceFeedMode(batch, feedMode, preferredCity);
       if (!nextCards.length) {
         const single = await AuraClient.getNextScreen(feedContext, focusedGoalId, undefined, feedMode).catch(() => null);
@@ -1294,7 +1298,7 @@ export default function FeedPage() {
     if (loadingMore || isLimited) return;
     setLoadingMore(true);
     try {
-      const batch = await AuraClient.getNextScreenBatch(3, goalId, undefined, feedContext, feedMode);
+      const batch = await AuraClient.getNextScreenBatch(FEED_LOAD_MORE_COUNT, goalId, undefined, feedContext, feedMode);
       let nextCards = enforceFeedMode(batch, feedMode, preferredCity);
       if (!nextCards.length) {
         const single = await AuraClient.getNextScreen(feedContext, goalId, undefined, feedMode).catch(() => null);
@@ -1322,7 +1326,7 @@ export default function FeedPage() {
     setIndex((prev) => {
       const next = Math.min(prev + 1, cards.length - 1);
       scrollToIndex(next);
-      if (next >= cards.length - 2) loadMore();
+      if (next >= cards.length - FEED_PREFETCH_THRESHOLD) loadMore();
       return next;
     });
   }, [cards.length, scrollToIndex, loadMore]);
@@ -1605,7 +1609,7 @@ export default function FeedPage() {
           const newIndex = Math.round(el.scrollTop / el.clientHeight);
           if (newIndex !== index) {
             setIndex(newIndex);
-            if (newIndex >= cards.length - 2) loadMore();
+            if (newIndex >= cards.length - FEED_PREFETCH_THRESHOLD) loadMore();
           }
         }}
       >
