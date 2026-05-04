@@ -789,6 +789,11 @@ class AuraClientClass {
     return res.data;
   }
 
+  async submitDailyCheckin(payload: { mood_index: number; capacity: string; focus: string; blocker?: string }) {
+    const res = await this.client.post('/api/mood/daily-checkin', payload);
+    return res.data as { ok: boolean; mood: string; xp_awarded: number; ora_focus: string; active_goal?: { id: string; title: string } | null };
+  }
+
   // ── A/B Testing ────────────────────────────────────────────────────────────────────────────────
 
   async assignAbVariant(experimentId: string): Promise<string> {
