@@ -18,7 +18,7 @@ export default defineConfig({
           'page-feed': ['./src/pages/FeedPage'],
           'page-goals': ['./src/pages/GoalsPage'],
           'page-journal': ['./src/pages/JournalPage'],
-          'page-ora': ['./src/pages/OraPage'],
+          'page-aura': ['./src/pages/AuraPage'],
           'page-dao': ['./src/pages/DAOPage'],
           'page-services': ['./src/pages/ServicesPage'],
           'page-profile': ['./src/pages/ProfilePage'],

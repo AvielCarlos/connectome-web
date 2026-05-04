@@ -42,7 +42,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-const isAiOsSetup = (service: Service) => service.id.startsWith('ora-ai-os-setup');
+const isAiOsSetup = (service: Service) => service.id.startsWith('aura-ai-os-setup');
 
 function getServiceAttribution(): ServiceAttribution {
   const params = new URLSearchParams(window.location.search);
@@ -358,7 +358,7 @@ export default function ServicesPage() {
         </div>
         <button
           onClick={() => {
-            const beta = services.find((s) => s.id === 'ora-ai-os-setup-beta') || services.find(isAiOsSetup);
+            const beta = services.find((s) => s.id === 'aura-ai-os-setup-beta') || services.find(isAiOsSetup);
             if (beta) setSelectedService(beta);
           }}
           disabled={!services.some(isAiOsSetup)}

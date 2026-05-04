@@ -4,7 +4,7 @@ import { useExperiment } from '../lib/useExperiment';
 
 interface Message {
   id: string;
-  role: 'user' | 'ora';
+  role: 'user' | 'aura';
   content: string;
   ts: number;
 }
@@ -14,7 +14,7 @@ function formatTime(ts: number) {
 }
 
 function OraMessage({ msg, showTime }: { msg: Message; showTime: boolean }) {
-  const isAura = msg.role === 'ora';
+  const isAura = msg.role === 'aura';
   return (
     <div style={{
       display: 'flex',
@@ -103,7 +103,7 @@ function DailyMomentumCheckin({ onComplete }: { onComplete: (reply: string) => v
     try {
       const res = await AuraClient.submitDailyCheckin({ mood_index: mood, capacity, focus: focus.trim(), blocker: blocker.trim() || undefined });
       setDone(true);
-      onComplete(`${res.ora_focus}${res.xp_awarded ? `\n\n+${res.xp_awarded} XP for checking in.` : ''}`);
+      onComplete(`${res.aura_focus}${res.xp_awarded ? `\n\n+${res.xp_awarded} XP for checking in.` : ''}`);
     } catch {
       onComplete('Check-in saved locally in spirit — tell me your one focus and I’ll help you make it concrete.');
     } finally {
@@ -116,7 +116,7 @@ function DailyMomentumCheckin({ onComplete }: { onComplete: (reply: string) => v
   return (
     <div style={{ marginBottom: 14, padding: 14, borderRadius: 22, border: '1px solid rgba(0,212,170,0.22)', background: 'linear-gradient(135deg, rgba(0,212,170,0.10), rgba(255,255,255,0.035))' }}>
       <div style={{ color: '#00d4aa', fontSize: 11, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase' }}>30-second momentum check-in</div>
-      <div style={{ color: '#f8f8fc', fontWeight: 850, marginTop: 6 }}>How should Ora tune today?</div>
+      <div style={{ color: '#f8f8fc', fontWeight: 850, marginTop: 6 }}>How should Aura tune today?</div>
       <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
         {['Exhausted', 'Neutral', 'Okay', 'Good', 'Energised'].map((label, i) => (
           <button key={label} onClick={() => setMood(i)} style={{ padding: '7px 10px', borderRadius: 999, background: mood === i ? '#00d4aa' : 'rgba(255,255,255,0.06)', color: mood === i ? '#07110f' : 'rgba(248,248,252,0.72)', fontSize: 12, fontWeight: 800 }}>{label}</button>
@@ -136,9 +136,9 @@ function DailyMomentumCheckin({ onComplete }: { onComplete: (reply: string) => v
 
 export default function AuraPage() {
   // ─── A/B experiments ────────────────────────────────────────────────────
-  const { variant: greetingVariant } = useExperiment('ora_greeting');
-  const { variant: responseLengthVariant } = useExperiment('ora_response_length');
-  const { variant: proactiveSuggestionsVariant, trackEvent: trackAuraEvent } = useExperiment('ora_proactive_suggestions');
+  const { variant: greetingVariant } = useExperiment('aura_greeting');
+  const { variant: responseLengthVariant } = useExperiment('aura_response_length');
+  const { variant: proactiveSuggestionsVariant, trackEvent: trackAuraEvent } = useExperiment('aura_proactive_suggestions');
 
   const AURA_GREETINGS: Record<string, string> = {
     A: "Hey! I'm Aura. What do you want to work toward?",
@@ -165,12 +165,12 @@ export default function AuraPage() {
   useEffect(() => {
     Promise.all([
       AuraClient.getOpeningMessage().catch(() => null),
-      AuraClient.getOraSelf().catch(() => null),
+      AuraClient.getAuraSelf().catch(() => null),
     ]).then(([opening, self]) => {
       // Use A/B greeting variant if no server-provided message
       const defaultGreeting = AURA_GREETINGS[greetingVariant] || AURA_GREETINGS['A'];
       const content = opening?.message || defaultGreeting;
-      setMessages([{ id: 'opening', role: 'ora', content, ts: Date.now() }]);
+      setMessages([{ id: 'opening', role: 'aura', content, ts: Date.now() }]);
       if (self) setAuraInfo(self);
     }).finally(() => setLoadingOpening(false));
   }, []);
@@ -218,13 +218,13 @@ export default function AuraPage() {
 
     try {
       const history = messages.slice(-12).map((m) => ({
-        role: m.role === 'ora' ? 'assistant' : 'user',
+        role: m.role === 'aura' ? 'assistant' : 'user',
         content: m.content,
       }));
       const res = await AuraClient.chat(text, history);
       setMessages((prev) => [...prev, {
-        id: Date.now().toString() + '-ora',
-        role: 'ora',
+        id: Date.now().toString() + '-aura',
+        role: 'aura',
         content: res.reply,
         ts: Date.now(),
       }]);
@@ -232,7 +232,7 @@ export default function AuraPage() {
       const errMsg = e?.response?.data?.detail || 'Something went wrong. Try again.';
       setMessages((prev) => [...prev, {
         id: Date.now().toString() + '-err',
-        role: 'ora',
+        role: 'aura',
         content: typeof errMsg === 'string' ? errMsg : 'Something went wrong.',
         ts: Date.now(),
       }]);
@@ -251,14 +251,14 @@ export default function AuraPage() {
   const clearChat = () => {
     setMessages([{
       id: 'clear-' + Date.now(),
-      role: 'ora',
+      role: 'aura',
       content: "Fresh start. What would you like to explore?",
       ts: Date.now(),
     }]);
   };
 
   const handleDailyMomentum = (reply: string) => {
-    setMessages((prev) => [...prev, { id: 'daily-' + Date.now(), role: 'ora', content: reply, ts: Date.now() }]);
+    setMessages((prev) => [...prev, { id: 'daily-' + Date.now(), role: 'aura', content: reply, ts: Date.now() }]);
   };
 
   // Show timestamps on last message per group
@@ -268,7 +268,7 @@ export default function AuraPage() {
   return (
     <div
       ref={containerRef}
-      className="ora-container"
+      className="aura-container"
       style={{
         maxWidth: 720,
         margin: '0 auto',

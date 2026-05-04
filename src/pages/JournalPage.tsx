@@ -41,7 +41,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
               {entry.response}
             </div>
           </div>
-          {entry.ora_reflection && (
+          {entry.aura_reflection && (
             <div style={{
               borderTop: '1px solid rgba(0,212,170,0.12)',
               background: 'rgba(0,212,170,0.04)',
@@ -51,7 +51,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                 ◈ AURA'S REFLECTION
               </div>
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.65)', lineHeight: 1.65, fontStyle: 'italic' }}>
-                {entry.ora_reflection}
+                {entry.aura_reflection}
               </div>
             </div>
           )}
@@ -87,7 +87,7 @@ export default function JournalPage() {
     setSubmitting(true);
     try {
       const res = await AuraClient.submitJournalEntry(prompt.id, text.trim());
-      setReflection(res.ora_reflection || '');
+      setReflection(res.aura_reflection || '');
       setSubmitted(true);
       show('Journal entry saved!', 'success');
       // Refresh entries

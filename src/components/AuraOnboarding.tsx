@@ -10,7 +10,7 @@ const TOTAL_QUESTIONS = 6;
 const ONBOARDING_CACHE_KEY = 'onboarding_done';
 
 function Bubble({ message }: { message: ChatMessage }) {
-  const isAura = message.role === 'ora';
+  const isAura = message.role === 'aura';
   return (
     <div style={{ display: 'flex', flexDirection: isAura ? 'row' : 'row-reverse', gap: 10, marginBottom: 12, alignItems: 'flex-end' }}>
       {isAura && (
@@ -99,7 +99,7 @@ export default function AuraOnboarding() {
         setLoading(true);
         const res = await AuraClient.advanceOnboarding([]);
         if (cancelled) return;
-        setMessages([{ id: 'opening', role: 'ora', content: res.message }]);
+        setMessages([{ id: 'opening', role: 'aura', content: res.message }]);
         setQuestionIndex(res.question_index);
         setTotalQuestions(res.total_questions || TOTAL_QUESTIONS);
         setVariantId(res.variant_id || status.variant_id || null);
@@ -134,7 +134,7 @@ export default function AuraOnboarding() {
     try {
       const conversation = nextMessages.map(({ role, content }) => ({ role, content }));
       const res = await AuraClient.advanceOnboarding(conversation);
-      setMessages(prev => [...prev, { id: `${Date.now()}-ora`, role: 'ora', content: res.message }]);
+      setMessages(prev => [...prev, { id: `${Date.now()}-aura`, role: 'aura', content: res.message }]);
       setQuestionIndex(Math.min(res.question_index, res.total_questions - 1));
       setTotalQuestions(res.total_questions || TOTAL_QUESTIONS);
       setVariantId(res.variant_id || variantId);
@@ -148,7 +148,7 @@ export default function AuraOnboarding() {
       console.error('Onboarding send failed:', e);
       setMessages(prev => [...prev, {
         id: `${Date.now()}-err`,
-        role: 'ora',
+        role: 'aura',
         content: "I couldn't connect right now. Try again in a moment.",
       }]);
     } finally {
@@ -195,7 +195,7 @@ export default function AuraOnboarding() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: 16,
     }}>
-      <div className="ora-onboarding-card" style={{
+      <div className="aura-onboarding-card" style={{
         width: '100%', maxWidth: 760, height: 'min(860px, calc(var(--visual-viewport-height, 100dvh) - 24px))',
         background: 'radial-gradient(circle at top, rgba(0,212,170,0.12), transparent 38%), #0a0a0f',
         border: '1px solid rgba(0,212,170,0.24)',
@@ -205,7 +205,7 @@ export default function AuraOnboarding() {
       }}>
         <div style={{ padding: '22px 22px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
-            <div className={complete ? 'ora-onboarding-pulse' : undefined} style={{
+            <div className={complete ? 'aura-onboarding-pulse' : undefined} style={{
               width: 52, height: 52, borderRadius: 26,
               background: 'linear-gradient(135deg, #00d4aa, #52ffd7)',
               color: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -324,12 +324,12 @@ export default function AuraOnboarding() {
         )}
       </div>
       <style>{`
-        .ora-onboarding-card { animation: oraOnboardingEnter 260ms ease-out; }
-        .ora-onboarding-pulse { animation: oraOnboardingPulse 900ms ease-in-out infinite alternate; }
-        @keyframes oraOnboardingEnter { from { transform: translateY(18px); opacity: 0.65; } to { transform: translateY(0); opacity: 1; } }
+        .aura-onboarding-card { animation: auraOnboardingEnter 260ms ease-out; }
+        .aura-onboarding-pulse { animation: auraOnboardingPulse 900ms ease-in-out infinite alternate; }
+        @keyframes auraOnboardingEnter { from { transform: translateY(18px); opacity: 0.65; } to { transform: translateY(0); opacity: 1; } }
         @keyframes oraOnboardingBounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.5; } 40% { transform: translateY(-6px); opacity: 1; } }
         @keyframes oraOnboardingPop { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes oraOnboardingPulse { from { transform: scale(1); } to { transform: scale(1.06); } }
+        @keyframes auraOnboardingPulse { from { transform: scale(1); } to { transform: scale(1.06); } }
       `}</style>
     </div>
   );

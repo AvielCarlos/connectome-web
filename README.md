@@ -29,7 +29,7 @@ Connectome Web
 
 Ecosystem map:
 
-- **Ora** — the AI brain and agent layer.
+- **Aura** — the AI brain and agent layer.
 - **Connectome** — the AI OS / nervous system.
 - **iDo** — the daily app experience.
 - **Ascension Technologies** — DAO, CP, governance, and contributor ownership layer.

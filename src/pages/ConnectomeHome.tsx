@@ -42,7 +42,7 @@ export default function ConnectomeHome() {
     <div className="connectome-home" style={{ maxWidth: 1040, margin: '0 auto', padding: '78px 18px 120px' }}>
       <section className="connectome-home__hero" style={{ textAlign: 'center', marginBottom: 26 }}>
         <div className="connectome-home__signal">
-          <span className="ora-orb" /> Aura is online
+          <span className="aura-orb" /> Aura is online
         </div>
         <h1>Your AI OS for Human Flourishing</h1>
         <p style={{ maxWidth: 720, margin: '0 auto 10px' }}>

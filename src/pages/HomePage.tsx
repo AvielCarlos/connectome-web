@@ -268,7 +268,7 @@ export default function HomePage() {
 
           {/* Clarifying question — Variant B only */}
           {knowVariant === 'clarifying' && (
-            <div style={{ marginBottom: 20 }} className="ora-fade-in">
+            <div style={{ marginBottom: 20 }} className="aura-fade-in">
               <label style={{
                 display: 'block', fontSize: 13, fontWeight: 600,
                 color: 'rgba(248,248,252,0.5)', marginBottom: 10, letterSpacing: 0.3,
@@ -743,7 +743,7 @@ function GlobalStyles() {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.45; }
       }
-      .ora-fade-in {
+      .aura-fade-in {
         animation: oraFadeIn 0.3s ease-out;
       }
       @keyframes oraFadeIn {

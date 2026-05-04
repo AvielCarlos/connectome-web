@@ -1,10 +1,10 @@
 # Developer Mission — Design the Interface for an AI OS
 
-Connectome Web is the human surface of the Ascension Technologies ecosystem. It turns the Ora brain and Connectome nervous system into a daily product people can use to act, reflect, discover, contribute, and coordinate.
+Connectome Web is the human surface of the Ascension Technologies ecosystem. It turns the Aura brain and Connectome nervous system into a daily product people can use to act, reflect, discover, contribute, and coordinate.
 
 The ecosystem has four layers:
 
-- **Ora** — the AI brain: agents that understand goals, context, constraints, opportunities, and feedback.
+- **Aura** — the AI brain: agents that understand goals, context, constraints, opportunities, and feedback.
 - **Connectome** — the nervous system: APIs, graph intelligence, memory, execution protocol, and integrations.
 - **iDo** — the daily surface: a WeChat-like app for action, discovery, routines, services, and community.
 - **Ascension Technologies** — the DAO/governance layer: CP, recognition, stewardship, and eventual economic coordination.
@@ -13,7 +13,7 @@ The ecosystem has four layers:
 
 High-leverage frontend work includes:
 
-- Contextual Ora quick actions that make each page feel agent-aware.
+- Contextual Aura quick actions that make each page feel agent-aware.
 - Shared design primitives that make the app faster to extend.
 - IOO execution views that show agent progress, options, and decisions clearly.
 - Contribution and CP surfaces that help developers understand the path from shipped work to recognition.
@@ -26,7 +26,7 @@ Agentic AI will only matter if people can trust it, understand it, and integrate
 
 Good Connectome Web work helps users:
 
-- understand what Ora can do,
+- understand what Aura can do,
 - choose meaningful next actions,
 - see progress without cognitive overload,
 - contribute to the ecosystem,

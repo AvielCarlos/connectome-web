@@ -23,7 +23,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 interface SubmissionResult {
-  ora_response: string;
+  aura_response: string;
   cp_earned: number;
   total_dao_cp: number;
 }
@@ -76,7 +76,7 @@ export default function SuggestionButton() {
     try {
       const res = await AuraClient.submitSuggestion(content.trim(), category, pageContext);
       setResult({
-        ora_response: res.ora_response,
+        aura_response: res.aura_response,
         cp_earned: res.cp_earned,
         total_dao_cp: res.total_dao_cp,
       });
@@ -174,7 +174,7 @@ export default function SuggestionButton() {
                   fontStyle: 'italic',
                   textAlign: 'left',
                 }}>
-                  {result.ora_response}
+                  {result.aura_response}
                 </div>
                 <div style={{
                   display: 'flex',

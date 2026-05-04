@@ -787,7 +787,7 @@ export default function DAOPage() {
                           <div style={{ fontSize: 10, color: 'rgba(248,248,252,0.35)' }}>CP</div>
                         </div>
                       </div>
-                      {item.ora_evaluation && (
+                      {item.aura_evaluation && (
                         <div style={{
                           marginTop: 10, background: 'rgba(99,102,241,0.08)',
                           borderLeft: '2px solid #6366f1', borderRadius: '0 8px 8px 0',
@@ -795,7 +795,7 @@ export default function DAOPage() {
                         }}>
                           <div style={{ fontSize: 9, color: '#6366f1', fontWeight: 700, letterSpacing: 0.5, marginBottom: 3 }}>AURA'S TAKE</div>
                           <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.55)', fontStyle: 'italic', lineHeight: 1.5 }}>
-                            {item.ora_evaluation}
+                            {item.aura_evaluation}
                           </div>
                         </div>
                       )}

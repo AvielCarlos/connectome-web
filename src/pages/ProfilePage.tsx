@@ -317,7 +317,7 @@ export default function ProfilePage() {
   const loadProposals = async () => {
     setProposalsLoading(true);
     try {
-      const res = await AuraClient['client'].get('/api/ora/autonomy/proposals');
+      const res = await AuraClient['client'].get('/api/aura/autonomy/proposals');
       setProposals(res.data?.proposals || []);
     } catch {}
     setProposalsLoading(false);
@@ -326,7 +326,7 @@ export default function ProfilePage() {
   const loadAgentPopulation = async () => {
     setAgentPopulationLoading(true);
     try {
-      const res = await AuraClient['client'].get('/api/ora/autonomy/evolution/population');
+      const res = await AuraClient['client'].get('/api/aura/autonomy/evolution/population');
       setAgentPopulation(res.data?.population || []);
     } catch {}
     setAgentPopulationLoading(false);
@@ -335,7 +335,7 @@ export default function ProfilePage() {
   const loadEvolutionProposals = async () => {
     setEvolutionProposalsLoading(true);
     try {
-      const res = await AuraClient['client'].get('/api/ora/autonomy/evolution/proposals');
+      const res = await AuraClient['client'].get('/api/aura/autonomy/evolution/proposals');
       setEvolutionProposals(res.data?.proposals || []);
     } catch {}
     setEvolutionProposalsLoading(false);
@@ -343,7 +343,7 @@ export default function ProfilePage() {
 
   const handleEvolutionProposal = async (id: string, action: 'approve' | 'reject') => {
     try {
-      await AuraClient['client'].post(`/api/ora/autonomy/evolution/proposals/${id}/${action}`);
+      await AuraClient['client'].post(`/api/aura/autonomy/evolution/proposals/${id}/${action}`);
       await loadEvolutionProposals();
     } catch (e: any) {
       alert(`Failed to ${action}: ${e?.response?.data?.detail || 'Unknown error'}`);
@@ -352,7 +352,7 @@ export default function ProfilePage() {
 
   const handleProposal = async (id: string, action: 'approve' | 'reject') => {
     try {
-      await AuraClient['client'].post(`/api/ora/autonomy/proposals/${id}/${action}`);
+      await AuraClient['client'].post(`/api/aura/autonomy/proposals/${id}/${action}`);
       await loadProposals();
     } catch (e: any) {
       alert(`Failed to ${action}: ${e?.response?.data?.detail || 'Unknown error'}`);
@@ -362,7 +362,7 @@ export default function ProfilePage() {
   const runAutonomy = async () => {
     setRunningAutonomy(true);
     try {
-      const res = await AuraClient['client'].post('/api/ora/autonomy/run');
+      const res = await AuraClient['client'].post('/api/aura/autonomy/run');
       setAutonomyStatus(res.data);
     } catch (e: any) {
       setAutonomyStatus({ error: e?.response?.data?.detail || 'Failed' });
@@ -1520,7 +1520,7 @@ export default function ProfilePage() {
           <Card title="Health Dashboard">
             <button
               onClick={async () => {
-                const res = await AuraClient['client'].get('/api/ora/health/dashboard').catch(() => ({ data: null }));
+                const res = await AuraClient['client'].get('/api/aura/health/dashboard').catch(() => ({ data: null }));
                 alert(JSON.stringify(res.data, null, 2));
               }}
               style={{ width: '100%', padding: '10px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(248,248,252,0.7)', fontWeight: 600, fontSize: 13 }}

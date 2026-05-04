@@ -16,7 +16,7 @@ and the system drifts. This document anchors the language.
 Three rules:
 
 1. Every concept here has one meaning. If you need a new concept, add it; do not overload an existing one.
-2. Boundaries matter. iDo is not Connectome. DAO is not iDo. Ora is not the OS.
+2. Boundaries matter. iDo is not Connectome. DAO is not iDo. Aura is not the OS.
 3. Whenever something visible to users changes, ask: *what entity, relationship, layer, app, agent, permission, and feedback signal does this touch?*
 
 ---
@@ -34,7 +34,7 @@ Three rules:
 - Backend: Railway / FastAPI / Postgres / vector store.
 - Frontend: AIOS shell (web today; mobile/native later).
 
-### Ora — Intelligence
+### Aura — Intelligence
 - The agentic mind that runs through Connectome.
 - Reasons across goals, constraints, memory, IOO Graph, signals.
 - Surfaces: chat overlay, recommendations, attention layer, generated tools, agents.
@@ -43,7 +43,7 @@ Three rules:
 ### IOO Graph — Map of human possibility
 - Semantic graph of goals, needs, constraints, opportunities, skills, routines, missions, transformation paths.
 - The "file system" of Connectome.
-- Used by Ora to decide *what should this person do next*.
+- Used by Aura to decide *what should this person do next*.
 
 ### Apps — Surfaces
 - iDo, iVive, Eviva, Aventi, DAO, plus shared surfaces (Goals, Routines, Services, IOO Map, Profile).
@@ -56,7 +56,7 @@ Three rules:
 - Sovereign over their data and permissions.
 
 ### Agents — Background processes
-- Ora-spawned or scheduled processes that act on entities.
+- Aura-spawned or scheduled processes that act on entities.
 - Examples: outreach, growth, enrichment, executive council, IOO graph builder, experiment generator.
 - Bound by permissions, safety levels, and the DAO governance layer.
 
@@ -81,13 +81,13 @@ Each entity has: name · purpose · key fields · lifecycle · who can create/re
 - **Community** — group context (DAO, guild, circle). fields: kind, scope, membership policy.
 - **DAO Task** — a contributable unit of work in Ascension. fields: kind (code, content, ops, outreach, governance), CP_reward, gating.
 - **Health Signal** — vitality/biometric/state input. fields: source, kind, value, time, confidence.
-- **Memory** — user-visible learning/recall record. Framing is A/B tested as “Ora remembers...” vs “saved to your profile/OS memory.” fields: kind (fact, preference, story, lesson), salience, privacy_tier.
+- **Memory** — user-visible learning/recall record. Framing is A/B tested as “Aura remembers...” vs “saved to your profile/OS memory.” fields: kind (fact, preference, story, lesson), salience, privacy_tier.
 - **Agent** — background process. fields: id, role, schedule, scope, permissions, fitness, lineage.
 - **App** — a visible surface inside the AIOS. fields: id, domain, dock, permissions, manifest.
 - **Permission** — granted access to a domain. fields: domain (memory/calendar/location/health/social/dao/files/notifications), scope, expires_at.
 - **Feedback Event** — anything users do that updates models. fields: kind (view, save, skip, complete, rate, abandon, react), target, value, context.
 - **Experiment** — a live test. fields: name, variants, allocation, fitness_function, lineage, status.
-- **Recommendation** — Ora's surfaced suggestion. fields: target_entity, reason, confidence, expires_at.
+- **Recommendation** — Aura's surfaced suggestion. fields: target_entity, reason, confidence, expires_at.
 - **Notification** — attention-layer message. fields: trigger, app, urgency, channel, time_window.
 - **Achievement / Milestone** — meaningful progress markers. fields: kind, evidence, awarded_at.
 
@@ -113,7 +113,7 @@ Examples (canonical predicates):
 - iVive **unlocks_readiness_for** Eviva (prerequisite gating)
 - DAO **governs** Connectome
 - Connectome **hosts** App
-- Ora **recommends** Goal | Routine | Mission | Event | Service | Action
+- Aura **recommends** Goal | Routine | Mission | Event | Service | Action
 - Feed **renders** Opportunity | Event | Mission | Routine | Service
 - iDo Feed **blends** iVive Feed | Eviva Feed | Aventi Feed | DAO/Contribute Signals
 
@@ -127,7 +127,7 @@ Examples (canonical predicates):
 
 Rest is an **aspect of iVive**, not a separate domain. It surfaces through recovery/sleep optimization, biometrics-driven rest nudges, nervous-system regulation, and practical tools like Pomodoro/rest timers — all inside iVive.
 
-iVive ↔ Eviva gating: Eviva opportunities can require iVive readiness; Ora spawns the bridge nodes.
+iVive ↔ Eviva gating: Eviva opportunities can require iVive readiness; Aura spawns the bridge nodes.
 
 ---
 
@@ -136,7 +136,7 @@ iVive ↔ Eviva gating: Eviva opportunities can require iVive readiness; Ora spa
 ### Daily life cluster
 - **iDo** — daily life surface. Feed, goals, routines, and the core decision mentality: **delegate it, plan it, or ditch it**.
 - **Goals** and **Routines** — primarily iDo features. They also generate shared datapoints for other apps/interfaces.
-- **Journal is scrapped as a primary app/surface.** Reflection may still exist as background memory capture or an Ora conversation mode, but the product mentality is action-oriented: delegate it, plan it, or ditch it.
+- **Journal is scrapped as a primary app/surface.** Reflection may still exist as background memory capture or an Aura conversation mode, but the product mentality is action-oriented: delegate it, plan it, or ditch it.
 
 ### Domain apps
 - **iVive** — vitality OS, including sleep, recovery, and rest as first-class aspects.
@@ -145,7 +145,7 @@ iVive ↔ Eviva gating: Eviva opportunities can require iVive readiness; Ora spa
 
 ### System apps
 - **DAO** — governance, contribution, CP/XP economics.
-- **Services** — tools, integrations, Ora-generated surfaces.
+- **Services** — tools, integrations, Aura-generated surfaces.
 - **IOO Map** — explorable view of the graph.
 - **Profile** — single identity/permissions/sovereignty/stats app opened from the top-right corner across the AIOS.
 
@@ -188,7 +188,7 @@ Safe-auto vs human-approved is defined per change kind (copy, weights, ranking �
 
 ## 8. Visible vs invisible language
 
-- **User-facing**: Ora, iDo, iVive, Eviva, Aventi, DAO, Goals, Routines, Profile.
+- **User-facing**: Aura, iDo, iVive, Eviva, Aventi, DAO, Goals, Routines, Profile.
 - **Architectural / internal / mission**: Connectome, IOO Graph, Agents, AIOS. Use Connectome silently for the most part; name it only when required to make the system make sense.
 - **DAO / community-facing**: Ascension Technologies, CP, XP, Eviva Universal.
 
@@ -220,7 +220,7 @@ Aventi is a domain of human activity and an external app we are developing. It r
 Journal is scrapped as a primary app. The iDo mentality is **delegate it, plan it, or ditch it**. Goals and Routines are primarily iDo features, but they provide shared datapoints for other interfaces/apps.
 
 ### C. Feed ownership — DECIDED
-The feed uses a **hybrid model**. Each domain can mature into its own feed/surface (iVive, Eviva, Aventi), while iDo renders the blended “What should I do next?” meta-feed. Ontologically: the attention engine belongs to Ora/Connectome infrastructure; the visible daily feed belongs to iDo.
+The feed uses a **hybrid model**. Each domain can mature into its own feed/surface (iVive, Eviva, Aventi), while iDo renders the blended “What should I do next?” meta-feed. Ontologically: the attention engine belongs to Aura/Connectome infrastructure; the visible daily feed belongs to iDo.
 
 ### D. DAO / Contribute / Eviva overlap — DECIDED
 Keep **DAO**, **Contribute**, and **Eviva** separate:
@@ -242,7 +242,7 @@ Rest belongs inside iVive as a first-class aspect, not as a fourth domain. It su
 
 ### H. Memory framing — DECIDED AS EXPERIMENT
 A/B test memory framing:
-- “Ora remembers...”
+- “Aura remembers...”
 - “Saved to your profile / OS memory...”
 Use different framing by context and measure trust/resonance.
 
@@ -260,7 +260,7 @@ Model individual people first. Future linking supports partners, family, friends
 
 ## 2026-04-30 Alignment Update
 
-- Public/user-facing intelligence brand: **Aura**. Legacy `Ora` can remain in code/API/storage compatibility surfaces until intentionally migrated.
+- Public/user-facing intelligence brand: **Aura**. Legacy `Aura` can remain in code/API/storage compatibility surfaces until intentionally migrated.
 - Main ordinary-user brand: **Aura**. **Connectome** may be visible, but should not dominate ordinary app chrome; it is primarily the orchestration AIOS underneath.
 - **iDo** currently names the Path Feed, but can evolve into a broader fulfilment interface set or full life AIOS if that tests/systematizes best.
 - **IOO** is internal language. Users see Path Maps / Life Maps / tested front-end language.

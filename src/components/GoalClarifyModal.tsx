@@ -12,7 +12,7 @@ interface ChatMessage extends GoalClarifyMessage {
 }
 
 function AuraBubble({ message }: { message: ChatMessage }) {
-  const isAura = message.role === 'ora';
+  const isAura = message.role === 'aura';
   return (
     <div style={{ display: 'flex', flexDirection: isAura ? 'row' : 'row-reverse', gap: 8, marginBottom: 10, alignItems: 'flex-end' }}>
       {isAura && (
@@ -57,9 +57,9 @@ function isAuraManagedNode(node: any) {
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
-  return node.owner === 'ora'
+  return node.owner === 'aura'
     || haystack.includes('aura')
-    || haystack.includes('ora')
+    || haystack.includes('aura')
     || haystack.includes('map prerequisite')
     || haystack.includes('bridge node')
     || haystack.includes('find real options')
@@ -69,13 +69,13 @@ function isAuraManagedNode(node: any) {
 
 function userActionNodes(path: any[]) {
   const nodes = (path || []).filter((node) => !isAuraManagedNode(node));
-  return nodes.length ? nodes : (path || []).filter((node) => node.user_action || node.owner !== 'ora');
+  return nodes.length ? nodes : (path || []).filter((node) => node.user_action || node.owner !== 'aura');
 }
 
 export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: GoalClarifyModalProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([{
     id: 'opening',
-    role: 'ora',
+    role: 'aura',
     content: `I'd love to help you get ${goalTitle}! Let me ask a few questions to build your perfect plan.`,
   }]);
   const [input, setInput] = useState('');
@@ -107,7 +107,7 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
     try {
       const conversation = nextMessages.map(({ role, content }) => ({ role, content }));
       const res = await AuraClient.clarifyGoal(goalTitle, conversation);
-      setMessages(prev => [...prev, { id: `${Date.now()}-ora`, role: 'ora', content: res.message }]);
+      setMessages(prev => [...prev, { id: `${Date.now()}-aura`, role: 'aura', content: res.message }]);
       if (res.is_complete) {
         setStructuredGoal(res.structured_goal || { title: goalTitle });
         setIooPath(res.suggested_ioo_path || []);
@@ -115,7 +115,7 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
     } catch (e) {
       setMessages(prev => [...prev, {
         id: `${Date.now()}-err`,
-        role: 'ora',
+        role: 'aura',
         content: "I couldn't connect right now. Try again in a moment.",
       }]);
     } finally {
@@ -139,9 +139,9 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
     try {
       const res = await AuraClient.createServiceOrder(
         node.service_id,
-        `Goal: ${structuredGoal?.title || goalTitle}\nNode: ${node.title}\nAura action: ${node.ora_action || node.description || ''}`,
+        `Goal: ${structuredGoal?.title || goalTitle}\nNode: ${node.title}\nAura action: ${node.aura_action || node.description || ''}`,
         undefined,
-        { source: 'goal_clarify_modal', campaign: 'ioo_paid_ora_node', content: node.node_type || node.step_type },
+        { source: 'goal_clarify_modal', campaign: 'ioo_paid_aura_node', content: node.node_type || node.step_type },
         { quoted_price_usd: node.price_usd, quote_reason: node.pricing_note || node.pricing_level || 'dynamic_goal_quote' },
       );
       if (res?.checkout_url) window.location.href = res.checkout_url;
@@ -217,17 +217,17 @@ export default function GoalClarifyModal({ goalTitle, onClose, onComplete }: Goa
                     </div>
                   )}
                   {userActionNodes(iooPath).slice(0, 5).map((node, i) => (
-                    <div key={node.id || i} style={{ display: 'flex', gap: 10, padding: 10, borderRadius: 12, background: node.owner === 'ora' ? 'rgba(0,212,170,0.07)' : 'rgba(255,255,255,0.04)', border: node.owner === 'ora' ? '1px solid rgba(0,212,170,0.18)' : '1px solid rgba(255,255,255,0.06)' }}>
+                    <div key={node.id || i} style={{ display: 'flex', gap: 10, padding: 10, borderRadius: 12, background: node.owner === 'aura' ? 'rgba(0,212,170,0.07)' : 'rgba(255,255,255,0.04)', border: node.owner === 'aura' ? '1px solid rgba(0,212,170,0.18)' : '1px solid rgba(255,255,255,0.06)' }}>
                       <div style={{ width: 24, height: 24, borderRadius: 12, background: '#00d4aa', color: '#0a0a0f', fontSize: 12, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</div>
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 3 }}>
-                          <span style={{ fontSize: 10, color: node.owner === 'ora' ? '#00d4aa' : 'rgba(248,248,252,0.48)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 999, padding: '2px 7px', fontWeight: 800 }}>{node.owner === 'ora' ? 'Aura can do' : 'You do'}</span>
+                          <span style={{ fontSize: 10, color: node.owner === 'aura' ? '#00d4aa' : 'rgba(248,248,252,0.48)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 999, padding: '2px 7px', fontWeight: 800 }}>{node.owner === 'aura' ? 'Aura can do' : 'You do'}</span>
                           {node.node_type && <span style={{ fontSize: 10, color: 'rgba(248,248,252,0.36)' }}>{node.node_type}</span>}
                         </div>
                         <div style={{ fontSize: 13, fontWeight: 700 }}>{node.title || 'First step'}</div>
                         {node.description && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.5)', lineHeight: 1.45, marginTop: 2 }}>{node.description}</div>}
                         {node.user_action && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.56)', lineHeight: 1.45, marginTop: 6 }}><b>You:</b> {node.user_action}</div>}
-                        {node.ora_action && <div style={{ fontSize: 12, color: 'rgba(0,212,170,0.78)', lineHeight: 1.45, marginTop: 4 }}><b>Aura:</b> {node.ora_action}</div>}
+                        {node.aura_action && <div style={{ fontSize: 12, color: 'rgba(0,212,170,0.78)', lineHeight: 1.45, marginTop: 4 }}><b>Aura:</b> {node.aura_action}</div>}
                         {node.requires_payment && node.service_id && (
                           <>
                           {(node.pricing_level || node.pricing_note) && <div style={{ fontSize: 11, color: 'rgba(248,248,252,0.38)', lineHeight: 1.4, marginTop: 7 }}>{node.pricing_level ? `Quote: ${node.pricing_level}. ` : ''}{node.pricing_note || ''}</div>}
