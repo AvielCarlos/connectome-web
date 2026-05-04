@@ -21,6 +21,7 @@ import ContributePage from './pages/ContributePage'
 import ServicesPage from './pages/ServicesPage'
 import AiOsSetupLandingPage from './pages/AiOsSetupLandingPage'
 import HumanFlourishingLandingPage from './pages/HumanFlourishingLandingPage'
+import PathFeedMomentumLandingPage from './pages/PathFeedMomentumLandingPage'
 import ProfilePage from './pages/ProfilePage'
 import SurfacePage from './pages/SurfacePage'
 import IOOPage from './pages/IOOPage'
@@ -175,6 +176,7 @@ function App() {
           <Route path="/ai-os-setup" element={<AiOsSetupLandingPage />} />
           <Route path="/services/ai-os-setup" element={<AiOsSetupLandingPage />} />
           <Route path="/ai-os-human-flourishing" element={<HumanFlourishingLandingPage />} />
+          <Route path="/path-feed-momentum" element={<PathFeedMomentumLandingPage />} />
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
           <Route path="/app/ivive" element={<Navigate to="/app/ioo" replace />} />
           <Route path="/app/eviva" element={<Navigate to="/app/ioo" replace />} />
