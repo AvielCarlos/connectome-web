@@ -31,7 +31,7 @@
   --keyboard-inset: 0px;
   --visual-viewport-height: 100dvh;
   --connectome-chrome-height: var(--top-header-height);
-  --shell-top-clearance: calc(var(--connectome-chrome-height) + 6px);
+  --shell-top-clearance: calc(var(--connectome-chrome-height) + 12px);
   --shell-bottom-clearance: calc(72px + max(14px, env(safe-area-inset-bottom, 0px)) + 14px + var(--keyboard-inset));
 }
 
@@ -422,6 +422,22 @@ body {
 .connectome-ambient-chrome {
   pointer-events: none;
   background: linear-gradient(180deg, rgba(6, 6, 16, 0.34), transparent);
+}
+
+@media (max-width: 420px) {
+  .connectome-ambient-chrome {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .connectome-context-label {
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .connectome-ambient-chrome > * {
