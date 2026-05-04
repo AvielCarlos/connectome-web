@@ -89,6 +89,51 @@ function TypingIndicator() {
   );
 }
 
+function DailyMomentumCheckin({ onComplete }: { onComplete: (reply: string) => void }) {
+  const [mood, setMood] = useState(2);
+  const [capacity, setCapacity] = useState('15 minutes');
+  const [focus, setFocus] = useState('');
+  const [blocker, setBlocker] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const submit = async () => {
+    if (!focus.trim() || saving) return;
+    setSaving(true);
+    try {
+      const res = await AuraClient.submitDailyCheckin({ mood_index: mood, capacity, focus: focus.trim(), blocker: blocker.trim() || undefined });
+      setDone(true);
+      onComplete(`${res.ora_focus}${res.xp_awarded ? `\n\n+${res.xp_awarded} XP for checking in.` : ''}`);
+    } catch {
+      onComplete('Check-in saved locally in spirit — tell me your one focus and I’ll help you make it concrete.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (done) return null;
+
+  return (
+    <div style={{ marginBottom: 14, padding: 14, borderRadius: 22, border: '1px solid rgba(0,212,170,0.22)', background: 'linear-gradient(135deg, rgba(0,212,170,0.10), rgba(255,255,255,0.035))' }}>
+      <div style={{ color: '#00d4aa', fontSize: 11, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase' }}>30-second momentum check-in</div>
+      <div style={{ color: '#f8f8fc', fontWeight: 850, marginTop: 6 }}>How should Ora tune today?</div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+        {['Exhausted', 'Neutral', 'Okay', 'Good', 'Energised'].map((label, i) => (
+          <button key={label} onClick={() => setMood(i)} style={{ padding: '7px 10px', borderRadius: 999, background: mood === i ? '#00d4aa' : 'rgba(255,255,255,0.06)', color: mood === i ? '#07110f' : 'rgba(248,248,252,0.72)', fontSize: 12, fontWeight: 800 }}>{label}</button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+        {['5 minutes', '15 minutes', '30 minutes', 'Deep block'].map((label) => (
+          <button key={label} onClick={() => setCapacity(label)} style={{ padding: '7px 10px', borderRadius: 999, background: capacity === label ? 'rgba(0,212,170,0.18)' : 'rgba(255,255,255,0.05)', border: capacity === label ? '1px solid rgba(0,212,170,0.45)' : '1px solid rgba(255,255,255,0.08)', color: '#f8f8fc', fontSize: 12 }}>{label}</button>
+        ))}
+      </div>
+      <input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder="One focus for today…" style={{ width: '100%', marginTop: 10, padding: '11px 12px', borderRadius: 14, background: 'rgba(0,0,0,0.22)', border: '1px solid rgba(255,255,255,0.10)', color: '#f8f8fc' }} />
+      <input value={blocker} onChange={(e) => setBlocker(e.target.value)} placeholder="Optional blocker…" style={{ width: '100%', marginTop: 8, padding: '10px 12px', borderRadius: 14, background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(255,255,255,0.08)', color: '#f8f8fc' }} />
+      <button onClick={submit} disabled={!focus.trim() || saving} style={{ width: '100%', marginTop: 10, padding: '11px 14px', borderRadius: 14, background: focus.trim() ? '#00d4aa' : 'rgba(255,255,255,0.08)', color: focus.trim() ? '#07110f' : 'rgba(248,248,252,0.35)', fontWeight: 900 }}>{saving ? 'Tuning…' : 'Tune today'}</button>
+    </div>
+  );
+}
+
 export default function AuraPage() {
   // ─── A/B experiments ────────────────────────────────────────────────────
   const { variant: greetingVariant } = useExperiment('ora_greeting');
@@ -212,6 +257,10 @@ export default function AuraPage() {
     }]);
   };
 
+  const handleDailyMomentum = (reply: string) => {
+    setMessages((prev) => [...prev, { id: 'daily-' + Date.now(), role: 'ora', content: reply, ts: Date.now() }]);
+  };
+
   // Show timestamps on last message per group
   const shouldShowTime = (i: number) =>
     i === messages.length - 1 || messages[i + 1]?.role !== messages[i].role;
@@ -274,6 +323,7 @@ export default function AuraPage() {
           scrollbarWidth: 'thin',
         }}
       >
+        <DailyMomentumCheckin onComplete={handleDailyMomentum} />
         {loadingOpening ? (
           <TypingIndicator />
         ) : (
