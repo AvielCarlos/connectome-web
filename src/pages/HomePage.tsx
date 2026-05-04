@@ -101,6 +101,7 @@ export default function HomePage() {
   // Deep intake state
   const [mood, setMood] = useState('');
   const [lifeArea, setLifeArea] = useState('');
+  const [enjoymentSignal, setEnjoymentSignal] = useState('');
   const [timeAvail, setTimeAvail] = useState('');
 
   // One-Q intake state
@@ -185,6 +186,32 @@ export default function HomePage() {
   const handleIntakeSubmit = () => {
     const variant = exploreVariant === 'deep' ? 'deep' : 'one_q';
     AuraClient.trackAbEvent('home_intake_v1', variant, 'intake_depth').catch(() => {});
+
+    if (variant === 'deep') {
+      const answers = {
+        current_mood: mood,
+        current_life_area: lifeArea,
+        current_enjoyment_signal: enjoymentSignal,
+        entertainment_preference_now: enjoymentSignal,
+        available_time_now: timeAvail,
+      };
+      AuraClient.submitNowCheckin({ answers, feed_mode: 'path' }).catch(() => {
+        return Promise.allSettled([
+          mood && AuraClient.submitDiscoveryAnswer({ question_id: 'home_deep_mood', profile_field: 'current_mood', answer: mood }),
+          lifeArea && AuraClient.submitDiscoveryAnswer({ question_id: 'home_deep_life_area', profile_field: 'current_life_area', answer: lifeArea }),
+          enjoymentSignal && AuraClient.submitDiscoveryAnswer({ question_id: 'home_deep_enjoyment_signal', profile_field: 'current_enjoyment_signal', answer: enjoymentSignal }),
+          enjoymentSignal && AuraClient.submitDiscoveryAnswer({ question_id: 'home_deep_entertainment_preference', profile_field: 'entertainment_preference_now', answer: enjoymentSignal }),
+          timeAvail && AuraClient.submitDiscoveryAnswer({ question_id: 'home_deep_time', profile_field: 'available_time_now', answer: timeAvail }),
+        ].filter(Boolean) as Promise<any>[]);
+      });
+    } else if (oneQAnswer.trim()) {
+      AuraClient.submitDiscoveryAnswer({
+        question_id: 'home_one_q_intent',
+        profile_field: 'current_intent_freeform',
+        answer: oneQAnswer.trim(),
+      }).catch(() => {});
+    }
+
     navigate('/app/ido');
   };
 
@@ -434,7 +461,25 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Q3: Time */}
+          {/* Q3: Fun / enjoyment */}
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(248,248,252,0.7)', marginBottom: 14 }}>
+              What would feel genuinely enjoyable right now?
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {['Playful', 'Entertaining', 'Creative', 'Adventurous', 'Social', 'Quiet beauty', 'Surprise me'].map((signal) => (
+                <button key={signal} onClick={() => setEnjoymentSignal(signal)} style={{
+                  padding: '9px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  background: enjoymentSignal === signal ? 'rgba(245,158,11,0.14)' : 'rgba(255,255,255,0.04)',
+                  border: enjoymentSignal === signal ? '1px solid rgba(245,158,11,0.45)' : '1px solid rgba(255,255,255,0.08)',
+                  color: enjoymentSignal === signal ? '#fbbf24' : 'rgba(248,248,252,0.5)',
+                  transition: 'all 0.15s',
+                }}>{signal}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Q4: Time */}
           <div style={{ marginBottom: 36 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(248,248,252,0.7)', marginBottom: 14 }}>
               How much time do you have?
