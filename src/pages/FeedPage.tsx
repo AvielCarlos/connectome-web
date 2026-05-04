@@ -110,6 +110,14 @@ const TIME_HORIZON_OPTIONS = [
   { id: 'Freedom', label: 'Total freedom', context: 'The user has total freedom. Guide them toward the greatest adventure available: expansive, transformational, ambitious, real-world, and still executable through concrete next nodes.' },
 ] as const;
 type TimeHorizonId = typeof TIME_HORIZON_OPTIONS[number]['id'];
+type DifficultyFilterId = 'adaptive' | 'easy' | 'medium' | 'deep';
+
+const FALLBACK_DIFFICULTY_FILTERS: Array<{ id: DifficultyFilterId; label: string; context: string }> = [
+  { id: 'adaptive', label: 'Adaptive', context: 'Let Aura choose the right challenge level from capacity, goals, and recent engagement.' },
+  { id: 'easy', label: 'Easy', context: 'Prefer low-friction 2-10 minute quick wins with gentle emotional load.' },
+  { id: 'medium', label: 'Medium', context: 'Prefer 15-45 minute nodes with meaningful but realistic effort.' },
+  { id: 'deep', label: 'Deep', context: 'Prefer ambitious stretch nodes with higher transformation potential.' },
+];
 
 function timeHorizonContext(_mode: FeedMode, horizonId: TimeHorizonId) {
   const horizon = TIME_HORIZON_OPTIONS.find((item) => item.id === horizonId) || TIME_HORIZON_OPTIONS[1];
@@ -1200,6 +1208,8 @@ export default function FeedPage() {
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
   const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizonId>(initialTimeHorizon);
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilterId>('adaptive');
+  const [difficultyFilters, setDifficultyFilters] = useState(FALLBACK_DIFFICULTY_FILTERS);
   const { profile } = useAuth();
   const preferredCity = profile?.city || profile?.location_city || profile?.profile?.city || profile?.profile?.location_city || localStorage.getItem('connectome_live_location_city') || localStorage.getItem('aura_live_location_city');
 
@@ -1227,10 +1237,23 @@ export default function FeedPage() {
     }
   }, [searchParams]);
 
-  const feedContext = `${timeHorizonContext(feedMode, timeHorizon)} ${goalId ? 'GOAL-SPECIFIC PATH: optimize recommendations for the selected goal only while still mixing immediate, scheduled, and future-facing steps when useful.' : 'GENERAL PATH: diversify node recommendations across all active goals plus value-aligned possibilities the user has not explicitly stated as goals. Do not imply the feed is only completing one goal or only about what can happen immediately.'}`;
+  useEffect(() => {
+    AuraClient.getChallengeFilters().then((data) => {
+      if (Array.isArray(data.filters) && data.filters.length) setDifficultyFilters(data.filters);
+    }).catch(() => {});
+  }, []);
+
+  const difficultyContext = difficultyFilters.find((item) => item.id === difficultyFilter)?.context || FALLBACK_DIFFICULTY_FILTERS[0].context;
+  const feedContext = `${timeHorizonContext(feedMode, timeHorizon)} Challenge difficulty filter: ${difficultyFilter}. ${difficultyContext} ${goalId ? 'GOAL-SPECIFIC PATH: optimize recommendations for the selected goal only while still mixing immediate, scheduled, and future-facing steps when useful.' : 'GENERAL PATH: diversify node recommendations across all active goals plus value-aligned possibilities the user has not explicitly stated as goals. Do not imply the feed is only completing one goal or only about what can happen immediately.'}`;
 
   const updateTimeHorizon = (value: TimeHorizonId) => {
     setTimeHorizon(value);
+    setCards([]);
+    setIndex(0);
+  };
+
+  const updateDifficultyFilter = (value: DifficultyFilterId) => {
+    setDifficultyFilter(value);
     setCards([]);
     setIndex(0);
   };
@@ -1612,6 +1635,29 @@ export default function FeedPage() {
 
   return (
     <div className="feed-container" style={{ background: '#0a0a0f' }}>
+
+      <div style={{ position: 'absolute', top: 'calc(env(safe-area-inset-top, 0px) + 10px)', left: 12, right: 12, zIndex: 20, display: 'flex', gap: 7, overflowX: 'auto', scrollbarWidth: 'none', pointerEvents: 'auto' }}>
+        {difficultyFilters.map((filter) => (
+          <button
+            key={filter.id}
+            onClick={() => updateDifficultyFilter(filter.id)}
+            style={{
+              flexShrink: 0,
+              border: difficultyFilter === filter.id ? '1px solid rgba(0,212,170,0.78)' : '1px solid rgba(255,255,255,0.12)',
+              background: difficultyFilter === filter.id ? 'rgba(0,212,170,0.18)' : 'rgba(10,10,15,0.62)',
+              backdropFilter: 'blur(14px)',
+              color: difficultyFilter === filter.id ? '#bfffee' : 'rgba(248,248,252,0.66)',
+              borderRadius: 999,
+              padding: '8px 11px',
+              fontSize: 11,
+              fontWeight: 900,
+              boxShadow: difficultyFilter === filter.id ? '0 0 20px rgba(0,212,170,0.16)' : 'none',
+            }}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
 
       {/* Collection picker */}
       {pathwaySheet && <PathwaySheet data={pathwaySheet} onClose={() => setPathwaySheet(null)} onInvite={() => handleInvite(pathwaySheet.item, pathwaySheet.card)} />}

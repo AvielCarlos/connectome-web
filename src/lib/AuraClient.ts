@@ -394,6 +394,11 @@ class AuraClientClass {
     return res.data;
   }
 
+  async getChallengeFilters() {
+    const res = await this.client.get('/api/screens/challenge-filters');
+    return res.data as { default: string; filters: Array<{ id: 'adaptive' | 'easy' | 'medium' | 'deep'; label: string; context: string }> };
+  }
+
   // ── Feedback ─────────────────────────────────────────────────────────────
 
   async saveScreen(screenSpecDbId: string): Promise<void> {
