@@ -490,6 +490,20 @@ class AuraClientClass {
     return res.data;
   }
 
+  async getWeeklyRecap() {
+    const res = await this.client.get('/api/gamification/weekly-recap');
+    return res.data as {
+      total_xp: number;
+      goals_created: number;
+      goals_completed: number;
+      journal_entries: number;
+      saved_nodes: number;
+      current_streak: number;
+      highlights: string[];
+      next_prompt: string;
+    };
+  }
+
   // ── Journal ───────────────────────────────────────────────────────────────
 
   async getJournalPrompt(): Promise<{ id: string; prompt: string }> {

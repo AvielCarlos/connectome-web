@@ -87,6 +87,38 @@ function DesiredStateCompass({ goals }: { goals: Goal[] }) {
   );
 }
 
+function WeeklyRecapCard() {
+  const [recap, setRecap] = useState<any>(null);
+  useEffect(() => {
+    AuraClient.getWeeklyRecap().then(setRecap).catch(() => setRecap(null));
+  }, []);
+  if (!recap) return null;
+  const stats = [
+    { label: 'XP', value: recap.total_xp },
+    { label: 'Goals done', value: recap.goals_completed },
+    { label: 'Journal', value: recap.journal_entries },
+    { label: 'Saved nodes', value: recap.saved_nodes },
+  ];
+  return (
+    <section style={{ border: '1px solid rgba(0,212,170,0.2)', background: 'linear-gradient(135deg, rgba(0,212,170,0.09), rgba(255,255,255,0.035))', borderRadius: 26, padding: 16, margin: '0 0 16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
+        <div>
+          <div style={{ color: '#00d4aa', fontSize: 11, fontWeight: 950, letterSpacing: 1, textTransform: 'uppercase' }}>Weekly progress recap</div>
+          <div style={{ color: '#f8f8fc', fontSize: 18, fontWeight: 950, marginTop: 5 }}>Your graph moved this week</div>
+        </div>
+        {!!recap.current_streak && <div style={{ color: '#00d4aa', fontWeight: 950, background: 'rgba(0,212,170,0.12)', borderRadius: 999, padding: '7px 10px', fontSize: 12 }}>🔥 {recap.current_streak}d</div>}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 12 }}>
+        {stats.map((s) => <div key={s.label} style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.18)', borderRadius: 16, padding: 10 }}><div style={{ color: '#f8f8fc', fontWeight: 950 }}>{s.value}</div><div style={{ color: 'rgba(248,248,252,0.42)', fontSize: 10, fontWeight: 850, textTransform: 'uppercase' }}>{s.label}</div></div>)}
+      </div>
+      <ul style={{ margin: '12px 0 0', paddingLeft: 18, color: 'rgba(248,248,252,0.68)', fontSize: 13, lineHeight: 1.55 }}>
+        {(recap.highlights || []).slice(0, 3).map((h: string) => <li key={h}>{h}</li>)}
+      </ul>
+      <div style={{ marginTop: 10, color: 'rgba(0,212,170,0.78)', fontSize: 12, fontWeight: 800 }}>{recap.next_prompt}</div>
+    </section>
+  );
+}
+
 function isAuraManagedNode(node: any) {
   const haystack = [node.owner, node.node_type, node.step_type, node.title, node.description]
     .filter(Boolean)
@@ -507,6 +539,7 @@ export default function GoalsPage() {
 
       <UserStateStrip goals={goals} />
       <DesiredStateCompass goals={goals} />
+      <WeeklyRecapCard />
       <CaptureBar onClarify={setClarifyingGoal} />
       <StarterRail onClarify={setClarifyingGoal} />
       <LensTabs lens={lens} setLens={setLens} counts={counts} />
