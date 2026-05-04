@@ -7,7 +7,7 @@ type ConnectomeApp = AppManifestEntry;
 
 type AiosState = {
   featured_apps?: string[];
-  ora_mission_statement?: string;
+  aura_mission_statement?: string;
 };
 
 export const CONNECTOME_APPS: ConnectomeApp[] = APP_MANIFEST.filter((app) => app.visibleToUser);
@@ -72,8 +72,8 @@ export default function AppLauncher({ onLaunch }: AppLauncherProps) {
       <div className="app-launcher__intro">
         <span>Aura</span>
         <h2>What are you trying to do?</h2>
-        {aiosState.ora_mission_statement && (
-          <p className="app-launcher__mission">{aiosState.ora_mission_statement}</p>
+        {aiosState.aura_mission_statement && (
+          <p className="app-launcher__mission">{aiosState.aura_mission_statement}</p>
         )}
       </div>
       <div className="app-launcher__grid">

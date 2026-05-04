@@ -124,9 +124,9 @@ function isAuraManagedNode(node: any) {
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
-  return node.owner === 'ora'
+  return node.owner === 'aura'
     || haystack.includes('aura')
-    || haystack.includes('ora')
+    || haystack.includes('aura')
     || haystack.includes('map prerequisite')
     || haystack.includes('bridge node')
     || haystack.includes('find real options')
@@ -136,7 +136,7 @@ function isAuraManagedNode(node: any) {
 
 function userActionNodes(path: any[]) {
   const nodes = (path || []).filter((node) => !isAuraManagedNode(node));
-  return nodes.length ? nodes : (path || []).filter((node) => node.user_action || node.owner !== 'ora');
+  return nodes.length ? nodes : (path || []).filter((node) => node.user_action || node.owner !== 'aura');
 }
 
 function UserStateStrip({ goals }: { goals: Goal[] }) {
@@ -260,7 +260,7 @@ function GoalCard({ goal, onUpdate, onDelete, onOpenFeed }: { goal: Goal; onUpda
   const intention = goal.intention_text || goal.graph_metadata?.intention_text;
   const measurable = goal.measurable_outcome || goal.graph_metadata?.measurable_outcome || goal.title;
   const metricLine = [goal.success_metric, goal.target_value, goal.target_date].filter(Boolean).join(' • ');
-  const auraManagedCount = goal.graph_metadata?.aura_managed_nodes?.length || goal.graph_metadata?.ora_nodes?.length || 0;
+  const auraManagedCount = goal.graph_metadata?.aura_managed_nodes?.length || goal.graph_metadata?.aura_nodes?.length || 0;
 
   const breakdown = async () => {
     setBusy('breakdown');
@@ -294,7 +294,7 @@ function GoalCard({ goal, onUpdate, onDelete, onOpenFeed }: { goal: Goal; onUpda
 
   const askAura = async () => {
     if (!step) return;
-    setBusy('ora');
+    setBusy('aura');
     try {
       const res = await AuraClient.chat(`This intention has become a specific goal in my living collection: "${goal.title}". Current step: "${step.text}". Help me refine the smallest measurable next move, in 2-3 sentences.`, []);
       setAuraReply(res.reply);
@@ -469,13 +469,13 @@ export default function GoalsPage() {
       detail: [
         node.description,
         node.user_action ? `You: ${node.user_action}` : null,
-        node.ora_action ? `Aura: ${node.ora_action}` : null,
+        node.aura_action ? `Aura: ${node.aura_action}` : null,
         node.requires_payment ? `Unlock: ${node.service_id || 'Aura service'}${node.price_usd ? ` • $${node.price_usd}` : ''}` : null,
       ].filter(Boolean).join('\n'),
       resources: [],
       completed: false,
       order: i,
-      ora_note: [
+      aura_note: [
         node.domain ? `Path map • ${node.domain}` : 'Path map',
         node.owner ? `Owner: ${node.owner}` : null,
         node.node_type || node.step_type || null,
@@ -505,9 +505,9 @@ export default function GoalsPage() {
         measurable_outcome: structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
         suggested_ioo_path: iooPath,
         aura_managed_nodes: iooPath.filter(isAuraManagedNode),
-        user_nodes: iooPath.filter((node) => node.owner !== 'ora'),
-        ora_nodes: iooPath.filter((node) => node.owner === 'ora'),
-        paid_ora_nodes: iooPath.filter((node) => node.requires_payment),
+        user_nodes: iooPath.filter((node) => node.owner !== 'aura'),
+        aura_nodes: iooPath.filter((node) => node.owner === 'aura'),
+        paid_aura_nodes: iooPath.filter((node) => node.requires_payment),
         source: 'goals_collection',
       },
     });

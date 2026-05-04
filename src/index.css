@@ -234,7 +234,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 /* ─── AuraPage fixed chat shell ────────────────────────────────── */
-.ora-container {
+.aura-container {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -242,7 +242,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px)) !important;
 }
 @media (min-width: 1024px) {
-  .ora-container {
+  .aura-container {
     left: 240px !important;
     bottom: 0 !important;
   }
@@ -449,7 +449,7 @@ body {
 }
 
 .connectome-brand,
-.connectome-ora-indicator,
+.connectome-aura-indicator,
 .connectome-launcher-toggle,
 .connectome-status button:not(.connectome-feedback-btn),
 .connectome-dock__item {
@@ -595,7 +595,7 @@ body {
 }
 
 
-.connectome-ora-indicator {
+.connectome-aura-indicator {
   justify-self: center;
   display: inline-flex;
   align-items: center;
@@ -610,7 +610,7 @@ body {
   letter-spacing: 0.02em;
 }
 
-.ora-orb {
+.aura-orb {
   width: 13px;
   height: 13px;
   flex: 0 0 auto;
@@ -621,8 +621,8 @@ body {
   animation: oraPulse 2.8s ease-in-out infinite;
 }
 
-.ora-orb--large { width: 34px; height: 34px; }
-.ora-orb--small { width: 22px; height: 22px; }
+.aura-orb--large { width: 34px; height: 34px; }
+.aura-orb--small { width: 22px; height: 22px; }
 
 @keyframes oraPulse {
   0%, 100% { transform: scale(1); filter: saturate(1); opacity: 0.82; }
@@ -725,7 +725,7 @@ body {
   box-shadow: 0 0 28px rgba(0,212,170,0.18), inset 0 0 0 1px rgba(0,212,170,0.18);
 }
 
-.connectome-dock__item--ora span {
+.connectome-dock__item--aura span {
   color: #00d4aa;
   text-shadow: 0 0 18px rgba(0,212,170,0.8);
 }
@@ -860,7 +860,7 @@ body.keyboard-open .global-feedback-fab {
 .connectome-home__activity p { padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.06); color: rgba(248,248,252,0.65); }
 
 .connectome-launcher-sheet,
-.ora-overlay {
+.aura-overlay {
   position: fixed;
   inset: 0;
   z-index: 180;
@@ -899,7 +899,7 @@ body.keyboard-open .global-feedback-fab {
 }
 
 .connectome-launcher-sheet__close,
-.ora-overlay__close {
+.aura-overlay__close {
   position: absolute;
   top: 16px;
   right: 16px;
@@ -928,9 +928,9 @@ body.keyboard-open .global-feedback-fab {
 .app-launcher__description { margin-top: 8px; color: rgba(248,248,252,0.55); font-size: 14px; line-height: 1.45; }
 .app-launcher__soon { margin-top: auto; color: #00d4aa; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
 
-.ora-overlay { display: grid; place-items: center; padding: 18px; }
-.ora-overlay__scrim { position: absolute; inset: 0; background: rgba(2,3,10,0.58); backdrop-filter: blur(16px); }
-.ora-overlay__panel {
+.aura-overlay { display: grid; place-items: center; padding: 18px; }
+.aura-overlay__scrim { position: absolute; inset: 0; background: rgba(2,3,10,0.58); backdrop-filter: blur(16px); }
+.aura-overlay__panel {
   position: relative;
   z-index: 1;
   width: min(760px, 100%);
@@ -944,27 +944,27 @@ body.keyboard-open .global-feedback-fab {
   flex-direction: column;
   overflow: hidden;
 }
-.ora-overlay__header { position: relative; padding: 18px 22px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.ora-overlay__handle { width: 44px; height: 4px; margin: 0 auto 14px; border-radius: 999px; background: rgba(255,255,255,0.24); }
-.ora-overlay__identity { display: flex; align-items: center; gap: 14px; }
-.ora-overlay__eyebrow { color: rgba(248,248,252,0.42); font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800; }
-.ora-overlay__identity h2 { margin: 2px 0 0; font-size: 30px; letter-spacing: -0.06em; }
-.ora-overlay__messages { flex: 1; overflow: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
-.ora-overlay__message { display: flex; align-items: flex-end; gap: 10px; }
-.ora-overlay__message > div { max-width: min(72%, 520px); padding: 13px 16px; border-radius: 20px; line-height: 1.55; font-size: 15px; }
-.ora-overlay__message--ora > div { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.08); border-bottom-left-radius: 6px; }
-.ora-overlay__message--user { justify-content: flex-end; }
-.ora-overlay__message--user > div { background: rgba(0,212,170,0.16); border: 1px solid rgba(0,212,170,0.28); border-bottom-right-radius: 6px; }
-.ora-overlay__typing { display: flex; gap: 5px; }
-.ora-overlay__typing span { width: 7px; height: 7px; border-radius: 999px; background: #00d4aa; animation: bounce 1.2s ease-in-out infinite; }
-.ora-overlay__typing span:nth-child(2) { animation-delay: 0.15s; }
-.ora-overlay__typing span:nth-child(3) { animation-delay: 0.3s; }
-.ora-overlay__quick-actions { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 0 20px 14px; }
-.ora-overlay__quick-context { flex: 0 0 auto; min-height: 28px; display: inline-flex; align-items: center; padding: 0 10px; border-radius: 999px; background: rgba(0,212,170,0.12); color: rgba(0,212,170,0.92); border: 1px solid rgba(0,212,170,0.18); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-.ora-overlay__quick-actions button { flex: 0 0 auto; min-height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.07); color: rgba(248,248,252,0.78); border: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
-.ora-overlay__composer { display: flex; gap: 10px; padding: 16px 20px max(18px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,0.08); }
-.ora-overlay__composer input { border-radius: 999px; background: rgba(255,255,255,0.07); }
-.ora-overlay__composer button { min-width: 82px; border-radius: 999px; background: #00d4aa; color: #04110f; }
+.aura-overlay__header { position: relative; padding: 18px 22px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.aura-overlay__handle { width: 44px; height: 4px; margin: 0 auto 14px; border-radius: 999px; background: rgba(255,255,255,0.24); }
+.aura-overlay__identity { display: flex; align-items: center; gap: 14px; }
+.aura-overlay__eyebrow { color: rgba(248,248,252,0.42); font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800; }
+.aura-overlay__identity h2 { margin: 2px 0 0; font-size: 30px; letter-spacing: -0.06em; }
+.aura-overlay__messages { flex: 1; overflow: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+.aura-overlay__message { display: flex; align-items: flex-end; gap: 10px; }
+.aura-overlay__message > div { max-width: min(72%, 520px); padding: 13px 16px; border-radius: 20px; line-height: 1.55; font-size: 15px; }
+.aura-overlay__message--aura > div { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.08); border-bottom-left-radius: 6px; }
+.aura-overlay__message--user { justify-content: flex-end; }
+.aura-overlay__message--user > div { background: rgba(0,212,170,0.16); border: 1px solid rgba(0,212,170,0.28); border-bottom-right-radius: 6px; }
+.aura-overlay__typing { display: flex; gap: 5px; }
+.aura-overlay__typing span { width: 7px; height: 7px; border-radius: 999px; background: #00d4aa; animation: bounce 1.2s ease-in-out infinite; }
+.aura-overlay__typing span:nth-child(2) { animation-delay: 0.15s; }
+.aura-overlay__typing span:nth-child(3) { animation-delay: 0.3s; }
+.aura-overlay__quick-actions { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 0 20px 14px; }
+.aura-overlay__quick-context { flex: 0 0 auto; min-height: 28px; display: inline-flex; align-items: center; padding: 0 10px; border-radius: 999px; background: rgba(0,212,170,0.12); color: rgba(0,212,170,0.92); border: 1px solid rgba(0,212,170,0.18); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.aura-overlay__quick-actions button { flex: 0 0 auto; min-height: 38px; padding: 0 14px; border-radius: 999px; background: rgba(255,255,255,0.07); color: rgba(248,248,252,0.78); border: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+.aura-overlay__composer { display: flex; gap: 10px; padding: 16px 20px max(18px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,0.08); }
+.aura-overlay__composer input { border-radius: 999px; background: rgba(255,255,255,0.07); }
+.aura-overlay__composer button { min-width: 82px; border-radius: 999px; background: #00d4aa; color: #04110f; }
 
 /* Reframe legacy full-screen pages inside the AIOS chrome. */
 .feed-container {
@@ -973,7 +973,7 @@ body.keyboard-open .global-feedback-fab {
   right: 0 !important;
   bottom: var(--shell-bottom-clearance) !important;
 }
-.ora-container {
+.aura-container {
   top: var(--top-header-height) !important;
   left: 0 !important;
   right: 0 !important;
@@ -992,7 +992,7 @@ body.aura-chat-active.keyboard-open {
   width: 100%;
 }
 
-body.keyboard-open .ora-container {
+body.keyboard-open .aura-container {
   bottom: auto !important;
   height: calc(var(--visual-viewport-height, 100dvh) - var(--top-header-height, 56px)) !important;
   overflow: hidden !important;
@@ -1011,13 +1011,13 @@ body.aura-chat-active.keyboard-open .connectome-dock {
   bottom: max(14px, env(safe-area-inset-bottom, 0px)) !important;
 }
 
-body.aura-chat-active.keyboard-open .ora-container {
+body.aura-chat-active.keyboard-open .aura-container {
   bottom: auto !important;
   height: calc(var(--visual-viewport-height, 100dvh) - var(--top-header-height, 56px)) !important;
 }
 
 @media (max-width: 760px) {
-  body.aura-chat-active.keyboard-open .ora-container {
+  body.aura-chat-active.keyboard-open .aura-container {
     top: 0 !important;
     height: var(--visual-viewport-height, 100dvh) !important;
   }
@@ -1026,7 +1026,7 @@ body.aura-chat-active.keyboard-open .ora-container {
 @media (min-width: 1024px) {
   .app-authenticated { padding-left: 0; }
   .feed-container { left: 0 !important; bottom: var(--shell-bottom-clearance) !important; }
-  .ora-container { left: 0 !important; }
+  .aura-container { left: 0 !important; }
 }
 
 @media (max-width: 760px) {
@@ -1043,7 +1043,7 @@ body.aura-chat-active.keyboard-open .ora-container {
 
   .connectome-brand small,
   .connectome-context-label,
-  .connectome-ora-indicator span:last-child,
+  .connectome-aura-indicator span:last-child,
   .connectome-app-titlebar small,
   .connectome-signout { display: none; }
   .connectome-brand strong { font-size: 14px; }
@@ -1055,9 +1055,9 @@ body.aura-chat-active.keyboard-open .ora-container {
   .connectome-home__highlights,
   .app-launcher__grid { grid-template-columns: 1fr; }
   .connectome-home h1 { font-size: clamp(36px, 14vw, 62px); }
-  .ora-overlay { padding: 0; align-items: stretch; }
-  .ora-overlay__panel { width: 100%; height: var(--visual-viewport-height, 100dvh); border-radius: 0; border-left: none; border-right: none; }
-  .ora-overlay__message > div { max-width: 82%; }
+  .aura-overlay { padding: 0; align-items: stretch; }
+  .aura-overlay__panel { width: 100%; height: var(--visual-viewport-height, 100dvh); border-radius: 0; border-left: none; border-right: none; }
+  .aura-overlay__message > div { max-width: 82%; }
 }
 
 /* Meta-app shells: iVive + Eviva */
@@ -1279,14 +1279,14 @@ body.aura-chat-active.keyboard-open .ora-container {
   .global-feedback-modal-backdrop { align-items: center; }
 }
 
-.ora-overlay__message-actions {
+.aura-overlay__message-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
 }
 
-.ora-overlay__message-actions button {
+.aura-overlay__message-actions button {
   border: 1px solid rgba(0, 212, 170, 0.34);
   background: rgba(0, 212, 170, 0.12);
   color: #b7fff0;
@@ -1297,7 +1297,7 @@ body.aura-chat-active.keyboard-open .ora-container {
   cursor: pointer;
 }
 
-.ora-overlay__message-actions button:disabled {
+.aura-overlay__message-actions button:disabled {
   opacity: 0.52;
   cursor: wait;
 }

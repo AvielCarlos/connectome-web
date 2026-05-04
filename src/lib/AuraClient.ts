@@ -160,11 +160,11 @@ export interface GoalStep {
   resources?: Array<{ label: string; url: string }>;
   completed: boolean;
   order: number;
-  ora_note?: string;
+  aura_note?: string;
 }
 
 export interface GoalClarifyMessage {
-  role: 'user' | 'ora';
+  role: 'user' | 'aura';
   content: string;
 }
 
@@ -176,7 +176,7 @@ export interface GoalClarifyResponse {
 }
 
 export interface OnboardingMessage {
-  role: 'user' | 'ora';
+  role: 'user' | 'aura';
   content: string;
 }
 
@@ -231,7 +231,7 @@ export interface JournalEntry {
   id: string;
   prompt: string;
   response: string;
-  ora_reflection: string;
+  aura_reflection: string;
   created_at: string;
 }
 
@@ -516,9 +516,9 @@ class AuraClientClass {
     return res.data as { id: string; prompt: string };
   }
 
-  async submitJournalEntry(promptId: string, response: string): Promise<{ ora_reflection: string }> {
+  async submitJournalEntry(promptId: string, response: string): Promise<{ aura_reflection: string }> {
     const res = await this.client.post('/api/journal/entry', { prompt_id: promptId, response });
-    return res.data as { ora_reflection: string };
+    return res.data as { aura_reflection: string };
   }
 
   async getJournalEntries(): Promise<JournalEntry[]> {
@@ -532,23 +532,23 @@ class AuraClientClass {
     message: string,
     history: { role: string; content: string }[],
     context: { route?: string; app_context?: Record<string, any> } = {},
-  ): Promise<{ reply: string; ora_state: any; aura_state?: any; suggested_actions?: AuraChatAction[] }> {
-    const res = await this.client.post('/api/ora/chat', {
+  ): Promise<{ reply: string; aura_state: any; suggested_actions?: AuraChatAction[] }> {
+    const res = await this.client.post('/api/aura/chat', {
       message,
       conversation_history: history.map(h => ({ role: h.role, content: h.content })),
       route: context.route,
       app_context: context.app_context,
     });
-    return res.data as { reply: string; ora_state: any; aura_state?: any; suggested_actions?: AuraChatAction[] };
+    return res.data as { reply: string; aura_state: any; suggested_actions?: AuraChatAction[] };
   }
 
-  async getOraSelf(): Promise<any> {
-    const res = await this.client.get('/api/ora/self');
+  async getAuraSelf(): Promise<any> {
+    const res = await this.client.get('/api/aura/self');
     return res.data;
   }
 
   async getOpeningMessage(): Promise<{ message: string }> {
-    const res = await this.client.get('/api/ora/opening');
+    const res = await this.client.get('/api/aura/opening');
     return res.data as { message: string };
   }
 
@@ -678,7 +678,7 @@ class AuraClientClass {
       suggestion: any;
       cp_earned: number;
       total_dao_cp: number;
-      ora_response: string;
+      aura_response: string;
       message: string;
     };
   }
@@ -708,7 +708,7 @@ class AuraClientClass {
       suggestion: any;
       cp_earned: number;
       total_dao_cp: number;
-      ora_response: string;
+      aura_response: string;
     };
   }
 
@@ -810,7 +810,7 @@ class AuraClientClass {
 
   async submitDailyCheckin(payload: { mood_index: number; capacity: string; focus: string; blocker?: string }) {
     const res = await this.client.post('/api/mood/daily-checkin', payload);
-    return res.data as { ok: boolean; mood: string; xp_awarded: number; ora_focus: string; active_goal?: { id: string; title: string } | null };
+    return res.data as { ok: boolean; mood: string; xp_awarded: number; aura_focus: string; active_goal?: { id: string; title: string } | null };
   }
 
   // ── A/B Testing ────────────────────────────────────────────────────────────────────────────────

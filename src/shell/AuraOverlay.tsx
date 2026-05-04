@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AuraClient, type AuraChatAction } from '../lib/AuraClient';
 
-type Message = { id: string; role: 'user' | 'ora'; content: string; actions?: AuraChatAction[] };
+type Message = { id: string; role: 'user' | 'aura'; content: string; actions?: AuraChatAction[] };
 type QuickAction = { label: string; prompt: string; context: string };
 
 interface AuraOverlayProps {
@@ -76,7 +76,7 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'opening',
-      role: 'ora',
+      role: 'aura',
       content: "I'm Aura — your AI OS for human flourishing. Ask me anything, or choose a signal below and I'll orient the day around it.",
     },
   ]);
@@ -107,18 +107,18 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
 
     try {
       const history = messages.slice(-10).map((m) => ({
-        role: m.role === 'ora' ? 'assistant' : 'user',
+        role: m.role === 'aura' ? 'assistant' : 'user',
         content: m.content,
       }));
       const res = await AuraClient.chat(text, history, {
         route: `${location.pathname}${location.search}${location.hash}`,
         app_context: { app: quickActionContext, page: location.pathname },
       });
-      setMessages((prev) => [...prev, { id: `${Date.now()}-ora`, role: 'ora', content: res.reply, actions: res.suggested_actions || [] }]);
+      setMessages((prev) => [...prev, { id: `${Date.now()}-aura`, role: 'aura', content: res.reply, actions: res.suggested_actions || [] }]);
     } catch {
       setMessages((prev) => [...prev, {
         id: `${Date.now()}-fallback`,
-        role: 'ora',
+        role: 'aura',
         content: "I couldn't reach my deeper systems just now, but I'm still here. Try again in a moment.",
       }]);
     } finally {
@@ -138,12 +138,12 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
         );
         setMessages((prev) => [...prev, {
           id: `${Date.now()}-goal-created`,
-          role: 'ora',
+          role: 'aura',
           content: `Done — I created the goal “${goal.title}”. I can break it down into a path next.`,
           actions: [{ label: 'Break it into steps', action: 'chat_prompt', prompt: `Break my new goal “${goal.title}” into a practical path with the smallest next action first.` }],
         }]);
       } catch {
-        setMessages((prev) => [...prev, { id: `${Date.now()}-goal-error`, role: 'ora', content: 'I could not create that goal just now. Try again, or ask me to revise it first.' }]);
+        setMessages((prev) => [...prev, { id: `${Date.now()}-goal-error`, role: 'aura', content: 'I could not create that goal just now. Try again, or ask me to revise it first.' }]);
       } finally {
         setLoading(false);
       }
@@ -153,9 +153,9 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
       setLoading(true);
       try {
         await AuraClient.syncGoogleDrive();
-        setMessages((prev) => [...prev, { id: `${Date.now()}-drive-sync`, role: 'ora', content: 'Drive sync started. Ask me again in a moment and I’ll use the refreshed context.' }]);
+        setMessages((prev) => [...prev, { id: `${Date.now()}-drive-sync`, role: 'aura', content: 'Drive sync started. Ask me again in a moment and I’ll use the refreshed context.' }]);
       } catch {
-        setMessages((prev) => [...prev, { id: `${Date.now()}-drive-sync-error`, role: 'ora', content: 'I could not sync Drive from here. Check Profile → Google Drive permissions/privacy, then try again.' }]);
+        setMessages((prev) => [...prev, { id: `${Date.now()}-drive-sync-error`, role: 'aura', content: 'I could not sync Drive from here. Check Profile → Google Drive permissions/privacy, then try again.' }]);
       } finally {
         setLoading(false);
       }
@@ -176,29 +176,29 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
   if (!open) return null;
 
   return (
-    <div className="ora-overlay" role="dialog" aria-modal="true" aria-label="Aura OS overlay">
-      <div className="ora-overlay__scrim" onClick={onClose} />
-      <div className="ora-overlay__panel" ref={panelRef} onPointerDown={handlePointerDown}>
-        <header className="ora-overlay__header">
-          <div className="ora-overlay__handle" />
-          <div className="ora-overlay__identity">
-            <span className="ora-orb ora-orb--large" />
+    <div className="aura-overlay" role="dialog" aria-modal="true" aria-label="Aura OS overlay">
+      <div className="aura-overlay__scrim" onClick={onClose} />
+      <div className="aura-overlay__panel" ref={panelRef} onPointerDown={handlePointerDown}>
+        <header className="aura-overlay__header">
+          <div className="aura-overlay__handle" />
+          <div className="aura-overlay__identity">
+            <span className="aura-orb aura-orb--large" />
             <div>
-              <div className="ora-overlay__eyebrow">Aura · AIOS</div>
+              <div className="aura-overlay__eyebrow">Aura · AIOS</div>
               <h2>Aura — your guide</h2>
             </div>
           </div>
-          <button className="ora-overlay__close" type="button" onClick={onClose} aria-label="Close Aura">×</button>
+          <button className="aura-overlay__close" type="button" onClick={onClose} aria-label="Close Aura">×</button>
         </header>
 
-        <div className="ora-overlay__messages">
+        <div className="aura-overlay__messages">
           {messages.map((message) => (
-            <div key={message.id} className={`ora-overlay__message ora-overlay__message--${message.role}`}>
-              {message.role === 'ora' && <span className="ora-orb ora-orb--small" />}
+            <div key={message.id} className={`aura-overlay__message aura-overlay__message--${message.role}`}>
+              {message.role === 'aura' && <span className="aura-orb aura-orb--small" />}
               <div>
                 <div>{message.content}</div>
-                {message.role === 'ora' && Boolean(message.actions?.length) && (
-                  <div className="ora-overlay__message-actions" aria-label="Aura suggested actions">
+                {message.role === 'aura' && Boolean(message.actions?.length) && (
+                  <div className="aura-overlay__message-actions" aria-label="Aura suggested actions">
                     {message.actions!.map((action, index) => (
                       <button
                         key={`${message.id}:${index}:${action.label}`}
@@ -215,16 +215,16 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
             </div>
           ))}
           {loading && (
-            <div className="ora-overlay__message ora-overlay__message--ora">
-              <span className="ora-orb ora-orb--small" />
-              <div className="ora-overlay__typing"><span /><span /><span /></div>
+            <div className="aura-overlay__message aura-overlay__message--aura">
+              <span className="aura-orb aura-orb--small" />
+              <div className="aura-overlay__typing"><span /><span /><span /></div>
             </div>
           )}
           <div ref={endRef} />
         </div>
 
-        <div className="ora-overlay__quick-actions" aria-label={`${quickActionContext} quick actions`}>
-          <span className="ora-overlay__quick-context">{quickActionContext}</span>
+        <div className="aura-overlay__quick-actions" aria-label={`${quickActionContext} quick actions`}>
+          <span className="aura-overlay__quick-context">{quickActionContext}</span>
           {quickActions.actions.map((action) => (
             <button
               key={`${action.context}:${action.label}`}
@@ -237,7 +237,7 @@ export default function AuraOverlay({ open, onClose }: AuraOverlayProps) {
           ))}
         </div>
 
-        <form className="ora-overlay__composer" onSubmit={(event) => { event.preventDefault(); sendMessage(); }}>
+        <form className="aura-overlay__composer" onSubmit={(event) => { event.preventDefault(); sendMessage(); }}>
           <input
             value={input}
             onChange={(event) => setInput(event.target.value)}

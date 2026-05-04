@@ -12,14 +12,14 @@ Public site (`web/atdao`) is the Ascension/DAO front door. GitHub Pages `connect
 
 ## Screen Graph principle
 
-Connectome screens are not fixed destinations. A generated screen is a pathway node: a temporary interface between the user's current state, Ora's IOO possibility graph, and the execution layer.
+Connectome screens are not fixed destinations. A generated screen is a pathway node: a temporary interface between the user's current state, Aura's IOO possibility graph, and the execution layer.
 
 This means UI work should assume:
 
 - a page/card can clarify intent, route to another card, execute an action, or belong to an IOO node;
-- screens should preserve enough metadata for Ora to learn why they were shown;
+- screens should preserve enough metadata for Aura to learn why they were shown;
 - transitions matter as much as the screen itself — what the screen leads to, requires, clarifies, or executes is part of the product;
-- multiple possible paths can exist from point A to point B, and Ora may rank or reroute them over time.
+- multiple possible paths can exist from point A to point B, and Aura may rank or reroute them over time.
 
 Apps/domains such as **iVive**, **Eviva**, and **Aventi** are reusable modules/modes used by Aura to guide the user. They should bend around the user's path rather than behave like isolated apps with hard walls.
 
@@ -81,7 +81,7 @@ The purpose is not app navigation. The purpose is helping people fulfil their de
 
 ## Screen Pattern Library principle
 
-Reusable screen patterns should behave like living UI memory, not a pile of templates. Ora can create or reuse a pattern, test small variants, reinforce the winners, and trim patterns that are stale, unused, or low-outcome.
+Reusable screen patterns should behave like living UI memory, not a pile of templates. Aura can create or reuse a pattern, test small variants, reinforce the winners, and trim patterns that are stale, unused, or low-outcome.
 
 Foundational lifecycle:
 
@@ -90,7 +90,7 @@ Foundational lifecycle:
 - **Reinforce winners** when users reach clarity, completion, execution, or other positive outcomes.
 - **Trim stale/unused/low-outcome patterns** so the library stays sharp and does not keep resurfacing weak experiences.
 
-Pattern metadata should preserve enough lifecycle signal for pruning: `last_used_at`, `usage_count`, `success_score` / `outcome_score`, and deprecated/pruned state. Prefer soft-pruning over deletion so Ora can retain historical learning while avoiding reuse.
+Pattern metadata should preserve enough lifecycle signal for pruning: `last_used_at`, `usage_count`, `success_score` / `outcome_score`, and deprecated/pruned state. Prefer soft-pruning over deletion so Aura can retain historical learning while avoiding reuse.
 
 Primary feed responses are graph-learning signals:
 
@@ -115,7 +115,7 @@ Primary feed responses are graph-learning signals:
 ### 1. First-time visitor → sign up → onboarding → home/feed
 
 1. Public entry explains Ascension/Connectome/iDo at a high level.
-2. User opens app and sees auth page: “iDo — your daily AI life app, guided by Ora.”
+2. User opens app and sees auth page: “iDo — your daily AI life app, guided by Aura.”
 3. Registration goes to `/onboarding` when the onboarding experiment asks for it; otherwise it lands at `/app`.
 4. Onboarding collects orientation signals.
 5. Completion lands at `/app`.
@@ -126,7 +126,7 @@ Primary feed responses are graph-learning signals:
 ### 2. Returning user → home → choose goal/discovery → feed/action
 
 1. Login, OAuth callback, `/`, and `/app` land on the Connectome home/orientation screen.
-2. If the user has intent, Goals opens focused and invites them to clarify with Ora.
+2. If the user has intent, Goals opens focused and invites them to clarify with Aura.
 3. If the user lacks intent, iDo opens the one-action feed.
 4. Feed cards support save/rate/skip/detail and should embed goal-building or external-app context as IOO Nodes/pathway sheets before routing to another app.
 
@@ -159,13 +159,13 @@ Primary feed responses are graph-learning signals:
 - `/` — unauthenticated auth page; authenticated Connectome/iDo home.
 - `/auth/callback` — Google OAuth callback; stores auth and redirects to `/app`.
 - `/auth/github-callback` — GitHub connection callback; redirects to `/app/contribute?github=connected`.
-- `/onboarding` — authenticated Ora onboarding; completion redirects to `/app`.
+- `/onboarding` — authenticated Aura onboarding; completion redirects to `/app`.
 
 ### Authenticated app
 
 - `/app` — Home/orientation screen.
 - `/app/ido` — one-action feed/discovery.
-- `/app/goals` — goals and Ora clarification.
+- `/app/goals` — goals and Aura clarification.
 - `/app/routines` — routines and habits.
 - `/app/dao` — DAO, CP, proposals, governance, contribution overview.
 - `/app/contribute` — submit contributions and sync GitHub.
@@ -186,30 +186,30 @@ Primary feed responses are graph-learning signals:
 - `/contribute` → `/app/contribute`
 - `/services` → `/app/services`
 - `/profile` → `/app/profile`
-- `/ora` → `/app`
+- `/aura` (legacy `/ora`) → `/app`
 
 ## Screen purposes, first 5 seconds, CTAs
 
 | Screen | Purpose | Must answer in 5 seconds | Primary CTA | Secondary CTA |
 |---|---|---|---|---|
-| Auth | Sign in/up to iDo/Ora | “This is my daily AI life app.” | Continue with Google / Sign in | Register |
-| `/app` Home | Orient the user and route intent | “Choose goal clarification or discovery.” | Clarify with Ora | Open iDo feed |
+| Auth | Sign in/up to iDo/Aura | “This is my daily AI life app.” | Continue with Google / Sign in | Register |
+| `/app` Home | Orient the user and route intent | “Choose goal clarification or discovery.” | Clarify with Aura | Open iDo feed |
 | `/app/ido` | Present one next action | “Here is something I can do now.” | Act/save/rate card | Skip / make it a goal |
-| `/app/goals` | Convert intent into structured path | “Tell Ora what you want.” | Start clarification | Pick a starter |
+| `/app/goals` | Convert intent into structured path | “Tell Aura what you want.” | Start clarification | Pick a starter |
 | `/app/dao` | Explain contribution economy/governance | “This is how the ecosystem is governed and rewarded.” | Open Contribute | Browse issues/proposals |
 | `/app/contribute` | Submit evidence of work | “Submit concrete work and earn CP.” | Submit contribution | Connect GitHub / What is CP? |
 | `/app/profile` | Identity, settings, system/admin | “This is my account and controls.” | Manage profile/settings | Open admin/system sections |
-| `/app/services` | Tools and surfaces | “Use or generate Ora-powered tools.” | Open tool/surface | Ask Ora |
-| `/app/ioo` | Semantic map | “This is Ora’s life graph.” | Explore map | Return to goals/iDo |
-| `/app/ivive` | Vitality domain | “Improve energy/body/mind.” | Start vitality action | Ask Ora |
+| `/app/services` | Tools and surfaces | “Use or generate Aura-powered tools.” | Open tool/surface | Ask Aura |
+| `/app/ioo` | Semantic map | “This is Aura’s life graph.” | Explore map | Return to goals/iDo |
+| `/app/ivive` | Vitality domain | “Improve energy/body/mind.” | Start vitality action | Ask Aura |
 | `/app/eviva` | Mission/service domain | “Find meaningful contribution.” | Explore missions/services | Contribute |
 
 ## Navigation rules
 
 - **Home is the orientation hub**: `/` when authenticated and `/app` both render it.
-- **Dock is local navigation**: show the 4–5 most relevant neighbouring actions for the current app. Keep Ora centered/contextual where possible.
+- **Dock is local navigation**: show the 4–5 most relevant neighbouring actions for the current app. Keep Aura centered/contextual where possible.
 - **Launcher is global navigation**: hamburger opens all major surfaces using user-outcome labels, not internal architecture labels.
-- **Ora overlay is contextual assistance**: use for questions, clarification, and routing help; do not make it the only way to move between screens.
+- **Aura overlay is contextual assistance**: use for questions, clarification, and routing help; do not make it the only way to move between screens.
 - **Profile is identity/settings**: admin/dev/system tools may live there for now but should not be primary user navigation.
 - **Legacy routes redirect** rather than render duplicate screens.
 
@@ -218,8 +218,8 @@ Primary feed responses are graph-learning signals:
 - **Auth**: show backend error; return to auth page after callback failure.
 - **Onboarding**: if already complete, redirect to `/app`; if API fails, avoid trapping user in a blank shell.
 - **Home**: static orientation should render without API dependency.
-- **Feed**: loading should communicate that Ora is preparing actions; empty should offer goals and feedback.
-- **Goals**: skeleton while loading; empty state invites starter or typed goal; failed Ora clarification should show toast.
+- **Feed**: loading should communicate that Aura is preparing actions; empty should offer goals and feedback.
+- **Goals**: skeleton while loading; empty state invites starter or typed goal; failed Aura clarification should show toast.
 - **DAO**: empty leaderboard/proposals explain what to do next, not just “none.”
 - **Contribute**: unauthenticated submit disabled with sign-in copy; code contribution requires GitHub; success/error messages stay inline.
 - **Feedback**: screenshot capture is optional; failed submit shows retryable error.

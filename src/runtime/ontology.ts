@@ -28,7 +28,7 @@ export type PrivacyTier = 'standard' | 'sensitive' | 'minimal';
 
 export interface PermissionGrant {
   domain: PermissionDomain;
-  scope: string[]; // e.g. ['ido', 'ora']
+  scope: string[]; // e.g. ['ido', 'aura']
   privacyTier: PrivacyTier;
   expiresAt?: string;
 }
@@ -37,7 +37,7 @@ export interface PermissionGrant {
 export type AppId =
   | 'home'
   | 'ido'
-  | 'ora'
+  | 'aura'
   | 'goals'
   | 'routines'
   | 'ivive'
@@ -140,7 +140,7 @@ export interface ActionDecision {
   id: string;
   targetEntity: { kind: string; id: string };
   decision: 'delegate' | 'plan' | 'ditch';
-  delegatedTo?: 'ora' | 'agent' | 'person';
+  delegatedTo?: 'aura' | 'agent' | 'person';
   planId?: string;
   reason?: string;
 }
@@ -154,7 +154,7 @@ export interface Opportunity {
   cost?: { amount: number; currency: string };
   servesNeeds: string[]; // Need.id[]
   fitScore?: number; // 0–1
-  source?: 'ido_feed' | 'domain_feed' | 'aventi' | 'eviva' | 'ivive' | 'dao' | 'ora' | 'partner';
+  source?: 'ido_feed' | 'domain_feed' | 'aventi' | 'eviva' | 'ivive' | 'dao' | 'aura' | 'partner';
 }
 
 export interface FeedSurface {
@@ -216,7 +216,7 @@ export interface DaoTask {
 
 export interface HealthSignal {
   id: string;
-  source: 'manual' | 'wearable' | 'inferred' | 'ora';
+  source: 'manual' | 'wearable' | 'inferred' | 'aura';
   kind: 'energy' | 'sleep' | 'mood' | 'recovery' | 'focus' | 'rest' | 'pomodoro' | 'biomarker';
   value: number;
   unit?: string;
@@ -225,7 +225,7 @@ export interface HealthSignal {
 }
 
 export type MemoryKind = 'fact' | 'preference' | 'story' | 'lesson' | 'commitment';
-export type MemoryFraming = 'ora_remembers' | 'profile_memory';
+export type MemoryFraming = 'aura_remembers' | 'profile_memory';
 
 export interface MemoryRecord {
   id: string;
@@ -370,10 +370,10 @@ export const FEED_SURFACES: FeedSurface[] = [
 // ─── App manifest (visible/invisible boundaries) ──────────────────────────────
 export const APP_MANIFEST: AppManifestEntry[] = [
   {
-    id: 'ora',
+    id: 'aura',
     name: 'Aura',
     icon: '◈',
-    path: '/app/ora',
+    path: '/app/aura',
     category: 'daily',
     visibleToUser: true,
     permissions: ['memory', 'notifications', 'files', 'calendar', 'location'],

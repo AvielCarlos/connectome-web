@@ -597,7 +597,7 @@ function isSystemManagedPathStep(step: any) {
     || text.includes('generate')
     || text.includes('rank')
     || text.includes('aura should')
-    || text.includes('ora should');
+    || text.includes('aura should');
 }
 
 function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => void; onInvite: () => void }) {

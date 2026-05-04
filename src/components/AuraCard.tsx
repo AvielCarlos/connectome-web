@@ -498,7 +498,7 @@ export function AuraCard({ component: comp, index, onAction }: AuraCardProps) {
           padding: 16,
           marginBottom: 12,
         }}>
-          {comp.ora_note && (
+          {comp.aura_note && (
             <div style={{
               display: 'flex',
               gap: 8,
@@ -509,7 +509,7 @@ export function AuraCard({ component: comp, index, onAction }: AuraCardProps) {
             }}>
               <span style={{ color: '#00d4aa', fontSize: 11 }}>✦</span>
               <span style={{ color: 'rgba(248,248,252,0.6)', fontSize: 12, fontStyle: 'italic', lineHeight: 1.5 }}>
-                {comp.ora_note}
+                {comp.aura_note}
               </span>
             </div>
           )}
@@ -705,7 +705,7 @@ export function AuraCard({ component: comp, index, onAction }: AuraCardProps) {
           </div>
           <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4, lineHeight: 1.4 }}>{comp.title}</div>
           {comp.channel && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.5)', marginBottom: 8 }}>{comp.channel}</div>}
-          {comp.ora_note && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.55)', fontStyle: 'italic', marginBottom: 10, lineHeight: 1.5 }}>{comp.ora_note}</div>}
+          {comp.aura_note && <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.55)', fontStyle: 'italic', marginBottom: 10, lineHeight: 1.5 }}>{comp.aura_note}</div>}
           {comp.youtube_url && (
             <a href={comp.youtube_url} target="_blank" rel="noopener noreferrer" style={{
               display: 'block',

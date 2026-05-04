@@ -13,7 +13,7 @@ import AuthCallbackPage from './pages/AuthCallbackPage'
 import GitHubCallbackPage from './pages/GitHubCallbackPage'
 import ConnectomeHome from './pages/ConnectomeHome'
 import FeedPage from './pages/FeedPage'
-import AuraPage from './pages/OraPage'
+import AuraPage from './pages/AuraPage'
 import GoalsPage from './pages/GoalsPage'
 import RoutinesPage from './pages/RoutinesPage'
 import DAOPage from './pages/DAOPage'
@@ -58,7 +58,7 @@ function useKeyboardViewport() {
       // Fixed app surfaces (Aura chat/feed sheets) handle their own keyboard
       // geometry. Browser scrollIntoView centering makes the composer float too
       // far above the keyboard on mobile Safari.
-      if (active.closest('.ora-container, .feed-container, .ora-overlay')) return
+      if (active.closest('.aura-container, .feed-container, .aura-overlay')) return
 
       window.requestAnimationFrame(() => {
         const viewportHeight = window.visualViewport?.height ?? window.innerHeight
@@ -163,7 +163,8 @@ function App() {
           <Route path="/app" element={<ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute>} />
           <Route path="/app/ido" element={<ShellRoute activeApp="ido"><FeedPage /></ShellRoute>} />
           <Route path="/app/future" element={<Navigate to="/app/ido" replace />} />
-          <Route path="/app/ora" element={<ShellRoute activeApp="ora"><AuraPage /></ShellRoute>} />
+          <Route path="/app/aura" element={<ShellRoute activeApp="aura"><AuraPage /></ShellRoute>} />
+          <Route path="/app/aura" element={<Navigate to="/app/aura" replace />} />
           <Route path="/app/goals" element={<ShellRoute activeApp="goals"><GoalsPage /></ShellRoute>} />
           <Route path="/app/routines" element={<ShellRoute activeApp="routines"><RoutinesPage /></ShellRoute>} />
           <Route path="/app/dao" element={<ShellRoute activeApp="dao"><DAOPage /></ShellRoute>} />
@@ -190,7 +191,8 @@ function App() {
           <Route path="/goals" element={<Navigate to="/app/goals" replace />} />
           <Route path="/routines" element={<Navigate to="/app/routines" replace />} />
           <Route path="/journal" element={<Navigate to="/app/ido" replace />} />
-          <Route path="/ora" element={<Navigate to="/app/ora" replace />} />
+          <Route path="/aura" element={<Navigate to="/app/aura" replace />} />
+          <Route path="/ora" element={<Navigate to="/app/aura" replace />} />
           <Route path="/dao" element={<Navigate to="/app/dao" replace />} />
           <Route path="/contribute" element={<Navigate to="/app/contribute" replace />} />
           <Route path="/profile" element={<Navigate to="/app/profile" replace />} />

@@ -31,7 +31,7 @@ type DockItem = {
 
 const CORE_DOCK: DockItem[] = [
   { id: 'ido', label: 'Path', icon: '⚡', path: '/app/ido' },
-  { id: 'ora', label: 'Aura', icon: '◈', path: '/app/ora' },
+  { id: 'aura', label: 'Aura', icon: '◈', path: '/app/aura' },
   { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
   { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },
 ];
@@ -39,7 +39,7 @@ const CORE_DOCK: DockItem[] = [
 const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   home: CORE_DOCK,
   ido: CORE_DOCK,
-  ora: CORE_DOCK,
+  aura: CORE_DOCK,
   goals: CORE_DOCK,
   routines: CORE_DOCK,
   dao: CORE_DOCK,
@@ -228,7 +228,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
             <button
               key={item.id}
               type="button"
-              className={`connectome-dock__item ${active ? 'connectome-dock__item--active' : ''} ${item.id === 'ora' ? 'connectome-dock__item--ora' : ''}`}
+              className={`connectome-dock__item ${active ? 'connectome-dock__item--active' : ''} ${item.id === 'aura' ? 'connectome-dock__item--aura' : ''}`}
               onClick={() => handleDock(item)}
               aria-label={item.label}
             >
