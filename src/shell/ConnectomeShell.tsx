@@ -105,7 +105,9 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
 
     const updateChromeHeight = () => {
       const height = Math.ceil(Math.max(chrome.getBoundingClientRect().height, chrome.scrollHeight));
+      const clearance = height + 12;
       document.documentElement.style.setProperty('--connectome-chrome-height', `${height}px`);
+      document.documentElement.style.setProperty('--shell-top-clearance', `${clearance}px`);
     };
 
     updateChromeHeight();
@@ -122,6 +124,7 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       window.removeEventListener('resize', updateChromeHeight);
       window.visualViewport?.removeEventListener('resize', updateChromeHeight);
       document.documentElement.style.removeProperty('--connectome-chrome-height');
+      document.documentElement.style.removeProperty('--shell-top-clearance');
     };
   }, []);
 
