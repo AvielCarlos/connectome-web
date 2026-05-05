@@ -866,9 +866,40 @@ function FeedCard({
   const chips = importantChips(spec);
   const review = reviewSummary(spec);
   const openCardAction = (action: any) => {
-    if (action?.type === 'navigate' && action.url === '/app/goals') onDoNow(item, cardData);
-    if (action?.type === 'open_url' && /^(ido|ioo):\/\//i.test(String(action.url || ''))) onDoNow(item, cardData);
-    if (action?.type === 'open_url' && /^https?:\/\//i.test(String(action.url || ''))) window.open(action.url, '_blank', 'noopener');
+    if (!action) return;
+    const actionType = String(action.type || action.action || '').toLowerCase();
+    const url = String(action.url || action.path || '').trim();
+    const payloadKind = String(action.payload?.kind || action.kind || '').toLowerCase();
+    const wantsExecution = [
+      'do_now',
+      'execute',
+      'start',
+      'start_node',
+      'open_execution',
+      'ioo_node',
+    ].includes(actionType) || ['do_now', 'execute', 'booking', 'reservation'].includes(payloadKind);
+
+    if (wantsExecution || /^(ido|ioo):\/\//i.test(url)) {
+      onDoNow(item, cardData);
+      return;
+    }
+
+    // Generated cards have used app-relative actions like /app/goals as a
+    // shorthand for "start this node". Keep those taps in the feed execution
+    // sheet instead of silently doing nothing or navigating away from context.
+    if (actionType === 'navigate' && /^\/app\/(goals|ioo)(?:[/?#]|$)/.test(url)) {
+      onDoNow(item, cardData);
+      return;
+    }
+
+    if (actionType === 'navigate' && url.startsWith('/')) {
+      navigate(url);
+      return;
+    }
+
+    if (actionType === 'open_url' && /^https?:\/\//i.test(url)) {
+      window.open(url, '_blank', 'noopener');
+    }
   };
 
   const handleSave = () => {
