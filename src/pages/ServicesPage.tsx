@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AuraClient } from '../lib/AuraClient';
 import { authStorage } from '../lib/AuraClient';
 import type { ServiceAttribution } from '../lib/AuraClient';
+import { AURA_CONTACT_EMAIL, auraMailto } from '../lib/contact';
 
 interface Service {
   id: string;
@@ -99,11 +100,11 @@ function OrderModal({
           <div style={{ fontSize: 32, marginBottom: 8 }}>{service.icon}</div>
           <div style={{ fontWeight: 800, fontSize: 20, marginBottom: 6 }}>Custom Request</div>
           <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.55)', marginBottom: 20, lineHeight: 1.6 }}>
-            Email <a href="mailto:nea@atdao.org?subject=Custom%20Service%20Request" style={{ color: '#00d4aa', textDecoration: 'none' }}>nea@atdao.org</a> with your request.
+            Email <a href={auraMailto('Custom Service Request')} style={{ color: '#00d4aa', textDecoration: 'none' }}>{AURA_CONTACT_EMAIL}</a> with your request.
             Nea will respond within 24 hours with a quote and timeline.
           </div>
           <a
-            href="mailto:nea@atdao.org?subject=Custom%20Service%20Request"
+            href={auraMailto('Custom Service Request')}
             style={{
               display: 'block', textAlign: 'center' as const,
               background: 'linear-gradient(135deg, #00d4aa, #6366f1)',
@@ -420,7 +421,7 @@ export default function ServicesPage() {
               </div>
             </div>
             <a
-              href="mailto:nea@atdao.org?subject=Custom%20Service%20Request"
+              href={auraMailto('Custom Service Request')}
               style={{
                 background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)',
                 color: '#fbbf24', fontSize: 13, fontWeight: 700,
