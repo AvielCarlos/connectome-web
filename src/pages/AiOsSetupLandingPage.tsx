@@ -1,7 +1,11 @@
 import { Link } from 'react-router-dom';
+import { auraMailto } from '../lib/contact';
 
 const SERVICES_UTM = '/services?utm_source=landing&utm_campaign=ai_os_setup_beta';
-const MAP_CALL_MAILTO = 'mailto:nea@atdao.org?subject=20-min%20AI%20OS%20map&body=Hi%20Nea%2C%0A%0AI%20would%20like%20to%20start%20with%20a%2020-minute%20AI%20OS%20map.%0A%0AContext%3A%0A-%20What%20I%20do%3A%0A-%20Where%20my%20tools%2Fnotes%2Fgoals%20feel%20fragmented%3A%0A-%20What%20I%20want%20AI%20to%20help%20me%20execute%3A%0A';
+const MAP_CALL_MAILTO = auraMailto(
+  '20-min AI OS map',
+  'Hi Aura,\n\nI would like to start with a 20-minute AI OS map.\n\nContext:\n- What I do:\n- Where my tools/notes/goals feel fragmented:\n- What I want AI to help me execute:\n',
+);
 
 const sections = {
   pains: ['Goals live in one place, notes in another, tasks somewhere else', 'AI chats are useful but forget your context and direction', 'Habits, content, clients, offers, and decisions compete for attention', 'You sense AI could change everything, but you do not have an architecture for it'],
