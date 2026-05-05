@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AuraClient, authStorage } from '../lib/AuraClient';
 import CPExplainerModal from '../components/CPExplainerModal';
+import { PageHero, PrimaryCTA, SectionCard } from '../components/design';
 
 const ACCENT = '#00d4aa';
 
@@ -32,13 +33,6 @@ const statusStyles: Record<string, { bg: string; color: string; border: string }
   approved: { bg: 'rgba(80,220,150,0.13)', color: '#6ff0ad', border: 'rgba(80,220,150,0.32)' },
   accepted: { bg: 'rgba(80,220,150,0.13)', color: '#6ff0ad', border: 'rgba(80,220,150,0.32)' },
   rejected: { bg: 'rgba(255,102,102,0.13)', color: '#ff7b7b', border: 'rgba(255,102,102,0.35)' },
-};
-
-const card: React.CSSProperties = {
-  background: 'linear-gradient(180deg, rgba(18,18,26,0.96), rgba(12,12,18,0.96))',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 22,
-  boxShadow: '0 18px 60px rgba(0,0,0,0.24)',
 };
 
 export default function ContributePage() {
@@ -146,12 +140,10 @@ export default function ContributePage() {
       `}</style>
 
       <div className="contribute-page" style={{ maxWidth: 980, margin: '0 auto' }}>
-        <section style={{ textAlign: 'center', marginBottom: 30 }}>
-          <div style={{ display: 'inline-flex', border: '1px solid rgba(0,212,170,0.28)', background: 'rgba(0,212,170,0.08)', color: ACCENT, borderRadius: 999, padding: '7px 12px', fontSize: 12, fontWeight: 900, letterSpacing: 0.9, textTransform: 'uppercase', marginBottom: 16 }}>Aligned developer workbench</div>
-          <h1 style={{ fontSize: 'clamp(36px, 7vw, 70px)', lineHeight: 0.98, letterSpacing: -2.2, margin: '0 0 16px', fontWeight: 950 }}>Build Aura. Earn CP. Help shape AI for human flourishing.</h1>
-          <p style={{ margin: '0 auto', maxWidth: 760, color: 'rgba(248,248,252,0.62)', fontSize: 17, lineHeight: 1.65 }}>Contribute is the workbench for developers, designers, writers, and operators aligned with the mission: concrete tasks, evidence, review, shipping, and transparent CP recognition.</p>
+        <PageHero eyebrow="Aligned developer workbench" title="Build Aura. Earn CP. Help shape AI for human flourishing.">
+          <p style={{ margin: 0 }}>Contribute is the workbench for developers, designers, writers, and operators aligned with the mission: concrete tasks, evidence, review, shipping, and transparent CP recognition.</p>
           <button type="button" onClick={() => setCpExplainerOpen(true)} style={{ marginTop: 14, color: ACCENT, fontWeight: 900, textDecoration: 'none' }}>What is CP?</button>
-        </section>
+        </PageHero>
 
         {/* GitHub connect banner — shown near top if not connected */}
         {isAuthed && !githubStatus.connected && (
@@ -180,7 +172,7 @@ export default function ContributePage() {
           </div>
         )}
 
-        <section style={{ ...card, padding: 24, marginBottom: 22, border: '1px solid rgba(0,212,170,0.18)' }}>
+        <SectionCard accent style={{ marginBottom: 22 }}>
           <div style={{ color: ACCENT, fontSize: 12, fontWeight: 900, letterSpacing: 1.1, textTransform: 'uppercase', marginBottom: 8 }}>Who we're looking for now</div>
           <h2 style={{ margin: '0 0 12px', fontSize: 28, letterSpacing: -0.8 }}>Developers who care about agency, consciousness, and useful AI.</h2>
           <p style={{ margin: '0 0 16px', color: 'rgba(248,248,252,0.64)', lineHeight: 1.65 }}>
@@ -200,13 +192,13 @@ export default function ContributePage() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <a href="https://github.com/AvielCarlos/connectome-backend/issues" target="_blank" rel="noreferrer" style={{ background: ACCENT, color: '#06100e', borderRadius: 999, padding: '10px 14px', fontWeight: 950 }}>Browse CP issues →</a>
-            <a href="https://github.com/AvielCarlos/connectome-web" target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', color: '#f8f8fc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '10px 14px', fontWeight: 850 }}>View web repo</a>
-            <a href="https://t.me/ascensiontechai" target="_blank" rel="noreferrer" style={{ background: 'rgba(255,255,255,0.07)', color: '#f8f8fc', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '10px 14px', fontWeight: 850 }}>Join community</a>
+            <PrimaryCTA href="https://github.com/AvielCarlos/connectome-backend/issues" target="_blank" rel="noreferrer">Browse CP issues →</PrimaryCTA>
+            <PrimaryCTA href="https://github.com/AvielCarlos/connectome-web" target="_blank" rel="noreferrer" variant="secondary">View web repo</PrimaryCTA>
+            <PrimaryCTA href="https://t.me/ascensiontechai" target="_blank" rel="noreferrer" variant="secondary">Join community</PrimaryCTA>
           </div>
-        </section>
+        </SectionCard>
 
-        <section style={{ ...card, padding: 24, marginBottom: 22 }}>
+        <SectionCard style={{ marginBottom: 22 }}>
           <div style={{ marginBottom: 18 }}><div style={{ color: ACCENT, fontSize: 12, fontWeight: 900, letterSpacing: 1.1, textTransform: 'uppercase' }}>Submit a Contribution</div><h2 style={{ margin: '5px 0 0', fontSize: 30, letterSpacing: -0.8 }}>Tell reviewers what you built or moved forward.</h2></div>
           {githubStatus.connected && (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 20, padding: '4px 12px', marginBottom: 16 }}>
@@ -244,9 +236,9 @@ export default function ContributePage() {
             {error && <div style={{ color: '#ff8d8d', background: 'rgba(255,102,102,0.1)', border: '1px solid rgba(255,102,102,0.25)', borderRadius: 14, padding: 12 }}>{error}</div>}
             <button type="submit" disabled={submitting || !isAuthed || (type === 'code' && !githubStatus.connected)} style={{ justifySelf: 'start', minWidth: 210, padding: '14px 18px', borderRadius: 14, border: 'none', background: isAuthed && !(type === 'code' && !githubStatus.connected) ? `linear-gradient(135deg, ${ACCENT}, #00b896)` : 'rgba(255,255,255,0.12)', color: isAuthed && !(type === 'code' && !githubStatus.connected) ? '#06100e' : 'rgba(248,248,252,0.55)', fontWeight: 950, cursor: isAuthed && !(type === 'code' && !githubStatus.connected) ? 'pointer' : 'not-allowed', boxShadow: isAuthed && !(type === 'code' && !githubStatus.connected) ? '0 12px 34px rgba(0,212,170,0.20)' : 'none' }}>{submitting ? 'Submitting…' : isAuthed ? 'Submit Contribution' : 'Sign in to submit'}</button>
           </form>
-        </section>
+        </SectionCard>
 
-        <section style={{ ...card, padding: 22, marginBottom: 22 }}>
+        <SectionCard padding={22} style={{ marginBottom: 22 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
             <div><div style={{ color: ACCENT, fontSize: 12, fontWeight: 900, letterSpacing: 1.1, textTransform: 'uppercase' }}>My Contributions</div><h2 style={{ margin: '5px 0 0', fontSize: 26, letterSpacing: -0.6 }}>Your submitted work</h2></div>
             {githubStatus.connected ? <button type="button" onClick={syncGitHub} disabled={syncing} style={{ border: 'none', background: syncing ? 'rgba(255,255,255,0.12)' : `linear-gradient(135deg, ${ACCENT}, #00b896)`, color: syncing ? 'rgba(248,248,252,0.55)' : '#06100e', borderRadius: 12, padding: '10px 13px', fontWeight: 900, cursor: syncing ? 'not-allowed' : 'pointer' }}>{syncing ? 'Syncing…' : 'Sync GitHub PRs'}</button> : loadingMine && <span style={{ color: 'rgba(248,248,252,0.52)' }}>Loading…</span>}
@@ -267,12 +259,14 @@ export default function ContributePage() {
               })}
             </div>
           )}
-        </section>
+        </SectionCard>
 
-        <details style={{ ...card, padding: 20 }}>
+        <SectionCard as="div" padding={20}>
+        <details>
           <summary style={{ cursor: 'pointer', color: ACCENT, fontWeight: 950, fontSize: 16 }}>How contributions are evaluated</summary>
           <ul style={{ margin: '16px 0 0', paddingLeft: 20, color: 'rgba(248,248,252,0.66)', lineHeight: 1.75 }}><li>Quality over quantity.</li><li>Must be implemented or documented evidence of real work.</li><li>Aura reviews every submission within 24h.</li><li>CP awarded based on impact and complexity.</li></ul>
         </details>
+        </SectionCard>
       </div>
       <CPExplainerModal open={cpExplainerOpen} onClose={() => setCpExplainerOpen(false)} />
     </main>

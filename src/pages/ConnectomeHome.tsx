@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { PageHero, SectionCard } from '../components/design';
 
 const nextSignals = [
   { label: 'Guided path', title: 'Turn a desire into a concrete next step', path: '/app/goals' },
@@ -27,7 +28,7 @@ function dayPart() {
   return 'evening';
 }
 
-const panel: React.CSSProperties = {
+const actionPanel: React.CSSProperties = {
   background: 'linear-gradient(180deg, rgba(18,18,26,0.94), rgba(12,12,18,0.94))',
   border: '1px solid rgba(255,255,255,0.08)',
   borderRadius: 24,
@@ -40,17 +41,16 @@ export default function ConnectomeHome() {
 
   return (
     <div className="connectome-home" style={{ maxWidth: 1040, margin: '0 auto', padding: '78px 18px 120px' }}>
-      <section className="connectome-home__hero" style={{ textAlign: 'center', marginBottom: 26 }}>
-        <div className="connectome-home__signal">
-          <span className="aura-orb" /> Aura is online
-        </div>
-        <h1>Your AI OS for Human Flourishing</h1>
-        <p style={{ maxWidth: 720, margin: '0 auto 10px' }}>
-          Good {dayPart()}, {greetingName(profile)}. This is the Connectome home base: choose whether you already know your aim, or want the Path Feed to surface a next action.
-        </p>
-      </section>
+      <PageHero
+        eyebrow={<><span className="aura-orb" /> Aura is online</>}
+        title="Your AI OS for Human Flourishing"
+        maxWidth={720}
+        style={{ marginBottom: 26 }}
+      >
+        Good {dayPart()}, {greetingName(profile)}. This is the Connectome home base: choose whether you already know your aim, or want the Path Feed to surface a next action.
+      </PageHero>
 
-      <section aria-label="How to guide Aura" style={{ ...panel, padding: 22, marginBottom: 24 }}>
+      <SectionCard ariaLabel="How to guide Aura" padding={22} style={{ marginBottom: 24 }}>
         <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>How to make Aura better</div>
         <h2 style={{ margin: '0 0 10px', fontSize: 24, letterSpacing: -0.5 }}>Use it like a living path, not a static app</h2>
         <p style={{ margin: '0 0 16px', color: 'rgba(248,248,252,0.62)', lineHeight: 1.6 }}>
@@ -68,13 +68,13 @@ export default function ConnectomeHome() {
         <div style={{ marginTop: 14, padding: '12px 14px', borderRadius: 16, background: 'rgba(244,194,107,0.09)', color: 'rgba(248,248,252,0.78)', border: '1px solid rgba(244,194,107,0.18)', fontSize: 13, lineHeight: 1.5 }}>
           Evidence after action earns a small CP reward — currently capped and intentionally modest to reward real proof without making spam profitable.
         </div>
-      </section>
+      </SectionCard>
 
       <section aria-label="Choose your next mode" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: 16, marginBottom: 24 }}>
         <button
           type="button"
           onClick={() => navigate('/app/goals?clarify=1')}
-          style={{ ...panel, padding: 24, color: '#f8f8fc', textAlign: 'left', cursor: 'pointer' }}
+          style={{ ...actionPanel, padding: 24, color: '#f8f8fc', textAlign: 'left', cursor: 'pointer' }}
         >
           <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>I know what I want to do</div>
           <h2 style={{ margin: '0 0 10px', fontSize: 28, letterSpacing: -0.7 }}>Clarify it with Aura</h2>
@@ -85,7 +85,7 @@ export default function ConnectomeHome() {
         <button
           type="button"
           onClick={() => navigate('/app/ido')}
-          style={{ ...panel, padding: 24, color: '#f8f8fc', textAlign: 'left', cursor: 'pointer' }}
+          style={{ ...actionPanel, padding: 24, color: '#f8f8fc', textAlign: 'left', cursor: 'pointer' }}
         >
           <div style={{ color: '#f4c26b', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>I don’t know what I want to do</div>
           <h2 style={{ margin: '0 0 10px', fontSize: 28, letterSpacing: -0.7 }}>Begin your path</h2>
@@ -94,7 +94,7 @@ export default function ConnectomeHome() {
         </button>
       </section>
 
-      <section aria-label="What this is" style={{ ...panel, padding: 22, marginBottom: 24 }}>
+      <SectionCard ariaLabel="What this is" padding={22} style={{ marginBottom: 24 }}>
         <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 }}>How the pieces fit</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 12 }}>
           {[
@@ -109,7 +109,7 @@ export default function ConnectomeHome() {
             </div>
           ))}
         </div>
-      </section>
+      </SectionCard>
 
       <section className="connectome-home__highlights" aria-label="Next places">
         {nextSignals.map((item) => (
