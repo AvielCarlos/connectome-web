@@ -34,6 +34,12 @@ const DEFAULT_VALUE_SCORES: Record<(typeof TOP_LEVEL_VALUES)[number], number> = 
   adventure: 7,
 };
 
+const getStoredAdminToken = () => localStorage.getItem('admin_token')?.trim() || '';
+const getAdminHeaders = () => {
+  const adminToken = getStoredAdminToken();
+  return adminToken ? { 'X-Admin-Token': adminToken } : {};
+};
+
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { logout, refreshProfile } = useAuth();
@@ -135,8 +141,7 @@ export default function ProfilePage() {
     if (!isAdmin) return;
     setCouncilLoading(true);
     try {
-      const adminToken = localStorage.getItem('admin_token') || 'connectome-admin-secret';
-      const headers = { 'X-Admin-Token': adminToken };
+      const headers = getAdminHeaders();
       const [briefRes, agentsRes, metricsRes] = await Promise.allSettled([
         AuraClient['client'].get('/api/executive/brief', { headers }),
         AuraClient['client'].get('/api/executive/agents', { headers }),
@@ -153,9 +158,8 @@ export default function ProfilePage() {
     if (!isAdmin) return;
     setRunningAgent(agentName);
     try {
-      const adminToken = localStorage.getItem('admin_token') || 'connectome-admin-secret';
       await AuraClient['client'].post(`/api/executive/run/${agentName}`, {}, {
-        headers: { 'X-Admin-Token': adminToken },
+        headers: getAdminHeaders(),
       });
       // Refresh after a short delay
       setTimeout(() => {
@@ -172,12 +176,11 @@ export default function ProfilePage() {
     setAdminTierSaving(true);
     setAdminTierMessage(null);
     try {
-      const adminToken = localStorage.getItem('admin_token') || 'connectome-admin-secret';
       const res = await AuraClient['client'].post('/api/admin/users/tier-reset', {
         email: 'carlosandromeda8@gmail.com',
         tier: adminTier,
         reset_feed: true,
-      }, { headers: { 'X-Admin-Token': adminToken } });
+      }, { headers: getAdminHeaders() });
       localStorage.removeItem('aura_active_feedback_context');
       setAdminTierMessage(`Switched to ${res.data?.tier || adminTier}; feed counter reset.`);
       await refreshProfile().catch(() => null);
