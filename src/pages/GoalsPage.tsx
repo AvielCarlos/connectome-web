@@ -175,6 +175,7 @@ function CaptureBar({ onClarify }: { onClarify: (title: string) => void }) {
   const [focused, setFocused] = useState(false);
   const [searchParams] = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
+  const handledDeepLinkRef = useRef('');
   const { variant, trackEvent } = useExperiment('goals_input_placeholder');
   const placeholders: Record<string, string> = {
     A: 'Add an intention — Aura will make it measurable…',
@@ -184,10 +185,24 @@ function CaptureBar({ onClarify }: { onClarify: (title: string) => void }) {
   };
 
   useEffect(() => {
-    if (searchParams.get('focus') === 'true' || searchParams.get('clarify') === '1') {
+    const deepLinkedTitle = (searchParams.get('intent') || searchParams.get('goal') || searchParams.get('title') || '').trim().slice(0, 180);
+    const shouldClarify = searchParams.get('clarify') === '1';
+
+    if (deepLinkedTitle) {
+      if (shouldClarify && handledDeepLinkRef.current !== deepLinkedTitle) {
+        handledDeepLinkRef.current = deepLinkedTitle;
+        onClarify(deepLinkedTitle);
+        setTitle('');
+        setFocused(false);
+        return;
+      }
+      setTitle((current) => current || deepLinkedTitle);
+    }
+
+    if (searchParams.get('focus') === 'true' || shouldClarify) {
       setTimeout(() => { inputRef.current?.focus(); setFocused(true); }, 150);
     }
-  }, [searchParams]);
+  }, [searchParams, onClarify]);
 
   const submit = () => {
     const trimmed = title.trim();
