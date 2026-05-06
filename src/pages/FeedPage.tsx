@@ -1667,27 +1667,51 @@ export default function FeedPage() {
   return (
     <div className="feed-container" style={{ background: '#0a0a0f' }}>
 
-      <div style={{ position: 'absolute', top: 'calc(env(safe-area-inset-top, 0px) + 10px)', left: 12, right: 12, zIndex: 20, display: 'flex', gap: 7, overflowX: 'auto', scrollbarWidth: 'none', pointerEvents: 'auto' }}>
-        {difficultyFilters.map((filter) => (
-          <button
-            key={filter.id}
-            onClick={() => updateDifficultyFilter(filter.id)}
-            style={{
-              flexShrink: 0,
-              border: difficultyFilter === filter.id ? '1px solid rgba(0,212,170,0.78)' : '1px solid rgba(255,255,255,0.12)',
-              background: difficultyFilter === filter.id ? 'rgba(0,212,170,0.18)' : 'rgba(10,10,15,0.62)',
-              backdropFilter: 'blur(14px)',
-              color: difficultyFilter === filter.id ? '#bfffee' : 'rgba(248,248,252,0.66)',
-              borderRadius: 999,
-              padding: '8px 11px',
-              fontSize: 11,
-              fontWeight: 900,
-              boxShadow: difficultyFilter === filter.id ? '0 0 20px rgba(0,212,170,0.16)' : 'none',
-            }}
-          >
-            {filter.label}
-          </button>
-        ))}
+      {/* ── Difficulty switcher — centred at top ─────────────────────────── */}
+      <div style={{
+        position: 'absolute',
+        top: 'calc(env(safe-area-inset-top, 0px) + var(--shell-top-clearance, 52px) + 10px)',
+        left: 0, right: 0,
+        zIndex: 20,
+        display: 'flex',
+        justifyContent: 'center',
+        pointerEvents: 'auto',
+      }}>
+        <div style={{
+          display: 'inline-flex',
+          gap: 3,
+          background: 'rgba(10,10,15,0.72)',
+          backdropFilter: 'blur(18px)',
+          borderRadius: 999,
+          padding: '4px 4px',
+          border: '1px solid rgba(255,255,255,0.09)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+        }}>
+          {difficultyFilters.map((filter) => (
+            <button
+              key={filter.id}
+              onClick={() => updateDifficultyFilter(filter.id)}
+              style={{
+                flexShrink: 0,
+                border: 'none',
+                background: difficultyFilter === filter.id
+                  ? 'linear-gradient(135deg, rgba(0,212,170,0.28), rgba(0,212,170,0.16))'
+                  : 'transparent',
+                color: difficultyFilter === filter.id ? '#bfffee' : 'rgba(248,248,252,0.52)',
+                borderRadius: 999,
+                padding: '7px 14px',
+                fontSize: 12,
+                fontWeight: difficultyFilter === filter.id ? 900 : 600,
+                cursor: 'pointer',
+                transition: 'background 180ms ease, color 180ms ease',
+                boxShadow: difficultyFilter === filter.id ? '0 0 16px rgba(0,212,170,0.2)' : 'none',
+                letterSpacing: 0.2,
+              }}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Collection picker */}
