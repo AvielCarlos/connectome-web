@@ -1248,6 +1248,7 @@ export default function FeedPage() {
   const touchStartX = useRef<number | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const activeCardViewRef = useRef<{ id: string; startedAtMs: number } | null>(null);
+  const initialLoadSeqRef = useRef(0);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -1289,37 +1290,47 @@ export default function FeedPage() {
     setIndex(0);
   };
 
-  // Fetch goal title
-  useEffect(() => {
-    if (!goalId) return;
-    AuraClient.listGoals()
-      .then((goals) => {
-        const found = goals.find((g: any) => g.id === goalId);
-        if (found) setGoalTitle(found.title);
-      })
-      .catch(() => {});
-  }, [goalId]);
-
   const loadInitial = useCallback(async () => {
+    const loadSeq = initialLoadSeqRef.current + 1;
+    initialLoadSeqRef.current = loadSeq;
+    const isCurrentLoad = () => initialLoadSeqRef.current === loadSeq;
+
     setLoading(true);
     setError('');
     try {
-      const goals = await AuraClient.listGoals().catch(() => []);
-      setHasGoals(goals.length > 0);
-      const focusedGoal = goalId ? goals.find((g: any) => g.id === goalId) : null;
-      if (focusedGoal?.title) setGoalTitle(focusedGoal.title);
-      else if (!goalId) setGoalTitle(null);
-      const focusedGoalId = goalId ? focusedGoal?.id : undefined;
-      const batch = await AuraClient.getNextScreenBatch(FEED_INITIAL_PREFETCH_COUNT, focusedGoalId, undefined, feedContext, feedMode);
+      const goalsPromise = AuraClient.listGoals().catch(() => []);
+      let goals: any[];
+      let focusedGoal: any = null;
+      let focusedGoalId: string | undefined;
+      let batch: ScreenResponse[];
+
+      if (goalId) {
+        goals = await goalsPromise;
+        focusedGoal = goals.find((g: any) => g.id === goalId) || null;
+        focusedGoalId = focusedGoal?.id;
+        batch = await AuraClient.getNextScreenBatch(FEED_INITIAL_PREFETCH_COUNT, focusedGoalId, undefined, feedContext, feedMode);
+      } else {
+        [goals, batch] = await Promise.all([
+          goalsPromise,
+          AuraClient.getNextScreenBatch(FEED_INITIAL_PREFETCH_COUNT, undefined, undefined, feedContext, feedMode),
+        ]);
+      }
+
       let nextCards = enforceFeedMode(batch, feedMode, preferredCity);
       if (!nextCards.length) {
         const single = await AuraClient.getNextScreen(feedContext, focusedGoalId, undefined, feedMode).catch(() => null);
         nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
+
+      if (!isCurrentLoad()) return;
+
+      setHasGoals(goals.length > 0);
+      if (focusedGoal?.title) setGoalTitle(focusedGoal.title);
+      else if (!goalId) setGoalTitle(null);
       // Prepend context intake card for Path if not answered this session.
       // The default Path feed is general; only a selected goal route passes goal context.
       if (!sessionStorage.getItem(sessionCapabilityKey(focusedGoalId)) && !localStorage.getItem(todayCapabilityKey(focusedGoalId))) {
-        const intakeCard = _buildIntakeCard(focusedGoal?.title || goalTitle, focusedGoalId);
+        const intakeCard = _buildIntakeCard(focusedGoal?.title, focusedGoalId);
         if (intakeCard) nextCards = [intakeCard, ...nextCards];
       }
       setCards(nextCards);
@@ -1333,12 +1344,13 @@ export default function FeedPage() {
       // Send backend progress signal.
       AuraClient['client'].post('/api/gamification/checkin', { reason: 'card_view' }).catch(() => {});
     } catch (e: any) {
+      if (!isCurrentLoad()) return;
       if (e?.response?.status === 402) {
         setIsLimited(true);
         setError('You have explored today’s cards. We are opening the feed again now — tap retry.');
       } else setError(e?.response?.data?.detail || 'Failed to load feed');
     } finally {
-      setLoading(false);
+      if (isCurrentLoad()) setLoading(false);
     }
   }, [goalId, feedContext, feedMode, preferredCity]);
 
