@@ -21,6 +21,14 @@ const STARTERS = [
   { title: 'Turn a vague desire into a real path', tag: 'clarify', domain: 'iVive' },
 ];
 
+type GoalSeed = {
+  eyebrow: string;
+  title: string;
+  body: string;
+  cta: string;
+  domain: string;
+};
+
 function domainConfig(domain?: string) {
   const normalized = domain === 'Rest' ? 'iVive' : domain; // legacy Rest maps into iVive; Rest is an iVive aspect.
   return DOMAIN_CONFIG[normalized || ''] || { emoji: '◈', color: '#00d4aa', label: 'Path' };
@@ -48,6 +56,73 @@ function stateCopy(state: string) {
   if (state === 'mapped') return 'Measurable goal';
   if (state === 'moving') return 'Steps underway';
   return 'Achieved';
+}
+
+function auraGoalSeed(goals: Goal[]): GoalSeed {
+  const active = goals.filter((g) => g.status === 'active');
+  const unmapped = active.filter((g) => !g.steps?.length);
+  const moving = active.filter((g) => progressFor(g) > 0 && progressFor(g) < 1);
+  const hour = new Date().getHours();
+
+  if (unmapped.length > 0) {
+    const goal = unmapped[0];
+    return {
+      eyebrow: 'Aura sees an unmapped spark',
+      title: `Make “${goal.title}” measurable`,
+      body: 'This intention is alive, but it has not been translated into a current state, desired state, and first doable step yet.',
+      cta: goal.title,
+      domain: goal.domain || 'iVive',
+    };
+  }
+
+  if (moving.length > 0) {
+    const goal = moving[0];
+    return {
+      eyebrow: 'Momentum window',
+      title: `Define the next edge for “${goal.title}”`,
+      body: 'You already have movement here. A useful next seed is the smallest follow-through action that keeps the graph warm.',
+      cta: `Next follow-through for ${goal.title}`,
+      domain: goal.domain || 'Aventi',
+    };
+  }
+
+  if (active.length >= 3) {
+    return {
+      eyebrow: 'Too many open loops',
+      title: 'Choose the goal that deserves protection this week',
+      body: 'A crowded graph needs priority. Capture the one outcome that would make the rest easier or less urgent.',
+      cta: 'Protect the most important goal this week',
+      domain: 'iVive',
+    };
+  }
+
+  if (hour < 12) {
+    return {
+      eyebrow: 'Morning path seed',
+      title: 'Turn today’s energy into one measurable win',
+      body: 'Start with a small intention while the day is still shapeable. Aura can turn it into a path before the feed recommends actions.',
+      cta: 'Create one measurable win for today',
+      domain: 'iVive',
+    };
+  }
+
+  if (hour < 18) {
+    return {
+      eyebrow: 'Midday path seed',
+      title: 'Rescue one meaningful action from the noise',
+      body: 'If the day has become scattered, capture the outcome that would still make today feel aligned.',
+      cta: 'Recover one meaningful action today',
+      domain: 'Aventi',
+    };
+  }
+
+  return {
+    eyebrow: 'Evening integration seed',
+    title: 'Convert today’s signal into tomorrow’s path',
+    body: 'Use what happened today as evidence. Capture the next state you want Aura to help you move toward tomorrow.',
+    cta: 'Turn today’s signal into tomorrow’s path',
+    domain: 'Eviva',
+  };
 }
 
 function goalCurrentState(goal: Goal) {
@@ -115,6 +190,27 @@ function WeeklyRecapCard() {
         {(recap.highlights || []).slice(0, 3).map((h: string) => <li key={h}>{h}</li>)}
       </ul>
       <div style={{ marginTop: 10, color: 'rgba(0,212,170,0.78)', fontSize: 12, fontWeight: 800 }}>{recap.next_prompt}</div>
+    </section>
+  );
+}
+
+function AuraGoalSeedCard({ goals, onClarify }: { goals: Goal[]; onClarify: (title: string) => void }) {
+  const seed = auraGoalSeed(goals);
+  const cfg = domainConfig(seed.domain);
+
+  return (
+    <section style={{ position: 'relative', overflow: 'hidden', border: `1px solid ${cfg.color}24`, background: 'linear-gradient(135deg, rgba(255,255,255,0.055), rgba(0,212,170,0.045))', borderRadius: 26, padding: 16, margin: '0 0 16px' }}>
+      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 12% 0%, ${cfg.color}1f, transparent 42%)`, pointerEvents: 'none' }} />
+      <div style={{ position: 'relative', display: 'grid', gap: 12 }}>
+        <div>
+          <div style={{ color: cfg.color, fontSize: 11, fontWeight: 950, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 7 }}>{cfg.emoji} {seed.eyebrow}</div>
+          <h2 style={{ color: '#f8f8fc', fontSize: 20, letterSpacing: -0.55, lineHeight: 1.15, margin: 0 }}>{seed.title}</h2>
+          <p style={{ color: 'rgba(248,248,252,0.62)', fontSize: 13, lineHeight: 1.55, margin: '8px 0 0' }}>{seed.body}</p>
+        </div>
+        <button onClick={() => onClarify(seed.cta)} style={{ justifySelf: 'start', border: `1px solid ${cfg.color}40`, background: `${cfg.color}18`, color: '#dffcf6', borderRadius: 999, padding: '10px 13px', fontSize: 12, fontWeight: 950 }}>
+          Seed this with Aura →
+        </button>
+      </div>
     </section>
   );
 }
@@ -555,6 +651,7 @@ export default function GoalsPage() {
       <UserStateStrip goals={goals} />
       <DesiredStateCompass goals={goals} />
       <WeeklyRecapCard />
+      <AuraGoalSeedCard goals={goals} onClarify={setClarifyingGoal} />
       <CaptureBar onClarify={setClarifyingGoal} />
       <StarterRail onClarify={setClarifyingGoal} />
       <LensTabs lens={lens} setLens={setLens} counts={counts} />
