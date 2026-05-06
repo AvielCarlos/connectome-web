@@ -11,9 +11,9 @@ This is a rare chance to shape the interface layer for an agentic AI ecosystem:
 - **Frontend/design engineers** can turn complex AI systems into calm, practical product surfaces.
 - **Agent developers** can expose Aura capabilities through contextual quick actions, overlays, and workflows.
 - **Growth engineers** can improve onboarding, contribution loops, analytics, referrals, and activation.
-- **Product engineers** can connect mission, CP rewards, DAO participation, and daily utility in one coherent experience.
+- **Product engineers** can connect mission, CP recognition, DAO participation, and daily utility in one coherent experience.
 
-Contributors earn Contribution Points (CP), leaderboard recognition, and a path toward founding steward status in the Ascension Technologies ecosystem.
+Contributors can earn Contribution Points (CP), leaderboard recognition, and a path toward founding steward review in the Ascension Technologies ecosystem. CP is reputation/recognition for contribution quality; it is not cash, token, equity, or an investment promise.
 
 ## Architecture overview
 
@@ -32,7 +32,7 @@ Ecosystem map:
 - **Aura** — the AI brain and agent layer.
 - **Connectome** — the AI OS / nervous system.
 - **iDo** — the daily app experience.
-- **Ascension Technologies** — DAO, CP, governance, and contributor ownership layer.
+- **Ascension Technologies** — DAO, CP, governance, and contributor coordination layer.
 
 
 ## Try / share / contribute
@@ -42,6 +42,7 @@ We are currently aiming for **10 new users per day** through no-spam inbound gro
 Useful first actions:
 
 - Try the app: https://avielcarlos.github.io/connectome-web/
+- Read the current Path Feed proof page: https://avielcarlos.github.io/connectome-web/path-feed-momentum/
 - Open the Path Feed and give feedback on confusing or useful cards.
 - Share one concrete critique or screenshot with context.
 - Builders: pick one narrow issue and comment with your approach before opening a PR.
@@ -57,7 +58,7 @@ Contribution Points recognise shipped work and help identify trusted builders.
 | Product feature or agent UX integration | 200–600 CP |
 | Major UX system, design architecture, growth engine | 600–1,500+ CP |
 
-CP can support reputation, leaderboard placement, steward invitations, governance influence, and future upside as the DAO matures.
+CP can support reputation, leaderboard placement, steward invitations, and governance signal as the DAO matures. CP does not promise cash, tokens, equity, profit share, or investment returns.
 
 ## Good first areas
 
