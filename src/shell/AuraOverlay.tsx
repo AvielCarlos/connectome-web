@@ -62,6 +62,42 @@ const pageQuickActions: { pathPrefix: string; label: string; actions: QuickActio
       { label: 'Find useful work', prompt: 'Suggest the most useful small contribution I could make from here.', context: 'Contribute page' },
     ],
   },
+  {
+    pathPrefix: '/app/routines',
+    label: 'Routines page',
+    actions: [
+      { label: 'Pick today’s loop', prompt: 'Use the current Routines page context to choose the most useful loop for today and explain why.', context: 'Routines page' },
+      { label: 'Make it tiny', prompt: 'Convert the most relevant routine here into a 5-minute version I can actually complete now.', context: 'Routines page' },
+      { label: 'Protect my energy', prompt: 'Help me adapt this routine to my current energy, constraints, and recovery needs.', context: 'Routines page' },
+    ],
+  },
+  {
+    pathPrefix: '/app/services',
+    label: 'Services page',
+    actions: [
+      { label: 'Choose the right service', prompt: 'Use the current Services page context to help me decide which service best fits my current need.', context: 'Services page' },
+      { label: 'Draft order brief', prompt: 'Help me write a clear service order brief with context, desired outcome, constraints, and success criteria.', context: 'Services page' },
+      { label: 'Clarify ROI', prompt: 'Assess the practical return on investment of ordering support here versus doing it myself.', context: 'Services page' },
+    ],
+  },
+  {
+    pathPrefix: '/app/profile',
+    label: 'Profile page',
+    actions: [
+      { label: 'Tune my context', prompt: 'Use the current Profile page context to identify which settings, permissions, or profile fields would make Aura more useful.', context: 'Profile page' },
+      { label: 'Explain my limits', prompt: 'Explain my current tier, limits, and upgrade choices in plain language, focused on what I am trying to do.', context: 'Profile page' },
+      { label: 'Check privacy fit', prompt: 'Help me review whether my connected accounts and permissions fit my privacy preferences.', context: 'Profile page' },
+    ],
+  },
+  {
+    pathPrefix: '/app',
+    label: 'Home page',
+    actions: [
+      { label: 'Choose a mode', prompt: 'Use the Connectome home context to help me choose whether to clarify a goal, open the Path Feed, or contribute.', context: 'Home page' },
+      { label: 'Orient my day', prompt: 'Give me a short orientation for today: what to clarify, what to browse, and what to do next.', context: 'Home page' },
+      { label: 'Teach me the system', prompt: 'Explain how to use Aura, Goals, Path Feed, and CP as one living path system.', context: 'Home page' },
+    ],
+  },
 ];
 
 function quickActionConfig(pathname: string) {
