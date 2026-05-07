@@ -19,9 +19,12 @@ interface ExperimentAssignments {
   [experiment: string]: string; // experiment_name -> variant_key
 }
 
-// Session-level cache — shared across all hook instances in the same page load
+// Session-level cache — shared across all hook instances for the same signed-in user.
+// Auth can change without a full reload, so keep the cache keyed by user id.
 let assignmentCache: ExperimentAssignments | null = null;
+let assignmentCacheUserId: string | null = null;
 let assignmentFetchPromise: Promise<ExperimentAssignments> | null = null;
+let assignmentFetchUserId: string | null = null;
 
 function getToken(): string {
   return localStorage.getItem(TOKEN_KEY) || '';
@@ -42,17 +45,23 @@ async function fetchAllAssignments(userId: string): Promise<ExperimentAssignment
 }
 
 async function getAssignments(userId: string): Promise<ExperimentAssignments> {
-  if (assignmentCache) return assignmentCache;
-  // Deduplicate concurrent fetches
-  if (!assignmentFetchPromise) {
+  if (assignmentCache && assignmentCacheUserId === userId) return assignmentCache;
+
+  // Deduplicate concurrent fetches only for the same user. If auth changes mid-page,
+  // start a fresh request so a previous account's variants cannot leak forward.
+  if (!assignmentFetchPromise || assignmentFetchUserId !== userId) {
+    assignmentFetchUserId = userId;
     assignmentFetchPromise = fetchAllAssignments(userId)
       .then((data) => {
         assignmentCache = data;
+        assignmentCacheUserId = userId;
         assignmentFetchPromise = null;
+        assignmentFetchUserId = null;
         return data;
       })
       .catch((err) => {
         assignmentFetchPromise = null;
+        assignmentFetchUserId = null;
         console.warn('[useExperiment] assignment fetch failed:', err);
         return {};
       });
@@ -90,7 +99,9 @@ async function trackExperimentEvent(
 /** Clear the session-level assignment cache (e.g. after login/logout). */
 export function clearExperimentCache(): void {
   assignmentCache = null;
+  assignmentCacheUserId = null;
   assignmentFetchPromise = null;
+  assignmentFetchUserId = null;
 }
 
 /**
