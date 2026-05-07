@@ -10,7 +10,6 @@ import { AuraClient, ScreenResponse } from '../lib/AuraClient';
 import { AuraCard } from '../components/AuraCard';
 import { CollectionPicker } from '../components/CollectionPicker';
 import { useAuth } from '../context/AuthContext';
-import { useExperiment } from '../lib/useExperiment';
 
 // ─── Domain config ────────────────────────────────────────────────────────────
 function normalizeDomain(domain?: string) { return domain === 'Rest' ? 'iVive' : domain; } // legacy Rest cards render as iVive; Rest is an iVive aspect.
@@ -1195,6 +1194,8 @@ function _buildIntakeCard(goalTitle?: string | null, goalId?: string): any | nul
 const FEED_INITIAL_PREFETCH_COUNT = 12;
 const FEED_LOAD_MORE_COUNT = 8;
 const FEED_PREFETCH_THRESHOLD = 5;
+const FEED_RENDER_BACK_BUFFER = 1;
+const FEED_RENDER_FORWARD_BUFFER = 2;
 const MAX_TIME_ON_SCREEN_MS = 30 * 60 * 1000;
 
 function monotonicNowMs() {
@@ -1211,9 +1212,6 @@ export default function FeedPage() {
       navigate('/auth?redirect=/app/ido', { replace: true });
     }
   }, [navigate]);
-
-  const { variant: goalBannerVariant } = useExperiment('feed_goal_banner');
-  const { variant: emptyStateVariant, trackEvent: trackEmptyState } = useExperiment('feed_empty_state');
 
   const goalId = searchParams.get('goal') || undefined;
   const requestedMode: FeedMode = 'path';
@@ -1676,6 +1674,9 @@ export default function FeedPage() {
     );
   }
 
+  const renderWindowStart = Math.max(0, index - FEED_RENDER_BACK_BUFFER);
+  const renderWindowEnd = Math.min(cards.length - 1, index + FEED_RENDER_FORWARD_BUFFER);
+
   return (
     <div className="feed-container" style={{ background: '#0a0a0f' }}>
 
@@ -1759,25 +1760,32 @@ export default function FeedPage() {
           }
         }}
       >
-        {cards.map((item, i) => (
-          <div key={item.screen_spec_db_id} style={{
-            width: '100%', height: '100%', flexShrink: 0,
-            scrollSnapAlign: 'start', scrollSnapStop: 'always',
-          }}>
-            <FeedCard
-              item={item}
-              active={i === index}
-              onRate={handleRate}
-              onDoNow={handleDoNow}
-              onInvite={handleInvite}
-              onSaveRequest={handleSaveRequest}
-              onSkip={handleSkip}
-              onIntakeComplete={handleIntakeComplete}
-              ratings={ratings}
-              savedIds={savedIds}
-            />
-          </div>
-        ))}
+        {cards.map((item, i) => {
+          const shouldRenderCard = i >= renderWindowStart && i <= renderWindowEnd;
+          return (
+            <div key={item.screen_spec_db_id} style={{
+              width: '100%', height: '100%', flexShrink: 0,
+              scrollSnapAlign: 'start', scrollSnapStop: 'always',
+            }}>
+              {shouldRenderCard ? (
+                <FeedCard
+                  item={item}
+                  active={i === index}
+                  onRate={handleRate}
+                  onDoNow={handleDoNow}
+                  onInvite={handleInvite}
+                  onSaveRequest={handleSaveRequest}
+                  onSkip={handleSkip}
+                  onIntakeComplete={handleIntakeComplete}
+                  ratings={ratings}
+                  savedIds={savedIds}
+                />
+              ) : (
+                <div aria-hidden="true" style={{ width: '100%', height: '100%' }} />
+              )}
+            </div>
+          );
+        })}
 
         {isLimited && (
           <div style={{
