@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authStorage, AuraClient } from '../lib/AuraClient';
+import { clearExperimentCache } from '../lib/useExperiment';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const res = await AuraClient.login(email, password);
+    clearExperimentCache();
     authStorage.setAuth(res.access_token, res.user_id);
     setIsAuthenticated(true);
     setUserId(res.user_id);
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (email: string, password: string, displayName?: string) => {
     const res = await AuraClient.register(email, password, displayName);
+    clearExperimentCache();
     authStorage.setAuth(res.access_token, res.user_id);
     setIsAuthenticated(true);
     setUserId(res.user_id);
@@ -50,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     authStorage.clearAuth();
+    clearExperimentCache();
     setIsAuthenticated(false);
     setUserId(null);
     setProfile(null);
