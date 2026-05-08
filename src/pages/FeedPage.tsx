@@ -1250,6 +1250,142 @@ function _buildIntakeCard(goalTitle?: string | null, goalId?: string): any | nul
   };
 }
 
+const STATIC_FALLBACK_ACTIONS = [
+  {
+    domain: 'iVive',
+    title: 'Take a five-minute nervous system reset',
+    body: 'Step away from the screen, breathe slowly, unclench your body, and choose the smallest useful action after you come back.',
+    time: '5 min',
+    difficulty: 'Easy',
+    temporalBranch: 'immediate',
+    tags: ['reset', 'regulation', 'tiny win'],
+    steps: ['Put the phone down or lower the screen.', 'Take ten slow breaths and relax your jaw, shoulders, and hands.', 'Write down the one smallest next action that still matters.'],
+  },
+  {
+    domain: 'Eviva',
+    title: 'Message one person you care about',
+    body: 'Send a short, real check-in to someone whose connection would make today feel more human.',
+    time: '3–8 min',
+    difficulty: 'Easy',
+    temporalBranch: 'immediate',
+    tags: ['connection', 'relationship', 'care'],
+    steps: ['Pick one person without overthinking it.', 'Send: “Thinking of you — how are you really doing?”', 'If they answer, give them one fully present reply.'],
+  },
+  {
+    domain: 'Aventi',
+    title: 'Walk somewhere slightly unfamiliar',
+    body: 'Choose a nearby street, park, cafe, viewpoint, or route you do not usually take and let novelty restart your attention.',
+    time: '20–45 min',
+    difficulty: 'Medium',
+    temporalBranch: 'near_term',
+    tags: ['adventure', 'movement', 'novelty'],
+    steps: ['Choose a destination or route within easy reach.', 'Go without turning it into a performance task.', 'Notice one place, person, or idea you would have missed at home.'],
+  },
+  {
+    domain: 'iVive',
+    title: 'Clear one friction point from your environment',
+    body: 'Pick the smallest physical mess or digital annoyance that keeps stealing attention, and remove it completely.',
+    time: '10–15 min',
+    difficulty: 'Easy',
+    temporalBranch: 'immediate',
+    tags: ['clarity', 'environment', 'focus'],
+    steps: ['Choose one visible friction point only.', 'Set a 10-minute timer.', 'Stop when that one thing is genuinely better.'],
+  },
+  {
+    domain: 'Eviva',
+    title: 'Find one local thing worth doing this week',
+    body: 'Search for a class, meetup, event, volunteer shift, workshop, or gathering that could expand your world this week.',
+    time: '15–25 min',
+    difficulty: 'Medium',
+    temporalBranch: 'scheduled_opportunity',
+    tags: ['local', 'event', 'social'],
+    steps: ['Search your city plus one interest that feels alive.', 'Save the most promising option.', 'Decide the next booking, invite, or calendar step.'],
+  },
+  {
+    domain: 'Aventi',
+    title: 'Make one brave ask',
+    body: 'Ask for the conversation, intro, opportunity, feedback, help, or collaboration that would move a real path forward.',
+    time: '10–20 min',
+    difficulty: 'Deep',
+    temporalBranch: 'near_term',
+    tags: ['courage', 'opportunity', 'growth'],
+    steps: ['Name the ask in one sentence.', 'Make it specific and easy to answer.', 'Send it before polishing it into avoidance.'],
+  },
+  {
+    domain: 'iVive',
+    title: 'Feed your body before deciding your day',
+    body: 'Drink water and eat something simple if you have not — then reassess what kind of action is actually available.',
+    time: '5–15 min',
+    difficulty: 'Easy',
+    temporalBranch: 'immediate',
+    tags: ['body', 'energy', 'care'],
+    steps: ['Drink a full glass of water.', 'Eat something steady if you need it.', 'After five minutes, choose your next card or next action.'],
+  },
+  {
+    domain: 'Aventi',
+    title: 'Turn one vague desire into a next node',
+    body: 'Choose one thing you keep wanting and define the smallest concrete step that would make it more real today.',
+    time: '10 min',
+    difficulty: 'Medium',
+    temporalBranch: 'planning',
+    tags: ['goal', 'path', 'execution'],
+    steps: ['Write the desire as a clear outcome.', 'Ask: “What would be visible if this moved forward today?”', 'Do or schedule that first visible step.'],
+  },
+] as const;
+
+function buildStaticFallbackCards(count = FEED_LOAD_MORE_COUNT, startIndex = 0, goalTitle?: string | null): ScreenResponse[] {
+  return Array.from({ length: count }, (_, i) => {
+    const action = STATIC_FALLBACK_ACTIONS[(startIndex + i) % STATIC_FALLBACK_ACTIONS.length];
+    const id = `static_fallback_${startIndex + i}_${action.title.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`;
+    const body = goalTitle ? `${action.body} If it fits “${goalTitle}”, make this the smallest bridge toward it.` : action.body;
+    return {
+      screen_spec_db_id: id,
+      screens_today: 0,
+      daily_limit: -1,
+      is_limited: false,
+      screen: {
+        screen_id: id,
+        type: 'path_action',
+        layout: 'full_bleed_card',
+        domain: action.domain,
+        card_data: {
+          title: action.title,
+          body,
+          image_url: DOMAIN_IMAGE_FALLBACK[action.domain],
+          deep_dive: {
+            time_to_start: action.time,
+            difficulty: action.difficulty.toLowerCase(),
+            why_it_matters: 'This keeps the Path feed useful even when live recommendations are temporarily unavailable. Acting on it still gives you momentum and a clearer signal for what should come next.',
+            stat: 'A concrete fallback is better than a blank feed: choose, skip, save, or do it so the path can keep moving.',
+            steps: action.steps,
+            resources: [],
+          },
+        },
+        components: [
+          { type: 'hero_image', source: DOMAIN_IMAGE_FALLBACK[action.domain], alt: action.title },
+          { type: 'headline', text: action.title },
+          { type: 'body', text: body },
+          { type: 'context_strip', items: [
+            { label: 'Time', value: action.time },
+            { label: 'Difficulty', value: action.difficulty },
+            { label: 'Mode', value: action.temporalBranch.replace(/_/g, ' ') },
+          ] },
+        ],
+        feedback_overlay: { type: 'rating', position: 'bottom', always_visible: true },
+        metadata: {
+          agent: 'static_fallback',
+          source: 'static_fallback',
+          feed_mode: 'path',
+          temporal_branch: action.temporalBranch,
+          domain: action.domain,
+          tags: action.tags,
+          generated_at: new Date().toISOString(),
+        },
+      },
+    };
+  });
+}
+
 const FEED_INITIAL_PREFETCH_COUNT = 12;
 const FEED_LOAD_MORE_COUNT = 8;
 const FEED_PREFETCH_THRESHOLD = 5;
@@ -1380,6 +1516,10 @@ export default function FeedPage() {
         nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
 
+      if (!nextCards.length) {
+        nextCards = buildStaticFallbackCards(FEED_INITIAL_PREFETCH_COUNT, 0, focusedGoal?.title || null);
+      }
+
       if (!isCurrentLoad()) return;
 
       setHasGoals(goals.length > 0);
@@ -1393,20 +1533,23 @@ export default function FeedPage() {
       }
       setCards(nextCards);
       setIndex(0);
-      if (nextCards.length > 0) {
-        setIsLimited(false);
-        setDailyLimit(nextCards[nextCards.length - 1].daily_limit);
-      } else {
-        setError('Aura could not prepare cards yet. Try again in a moment.');
-      }
+      setIsLimited(false);
+      setDailyLimit(nextCards[nextCards.length - 1]?.daily_limit ?? -1);
       // Send backend progress signal.
       AuraClient['client'].post('/api/gamification/checkin', { reason: 'card_view' }).catch(() => {});
     } catch (e: any) {
       if (!isCurrentLoad()) return;
-      if (e?.response?.status === 402) {
-        setIsLimited(true);
-        setError('You have explored today’s cards. We are opening the feed again now — tap retry.');
-      } else setError(e?.response?.data?.detail || 'Failed to load feed');
+      if (e?.response?.status === 401 || e?.response?.status === 403) {
+        setError(e?.response?.data?.detail || 'Failed to load feed');
+        return;
+      }
+      const fallbackCards = buildStaticFallbackCards(FEED_INITIAL_PREFETCH_COUNT, 0, null);
+      setCards(fallbackCards);
+      setIndex(0);
+      setIsLimited(false);
+      setDailyLimit(-1);
+      setHasGoals(null);
+      showToast('Live recommendations are unavailable, so Path opened with starter cards.');
     } finally {
       if (isCurrentLoad()) setLoading(false);
     }
@@ -1455,17 +1598,24 @@ export default function FeedPage() {
         const single = await AuraClient.getNextScreen(feedContext, goalId, undefined, feedMode).catch(() => null);
         nextCards = enforceFeedMode(single ? [single] : [], feedMode, preferredCity);
       }
+      if (!nextCards.length) {
+        nextCards = buildStaticFallbackCards(FEED_LOAD_MORE_COUNT, cards.length, goalTitle);
+      }
       if (nextCards.length > 0) {
         setCards((prev) => [...prev, ...nextCards]);
         setIsLimited(false);
         setDailyLimit(nextCards[nextCards.length - 1].daily_limit);
       }
     } catch (e: any) {
-      if (e?.response?.status === 402) setIsLimited(true);
+      if (e?.response?.status === 401 || e?.response?.status === 403) return;
+      const fallbackCards = buildStaticFallbackCards(FEED_LOAD_MORE_COUNT, cards.length, goalTitle);
+      setCards((prev) => [...prev, ...fallbackCards]);
+      setIsLimited(false);
+      setDailyLimit(-1);
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, goalId, feedContext, feedMode, preferredCity]);
+  }, [loadingMore, goalId, feedContext, feedMode, preferredCity, cards.length, goalTitle]);
 
   const scrollToIndex = useCallback((i: number) => {
     const s = scrollerRef.current;
