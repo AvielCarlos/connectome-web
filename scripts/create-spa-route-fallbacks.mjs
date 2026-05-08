@@ -13,6 +13,7 @@ const publicRoutes = [
   'services/ai-os-setup',
   'ai-os-human-flourishing',
   'path-feed-momentum',
+  'connectome-builders',
 ]
 
 if (!existsSync(indexPath)) {

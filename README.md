@@ -43,6 +43,7 @@ Useful first actions:
 
 - Try the app: https://avielcarlos.github.io/connectome-web/
 - Read the current Path Feed proof page: https://avielcarlos.github.io/connectome-web/path-feed-momentum/
+- Read the builder invitation and first-PR path: https://avielcarlos.github.io/connectome-web/connectome-builders/
 - Open the Path Feed and give feedback on confusing or useful cards.
 - Share one concrete critique or screenshot with context.
 - Builders: pick one narrow issue and comment with your approach before opening a PR.
