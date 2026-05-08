@@ -6,6 +6,7 @@ import { useExperiment } from '../lib/useExperiment';
 import { StreakBadge } from '../components/StreakBadge';
 import { billingCancelUrl, billingSuccessUrl } from '../lib/checkoutUrls';
 import { UpgradePanel } from '../components/UpgradePanel';
+import { AuraRecommendationStrip, AuraRecommendation } from '../components/AuraRecommendationStrip';
 
 const EXPERIMENT_ID = 'primary_landing_v1';
 const VARIANTS = ['A', 'B', 'C', 'D'] as const;
@@ -33,6 +34,42 @@ const DEFAULT_VALUE_SCORES: Record<(typeof TOP_LEVEL_VALUES)[number], number> = 
   abundance: 6,
   adventure: 7,
 };
+
+function profileAuraRecommendation(profile: any, tier: string): AuraRecommendation {
+  const topValues = Object.entries(profile?.profile?.value_weights || profile?.profile?.valueWeights || DEFAULT_VALUE_SCORES)
+    .sort((a, b) => Number(b[1]) - Number(a[1]))
+    .slice(0, 2)
+    .map(([value]) => value);
+
+  if (!profile?.profile?.now_vector_prompt && !profile?.profile?.later_vector_prompt) {
+    return {
+      eyebrow: 'Profile signal Aura needs',
+      title: 'Give Aura a current-state and future-state vector',
+      body: 'Your profile already stores values, tier, Drive, and travel signals. Add one current path signal and one future-facing signal so recommendations across Goals and iDo have better context.',
+      cta: 'Tune recommendation vectors',
+      domain: 'iVive',
+      evidenceHint: 'These vectors become reusable context for the graph instead of another isolated profile setting.',
+    };
+  }
+
+  if (tier === 'free') {
+    return {
+      eyebrow: 'Explorer path preview',
+      title: 'Turn profile context into richer Aura guidance',
+      body: `Aura can use your ${topValues.join(' + ') || 'value'} signals to shape next nodes, evidence prompts, and surfaced recommendations as your graph grows.`,
+      cta: 'See Explorer unlocks',
+      domain: 'Aventi',
+    };
+  }
+
+  return {
+    eyebrow: 'Personal OS calibration',
+    title: 'Keep your profile as the source of truth for recommendations',
+    body: `Aura is currently weighted toward ${topValues.join(' + ') || 'your values'}. Revisit these when your season changes so every surface recommends from the right state.`,
+    cta: 'Review value compass',
+    domain: 'Eviva',
+  };
+}
 
 const getStoredAdminToken = () => localStorage.getItem('admin_token')?.trim() || '';
 const getAdminHeaders = () => {
@@ -608,6 +645,22 @@ export default function ProfilePage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* ── Streak + Milestones + Badges ── */}
           <StreakBadge />
+
+          <AuraRecommendationStrip
+            recommendation={profileAuraRecommendation(profile, tier)}
+            onAction={() => {
+              const recommendation = profileAuraRecommendation(profile, tier);
+              if (recommendation.cta === 'Tune recommendation vectors') {
+                setVectorsOpen(true);
+                return;
+              }
+              if (recommendation.cta === 'See Explorer unlocks') {
+                setShowUpgradePanel(true);
+                return;
+              }
+              setCompassOpen(true);
+            }}
+          />
 
           {/* Google Drive — compact folded control */}
           <div style={{ background: '#12121a', border: `1px solid ${driveStatus?.connected ? 'rgba(52,211,153,0.26)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, overflow: 'hidden' }}>

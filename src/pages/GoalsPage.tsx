@@ -5,6 +5,7 @@ import { useToast } from '../components/Toast';
 import { useExperiment } from '../lib/useExperiment';
 import GoalClarifyModal from '../components/GoalClarifyModal';
 import { PathLimitSheet } from '../components/PathLimitSheet';
+import { AuraRecommendationStrip, AuraRecommendation } from '../components/AuraRecommendationStrip';
 
 type Lens = 'active' | 'paths' | 'saved' | 'done' | 'all';
 
@@ -21,13 +22,6 @@ const STARTERS = [
   { title: 'Turn a vague desire into a real path', tag: 'clarify', domain: 'iVive' },
 ];
 
-type GoalSeed = {
-  eyebrow: string;
-  title: string;
-  body: string;
-  cta: string;
-  domain: string;
-};
 
 function domainConfig(domain?: string) {
   const normalized = domain === 'Rest' ? 'iVive' : domain; // legacy Rest maps into iVive; Rest is an iVive aspect.
@@ -58,7 +52,7 @@ function stateCopy(state: string) {
   return 'Achieved';
 }
 
-function auraGoalSeed(goals: Goal[]): GoalSeed {
+function auraGoalSeed(goals: Goal[]): AuraRecommendation {
   const active = goals.filter((g) => g.status === 'active');
   const unmapped = active.filter((g) => !g.steps?.length);
   const moving = active.filter((g) => progressFor(g) > 0 && progressFor(g) < 1);
@@ -196,22 +190,12 @@ function WeeklyRecapCard() {
 
 function AuraGoalSeedCard({ goals, onClarify }: { goals: Goal[]; onClarify: (title: string) => void }) {
   const seed = auraGoalSeed(goals);
-  const cfg = domainConfig(seed.domain);
-
   return (
-    <section style={{ position: 'relative', overflow: 'hidden', border: `1px solid ${cfg.color}24`, background: 'linear-gradient(135deg, rgba(255,255,255,0.055), rgba(0,212,170,0.045))', borderRadius: 26, padding: 16, margin: '0 0 16px' }}>
-      <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 12% 0%, ${cfg.color}1f, transparent 42%)`, pointerEvents: 'none' }} />
-      <div style={{ position: 'relative', display: 'grid', gap: 12 }}>
-        <div>
-          <div style={{ color: cfg.color, fontSize: 11, fontWeight: 950, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 7 }}>{cfg.emoji} {seed.eyebrow}</div>
-          <h2 style={{ color: '#f8f8fc', fontSize: 20, letterSpacing: -0.55, lineHeight: 1.15, margin: 0 }}>{seed.title}</h2>
-          <p style={{ color: 'rgba(248,248,252,0.62)', fontSize: 13, lineHeight: 1.55, margin: '8px 0 0' }}>{seed.body}</p>
-        </div>
-        <button onClick={() => onClarify(seed.cta)} style={{ justifySelf: 'start', border: `1px solid ${cfg.color}40`, background: `${cfg.color}18`, color: '#dffcf6', borderRadius: 999, padding: '10px 13px', fontSize: 12, fontWeight: 950 }}>
-          Seed this with Aura →
-        </button>
-      </div>
-    </section>
+    <AuraRecommendationStrip
+      recommendation={{ ...seed, evidenceHint: 'This recommendation is shown inside Goals so Aura guidance feels woven through the OS, not locked in the feed.' }}
+      actionLabel="Seed this with Aura"
+      onAction={() => onClarify(seed.cta || seed.title)}
+    />
   );
 }
 
