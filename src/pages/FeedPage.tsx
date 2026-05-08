@@ -788,6 +788,65 @@ function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => v
   );
 }
 
+function DiscoveryQuickTips({ onClose }: { onClose: () => void }) {
+  const tips = [
+    ['Choose by reality', 'Use the challenge filter and capability check-in so Aura recommends what fits today, not an ideal day.'],
+    ['Tap for context', 'Open any card for why it matters, links, constraints, and a concrete way to start.'],
+    ['Teach the graph', 'Do now, Do later, ratings, invites, and skips all become signals for better future nodes.'],
+    ['Start tiny', 'If a node feels right but too big, ask Aura to turn it into the smallest next move.'],
+  ];
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 210,
+        background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(10px)',
+        display: 'flex', alignItems: 'flex-end',
+      }}
+    >
+      <section
+        aria-label="Path Feed quick tips"
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: '100%',
+          background: 'linear-gradient(180deg, rgba(18,18,30,0.98), rgba(10,10,15,0.98))',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderBottom: 'none',
+          borderRadius: '28px 28px 0 0',
+          padding: '18px 20px max(30px, env(safe-area-inset-bottom))',
+          boxShadow: '0 -18px 70px rgba(0,0,0,0.45)',
+        }}
+      >
+        <div style={{ width: 38, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.16)', margin: '0 auto 18px' }} />
+        <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>Quick tips</div>
+        <h2 style={{ color: '#f8f8fc', margin: '0 0 10px', fontSize: 24, letterSpacing: -0.6 }}>Make the Path Feed learn faster</h2>
+        <p style={{ color: 'rgba(248,248,252,0.58)', margin: '0 0 18px', fontSize: 14, lineHeight: 1.6 }}>
+          A few intentional taps are enough. Aura improves from what you choose, skip, save, and actually do.
+        </p>
+        <div style={{ display: 'grid', gap: 10 }}>
+          {tips.map(([title, body], index) => (
+            <div key={title} style={{ display: 'flex', gap: 12, padding: 13, border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, background: 'rgba(255,255,255,0.045)' }}>
+              <div style={{ width: 26, height: 26, borderRadius: 13, display: 'grid', placeItems: 'center', flexShrink: 0, background: 'rgba(0,212,170,0.14)', color: '#00d4aa', fontWeight: 950 }}>{index + 1}</div>
+              <div>
+                <div style={{ color: '#f8f8fc', fontWeight: 900, fontSize: 14, marginBottom: 3 }}>{title}</div>
+                <div style={{ color: 'rgba(248,248,252,0.58)', fontSize: 13, lineHeight: 1.5 }}>{body}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{ marginTop: 16, width: '100%', border: 'none', borderRadius: 18, padding: '14px 18px', background: 'linear-gradient(135deg,#00d4aa,#14f1c1)', color: '#06110f', fontWeight: 950 }}
+        >
+          Got it
+        </button>
+      </section>
+    </div>
+  );
+}
+
 // ─── Full-bleed FeedCard ─────────────────────────────────────────────────────
 function FeedCard({
   item,
@@ -1235,6 +1294,7 @@ export default function FeedPage() {
   // Always start ready so the feed loads immediately.
   const [capabilityReady] = useState(true);
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
+  const [showQuickTips, setShowQuickTips] = useState(false);
   const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizonId>(initialTimeHorizon);
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilterId>('adaptive');
@@ -1729,6 +1789,7 @@ export default function FeedPage() {
 
       {/* Collection picker */}
       {pathwaySheet && <PathwaySheet data={pathwaySheet} onClose={() => setPathwaySheet(null)} onInvite={() => handleInvite(pathwaySheet.item, pathwaySheet.card)} />}
+      {showQuickTips && <DiscoveryQuickTips onClose={() => setShowQuickTips(false)} />}
 
 
       {collectionPickerCard && (
@@ -1823,6 +1884,34 @@ export default function FeedPage() {
       </div>
 
 
+      {/* Quick tips trigger */}
+      <button
+        type="button"
+        onClick={() => setShowQuickTips(true)}
+        aria-label="Open Path Feed quick tips"
+        style={{
+          position: 'absolute',
+          top: 'max(env(safe-area-inset-top), 12px)',
+          left: 14,
+          zIndex: 26,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          border: '1px solid rgba(255,255,255,0.12)',
+          borderRadius: 999,
+          padding: '7px 10px',
+          background: 'rgba(10,10,15,0.64)',
+          backdropFilter: 'blur(14px)',
+          color: 'rgba(248,248,252,0.72)',
+          fontSize: 12,
+          fontWeight: 850,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.32)',
+        }}
+      >
+        <span style={{ color: '#00d4aa' }}>?</span>
+        Tips
+      </button>
+
       {/* Top header */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20,
@@ -1833,9 +1922,9 @@ export default function FeedPage() {
         pointerEvents: 'none',
       }}>
         {goalId && goalTitle ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginLeft: 86 }}>
             <span style={{ color: '#8b5cf6', fontSize: 14 }}>◈</span>
-            <span style={{ fontWeight: 700, fontSize: 13, color: '#8b5cf6', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ fontWeight: 700, fontSize: 13, color: '#8b5cf6', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {goalTitle}
             </span>
           </div>
