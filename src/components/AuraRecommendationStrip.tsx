@@ -9,6 +9,10 @@ export type AuraRecommendation = {
   cta?: string;
   domain?: AuraRecommendationDomain;
   evidenceHint?: string;
+  nodeId?: string | null;
+  trackingId?: string | null;
+  source?: string | null;
+  metadata?: Record<string, unknown>;
 };
 
 const DOMAIN_CONFIG: Record<string, { emoji: string; color: string; label: string }> = {
@@ -26,13 +30,42 @@ export function AuraRecommendationStrip({
   recommendation,
   onAction,
   actionLabel,
+  surface = 'embedded',
 }: {
   recommendation: AuraRecommendation;
   onAction?: () => void;
   actionLabel?: string;
+  surface?: string;
 }) {
   const cfg = domainConfig(recommendation.domain);
   const cta = actionLabel || recommendation.cta;
+
+  const handleAction = () => {
+    if (typeof window !== 'undefined') {
+      const eventPayload = {
+        surface,
+        route: window.location.pathname,
+        eyebrow: recommendation.eyebrow,
+        title: recommendation.title,
+        cta,
+        domain: recommendation.domain || null,
+        node_id: recommendation.nodeId || null,
+        tracking_id: recommendation.trackingId || null,
+        source: recommendation.source || 'aura_recommendation_strip',
+        metadata: recommendation.metadata || {},
+        updated_at: new Date().toISOString(),
+      };
+      try {
+        window.localStorage.setItem('aura_active_feedback_context', JSON.stringify({
+          ...eventPayload,
+          surface: `recommendation:${surface}`,
+          card_type: 'aura_recommendation',
+        }));
+      } catch {}
+      window.dispatchEvent(new CustomEvent('connectome:aura-recommendation-action', { detail: eventPayload }));
+    }
+    onAction?.();
+  };
 
   return (
     <section style={{ position: 'relative', overflow: 'hidden', border: `1px solid ${cfg.color}24`, background: 'linear-gradient(135deg, rgba(255,255,255,0.055), rgba(0,212,170,0.045))', borderRadius: 26, padding: 16, margin: '0 0 16px' }}>
@@ -47,7 +80,7 @@ export function AuraRecommendationStrip({
           )}
         </div>
         {cta && onAction && (
-          <button onClick={onAction} style={{ justifySelf: 'start', border: `1px solid ${cfg.color}40`, background: `${cfg.color}18`, color: '#dffcf6', borderRadius: 999, padding: '10px 13px', fontSize: 12, fontWeight: 950, cursor: 'pointer' }}>
+          <button onClick={handleAction} style={{ justifySelf: 'start', border: `1px solid ${cfg.color}40`, background: `${cfg.color}18`, color: '#dffcf6', borderRadius: 999, padding: '10px 13px', fontSize: 12, fontWeight: 950, cursor: 'pointer' }}>
             {cta} →
           </button>
         )}

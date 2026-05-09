@@ -647,7 +647,12 @@ export default function ProfilePage() {
           <StreakBadge />
 
           <AuraRecommendationStrip
-            recommendation={profileAuraRecommendation(profile, tier)}
+            surface="profile"
+            recommendation={{
+              ...profileAuraRecommendation(profile, tier),
+              source: 'profile_calibration_card',
+              trackingId: `profile:${profileAuraRecommendation(profile, tier).eyebrow.toLowerCase().replace(/\s+/g, '-')}`,
+            }}
             onAction={() => {
               const recommendation = profileAuraRecommendation(profile, tier);
               if (recommendation.cta === 'Tune recommendation vectors') {
