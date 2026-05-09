@@ -192,7 +192,13 @@ function AuraGoalSeedCard({ goals, onClarify }: { goals: Goal[]; onClarify: (tit
   const seed = auraGoalSeed(goals);
   return (
     <AuraRecommendationStrip
-      recommendation={{ ...seed, evidenceHint: 'This recommendation is shown inside Goals so Aura guidance feels woven through the OS, not locked in the feed.' }}
+      surface="goals"
+      recommendation={{
+        ...seed,
+        source: 'goals_seed_card',
+        trackingId: `goals:${seed.eyebrow.toLowerCase().replace(/\s+/g, '-')}`,
+        evidenceHint: 'This recommendation is shown inside Goals so Aura guidance feels woven through the OS, not locked in the feed.',
+      }}
       actionLabel="Seed this with Aura"
       onAction={() => onClarify(seed.cta || seed.title)}
     />
