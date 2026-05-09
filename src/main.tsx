@@ -163,7 +163,9 @@ function App() {
           {/* AIOS app routes */}
           <Route path="/app" element={<ShellRoute activeApp="home"><ConnectomeHome /></ShellRoute>} />
           <Route path="/app/ido" element={<ShellRoute activeApp="ido"><FeedPage /></ShellRoute>} />
-          <Route path="/app/future" element={<Navigate to="/app/ido" replace />} />
+          <Route path="/app/discovery" element={<ShellRoute activeApp="ido"><FeedPage /></ShellRoute>} />
+          <Route path="/app/discovery-agent" element={<ShellRoute activeApp="ido"><FeedPage /></ShellRoute>} />
+          <Route path="/app/future" element={<Navigate to="/app/discovery" replace />} />
           <Route path="/app/aura" element={<ShellRoute activeApp="aura"><AuraPage /></ShellRoute>} />
           <Route path="/app/aura" element={<Navigate to="/app/aura" replace />} />
           <Route path="/app/goals" element={<ShellRoute activeApp="goals"><GoalsPage /></ShellRoute>} />
@@ -172,7 +174,7 @@ function App() {
           <Route path="/app/contribute" element={<ShellRoute activeApp="contribute"><ContributePage /></ShellRoute>} />
           <Route path="/app/profile" element={<ShellRoute activeApp="profile"><ProfilePage /></ShellRoute>} />
           <Route path="/app/billing/success" element={<ShellRoute activeApp="profile"><PaymentSuccessPage /></ShellRoute>} />
-          <Route path="/app/journal" element={<Navigate to="/app/ido" replace />} />
+          <Route path="/app/journal" element={<Navigate to="/app/discovery" replace />} />
           <Route path="/app/services" element={<ShellRoute activeApp="services"><ServicesPage /></ShellRoute>} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/ai-os-setup" element={<AiOsSetupLandingPage />} />
@@ -188,11 +190,13 @@ function App() {
 
           {/* Backward-compatible redirects */}
           <Route path="/home" element={<Navigate to="/app" replace />} />
-          <Route path="/feed" element={<Navigate to="/app/ido" replace />} />
-          <Route path="/discover" element={<Navigate to="/app/ido" replace />} />
+          <Route path="/feed" element={<Navigate to="/app/discovery" replace />} />
+          <Route path="/discover" element={<Navigate to="/app/discovery" replace />} />
+          <Route path="/discovery" element={<Navigate to="/app/discovery" replace />} />
+          <Route path="/discovery-agent" element={<Navigate to="/app/discovery-agent" replace />} />
           <Route path="/goals" element={<Navigate to="/app/goals" replace />} />
           <Route path="/routines" element={<Navigate to="/app/routines" replace />} />
-          <Route path="/journal" element={<Navigate to="/app/ido" replace />} />
+          <Route path="/journal" element={<Navigate to="/app/discovery" replace />} />
           <Route path="/aura" element={<Navigate to="/app/aura" replace />} />
           <Route path="/ora" element={<Navigate to="/app/aura" replace />} />
           <Route path="/dao" element={<Navigate to="/app/dao" replace />} />

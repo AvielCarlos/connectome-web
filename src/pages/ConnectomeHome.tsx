@@ -5,7 +5,7 @@ import { PageHero, SectionCard } from '../components/design';
 
 const nextSignals = [
   { label: 'Guided path', title: 'Turn a desire into a concrete next step', path: '/app/goals' },
-  { label: 'Discovery feed', title: 'Browse one doable action at a time', path: '/app/ido' },
+  { label: 'Discovery feed', title: 'Browse one doable action at a time', path: '/app/discovery' },
   { label: 'Community', title: 'Contribute to the ecosystem and earn CP', path: '/app/dao' },
 ];
 
@@ -84,13 +84,13 @@ export default function ConnectomeHome() {
 
         <button
           type="button"
-          onClick={() => navigate('/app/ido')}
+          onClick={() => navigate('/app/discovery')}
           style={{ ...actionPanel, padding: 24, color: '#f8f8fc', textAlign: 'left', cursor: 'pointer' }}
         >
           <div style={{ color: '#f4c26b', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12 }}>I don’t know what I want to do</div>
           <h2 style={{ margin: '0 0 10px', fontSize: 28, letterSpacing: -0.7 }}>Begin your path</h2>
           <p style={{ margin: 0, color: 'rgba(248,248,252,0.62)', lineHeight: 1.6 }}>Open the discovery feed and choose, save, skip, or act on one useful possibility at a time.</p>
-          <div style={{ marginTop: 18, color: '#f4c26b', fontWeight: 900 }}>Open Path Feed →</div>
+          <div style={{ marginTop: 18, color: '#f4c26b', fontWeight: 900 }}>Open Discovery →</div>
         </button>
       </section>
 

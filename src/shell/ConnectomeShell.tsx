@@ -17,7 +17,7 @@ interface ConnectomeShellProps {
 
 function appLabel(appId: ShellApp) {
   if (appId === 'home') return 'Aura';
-  if (appId === 'ido') return 'Path';
+  if (appId === 'ido') return 'Discover';
   return appById(appId)?.name || 'Aura';
 }
 
@@ -30,7 +30,7 @@ type DockItem = {
 };
 
 const CORE_DOCK: DockItem[] = [
-  { id: 'ido', label: 'Path', icon: '⚡', path: '/app/ido' },
+  { id: 'ido', label: 'Discover', icon: '⚡', path: '/app/discovery' },
   { id: 'aura', label: 'Aura', icon: '◈', path: '/app/aura' },
   { id: 'goals', label: 'Goals', icon: '🎯', path: '/app/goals' },
   { id: 'profile', label: 'Profile', icon: '👤', path: '/app/profile' },

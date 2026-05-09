@@ -164,7 +164,8 @@ Primary feed responses are graph-learning signals:
 ### Authenticated app
 
 - `/app` — Home/orientation screen.
-- `/app/ido` — one-action feed/discovery.
+- `/app/discovery` / `/app/discovery-agent` — one-action feed/discovery (canonical user-facing route).
+- `/app/ido` — legacy path to the same discovery surface.
 - `/app/goals` — goals and Aura clarification.
 - `/app/routines` — routines and habits.
 - `/app/dao` — DAO, CP, proposals, governance, contribution overview.
@@ -179,7 +180,7 @@ Primary feed responses are graph-learning signals:
 ### Backward-compatible redirects
 
 - `/home` → `/app`
-- `/feed`, `/discover`, `/journal` → `/app/ido`
+- `/feed`, `/discover`, `/discovery`, `/discovery-agent`, `/journal` → discovery surface
 - `/goals` → `/app/goals`
 - `/routines` → `/app/routines`
 - `/dao` → `/app/dao`
