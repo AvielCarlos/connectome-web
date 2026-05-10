@@ -127,6 +127,61 @@ function goalDesiredState(goal: Goal) {
   return goal.graph_metadata?.desired_state || goal.graph_metadata?.desired_state_text || goal.measurable_outcome || goal.title;
 }
 
+function daysSince(value?: string) {
+  const time = value ? new Date(value).getTime() : 0;
+  if (!Number.isFinite(time) || time <= 0) return 0;
+  return Math.max(0, Math.floor((Date.now() - time) / 86_400_000));
+}
+
+function MomentumRadarCard({ goals, onClarify }: { goals: Goal[]; onClarify: (title: string) => void }) {
+  const active = goals.filter((g) => g.status === 'active');
+  const staleSpark = active.find((g) => !g.steps?.length && daysSince(g.created_at) >= 3);
+  const stalledPath = active.find((g) => g.steps?.length && progressFor(g) === 0 && daysSince(g.created_at) >= 7);
+  const completed = goals.filter((g) => g.status === 'completed').length;
+
+  let insight: { eyebrow: string; title: string; body: string; cta: string; domain?: string } | null = null;
+  if (staleSpark) {
+    insight = {
+      eyebrow: `${daysSince(staleSpark.created_at)}d unmapped`,
+      title: `“${staleSpark.title}” is still a spark`,
+      body: 'Aura has enough signal to help translate this into a measurable desired state before it goes cold.',
+      cta: `Make ${staleSpark.title} measurable`,
+      domain: staleSpark.domain,
+    };
+  } else if (stalledPath) {
+    insight = {
+      eyebrow: `${daysSince(stalledPath.created_at)}d without first movement`,
+      title: `The first step for “${stalledPath.title}” may be too heavy`,
+      body: 'A useful intelligence seed is not more goals — it is shrinking the next move until the path becomes do-able today.',
+      cta: `Find the smallest next move for ${stalledPath.title}`,
+      domain: stalledPath.domain,
+    };
+  } else if (!active.length && completed > 0) {
+    insight = {
+      eyebrow: 'Integration window',
+      title: 'Completed energy is ready to become the next path',
+      body: 'You have achieved something. Capture what that unlocked so Aura can route the next aligned step.',
+      cta: 'Turn my latest progress into the next aligned goal',
+      domain: 'Eviva',
+    };
+  }
+
+  if (!insight) return null;
+  const cfg = domainConfig(insight.domain);
+  return (
+    <section style={{ border: `1px solid ${cfg.color}24`, background: `linear-gradient(135deg, ${cfg.color}10, rgba(255,255,255,0.03))`, borderRadius: 24, padding: 15, margin: '0 0 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <div>
+          <div style={{ color: cfg.color, fontSize: 11, fontWeight: 950, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>{cfg.emoji} Momentum radar • {insight.eyebrow}</div>
+          <div style={{ color: '#f8f8fc', fontSize: 17, fontWeight: 950, lineHeight: 1.25 }}>{insight.title}</div>
+          <div style={{ color: 'rgba(248,248,252,0.56)', fontSize: 13, lineHeight: 1.55, marginTop: 7 }}>{insight.body}</div>
+        </div>
+        <button onClick={() => onClarify(insight.cta)} style={{ flex: '0 0 auto', border: `1px solid ${cfg.color}3a`, background: `${cfg.color}16`, color: cfg.color, borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>Repair with Aura</button>
+      </div>
+    </section>
+  );
+}
+
 function DesiredStateCompass({ goals }: { goals: Goal[] }) {
   const active = goals.filter((g) => g.status === 'active');
   const primary = active[0];
@@ -640,6 +695,7 @@ export default function GoalsPage() {
 
       <UserStateStrip goals={goals} />
       <DesiredStateCompass goals={goals} />
+      <MomentumRadarCard goals={goals} onClarify={setClarifyingGoal} />
       <WeeklyRecapCard />
       <AuraGoalSeedCard goals={goals} onClarify={setClarifyingGoal} />
       <CaptureBar onClarify={setClarifyingGoal} />
