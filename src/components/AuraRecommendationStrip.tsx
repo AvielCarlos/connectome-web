@@ -1,4 +1,5 @@
 import React from 'react';
+import { recordFeedbackAction, setActiveFeedbackContext } from '../lib/feedbackContext';
 
 export type AuraRecommendationDomain = 'iVive' | 'Eviva' | 'Aventi' | 'Rest' | string;
 
@@ -55,13 +56,22 @@ export function AuraRecommendationStrip({
         metadata: recommendation.metadata || {},
         updated_at: new Date().toISOString(),
       };
-      try {
-        window.localStorage.setItem('aura_active_feedback_context', JSON.stringify({
-          ...eventPayload,
-          surface: `recommendation:${surface}`,
-          card_type: 'aura_recommendation',
-        }));
-      } catch {}
+      const feedbackContext = {
+        ...eventPayload,
+        surface: `recommendation:${surface}`,
+        card_type: 'aura_recommendation',
+      };
+      setActiveFeedbackContext(feedbackContext);
+      recordFeedbackAction({
+        type: 'recommendation_cta',
+        route: eventPayload.route,
+        title: recommendation.title,
+        cta,
+        domain: recommendation.domain || null,
+        node_id: recommendation.nodeId || null,
+        tracking_id: recommendation.trackingId || null,
+        source: recommendation.source || 'aura_recommendation_strip',
+      });
       window.dispatchEvent(new CustomEvent('connectome:aura-recommendation-action', { detail: eventPayload }));
     }
     onAction?.();

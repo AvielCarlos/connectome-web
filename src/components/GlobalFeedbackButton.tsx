@@ -3,6 +3,7 @@ import html2canvas from 'html2canvas';
 import { AuraClient, GlobalFeedbackPayload } from '../lib/AuraClient';
 import CPExplainerModal from './CPExplainerModal';
 import { useToast } from './Toast';
+import { buildFeedbackContextSnapshot } from '../lib/feedbackContext';
 
 const CATEGORIES: GlobalFeedbackPayload['category'][] = ['Bad Card/Node', 'Malfunction', 'Bug', 'Confusing', 'Idea', 'Design', 'Praise', 'Other'];
 
@@ -83,13 +84,7 @@ export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger
     setError(null);
     try {
       let screenshot: string | null = null;
-      let feedbackContext: Record<string, any> | null = null;
-      try {
-        const rawContext = localStorage.getItem('aura_active_feedback_context');
-        feedbackContext = rawContext ? JSON.parse(rawContext) : null;
-      } catch {
-        feedbackContext = null;
-      }
+      const feedbackContext = buildFeedbackContextSnapshot();
       const metadata: Record<string, any> = {
         viewport: { width: window.innerWidth, height: window.innerHeight },
         userAgent: navigator.userAgent,
