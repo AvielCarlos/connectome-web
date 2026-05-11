@@ -1719,6 +1719,19 @@ export default function FeedPage() {
   const handleCollectionSaved = (collectionName: string) => {
     if (collectionPickerCard) {
       setSavedIds((prev) => new Set([...prev, collectionPickerCard.screen_spec_id]));
+      AuraClient.submitFeedback({
+        screen_spec_id: collectionPickerCard.screen_spec_id,
+        rating: 4,
+        time_on_screen_ms: timeOnActiveCardMs(collectionPickerCard.screen_spec_id),
+        exit_point: 'do_later',
+        completed: false,
+        metadata: {
+          learning_signal: 'resurface_intent',
+          collection_name: collectionName,
+          offered_domain: collectionPickerCard.card_domain,
+          interpretation: 'Saving a Path card means the user is interested but not ready now; resurface related nodes when timing or capacity improves.',
+        },
+      }).catch(() => {});
     }
     setCollectionPickerCard(null);
     showToast(`✦ Saved to ${collectionName}`);
