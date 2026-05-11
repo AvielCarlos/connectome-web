@@ -7,6 +7,7 @@ import AuraOverlay from './AuraOverlay';
 import GlobalFeedbackButton from '../components/GlobalFeedbackButton';
 import { appById, type AppId } from '../runtime/ontology';
 import { AuraClient } from '../lib/AuraClient';
+import { recordFeedbackRoute } from '../lib/feedbackContext';
 
 type ShellApp = Exclude<AppId, 'aventi' | 'ivive' | 'eviva'>;
 
@@ -179,6 +180,10 @@ export default function ConnectomeShell({ children, activeApp = 'home' }: Connec
       })
       .catch(() => setLocationPromptOpen(true));
   }, [profile]);
+
+  useEffect(() => {
+    recordFeedbackRoute(`${location.pathname}${location.search}${location.hash}`, activeApp);
+  }, [activeApp, location.pathname, location.search, location.hash]);
 
   const dockItems = dockMenus[activeApp] || dockMenus.home || [];
 
