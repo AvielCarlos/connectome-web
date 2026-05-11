@@ -13,6 +13,8 @@ const publicRoutes = [
   'services/ai-os-setup',
   'ai-os-human-flourishing',
   'path-feed-momentum',
+  'path-feed-examples',
+  'path-feed-return-loop',
   'connectome-builders',
 ]
 

@@ -23,6 +23,7 @@ import AiOsSetupLandingPage from './pages/AiOsSetupLandingPage'
 import HumanFlourishingLandingPage from './pages/HumanFlourishingLandingPage'
 import PathFeedMomentumLandingPage from './pages/PathFeedMomentumLandingPage'
 import PathFeedExamplesLandingPage from './pages/PathFeedExamplesLandingPage'
+import PathFeedReturnLoopLandingPage from './pages/PathFeedReturnLoopLandingPage'
 import ConnectomeBuildersLandingPage from './pages/ConnectomeBuildersLandingPage'
 import ProfilePage from './pages/ProfilePage'
 import SurfacePage from './pages/SurfacePage'
@@ -183,6 +184,7 @@ function App() {
           <Route path="/ai-os-human-flourishing" element={<HumanFlourishingLandingPage />} />
           <Route path="/path-feed-momentum" element={<PathFeedMomentumLandingPage />} />
           <Route path="/path-feed-examples" element={<PathFeedExamplesLandingPage />} />
+          <Route path="/path-feed-return-loop" element={<PathFeedReturnLoopLandingPage />} />
           <Route path="/connectome-builders" element={<ConnectomeBuildersLandingPage />} />
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
           <Route path="/app/ivive" element={<Navigate to="/app/ioo" replace />} />
