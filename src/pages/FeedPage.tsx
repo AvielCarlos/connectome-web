@@ -635,7 +635,7 @@ function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => v
       rating: 5,
       exit_point: 'execute_ask_aura',
       completed: false,
-      metadata: { learning_signal: 'execute_clarification_requested', title: card.title, feed_mode: metadata.feed_mode, temporal_branch: metadata.temporal_branch },
+      metadata: { learning_signal: 'execute_clarification_requested', title: card.title, available_time: availableTime, feed_mode: metadata.feed_mode, temporal_branch: metadata.temporal_branch },
     }).catch(() => {});
   };
   const remember = async () => {
@@ -646,9 +646,26 @@ function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => v
       rating: 5,
       exit_point: 'execute_create_reminder_intent',
       completed: false,
-      metadata: { learning_signal: 'reminder_intent', reminder_text: text },
+      metadata: { learning_signal: 'reminder_intent', reminder_text: text, available_time: availableTime, feed_mode: metadata.feed_mode, temporal_branch: metadata.temporal_branch },
     }).catch(() => {});
   };
+  const recordAvailableTime = (value: TimeHorizonId) => {
+    setAvailableTime(value);
+    AuraClient.submitFeedback({
+      screen_spec_id: item?.screen_spec_db_id || '',
+      rating: 5,
+      exit_point: 'execute_available_time_selected',
+      completed: false,
+      metadata: {
+        learning_signal: 'execution_time_fit_selected',
+        available_time: value,
+        feed_mode: metadata.feed_mode,
+        temporal_branch: metadata.temporal_branch,
+        node_id: metadata.node_id || card?.node_id || null,
+      },
+    }).catch(() => {});
+  };
+
   const openUrl = (url?: string, exitPoint = 'execute_open_link') => {
     if (!url) return;
     window.open(url, '_blank', 'noopener');
@@ -657,7 +674,7 @@ function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => v
       rating: 5,
       exit_point: exitPoint,
       completed: false,
-      metadata: { learning_signal: 'execute_safe_action', url, feed_mode: metadata.feed_mode, temporal_branch: metadata.temporal_branch },
+      metadata: { learning_signal: 'execute_safe_action', url, available_time: availableTime, feed_mode: metadata.feed_mode, temporal_branch: metadata.temporal_branch },
     }).catch(() => {});
   };
 
@@ -721,7 +738,7 @@ function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => v
                 key={option.id}
                 type="button"
                 aria-pressed={availableTime === option.id}
-                onClick={() => setAvailableTime(option.id)}
+                onClick={() => recordAvailableTime(option.id)}
                 style={{
                   border: availableTime === option.id ? '1px solid rgba(0,212,170,0.8)' : '1px solid rgba(255,255,255,0.12)',
                   borderRadius: 999,
