@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://avielcarlos.github.io/connectome-web/sitemap.xml
