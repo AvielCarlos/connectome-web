@@ -1859,7 +1859,7 @@ export default function FeedPage() {
         {hasGoals === false && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 320 }}>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/app/goals?focus=true')}
               style={{
                 marginTop: 12,
                 background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
@@ -1873,7 +1873,7 @@ export default function FeedPage() {
                 boxShadow: '0 0 24px rgba(139,92,246,0.25)',
               }}
             >
-              I know what I want to do →
+              Set a goal with Aura →
             </button>
             <button
               onClick={() => loadInitial()}
