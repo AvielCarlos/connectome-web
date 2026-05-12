@@ -200,6 +200,7 @@ export default function ContributePage() {
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <PrimaryCTA href="https://github.com/AvielCarlos/connectome-backend/issues" target="_blank" rel="noreferrer" onClick={() => trackDeveloperOnboardingEvent('cp_issue_list_clicked')}>Browse CP issues →</PrimaryCTA>
+            <PrimaryCTA href="https://github.com/AvielCarlos/connectome-backend" target="_blank" rel="noreferrer" variant="secondary" onClick={() => trackDeveloperOnboardingEvent('backend_repo_clicked')}>View backend repo</PrimaryCTA>
             <PrimaryCTA href="https://github.com/AvielCarlos/connectome-web" target="_blank" rel="noreferrer" variant="secondary" onClick={() => trackDeveloperOnboardingEvent('web_repo_clicked')}>View web repo</PrimaryCTA>
             <PrimaryCTA href="https://t.me/ascensiontechai" target="_blank" rel="noreferrer" variant="secondary" onClick={() => trackDeveloperOnboardingEvent('community_clicked')}>Join community</PrimaryCTA>
           </div>
