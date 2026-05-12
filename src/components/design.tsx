@@ -87,7 +87,7 @@ export function PrimaryCTA({ href, onClick, variant = 'primary', target, rel, st
   };
 
   if (href) {
-    return <a href={href} target={target} rel={rel} style={baseStyle}>{children}</a>;
+    return <a href={href} target={target} rel={rel} onClick={onClick} style={baseStyle}>{children}</a>;
   }
 
   return <button type={type} onClick={onClick} style={baseStyle}>{children}</button>;
