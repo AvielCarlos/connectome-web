@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AuraClient, authStorage } from '../lib/AuraClient';
 import CPExplainerModal from '../components/CPExplainerModal';
 import { PageHero, PrimaryCTA, SectionCard } from '../components/design';
+import { trackDeveloperOnboardingEvent } from '../lib/developerOnboardingAnalytics';
 
 const ACCENT = '#00d4aa';
 
@@ -67,6 +68,7 @@ export default function ContributePage() {
   };
 
   useEffect(() => {
+    trackDeveloperOnboardingEvent('contribute_page_viewed');
     loadMine();
     AuraClient.getGitHubStatus().then(setGithubStatus);
   }, []);
@@ -74,6 +76,7 @@ export default function ContributePage() {
   const syncGitHub = async () => {
     setMessage(null);
     setError(null);
+    trackDeveloperOnboardingEvent('github_sync_clicked');
     setSyncing(true);
     try {
       const res = await AuraClient.syncGitHubContributions();
@@ -102,6 +105,7 @@ export default function ContributePage() {
       return;
     }
 
+    trackDeveloperOnboardingEvent('contribution_submit_started');
     setSubmitting(true);
     try {
       const trimmedLink = link.trim();
@@ -114,6 +118,7 @@ export default function ContributePage() {
         evidence_text: evidence.trim() || undefined,
         attachment_urls: attachmentUrls.map((url) => url.trim()).filter(Boolean),
       });
+      trackDeveloperOnboardingEvent('contribution_submit_succeeded');
       setMessage('Contribution submitted! Aura will review within 24h.');
       setTitle('');
       setDescription('');
@@ -122,6 +127,7 @@ export default function ContributePage() {
       setAttachmentUrls(['', '', '']);
       await loadMine();
     } catch (err: any) {
+      trackDeveloperOnboardingEvent('contribution_submit_failed');
       const detail = err?.response?.data?.detail;
       setError(detail || 'Could not submit contribution. Please sign in and try again.');
     } finally {
@@ -142,7 +148,7 @@ export default function ContributePage() {
       <div className="contribute-page" style={{ maxWidth: 980, margin: '0 auto' }}>
         <PageHero eyebrow="Aligned developer workbench" title="Build Aura. Earn CP. Help shape AI for human flourishing.">
           <p style={{ margin: 0 }}>Contribute is the workbench for developers, designers, writers, and operators aligned with the mission: concrete tasks, evidence, review, shipping, and transparent CP recognition.</p>
-          <button type="button" onClick={() => setCpExplainerOpen(true)} style={{ marginTop: 14, color: ACCENT, fontWeight: 900, textDecoration: 'none' }}>What is CP?</button>
+          <button type="button" onClick={() => { trackDeveloperOnboardingEvent('cp_explainer_opened'); setCpExplainerOpen(true); }} style={{ marginTop: 14, color: ACCENT, fontWeight: 900, textDecoration: 'none' }}>What is CP?</button>
         </PageHero>
 
         {/* GitHub connect banner — shown near top if not connected */}
@@ -161,6 +167,7 @@ export default function ContributePage() {
             </div>
             <a
               href={AuraClient.getGitHubLoginUrl()}
+              onClick={() => trackDeveloperOnboardingEvent('github_connect_clicked')}
               style={{
                 background: '#24292e', color: '#fff', padding: '9px 18px',
                 borderRadius: 12, textDecoration: 'none', fontWeight: 800, fontSize: 13,
@@ -192,9 +199,9 @@ export default function ContributePage() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <PrimaryCTA href="https://github.com/AvielCarlos/connectome-backend/issues" target="_blank" rel="noreferrer">Browse CP issues →</PrimaryCTA>
-            <PrimaryCTA href="https://github.com/AvielCarlos/connectome-web" target="_blank" rel="noreferrer" variant="secondary">View web repo</PrimaryCTA>
-            <PrimaryCTA href="https://t.me/ascensiontechai" target="_blank" rel="noreferrer" variant="secondary">Join community</PrimaryCTA>
+            <PrimaryCTA href="https://github.com/AvielCarlos/connectome-backend/issues" target="_blank" rel="noreferrer" onClick={() => trackDeveloperOnboardingEvent('cp_issue_list_clicked')}>Browse CP issues →</PrimaryCTA>
+            <PrimaryCTA href="https://github.com/AvielCarlos/connectome-web" target="_blank" rel="noreferrer" variant="secondary" onClick={() => trackDeveloperOnboardingEvent('web_repo_clicked')}>View web repo</PrimaryCTA>
+            <PrimaryCTA href="https://t.me/ascensiontechai" target="_blank" rel="noreferrer" variant="secondary" onClick={() => trackDeveloperOnboardingEvent('community_clicked')}>Join community</PrimaryCTA>
           </div>
         </SectionCard>
 
@@ -208,14 +215,14 @@ export default function ContributePage() {
             </div>
           )}
           <form onSubmit={submit} style={{ display: 'grid', gap: 16 }}>
-            <div><label>Contribution type</label><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>{contributionTypes.map((item) => { const active = type === item.value; return <button key={item.value} type="button" onClick={() => setType(item.value)} style={{ border: active ? '1px solid rgba(0,212,170,0.72)' : '1px solid rgba(255,255,255,0.1)', background: active ? 'rgba(0,212,170,0.14)' : 'rgba(255,255,255,0.04)', color: active ? ACCENT : '#f8f8fc', borderRadius: 999, padding: '10px 13px', fontWeight: 850, cursor: 'pointer' }}>{item.icon} {item.label}</button>; })}</div></div>
+            <div><label>Contribution type</label><div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>{contributionTypes.map((item) => { const active = type === item.value; return <button key={item.value} type="button" onClick={() => { trackDeveloperOnboardingEvent('contribution_type_selected'); setType(item.value); }} style={{ border: active ? '1px solid rgba(0,212,170,0.72)' : '1px solid rgba(255,255,255,0.1)', background: active ? 'rgba(0,212,170,0.14)' : 'rgba(255,255,255,0.04)', color: active ? ACCENT : '#f8f8fc', borderRadius: 999, padding: '10px 13px', fontWeight: 850, cursor: 'pointer' }}>{item.icon} {item.label}</button>; })}</div></div>
             {type === 'code' && !githubStatus.connected && (
               <div style={{ background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.3)', borderRadius: 16, padding: '20px 24px', marginBottom: 20 }}>
                 <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>Connect GitHub first</div>
                 <div style={{ fontSize: 14, color: 'rgba(248,248,252,0.6)', marginBottom: 16 }}>
                   For code contributions, we verify your GitHub account to automatically track your merged PRs and award CP accurately.
                 </div>
-                <a href={AuraClient.getGitHubLoginUrl()} style={{ display: 'inline-block', background: '#24292e', color: '#fff', padding: '10px 20px', borderRadius: 24, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
+                <a href={AuraClient.getGitHubLoginUrl()} onClick={() => trackDeveloperOnboardingEvent('github_connect_clicked')} style={{ display: 'inline-block', background: '#24292e', color: '#fff', padding: '10px 20px', borderRadius: 24, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
                   Connect GitHub →
                 </a>
               </div>
@@ -227,7 +234,7 @@ export default function ContributePage() {
             <div><label>Attachment URLs (optional)</label><div style={{ display: 'grid', gap: 10 }}>{attachmentUrls.map((url, i) => <input key={i} value={url} onChange={(e) => { const next = [...attachmentUrls]; next[i] = e.target.value; setAttachmentUrls(next); }} placeholder={`Screenshot, Drive, Figma, Loom, or proof URL ${i + 1}`} />)}</div></div>
             {!githubStatus.connected && type !== 'code' && (
               <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.4)', marginTop: 8, textAlign: 'center' }}>
-                <a href={AuraClient.getGitHubLoginUrl()} style={{ color: '#00d4aa', textDecoration: 'none' }}>
+                <a href={AuraClient.getGitHubLoginUrl()} onClick={() => trackDeveloperOnboardingEvent('github_connect_clicked')} style={{ color: '#00d4aa', textDecoration: 'none' }}>
                   Connect GitHub
                 </a>{' '}to link your profile and get more accurate CP attribution.
               </div>
