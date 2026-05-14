@@ -31,6 +31,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://avielcarlos.github.io/connectome-web/personal-ai-recommendations/</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://avielcarlos.github.io/connectome-web/connectome-builders/</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>

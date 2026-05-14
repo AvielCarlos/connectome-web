@@ -16,6 +16,7 @@ const publicRoutes = [
   'path-feed-examples',
   'path-feed-return-loop',
   'daily-ai-check-in',
+  'personal-ai-recommendations',
   'connectome-builders',
 ]
 
