@@ -177,7 +177,8 @@ function App() {
           <Route path="/app/dao" element={<ShellRoute activeApp="dao"><DAOPage /></ShellRoute>} />
           <Route path="/app/contribute" element={<ShellRoute activeApp="contribute"><ContributePage /></ShellRoute>} />
           <Route path="/app/profile" element={<ShellRoute activeApp="profile"><ProfilePage /></ShellRoute>} />
-          <Route path="/app/admin" element={<ShellRoute activeApp="profile"><ProfilePage initialSection="admin" /></ShellRoute>} />
+          <Route path="/app/admin" element={<ShellRoute activeApp="admin"><ProfilePage initialSection="admin" /></ShellRoute>} />
+          <Route path="/app/system" element={<ShellRoute activeApp="admin"><ProfilePage initialSection="system" /></ShellRoute>} />
           <Route path="/app/billing/success" element={<ShellRoute activeApp="profile"><PaymentSuccessPage /></ShellRoute>} />
           <Route path="/app/journal" element={<Navigate to="/app/discovery" replace />} />
           <Route path="/app/services" element={<ShellRoute activeApp="services"><ServicesPage /></ShellRoute>} />
@@ -212,6 +213,7 @@ function App() {
           <Route path="/contribute" element={<Navigate to="/app/contribute" replace />} />
           <Route path="/profile" element={<Navigate to="/app/profile" replace />} />
           <Route path="/admin" element={<Navigate to="/app/admin" replace />} />
+          <Route path="/system" element={<Navigate to="/app/system" replace />} />
           <Route path="/ioo" element={<Navigate to="/app/ioo" replace />} />
 
           {/* WebSpawn surfaces — auth-gated but accessible via direct link */}

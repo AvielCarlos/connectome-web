@@ -47,7 +47,8 @@ export type AppId =
   | 'contribute'
   | 'services'
   | 'ioo'
-  | 'profile';
+  | 'profile'
+  | 'admin';
 
 export type AppCategory = 'daily' | 'domain' | 'system' | 'governance';
 export type FeedOwner = 'ido_meta_feed' | 'ivive_domain_feed' | 'eviva_domain_feed' | 'aventi_domain_feed' | 'dao_signal_feed';
@@ -495,6 +496,17 @@ export const APP_MANIFEST: AppManifestEntry[] = [
     permissions: ['memory', 'dao'],
     description: 'User-facing Path Map over Aura’s internal IOO graph: goals, options, steps, and progress toward desired states.',
     purpose: 'Lets users see possible routes from current state to success without exposing internal graph machinery by default.',
+  },
+  {
+    id: 'admin',
+    name: 'System',
+    icon: '⚙️',
+    path: '/app/admin',
+    category: 'system',
+    visibleToUser: false,
+    permissions: ['memory', 'files', 'notifications'],
+    description: 'Protected operator controls, diagnostics, experiments, and Aura self-improvement surfaces.',
+    purpose: 'Keeps system-level tools behind an explicit route boundary instead of mixing them into the user Profile surface.',
   },
   {
     id: 'profile',
