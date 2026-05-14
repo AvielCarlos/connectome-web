@@ -26,6 +26,7 @@ import PathFeedExamplesLandingPage from './pages/PathFeedExamplesLandingPage'
 import PathFeedReturnLoopLandingPage from './pages/PathFeedReturnLoopLandingPage'
 import ConnectomeBuildersLandingPage from './pages/ConnectomeBuildersLandingPage'
 import DailyAiCheckInLandingPage from './pages/DailyAiCheckInLandingPage'
+import PersonalAiRecommendationsLandingPage from './pages/PersonalAiRecommendationsLandingPage'
 import ProfilePage from './pages/ProfilePage'
 import SurfacePage from './pages/SurfacePage'
 import IOOPage from './pages/IOOPage'
@@ -188,6 +189,7 @@ function App() {
           <Route path="/path-feed-examples" element={<PathFeedExamplesLandingPage />} />
           <Route path="/path-feed-return-loop" element={<PathFeedReturnLoopLandingPage />} />
           <Route path="/daily-ai-check-in" element={<DailyAiCheckInLandingPage />} />
+          <Route path="/personal-ai-recommendations" element={<PersonalAiRecommendationsLandingPage />} />
           <Route path="/connectome-builders" element={<ConnectomeBuildersLandingPage />} />
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
           <Route path="/app/ivive" element={<Navigate to="/app/ioo" replace />} />
