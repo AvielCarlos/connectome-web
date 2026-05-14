@@ -19,6 +19,7 @@ interface ConnectomeShellProps {
 function appLabel(appId: ShellApp) {
   if (appId === 'home') return 'Aura';
   if (appId === 'ido') return 'Discover';
+  if (appId === 'admin') return 'System';
   return appById(appId)?.name || 'Aura';
 }
 
@@ -48,6 +49,7 @@ const dockMenus: Partial<Record<ShellApp, DockItem[]>> = {
   services: CORE_DOCK,
   ioo: CORE_DOCK,
   profile: CORE_DOCK,
+  admin: CORE_DOCK,
 };
 
 function initials(profile: any) {

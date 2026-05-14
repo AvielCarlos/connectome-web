@@ -1522,9 +1522,19 @@ export default function ProfilePage({ initialSection = 'profile' }: ProfilePageP
         </div>
       )}
 
-      {/* ── Admin tier testing section ── */}
+      {/* ── Admin route hub + tier testing section ── */}
       {section === 'admin' && isAdmin && profile?.email?.toLowerCase() === 'carlosandromeda8@gmail.com' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Card title="Operator routes">
+            <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.55)', lineHeight: 1.6, marginBottom: 12 }}>
+              System tools live on explicit operator routes. Profile remains the user/account surface.
+            </div>
+            <div style={{ display: 'grid', gap: 8 }}>
+              <MenuRow icon="⚡" label="System tools" sublabel="Autonomy, health dashboard, proposals, and agent population" onClick={() => navigate('/app/system')} />
+              <MenuRow icon="⚗️" label="Experiments" sublabel="A/B tests, winners, and live experiment diagnostics" onClick={() => setSection('experiments')} />
+              <MenuRow icon="🏛️" label="Executive council" sublabel="Council brief, agent runs, and operating metrics" onClick={() => { setSection('council'); loadCouncilData(); }} last />
+            </div>
+          </Card>
           <Card title="Tier testing & feed reset">
             <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.55)', lineHeight: 1.6, marginBottom: 14 }}>
               Switch your account between tiers to test upgrade gates, then reset the Path Feed counter so the next feed load starts fresh.
@@ -1563,6 +1573,14 @@ export default function ProfilePage({ initialSection = 'profile' }: ProfilePageP
         <Card title="Admin controls">
           <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.58)', lineHeight: 1.6 }}>
             This is a protected system route. Your normal Profile stays separate at /app/profile; admin controls only appear for authorised operator accounts.
+          </div>
+        </Card>
+      )}
+
+      {section === 'system' && !isAdmin && (
+        <Card title="System tools">
+          <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.58)', lineHeight: 1.6 }}>
+            This is a protected system route. Your normal Profile stays separate at /app/profile; system controls only appear for authorised operator accounts.
           </div>
         </Card>
       )}
