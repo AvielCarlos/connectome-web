@@ -1923,7 +1923,7 @@ export default function FeedPage() {
       {/* ── Difficulty switcher — centred at top ─────────────────────────── */}
       <div style={{
         position: 'absolute',
-        top: 'calc(env(safe-area-inset-top, 0px) + var(--shell-top-clearance, 52px) + 10px)',
+        top: 'max(10px, env(safe-area-inset-top, 0px))',
         left: 0, right: 0,
         zIndex: 20,
         display: 'flex',
