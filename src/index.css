@@ -662,7 +662,7 @@ body {
 
 .connectome-app-titlebar {
   position: fixed;
-  top: calc(var(--top-header-height) + 12px);
+  top: var(--shell-top-clearance);
   left: 50%;
   transform: translateX(-50%);
   z-index: 35;
@@ -974,7 +974,7 @@ body.keyboard-open .global-feedback-fab {
   bottom: var(--shell-bottom-clearance) !important;
 }
 .aura-container {
-  top: var(--top-header-height) !important;
+  top: var(--shell-top-clearance) !important;
   left: 0 !important;
   right: 0 !important;
   bottom: calc(var(--bottom-nav-height, 72px) + max(14px, env(safe-area-inset-bottom, 0px)) + 14px) !important;
