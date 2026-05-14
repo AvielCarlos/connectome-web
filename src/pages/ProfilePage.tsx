@@ -35,6 +35,12 @@ const DEFAULT_VALUE_SCORES: Record<(typeof TOP_LEVEL_VALUES)[number], number> = 
   adventure: 7,
 };
 
+type ProfileSection = 'profile' | 'ab' | 'experiments' | 'system' | 'google' | 'surfaces' | 'council' | 'dashboard' | 'admin';
+
+type ProfilePageProps = {
+  initialSection?: ProfileSection;
+};
+
 function profileAuraRecommendation(profile: any, tier: string): AuraRecommendation {
   const topValues = Object.entries(profile?.profile?.value_weights || profile?.profile?.valueWeights || DEFAULT_VALUE_SCORES)
     .sort((a, b) => Number(b[1]) - Number(a[1]))
@@ -77,7 +83,7 @@ const getAdminHeaders = () => {
   return adminToken ? { 'X-Admin-Token': adminToken } : {};
 };
 
-export default function ProfilePage() {
+export default function ProfilePage({ initialSection = 'profile' }: ProfilePageProps = {}) {
   const navigate = useNavigate();
   const { logout, refreshProfile } = useAuth();
   const [profile, setProfile] = useState<any>(null);
@@ -90,7 +96,7 @@ export default function ProfilePage() {
   const [runningAutonomy, setRunningAutonomy] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsLoading, setProposalsLoading] = useState(false);
-  const [section, setSection] = useState<'profile' | 'ab' | 'experiments' | 'system' | 'google' | 'surfaces' | 'council' | 'dashboard' | 'admin'>('profile');
+  const [section, setSection] = useState<ProfileSection>(initialSection);
   const [dashboard, setDashboard] = useState<any>(null);
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [allExperiments, setAllExperiments] = useState<any>(null);
@@ -173,6 +179,10 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    setSection(initialSection);
+  }, [initialSection]);
 
   const loadCouncilData = async () => {
     if (!isAdmin) return;
@@ -617,7 +627,7 @@ export default function ProfilePage() {
       {section !== 'profile' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <button
-            onClick={() => setSection('profile')}
+            onClick={() => initialSection === 'profile' ? setSection('profile') : navigate('/app/profile')}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
               background: 'transparent', border: 'none', cursor: 'pointer',
@@ -936,7 +946,7 @@ export default function ProfilePage() {
           {isAdmin && profile?.email?.toLowerCase() === 'carlosandromeda8@gmail.com' && (
             <div style={{ background: '#12121e', border: '1px solid rgba(168,85,247,0.18)', borderRadius: 16, overflow: 'hidden' }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(168,85,247,0.8)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>Admin</div>
-              <MenuRow icon="⚙️" label="Tier testing & feed reset" sublabel="Switch free / Explorer / Sovereign and reset Path Feed count" onClick={() => setSection('admin')} last />
+              <MenuRow icon="⚙️" label="Admin controls" sublabel="Tier testing, system tools, and protected operations" onClick={() => navigate('/app/admin')} last />
             </div>
           )}
 
@@ -1547,6 +1557,14 @@ export default function ProfilePage() {
             {adminTierMessage && <div style={{ marginTop: 10, fontSize: 12, color: adminTierMessage.startsWith('Could') ? '#f87171' : '#34d399', textAlign: 'center' }}>{adminTierMessage}</div>}
           </Card>
         </div>
+      )}
+
+      {section === 'admin' && (!isAdmin || profile?.email?.toLowerCase() !== 'carlosandromeda8@gmail.com') && (
+        <Card title="Admin controls">
+          <div style={{ fontSize: 13, color: 'rgba(248,248,252,0.58)', lineHeight: 1.6 }}>
+            This is a protected system route. Your normal Profile stays separate at /app/profile; admin controls only appear for authorised operator accounts.
+          </div>
+        </Card>
       )}
 
       {/* ── System section (admin only) ── */}
