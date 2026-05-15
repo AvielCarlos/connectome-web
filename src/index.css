@@ -298,6 +298,67 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 /* ─── Tooltip ───────────────────────────────────────────────────────── */
 .tooltip { position: relative; }
 
+.ioo-graph-tooltip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,212,170,0.35);
+  color: #00d4aa;
+  background: rgba(0,212,170,0.08);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: help;
+  outline: none;
+}
+
+.ioo-graph-tooltip:focus-visible {
+  box-shadow: 0 0 0 3px rgba(0,212,170,0.2);
+}
+
+.tooltip-card {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%) translateY(-4px);
+  z-index: 20;
+  width: min(280px, calc(100vw - 48px));
+  padding: 12px 14px;
+  border: 1px solid rgba(0,212,170,0.22);
+  border-radius: 14px;
+  background: rgba(12,14,20,0.96);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+  color: rgba(248,248,252,0.78);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.tooltip-card::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translateX(-50%) rotate(45deg);
+  border-left: 1px solid rgba(0,212,170,0.22);
+  border-top: 1px solid rgba(0,212,170,0.22);
+  background: rgba(12,14,20,0.96);
+}
+
+.tooltip:hover .tooltip-card,
+.tooltip:focus-visible .tooltip-card,
+.tooltip:focus-within .tooltip-card {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* ─── Gamification / Celebration ───────────────────────────────────── */
 @keyframes streakFlame {
   0%   { transform: scale(1) rotate(-4deg); }
