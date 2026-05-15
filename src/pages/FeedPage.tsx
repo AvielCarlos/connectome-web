@@ -29,6 +29,8 @@ const DOMAIN_IMAGE_FALLBACK: Record<string, string> = {
 };
 
 const CAPABILITY_PULSE_VERSION = 'v2';
+const FIRST_PATH_SIGNAL_STORAGE_KEY = 'connectome_path_first_signal_done';
+const FIRST_PATH_NUDGE_DISMISS_KEY = 'connectome_path_first_signal_nudge_dismissed';
 
 const CAPABILITY_CARDS = [
   {
@@ -864,6 +866,56 @@ function DiscoveryQuickTips({ onClose }: { onClose: () => void }) {
   );
 }
 
+function FirstPathSignalNudge({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <section
+      aria-label="First Path Feed action nudge"
+      style={{
+        position: 'absolute',
+        left: 14,
+        right: 86,
+        bottom: 18,
+        zIndex: 27,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '12px 13px',
+        borderRadius: 20,
+        border: '1px solid rgba(0,212,170,0.28)',
+        background: 'linear-gradient(135deg, rgba(6,17,15,0.9), rgba(10,10,15,0.78))',
+        backdropFilter: 'blur(18px)',
+        boxShadow: '0 16px 52px rgba(0,0,0,0.42)',
+      }}
+    >
+      <div style={{ width: 28, height: 28, borderRadius: 14, flexShrink: 0, display: 'grid', placeItems: 'center', background: 'rgba(0,212,170,0.16)', color: '#00d4aa', fontWeight: 950 }}>1</div>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ color: '#f8f8fc', fontSize: 12, fontWeight: 950, letterSpacing: 0.1 }}>Teach Aura with one tap</div>
+        <div style={{ color: 'rgba(248,248,252,0.62)', fontSize: 11, lineHeight: 1.35, marginTop: 2 }}>
+          Tap ♥ Do now, ★ rate, ✧ Do later, or ✕ Not interested. One signal is enough to tune your next cards.
+        </div>
+      </div>
+      <button
+        type="button"
+        aria-label="Dismiss first action nudge"
+        onClick={onDismiss}
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: 14,
+          border: '1px solid rgba(255,255,255,0.12)',
+          background: 'rgba(255,255,255,0.06)',
+          color: 'rgba(248,248,252,0.62)',
+          fontSize: 16,
+          fontWeight: 900,
+          cursor: 'pointer',
+        }}
+      >
+        ×
+      </button>
+    </section>
+  );
+}
+
 // ─── Full-bleed FeedCard ─────────────────────────────────────────────────────
 function FeedCard({
   item,
@@ -1448,6 +1500,13 @@ export default function FeedPage() {
   const [capabilityReady] = useState(true);
   const [pathwaySheet, setPathwaySheet] = useState<any | null>(null);
   const [showQuickTips, setShowQuickTips] = useState(false);
+  const [showFirstSignalNudge, setShowFirstSignalNudge] = useState(() => {
+    try {
+      return !localStorage.getItem(FIRST_PATH_SIGNAL_STORAGE_KEY) && !localStorage.getItem(FIRST_PATH_NUDGE_DISMISS_KEY);
+    } catch {
+      return true;
+    }
+  });
   const [feedMode, setFeedMode] = useState<FeedMode>(requestedMode);
   const [timeHorizon, setTimeHorizon] = useState<TimeHorizonId>(initialTimeHorizon);
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilterId>('adaptive');
@@ -1465,6 +1524,20 @@ export default function FeedPage() {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 2500);
   };
+
+  const markFirstPathSignal = useCallback(() => {
+    try {
+      localStorage.setItem(FIRST_PATH_SIGNAL_STORAGE_KEY, new Date().toISOString());
+    } catch {}
+    setShowFirstSignalNudge(false);
+  }, []);
+
+  const dismissFirstPathNudge = useCallback(() => {
+    try {
+      localStorage.setItem(FIRST_PATH_NUDGE_DISMISS_KEY, new Date().toISOString());
+    } catch {}
+    setShowFirstSignalNudge(false);
+  }, []);
 
   useEffect(() => {
     setFeedMode(requestedMode);
@@ -1688,6 +1761,7 @@ export default function FeedPage() {
   }, []);
 
   const handleRate = async (screenId: string, rating: number) => {
+    markFirstPathSignal();
     setRatings((prev) => ({ ...prev, [screenId]: rating }));
     const card = cards[index];
     if (!card) return;
@@ -1707,6 +1781,7 @@ export default function FeedPage() {
   };
 
   const handleDoNow = async (item: ScreenResponse, cardData: any) => {
+    markFirstPathSignal();
     setRatings((prev) => ({ ...prev, [item.screen_spec_db_id]: 5 }));
     showToast('Opening next steps…');
     AuraClient.submitFeedback({
@@ -1730,6 +1805,7 @@ export default function FeedPage() {
   };
 
   const handleSaveRequest = (card: any) => {
+    markFirstPathSignal();
     setCollectionPickerCard(card);
   };
 
@@ -1757,6 +1833,7 @@ export default function FeedPage() {
   };
 
   const handleSkip = () => {
+    markFirstPathSignal();
     const card = cards[index];
     if (card) {
       AuraClient.submitFeedback({
@@ -1970,6 +2047,9 @@ export default function FeedPage() {
       {/* Collection picker */}
       {pathwaySheet && <PathwaySheet data={pathwaySheet} onClose={() => setPathwaySheet(null)} onInvite={() => handleInvite(pathwaySheet.item, pathwaySheet.card)} />}
       {showQuickTips && <DiscoveryQuickTips onClose={() => setShowQuickTips(false)} />}
+      {showFirstSignalNudge && !pathwaySheet && !collectionPickerCard && !showQuickTips && (
+        <FirstPathSignalNudge onDismiss={dismissFirstPathNudge} />
+      )}
 
 
       {collectionPickerCard && (
