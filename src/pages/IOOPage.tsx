@@ -351,9 +351,21 @@ export default function IOOPage() {
     <div className="page-content" style={containerStyle}>
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>
-          🧬 IOO Neural Graph
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>
+            🧬 IOO Neural Graph
+          </h1>
+          <span
+            className="tooltip ioo-graph-tooltip"
+            tabIndex={0}
+            aria-label="The IOO graph is Aura’s living map of goals, prerequisites, actions, tools, services, and state transitions."
+          >
+            ?
+            <span className="tooltip-card" role="tooltip">
+              Aura uses this graph to understand what helps you move from intention to fulfilment — then pick the next card, pathway, agent, or real-world step.
+            </span>
+          </span>
+        </div>
         <p style={{ fontSize: 14, color: 'rgba(248,248,252,0.55)', marginTop: 6, marginBottom: 0, lineHeight: 1.55 }}>
           This is Aura’s internal map of human possibility: goals, prerequisites, actions, tools, services, and state transitions. It should help Connectome choose your next best card, pathway, agent, or real-world step.
         </p>
