@@ -113,6 +113,26 @@ const TIME_HORIZON_OPTIONS = [
 type TimeHorizonId = typeof TIME_HORIZON_OPTIONS[number]['id'];
 type DifficultyFilterId = 'adaptive' | 'easy' | 'medium' | 'deep';
 
+function doLaterResurfaceWindow(horizonId: TimeHorizonId) {
+  const now = Date.now();
+  const oneHour = 60 * 60 * 1000;
+  const oneDay = 24 * oneHour;
+  const offsets: Record<TimeHorizonId, number> = {
+    '5m': oneHour,
+    '30m': 4 * oneHour,
+    '2h': oneDay,
+    Day: 2 * oneDay,
+    Weekend: 7 * oneDay,
+    'Week+': 14 * oneDay,
+    Freedom: 3 * oneDay,
+  };
+  return new Date(now + offsets[horizonId]).toISOString();
+}
+
+function timeHorizonLabel(horizonId: TimeHorizonId) {
+  return TIME_HORIZON_OPTIONS.find((item) => item.id === horizonId)?.label || horizonId;
+}
+
 const FALLBACK_DIFFICULTY_FILTERS: Array<{ id: DifficultyFilterId; label: string; context: string }> = [
   { id: 'adaptive', label: 'Adaptive', context: 'Let Aura choose the right challenge level from capacity, goals, and recent engagement.' },
   { id: 'easy', label: 'Easy', context: 'Prefer low-friction 2-10 minute quick wins with gentle emotional load.' },
@@ -1040,6 +1060,7 @@ function FeedCard({
       card_body: cardData.body,
       card_domain: domain,
       card_color: color,
+      node_id: (specAny.metadata?.node_id || cardData.node_id || '').toString() || undefined,
     });
   };
 
@@ -1822,12 +1843,15 @@ export default function FeedPage() {
           learning_signal: 'resurface_intent',
           collection_name: collectionName,
           offered_domain: collectionPickerCard.card_domain,
+          node_id: collectionPickerCard.node_id,
+          time_horizon: timeHorizon,
+          resurface_after: doLaterResurfaceWindow(timeHorizon),
           interpretation: 'Saving a Path card means the user is interested but not ready now; resurface related nodes when timing or capacity improves.',
         },
       }).catch(() => {});
     }
     setCollectionPickerCard(null);
-    showToast(`✦ Saved to ${collectionName}`);
+    showToast(`✦ Saved to ${collectionName} · ${timeHorizonLabel(timeHorizon)} signal`);
     // Navigate to next card after short delay
     setTimeout(goNext, 800);
   };
