@@ -311,8 +311,13 @@ function UserStateStrip({ goals }: { goals: Goal[] }) {
   );
 }
 
+const GOAL_DRAFT_KEY = 'connectome.goals.capture_draft.v1';
+
 function CaptureBar({ onClarify }: { onClarify: (title: string) => void }) {
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(() => {
+    try { return localStorage.getItem(GOAL_DRAFT_KEY) || ''; }
+    catch { return ''; }
+  });
   const [focused, setFocused] = useState(false);
   const [searchParams] = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -324,6 +329,15 @@ function CaptureBar({ onClarify }: { onClarify: (title: string) => void }) {
     C: 'Capture a desire to turn into steps…',
     D: 'Tell Aura the direction — she will make it achievable',
   };
+
+  useEffect(() => {
+    try {
+      if (title.trim()) localStorage.setItem(GOAL_DRAFT_KEY, title);
+      else localStorage.removeItem(GOAL_DRAFT_KEY);
+    } catch {
+      // Draft persistence should never block intention capture.
+    }
+  }, [title]);
 
   useEffect(() => {
     const deepLinkedTitle = (searchParams.get('intent') || searchParams.get('goal') || searchParams.get('title') || '').trim().slice(0, 180);
@@ -351,6 +365,7 @@ function CaptureBar({ onClarify }: { onClarify: (title: string) => void }) {
     trackEvent('goal_collection_capture_started', 1);
     onClarify(trimmed);
     setTitle('');
+    try { localStorage.removeItem(GOAL_DRAFT_KEY); } catch {}
     setFocused(false);
   };
 
@@ -363,7 +378,7 @@ function CaptureBar({ onClarify }: { onClarify: (title: string) => void }) {
           value={title}
           onFocus={() => setFocused(true)}
           onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') { setTitle(''); setFocused(false); } }}
+          onKeyDown={(e) => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') { setTitle(''); try { localStorage.removeItem(GOAL_DRAFT_KEY); } catch {}; setFocused(false); } }}
           placeholder={placeholders[variant] || placeholders.A}
           style={{ flex: 1, background: 'transparent', border: 0, outline: 0, color: '#f8f8fc', fontSize: 15, minWidth: 0 }}
         />
