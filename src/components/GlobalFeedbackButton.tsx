@@ -6,6 +6,13 @@ import { useToast } from './Toast';
 import { buildFeedbackContextSnapshot } from '../lib/feedbackContext';
 
 const CATEGORIES: GlobalFeedbackPayload['category'][] = ['Bad Card/Node', 'Malfunction', 'Bug', 'Confusing', 'Idea', 'Design', 'Praise', 'Other'];
+const FEEDBACK_DRAFT_KEY = 'connectome.global_feedback.draft.v1';
+
+type FeedbackDraft = {
+  category?: GlobalFeedbackPayload['category'];
+  message?: string;
+  includeScreenshot?: boolean;
+};
 
 export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger, onClose }: { inlineMode?: boolean; inlineTrigger?: boolean; onClose?: () => void } = {}) {
   const { show } = useToast();
@@ -17,6 +24,31 @@ export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    try {
+      const rawDraft = localStorage.getItem(FEEDBACK_DRAFT_KEY);
+      if (!rawDraft) return;
+      const draft = JSON.parse(rawDraft) as FeedbackDraft;
+      if (draft.message) setMessage(draft.message);
+      if (draft.category && CATEGORIES.includes(draft.category)) setCategory(draft.category);
+      if (typeof draft.includeScreenshot === 'boolean') setIncludeScreenshot(draft.includeScreenshot);
+    } catch {
+      localStorage.removeItem(FEEDBACK_DRAFT_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (!message.trim()) {
+        localStorage.removeItem(FEEDBACK_DRAFT_KEY);
+        return;
+      }
+      localStorage.setItem(FEEDBACK_DRAFT_KEY, JSON.stringify({ category, message, includeScreenshot }));
+    } catch {
+      // Draft persistence should never block the feedback form.
+    }
+  }, [category, includeScreenshot, message]);
 
   useEffect(() => {
     if (!open) return;
@@ -37,6 +69,7 @@ export default function GlobalFeedbackButton({ inlineMode = false, inlineTrigger
     setCategory('Bad Card/Node');
     setIncludeScreenshot(true);
     setError(null);
+    localStorage.removeItem(FEEDBACK_DRAFT_KEY);
     if (notifyParent) onClose?.();
   };
 
