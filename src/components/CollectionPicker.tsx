@@ -23,6 +23,7 @@ interface Props {
     card_body?: string;
     card_domain?: string;
     card_color?: string;
+    node_id?: string;
   };
   onClose: () => void;
   onSaved: (collectionName: string) => void;
@@ -71,6 +72,7 @@ export function CollectionPicker({ card, onClose, onSaved }: Props) {
         card_body: card.card_body,
         card_domain: card.card_domain,
         card_color: card.card_color,
+        node_id: card.node_id,
       });
       onSaved(collName);
       onClose();
@@ -91,6 +93,7 @@ export function CollectionPicker({ card, onClose, onSaved }: Props) {
         card_body: card.card_body,
         card_domain: card.card_domain,
         card_color: card.card_color,
+        node_id: card.node_id,
       });
       onSaved('Saved');
       onClose();
