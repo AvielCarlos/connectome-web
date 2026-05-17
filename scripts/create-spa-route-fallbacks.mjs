@@ -15,6 +15,7 @@ const publicRoutes = [
   'path-feed-momentum',
   'path-feed-examples',
   'path-feed-return-loop',
+  'path-feed-vs-chatbot',
   'daily-ai-check-in',
   'personal-ai-recommendations',
   'connectome-builders',
