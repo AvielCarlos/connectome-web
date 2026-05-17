@@ -24,6 +24,7 @@ import HumanFlourishingLandingPage from './pages/HumanFlourishingLandingPage'
 import PathFeedMomentumLandingPage from './pages/PathFeedMomentumLandingPage'
 import PathFeedExamplesLandingPage from './pages/PathFeedExamplesLandingPage'
 import PathFeedReturnLoopLandingPage from './pages/PathFeedReturnLoopLandingPage'
+import PathFeedVsChatbotLandingPage from './pages/PathFeedVsChatbotLandingPage'
 import ConnectomeBuildersLandingPage from './pages/ConnectomeBuildersLandingPage'
 import DailyAiCheckInLandingPage from './pages/DailyAiCheckInLandingPage'
 import PersonalAiRecommendationsLandingPage from './pages/PersonalAiRecommendationsLandingPage'
@@ -189,6 +190,7 @@ function App() {
           <Route path="/path-feed-momentum" element={<PathFeedMomentumLandingPage />} />
           <Route path="/path-feed-examples" element={<PathFeedExamplesLandingPage />} />
           <Route path="/path-feed-return-loop" element={<PathFeedReturnLoopLandingPage />} />
+          <Route path="/path-feed-vs-chatbot" element={<PathFeedVsChatbotLandingPage />} />
           <Route path="/daily-ai-check-in" element={<DailyAiCheckInLandingPage />} />
           <Route path="/personal-ai-recommendations" element={<PersonalAiRecommendationsLandingPage />} />
           <Route path="/connectome-builders" element={<ConnectomeBuildersLandingPage />} />

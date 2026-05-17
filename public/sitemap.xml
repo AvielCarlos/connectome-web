@@ -19,6 +19,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://avielcarlos.github.io/connectome-web/path-feed-vs-chatbot/</loc>
+    <lastmod>2026-05-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://avielcarlos.github.io/connectome-web/path-feed-momentum/</loc>
     <lastmod>2026-05-12</lastmod>
     <changefreq>weekly</changefreq>

@@ -44,6 +44,7 @@ Useful first actions:
 - Try the app: https://avielcarlos.github.io/connectome-web/
 - Read concrete Path Feed examples: https://avielcarlos.github.io/connectome-web/path-feed-examples/
 - Read the return-loop proof page: https://avielcarlos.github.io/connectome-web/path-feed-return-loop/
+- Compare the Path Feed against chatbot-first AI: https://avielcarlos.github.io/connectome-web/path-feed-vs-chatbot/
 - Try the daily AI check-in landing path: https://avielcarlos.github.io/connectome-web/daily-ai-check-in/
 - See the personal AI recommendations landing path: https://avielcarlos.github.io/connectome-web/personal-ai-recommendations/
 - Read the builder invitation and first-PR path: https://avielcarlos.github.io/connectome-web/connectome-builders/
