@@ -28,6 +28,32 @@ function domainConfig(domain?: string) {
   return DOMAIN_CONFIG[normalized || ''] || { emoji: '◈', color: '#00d4aa', label: 'Path' };
 }
 
+function normalizeDomain(domain?: string | null) {
+  if (!domain) return undefined;
+  const value = String(domain).trim();
+  if (!value) return undefined;
+  if (value === 'Rest') return 'iVive';
+  return DOMAIN_CONFIG[value] ? value : undefined;
+}
+
+function inferGoalDomain(structuredGoal: any, iooPath: any[]) {
+  const direct = normalizeDomain(
+    structuredGoal?.domain ||
+    structuredGoal?.primary_domain ||
+    structuredGoal?.life_domain ||
+    structuredGoal?.category
+  );
+  if (direct) return direct;
+
+  const counts = iooPath.reduce<Record<string, number>>((acc, node) => {
+    const domain = normalizeDomain(node?.domain || node?.pillar || node?.category);
+    if (domain) acc[domain] = (acc[domain] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+}
+
 function progressFor(goal: Goal) {
   const steps = goal.steps || [];
   if (!steps.length) return goal.progress || 0;
@@ -695,6 +721,7 @@ export default function GoalsPage() {
 
   const handleClarifiedGoal = async (structuredGoal: any, iooPath: any[]) => {
     const title = structuredGoal?.title || clarifyingGoal || 'New intention';
+    const inferredDomain = inferGoalDomain(structuredGoal, iooPath);
     const descriptionParts = [
       structuredGoal?.why ? `Why: ${structuredGoal.why}` : null,
       structuredGoal?.specifics ? `Shape: ${structuredGoal.specifics}` : null,
@@ -729,7 +756,7 @@ export default function GoalsPage() {
       setPathLimitInfo({ activePaths: pathStatus.active_paths, pathLimit: pathStatus.path_limit, pathCredits: pathStatus.path_credits });
       return;
     }
-    const goal = await AuraClient.createGoal(title, descriptionParts.join('\n') || undefined, undefined, steps.length ? steps : undefined, {
+    const goal = await AuraClient.createGoal(title, descriptionParts.join('\n') || undefined, inferredDomain, steps.length ? steps : undefined, {
       intention_text: clarifyingGoal || title,
       measurable_outcome: structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
       success_metric: structuredGoal?.success_metric || structuredGoal?.metric || structuredGoal?.specifics || undefined,
@@ -741,6 +768,7 @@ export default function GoalsPage() {
         desired_state: structuredGoal?.desired_state || structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
         gap_summary: `Move from ${structuredGoal?.current_state || structuredGoal?.starting_point || 'current state unclear'} toward ${structuredGoal?.desired_state || structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title}`,
         intention_text: clarifyingGoal || title,
+        inferred_domain: inferredDomain,
         measurable_outcome: structuredGoal?.measurable_outcome || structuredGoal?.specifics || structuredGoal?.title || title,
         suggested_ioo_path: iooPath,
         aura_managed_nodes: iooPath.filter(isAuraManagedNode),
