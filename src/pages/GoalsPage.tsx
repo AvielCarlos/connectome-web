@@ -133,6 +133,74 @@ function daysSince(value?: string) {
   return Math.max(0, Math.floor((Date.now() - time) / 86_400_000));
 }
 
+function daysUntil(value?: string) {
+  const time = value ? new Date(value).getTime() : 0;
+  if (!Number.isFinite(time) || time <= 0) return null;
+  return Math.ceil((time - Date.now()) / 86_400_000);
+}
+
+function focusForecast(goals: Goal[]) {
+  const candidates = goals
+    .filter((goal) => goal.status === 'active')
+    .map((goal) => {
+      const progress = progressFor(goal);
+      const dueIn = daysUntil(goal.target_date);
+      const age = daysSince(goal.created_at);
+      const step = nextStep(goal);
+      let score = 0;
+      const signals: string[] = [];
+
+      if (dueIn !== null && dueIn <= 3) {
+        score += 8;
+        signals.push(dueIn < 0 ? `${Math.abs(dueIn)}d overdue` : dueIn === 0 ? 'due today' : `due in ${dueIn}d`);
+      }
+      if (progress > 0 && progress < 1) {
+        score += 5 + progress * 2;
+        signals.push(`${Math.round(progress * 100)}% complete`);
+      }
+      if (goal.steps?.length && progress === 0 && age >= 5) {
+        score += 4;
+        signals.push(`${age}d without first movement`);
+      }
+      if (!goal.steps?.length && age >= 3) {
+        score += 3;
+        signals.push(`${age}d unmapped spark`);
+      }
+
+      return { goal, score, signals, step };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  return candidates[0] || null;
+}
+
+function FocusForecastCard({ goals, onOpenFeed, onClarify }: { goals: Goal[]; onOpenFeed: (goal: Goal) => void; onClarify: (title: string) => void }) {
+  const forecast = focusForecast(goals);
+  if (!forecast) return null;
+
+  const cfg = domainConfig(forecast.goal.domain);
+  const needsMapping = !forecast.goal.steps?.length;
+  const actionLabel = needsMapping ? 'Map with Aura' : 'Open goal path';
+  const action = () => needsMapping ? onClarify(`Make ${forecast.goal.title} measurable`) : onOpenFeed(forecast.goal);
+
+  return (
+    <section style={{ border: `1px solid ${cfg.color}30`, background: `linear-gradient(135deg, ${cfg.color}12, rgba(0,0,0,0.20))`, borderRadius: 24, padding: 15, margin: '0 0 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ color: cfg.color, fontSize: 11, fontWeight: 950, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>{cfg.emoji} Focus forecast</div>
+          <div style={{ color: '#f8f8fc', fontSize: 17, fontWeight: 950, lineHeight: 1.25 }}>Protect “{forecast.goal.title}” next</div>
+          <div style={{ color: 'rgba(248,248,252,0.58)', fontSize: 13, lineHeight: 1.55, marginTop: 7 }}>
+            Aura is ranking this as the next best focus because {forecast.signals.join(' + ')}.
+          </div>
+          {forecast.step && <div style={{ color: 'rgba(248,248,252,0.72)', fontSize: 13, lineHeight: 1.45, marginTop: 10 }}><b style={{ color: cfg.color }}>Next:</b> {forecast.step.text}</div>}
+        </div>
+        <button onClick={action} style={{ flex: '0 0 auto', border: `1px solid ${cfg.color}40`, background: `${cfg.color}16`, color: cfg.color, borderRadius: 999, padding: '9px 12px', fontSize: 12, fontWeight: 900 }}>{actionLabel}</button>
+      </div>
+    </section>
+  );
+}
+
 function MomentumRadarCard({ goals, onClarify }: { goals: Goal[]; onClarify: (title: string) => void }) {
   const active = goals.filter((g) => g.status === 'active');
   const staleSpark = active.find((g) => !g.steps?.length && daysSince(g.created_at) >= 3);
@@ -710,6 +778,7 @@ export default function GoalsPage() {
 
       <UserStateStrip goals={goals} />
       <DesiredStateCompass goals={goals} />
+      <FocusForecastCard goals={goals} onOpenFeed={(g) => navigate(`/app/ido?goal=${encodeURIComponent(g.id)}`)} onClarify={setClarifyingGoal} />
       <MomentumRadarCard goals={goals} onClarify={setClarifyingGoal} />
       <WeeklyRecapCard />
       <AuraGoalSeedCard goals={goals} onClarify={setClarifyingGoal} />
