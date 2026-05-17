@@ -85,6 +85,18 @@ const getAdminHeaders = () => {
 
 export default function ProfilePage({ initialSection = 'profile' }: ProfilePageProps = {}) {
   const navigate = useNavigate();
+  const routeRootSection: ProfileSection = initialSection === 'admin' || initialSection === 'system' ? initialSection : 'profile';
+  const handleSectionBack = () => {
+    if (section !== routeRootSection) {
+      setSection(routeRootSection);
+      return;
+    }
+    if (routeRootSection === 'system') {
+      navigate('/app/admin');
+      return;
+    }
+    navigate('/app/profile');
+  };
   const { logout, refreshProfile } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -627,7 +639,7 @@ export default function ProfilePage({ initialSection = 'profile' }: ProfilePageP
       {section !== 'profile' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
           <button
-            onClick={() => initialSection === 'profile' ? setSection('profile') : navigate('/app/profile')}
+            onClick={handleSectionBack}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
               background: 'transparent', border: 'none', cursor: 'pointer',
