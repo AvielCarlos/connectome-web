@@ -589,6 +589,32 @@ export default function ProfilePage({ initialSection = 'profile' }: ProfilePageP
   const upgradeHeadlineText = UPGRADE_HEADLINES[upgradeHeadlineVariant] || UPGRADE_HEADLINES['A'];
   const upgradePriceText = UPGRADE_PRICES[priceDisplayVariant] || UPGRADE_PRICES['A'];
   const upgradeCTAText = UPGRADE_CTAS[ctaButtonVariant] || UPGRADE_CTAS['A'];
+  const routeContext = section === 'admin'
+    ? {
+        icon: '⚙️',
+        title: 'Admin Controls',
+        subtitle: 'Operator-only controls, separated from your personal profile.',
+        accent: '#a855f7',
+        badge: 'OPERATOR',
+        showUpgrade: false,
+      }
+    : section === 'system'
+      ? {
+          icon: '⚡',
+          title: 'System Tools',
+          subtitle: 'Protected autonomy, health, proposal, and agent operations.',
+          accent: '#00d4aa',
+          badge: 'SYSTEM',
+          showUpgrade: false,
+        }
+      : {
+          icon: '◉',
+          title: profile?.email?.split('@')[0] || 'You',
+          subtitle: profile?.email || 'Your Connectome profile',
+          accent: '#00d4aa',
+          badge: tier.toUpperCase(),
+          showUpgrade: true,
+        };
 
   return (
     <div style={{ maxWidth: 480, margin: '0 auto', padding: '16px 16px', paddingBottom: 'calc(var(--bottom-nav-height, 80px) + env(safe-area-inset-bottom, 0px) + 16px)', overflowY: 'auto' }}>
@@ -601,36 +627,37 @@ export default function ProfilePage({ initialSection = 'profile' }: ProfilePageP
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24, paddingTop: 8 }}>
         <div style={{
           width: 56, height: 56, borderRadius: 28,
-          background: 'linear-gradient(135deg, rgba(0,212,170,0.2), rgba(0,212,170,0.4))',
-          border: '2px solid rgba(0,212,170,0.4)',
+          background: `linear-gradient(135deg, ${routeContext.accent}22, ${routeContext.accent}44)`,
+          border: `2px solid ${routeContext.accent}66`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 24,
         }}>
-          ◉
+          {routeContext.icon}
         </div>
-        <div>
-          <div style={{ fontWeight: 800, fontSize: 17 }}>
-            {profile?.email?.split('@')[0] || 'You'}
-
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 800, fontSize: 17, color: '#f8f8fc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {routeContext.title}
           </div>
-          <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)', marginTop: 2 }}>{profile?.email}</div>
+          <div style={{ fontSize: 12, color: 'rgba(248,248,252,0.4)', marginTop: 2, lineHeight: 1.4 }}>{routeContext.subtitle}</div>
           <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 11, color: tierColor, background: tierColor + '15', border: `1px solid ${tierColor}33`, padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>
-              {tier.toUpperCase()}
+            <span style={{ fontSize: 11, color: routeContext.showUpgrade ? tierColor : routeContext.accent, background: (routeContext.showUpgrade ? tierColor : routeContext.accent) + '15', border: `1px solid ${(routeContext.showUpgrade ? tierColor : routeContext.accent)}33`, padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>
+              {routeContext.badge}
             </span>
-            <button
-              onClick={() => setShowUpgradePanel(true)}
-              style={{
-                fontSize: 11, fontWeight: 900, letterSpacing: 0.5,
-                background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-                color: '#fff', border: 'none',
-                padding: '3px 10px', borderRadius: 10,
-                cursor: 'pointer',
-                boxShadow: '0 2px 10px rgba(139,92,246,0.3)',
-              }}
-            >
-              UPGRADE
-            </button>
+            {routeContext.showUpgrade && (
+              <button
+                onClick={() => setShowUpgradePanel(true)}
+                style={{
+                  fontSize: 11, fontWeight: 900, letterSpacing: 0.5,
+                  background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                  color: '#fff', border: 'none',
+                  padding: '3px 10px', borderRadius: 10,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 10px rgba(139,92,246,0.3)',
+                }}
+              >
+                UPGRADE
+              </button>
+            )}
           </div>
         </div>
       </div>
