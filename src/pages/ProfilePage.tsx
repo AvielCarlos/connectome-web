@@ -982,12 +982,6 @@ export default function ProfilePage({ initialSection = 'profile' }: ProfilePageP
             <MenuRow icon="📱" label="Get the App" sublabel="Add Connectome to your home screen" onClick={() => {}} last />
           </div>
 
-          {isAdmin && profile?.email?.toLowerCase() === 'carlosandromeda8@gmail.com' && (
-            <div style={{ background: '#12121e', border: '1px solid rgba(168,85,247,0.18)', borderRadius: 16, overflow: 'hidden' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, color: 'rgba(168,85,247,0.8)', textTransform: 'uppercase', padding: '14px 18px 6px' }}>Admin</div>
-              <MenuRow icon="⚙️" label="Admin controls" sublabel="Tier testing, system tools, and protected operations" onClick={() => navigate('/app/admin')} last />
-            </div>
-          )}
 
           {/* ── Sign Out ── */}
           <button onClick={handleLogout} style={{

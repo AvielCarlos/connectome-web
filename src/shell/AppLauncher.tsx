@@ -25,7 +25,7 @@ const OUTCOME_LABELS: Partial<Record<ConnectomeApp['id'], { title: string; descr
   dao: { title: 'Understand the DAO', description: 'See governance, CP, proposals, and the contribution economy.', badge: 'DAO' },
   contribute: { title: 'Submit work and earn CP', description: 'Share code, design, research, ideas, or feedback for review.', badge: 'Build' },
   ioo: { title: 'Open your Path Map', description: 'See user-friendly routes from your current state to your desired goals and experiences.', badge: 'Map' },
-  profile: { title: 'Manage identity and settings', description: 'Control profile, accounts, permissions, experiments, and system tools.', badge: 'You' },
+  profile: { title: 'Manage identity and settings', description: 'Control profile, accounts, permissions, personal context, and billing.', badge: 'You' },
 };
 
 export default function AppLauncher({ onLaunch }: AppLauncherProps) {
