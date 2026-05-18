@@ -187,6 +187,31 @@ function cardCity(card: ScreenResponse | null | undefined) {
   return metadata.city || metadata.location_city || metadata.venue_city || '';
 }
 
+function opportunityStart(metadata: any) {
+  return metadata?.starts_at || metadata?.event_starts_at || metadata?.scheduled_at || metadata?.start_time || null;
+}
+
+function opportunityTimingLabel(metadata: any) {
+  const raw = opportunityStart(metadata);
+  if (!raw) return null;
+
+  const time = new Date(raw).getTime();
+  if (!Number.isFinite(time)) return String(raw);
+
+  const eventDate = new Date(time);
+  const today = new Date();
+  const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const days = Math.round((startOfDay(eventDate) - startOfDay(today)) / 86_400_000);
+  const date = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' }).format(eventDate);
+  const clock = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(eventDate);
+
+  if (days < 0) return `Started ${Math.abs(days)}d ago · ${date}, ${clock}`;
+  if (days === 0) return `Today · ${clock}`;
+  if (days === 1) return `Tomorrow · ${clock}`;
+  if (days <= 7) return `In ${days}d · ${date}, ${clock}`;
+  return `${date} · ${clock}`;
+}
+
 function isNonLocalCard(card: ScreenResponse | null | undefined, preferredCity?: string | null) {
   const preferred = cityToken(preferredCity);
   const city = cityToken(cardCity(card));
@@ -196,7 +221,7 @@ function isNonLocalCard(card: ScreenResponse | null | undefined, preferredCity?:
 
 function isScheduledOpportunityCard(card: ScreenResponse | null | undefined) {
   const metadata: any = card?.screen?.metadata || {};
-  if (metadata.starts_at || metadata.event_starts_at) return true;
+  if (opportunityStart(metadata)) return true;
   if (metadata.feed_mode === 'future' || metadata.temporal_branch === 'future_event') return true;
   const text = screenText(card);
   const markers = [
@@ -644,8 +669,10 @@ function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => v
   const primaryUrl = card?.url || metadata.url || links.find((link: any) => link?.url)?.url;
   const bookingUrl = links.find((link: any) => /book|register|ticket/i.test(String(link?.label || link?.kind || '')))?.url || metadata.booking_url;
   const mapUrl = links.find((link: any) => /map|direction/i.test(String(link?.label || link?.kind || '')))?.url || metadata.map_url;
+  const timingLabel = opportunityTimingLabel(metadata);
+  const scheduledOpportunity = isScheduledOpportunityCard(item);
   const requirements = [
-    metadata.starts_at ? `Timing: ${metadata.starts_at}` : null,
+    timingLabel ? `Timing: ${timingLabel}` : null,
     metadata.location_city || metadata.city ? `Location: ${metadata.location_city || metadata.city}` : null,
     metadata.opportunity_kind ? `Mode: ${metadata.opportunity_kind}` : null,
     card?.deep_dive?.time_to_start ? `Time: ${card.deep_dive.time_to_start}` : null,
@@ -661,7 +688,7 @@ function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => v
     }).catch(() => {});
   };
   const remember = async () => {
-    const text = `Reminder: ${card.title || 'Connectome action'}${metadata.starts_at ? ` (${metadata.starts_at})` : ''}`;
+    const text = `Reminder: ${card.title || 'Connectome action'}${timingLabel ? ` (${timingLabel})` : ''}`;
     try { await navigator.clipboard.writeText(text); } catch {}
     AuraClient.submitFeedback({
       screen_spec_id: item?.screen_spec_db_id || '',
@@ -719,6 +746,16 @@ function PathwaySheet({ data, onClose, onInvite }: { data: any; onClose: () => v
         <div style={{ color: '#00d4aa', fontSize: 12, fontWeight: 900, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>iDo Execute</div>
         <h2 style={{ margin: 0, color: '#f8f8fc', fontSize: 24, lineHeight: 1.15 }}>{card.title || 'Your next step'}</h2>
         <p style={{ color: 'rgba(248,248,252,0.58)', lineHeight: 1.65, fontSize: 14 }}>{protocol?.summary || 'Aura explains and clarifies; iDo turns the node into structured choices, safe actions, and the next real-world step.'}</p>
+
+        {scheduledOpportunity && timingLabel && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 16px', padding: '11px 13px', borderRadius: 18, border: '1px solid rgba(245,158,11,0.28)', background: 'rgba(245,158,11,0.12)' }}>
+            <div style={{ width: 30, height: 30, borderRadius: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(245,158,11,0.18)', color: '#facc15', flexShrink: 0 }}>⏳</div>
+            <div>
+              <div style={{ color: '#facc15', fontSize: 12, fontWeight: 950, letterSpacing: 0.7, textTransform: 'uppercase' }}>Scheduled opportunity</div>
+              <div style={{ color: 'rgba(248,248,252,0.78)', fontSize: 13, lineHeight: 1.45 }}>{timingLabel} — Aura should help you decide, invite, book, or save this before the window closes.</div>
+            </div>
+          </div>
+        )}
 
         <div style={{ display: 'grid', gap: 10, marginBottom: 16 }}>
           <div style={{ background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, padding: 14 }}>
