@@ -27,6 +27,7 @@ import PathFeedReturnLoopLandingPage from './pages/PathFeedReturnLoopLandingPage
 import PathFeedVsChatbotLandingPage from './pages/PathFeedVsChatbotLandingPage'
 import ConnectomeBuildersLandingPage from './pages/ConnectomeBuildersLandingPage'
 import DailyAiCheckInLandingPage from './pages/DailyAiCheckInLandingPage'
+import AiDailyPlannerLandingPage from './pages/AiDailyPlannerLandingPage'
 import PersonalAiRecommendationsLandingPage from './pages/PersonalAiRecommendationsLandingPage'
 import ProfilePage from './pages/ProfilePage'
 import SurfacePage from './pages/SurfacePage'
@@ -192,6 +193,7 @@ function App() {
           <Route path="/path-feed-return-loop" element={<PathFeedReturnLoopLandingPage />} />
           <Route path="/path-feed-vs-chatbot" element={<PathFeedVsChatbotLandingPage />} />
           <Route path="/daily-ai-check-in" element={<DailyAiCheckInLandingPage />} />
+          <Route path="/ai-daily-planner" element={<AiDailyPlannerLandingPage />} />
           <Route path="/personal-ai-recommendations" element={<PersonalAiRecommendationsLandingPage />} />
           <Route path="/connectome-builders" element={<ConnectomeBuildersLandingPage />} />
           <Route path="/app/ioo" element={<ShellRoute activeApp="ioo"><IOOPage /></ShellRoute>} />
