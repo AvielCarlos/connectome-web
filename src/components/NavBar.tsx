@@ -51,13 +51,6 @@ export function NavBar() {
   const [navVisible, setNavVisible] = useState(true);
   const [moreMenu, setMoreMenu] = useState<'me' | 'map' | null>(null);
 
-  // More menu items for Me tab
-  const ME_MORE = [
-    { path: '/app/dao',        icon: '🏛', label: 'DAO & Contributions' },
-    { path: '/app/contribute', icon: '✚', label: 'Contribute & Earn' },
-    { path: '/app',       icon: '◉', label: 'Home' },
-  ];
-
   const MAP_MORE = [
     { path: '/ioo',      icon: '🗺', label: 'IOO Map' },
     { path: '/app/goals',    icon: '◎', label: 'Goals' },
@@ -69,6 +62,15 @@ export function NavBar() {
   const tierColor = TIER_COLORS[tier] || '#6b7280';
   const initials = ((profile as any)?.display_name || (profile as any)?.email || 'U')[0].toUpperCase();
   const isAdmin = (profile as any)?.is_admin || (profile as any)?.profile?.is_admin;
+  const sidebarItems = isAdmin
+    ? [...SIDEBAR_ITEMS, { path: '/app/admin', icon: '⚙️', label: 'System', isAdmin: true }]
+    : SIDEBAR_ITEMS;
+  const meMore = [
+    ...(isAdmin ? [{ path: '/app/admin', icon: '⚙️', label: 'System tools' }] : []),
+    { path: '/app/dao',        icon: '🏛', label: 'DAO & Contributions' },
+    { path: '/app/contribute', icon: '✚', label: 'Contribute & Earn' },
+    { path: '/app',       icon: '◉', label: 'Home' },
+  ];
 
   // Nav always visible — no hide on scroll
 
@@ -106,7 +108,7 @@ export function NavBar() {
 
         {/* Nav links */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {SIDEBAR_ITEMS.map((item) => (
+          {sidebarItems.map((item) => (
             <NavLink key={item.path} to={item.path} style={({ isActive }) => ({
               display: 'flex', alignItems: 'center', gap: 12,
               padding: '10px 14px', borderRadius: 12,
@@ -183,7 +185,7 @@ export function NavBar() {
             borderRadius: 16, overflow: 'hidden', minWidth: 220,
             boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
           }}>
-            {(moreMenu === 'me' ? ME_MORE : MAP_MORE).map((item, i, arr) => (
+            {(moreMenu === 'me' ? meMore : MAP_MORE).map((item, i, arr) => (
               <button key={item.path} onClick={() => { navigate(item.path); setMoreMenu(null); }} style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 12,
                 padding: '14px 18px', background: 'none', border: 'none',
